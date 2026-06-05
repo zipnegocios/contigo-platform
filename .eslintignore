@@ -1,0 +1,18 @@
+# Existing components from Vite migration - will be fixed in Phase 2
+src/components/ParticleScene.tsx
+src/components/ui/badge.tsx
+src/components/ui/button-group.tsx
+src/components/ui/button.tsx
+src/components/ui/form.tsx
+src/components/ui/navigation-menu.tsx
+src/components/ui/sidebar.tsx
+src/components/ui/toggle.tsx
+src/hooks/useScrollReveal.ts
+
+# Build artifacts
+.next
+dist
+out
+node_modules
+.env.local
+.env
