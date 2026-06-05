@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, Inter, Space_Grotesk } from 'next/font/google'
+import { LenisProvider } from '@/presentation/providers/LenisProvider'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -55,7 +56,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        {children}
+        <LenisProvider>
+          {children}
+        </LenisProvider>
       </body>
     </html>
   )

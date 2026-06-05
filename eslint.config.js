@@ -12,6 +12,8 @@ export default defineConfig([
     '**/*.config.js',
     'src/components/**',
     'src/hooks/**',
+    'src/presentation/components/**',
+    'src/presentation/hooks/**',
   ]),
   {
     files: ['**/*.{ts,tsx}'],
