@@ -48,7 +48,7 @@ const navItems = [
 ]
 
 export default function AdminSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
 
   return (
     <aside className="w-64 bg-gray-900 text-white flex flex-col h-screen">
