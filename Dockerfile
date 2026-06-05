@@ -9,7 +9,6 @@ COPY tsconfig.json ./
 COPY next.config.ts ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
-COPY .eslintrc.js ./
 
 # Install dependencies
 RUN npm ci
@@ -18,7 +17,6 @@ RUN npm ci
 COPY src ./src
 COPY app ./app
 COPY public ./public
-COPY middleware.ts ./
 
 # Build Next.js app
 RUN npm run build

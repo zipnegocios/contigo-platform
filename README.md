@@ -1,73 +1,162 @@
-# React + TypeScript + Vite
+# Contigo Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Luxury brand showcase website with admin dashboard, quote system, and portfolio management.
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Local Development
 
-## React Compiler
+```bash
+# Install dependencies
+npm install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# Configure environment
+cp .env.example .env.local
+# Edit .env.local with your settings
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Run dev server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Visit `http://localhost:3000`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Admin Portal
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- URL: `/admin/login`
+- Default email: `admin@contigo.com`
+- Default password: `admin123`
+- **⚠️ Change immediately after first login**
+
+## 🐳 Docker & Deployment
+
+### Local Docker (with PostgreSQL)
+
+```bash
+docker-compose up
 ```
+
+### Production (EasyPanel)
+
+See [DEPLOY.md](./DEPLOY.md) for detailed instructions.
+
+## 📁 Project Structure
+
+```
+contigo-platform/
+├── app/                          # Next.js 15 App Router
+│   ├── (marketing)/              # Public pages
+│   ├── admin/                    # Admin dashboard (protected)
+│   ├── api/                      # API routes
+│   ├── layout.tsx                # Root layout
+│   └── globals.css               # Global styles
+├── src/
+│   ├── core/                     # Domain layer (entities, value objects)
+│   ├── application/              # Use cases
+│   ├── infrastructure/           # Databases, services, auth
+│   └── presentation/             # React components, sections
+├── scripts/                      # Utility scripts
+├── public/                       # Static assets
+├── Dockerfile                    # Production image
+├── docker-compose.yml            # Local dev stack
+└── DEPLOY.md                     # Deployment guide
+```
+
+## 🔑 Key Technologies
+
+- **Next.js 15** - React framework with App Router
+- **PostgreSQL + pgvector** - Database with semantic search
+- **Drizzle ORM** - Type-safe database queries
+- **NextAuth v5** - Authentication & authorization
+- **React Hook Form + Zod** - Form validation
+- **GSAP + ScrollTrigger** - Scroll animations
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - Component library
+- **Resend** - Transactional email
+- **OpenAI** - Embeddings & AI features
+- **Cloudflare R2** - File storage
+
+## 📝 Available Scripts
+
+```bash
+# Development
+npm run dev              # Start dev server (localhost:3000)
+npm run build           # Production build
+npm start               # Run production server
+npm run lint            # ESLint
+
+# Database
+npm run db:push         # Push schema to database
+npm run db:migrate      # Run migrations
+npm run db:studio       # Drizzle Studio GUI
+npm run seed            # Seed admin user
+
+# Docker
+docker-compose up       # Start full stack (postgres + app)
+docker-compose down     # Stop all services
+```
+
+## 🔐 Environment Variables
+
+Required:
+- `DATABASE_URL` - PostgreSQL connection string
+- `NEXTAUTH_SECRET` - Random 32+ char secret for JWT
+- `NEXTAUTH_URL` - Full URL of your deployment
+
+Optional:
+- `RESEND_API_KEY` - For email notifications
+- `OPENAI_API_KEY` - For AI embeddings
+- `R2_*` - Cloudflare R2 for file uploads
+
+See `.env.example` for complete list.
+
+## 📚 Architecture
+
+Contigo uses **Clean Architecture** principles:
+
+1. **Domain Layer** (`src/core/`) - Business logic, entities, rules
+2. **Application Layer** (`src/application/`) - Use cases, orchestration
+3. **Infrastructure Layer** (`src/infrastructure/`) - Database, services, auth
+4. **Presentation Layer** (`src/presentation/`) - React components, pages
+
+## 🚢 Deployment
+
+### EasyPanel (Recommended)
+
+1. Create application
+2. Set environment variables
+3. Deploy from GitHub
+4. Dockerfile handles migrations + seed automatically
+
+See [DEPLOY.md](./DEPLOY.md) for step-by-step guide.
+
+## 🐛 Troubleshooting
+
+### Database Connection Failed
+```bash
+# Check PostgreSQL is running
+psql -d $DATABASE_URL
+
+# Ensure pgvector is installed
+psql -d $DATABASE_URL -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+
+### Admin Login Not Working
+```bash
+# Reseed admin user
+npm run seed
+```
+
+### Build Fails
+```bash
+# Clean build cache
+rm -rf .next
+npm run build
+```
+
+## 📞 Support
+
+For deployment issues, see [DEPLOY.md](./DEPLOY.md) troubleshooting section.
+
+## 📄 License
+
+Private project - Contigo Construction

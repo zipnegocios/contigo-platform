@@ -25,6 +25,20 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+
+# Build output
+.turbopack
+
+# Graphify
+graphify-out
+
 # Archivos Especificos
 .claude
 CLAUDE.md
