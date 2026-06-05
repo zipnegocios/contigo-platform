@@ -1,29 +1,69 @@
 'use client'
-import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { Phone, Mail, MapPin, Clock, Loader } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const ContactFormSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().optional(),
+  service: z.string().min(1, 'Please select a service'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+})
+
+type ContactFormInput = z.infer<typeof ContactFormSchema>
 
 export default function ContactSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const leftColRef = useRef<HTMLDivElement>(null);
-  const rightColRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const leftColRef = useRef<HTMLDivElement>(null)
+  const rightColRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    service: '',
-    message: '',
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<ContactFormInput>({
+    resolver: zodResolver(ContactFormSchema),
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Thank you for your inquiry! We will contact you shortly.');
-    setFormData({ name: '', email: '', phone: '', service: '', message: '' });
-  };
+  const onSubmit = async (data: ContactFormInput) => {
+    try {
+      const response = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        if (result.errors) {
+          result.errors.forEach((err: any) => {
+            console.error(`${err.field}: ${err.message}`)
+          })
+        } else {
+          console.error(result.message)
+        }
+        return
+      }
+
+      // Success: redirect to tracking page
+      reset()
+      router.push(`/quote-status/${result.trackingToken}`)
+    } catch (error) {
+      console.error('Form submission error:', error)
+    }
+  }
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -36,7 +76,7 @@ export default function ContactSection() {
           trigger: sectionRef.current,
           start: 'top 80%',
         },
-      });
+      })
 
       gsap.from(rightColRef.current, {
         x: 30,
@@ -48,11 +88,11 @@ export default function ContactSection() {
           trigger: sectionRef.current,
           start: 'top 80%',
         },
-      });
-    }, sectionRef);
+      })
+    }, sectionRef)
 
-    return () => ctx.revert();
-  }, []);
+    return () => ctx.revert()
+  }, [])
 
   return (
     <section
@@ -86,58 +126,86 @@ export default function ContactSection() {
               <div className="gooey-blob blob-2" />
               <div className="gooey-blob blob-3" />
               <div className="form-overlay">
-                <form onSubmit={handleSubmit} className="contact-form">
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    required
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                  />
-                  <select
-                    value={formData.service}
-                    onChange={(e) =>
-                      setFormData({ ...formData, service: e.target.value })
-                    }
-                    required
+                <form onSubmit={handleSubmit(onSubmit)} className="contact-form">
+                  <div className="form-group">
+                    <input
+                      {...register('name')}
+                      type="text"
+                      placeholder="Your Name"
+                    />
+                    {errors.name && (
+                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                        {errors.name.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <input
+                      {...register('email')}
+                      type="email"
+                      placeholder="Email Address"
+                    />
+                    {errors.email && (
+                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                        {errors.email.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <input
+                      {...register('phone')}
+                      type="tel"
+                      placeholder="Phone Number (optional)"
+                    />
+                    {errors.phone && (
+                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                        {errors.phone.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <select {...register('service')}>
+                      <option value="">Select a Service</option>
+                      <option value="New Home Building">New Home Building</option>
+                      <option value="Home Extensions">Home Extensions</option>
+                      <option value="Home Renovations">Home Renovations</option>
+                      <option value="Carpentry">Carpentry</option>
+                      <option value="Cladding">Cladding</option>
+                      <option value="Painting">Painting</option>
+                      <option value="Landscaping">Landscaping</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    {errors.service && (
+                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                        {errors.service.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <textarea
+                      {...register('message')}
+                      placeholder="Tell us about your project..."
+                      rows={4}
+                    />
+                    {errors.message && (
+                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                        {errors.message.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn-primary w-full"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >
-                    <option value="">Select a Service</option>
-                    <option value="new-home">New Home Building</option>
-                    <option value="extensions">Home Extensions</option>
-                    <option value="renovations">Home Renovations</option>
-                    <option value="carpentry">Carpentry</option>
-                    <option value="other">Other</option>
-                  </select>
-                  <textarea
-                    placeholder="Tell us about your project..."
-                    rows={4}
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                    required
-                  />
-                  <button type="submit" className="btn-primary w-full">
-                    Send Message
+                    {isSubmitting && <Loader size={16} className="animate-spin" />}
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </button>
                 </form>
               </div>
@@ -268,5 +336,5 @@ export default function ContactSection() {
         style={{ width: '200px', opacity: 0.15 }}
       />
     </section>
-  );
+  )
 }
