@@ -8,9 +8,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "db:push": "drizzle-kit push",
+    "db:setup": "node scripts/setup-pgvector.mjs && npm run db:push",
+    "db:push": "drizzle-kit push --force",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
+    "db:test": "node scripts/test-db.mjs",
     "seed": "node scripts/seed-admin.js"
   },
   "dependencies": {
@@ -85,6 +87,8 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.184.0",
     "autoprefixer": "^10.4.23",
+    "dotenv": "^17.4.2",
+    "dotenv-expand": "^13.0.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

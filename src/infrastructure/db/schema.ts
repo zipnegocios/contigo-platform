@@ -9,16 +9,8 @@ import {
   jsonb,
   pgEnum,
   index,
-  customType,
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
-
-// Define vector type manually to avoid pgvector export issues
-const vector = customType<{ data: number[] }>({
-  dataType() {
-    return 'vector(1536)'
-  },
-})
 
 // ============ ENUMS ============
 export const quoteStatusEnum = pgEnum('quote_status', [
@@ -57,7 +49,7 @@ export const quotes = pgTable(
     message: text('message').notNull(),
     status: quoteStatusEnum('status').notNull().default('new'),
     trackingToken: varchar('tracking_token', { length: 255 }).notNull().unique(),
-    descriptionVector: vector('description_vector', { dimensions: 1536 }),
+    descriptionVector: jsonb('description_vector').$type<number[]>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -66,7 +58,6 @@ export const quotes = pgTable(
     index('idx_quotes_email').on(table.email),
     index('idx_quotes_tracking_token').on(table.trackingToken),
     index('idx_quotes_created_at').on(table.createdAt),
-    index('idx_quotes_vector_hnsw').using('hnsw', table.descriptionVector),
   ],
 )
 
@@ -85,7 +76,7 @@ export const projects = pgTable(
     published: boolean('published').notNull().default(false),
     coverImageUrl: text('cover_image_url').notNull(),
     galleryUrls: jsonb('gallery_urls').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
-    descriptionVector: vector('description_vector', { dimensions: 1536 }),
+    descriptionVector: jsonb('description_vector').$type<number[]>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -94,7 +85,6 @@ export const projects = pgTable(
     index('idx_projects_status').on(table.published),
     index('idx_projects_featured').on(table.featured),
     index('idx_projects_created_at').on(table.createdAt),
-    index('idx_projects_vector_hnsw').using('hnsw', table.descriptionVector),
   ],
 )
 
