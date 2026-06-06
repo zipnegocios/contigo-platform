@@ -12,14 +12,23 @@ interface ProjectDetailPageProps {
 /**
  * Generate static params for all published projects
  * This enables static generation for better performance
+ * Returns empty array if DATABASE_URL is not available (e.g., during Docker build)
+ * dynamicParams = true ensures runtime generation still works
  */
 export async function generateStaticParams() {
-  const projectRepo = new DrizzleProjectRepository()
-  const projects = await projectRepo.findPublished(100)
-
-  return projects.map((project) => ({
-    slug: project.slug,
-  }))
+  try {
+    if (!process.env.DATABASE_URL) {
+      return []
+    }
+    const projectRepo = new DrizzleProjectRepository()
+    const projects = await projectRepo.findPublished(100)
+    return projects.map((project) => ({
+      slug: project.slug,
+    }))
+  } catch (error) {
+    console.warn('generateStaticParams: Could not fetch projects, will use dynamic params:', error)
+    return []
+  }
 }
 
 /**
