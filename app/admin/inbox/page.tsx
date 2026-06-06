@@ -1,8 +1,18 @@
-export default function InboxPage() {
+import { QuoteInboxTable } from '@/presentation/components/admin/QuoteInboxTable'
+import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
+
+export default async function InboxPage() {
+  const quoteRepo = new DrizzleQuoteRepository()
+  const quotes = await quoteRepo.findAll(100)
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-900">Inbox</h1>
-      <p className="text-gray-600 mt-2">Quote management coming soon</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Quotes</h1>
+        <p className="text-muted-foreground">Manage all incoming quotes and track their status.</p>
+      </div>
+
+      <QuoteInboxTable quotes={quotes} />
     </div>
   )
 }
