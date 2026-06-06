@@ -166,7 +166,9 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                       <p className="font-semibold text-gray-900 truncate">
                         {lead.quote?.name || 'Unknown'}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">{lead.quote?.email || '-'}</p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {lead.quote?.email ? lead.quote.email.toString() : '-'}
+                      </p>
                     </div>
                     {lead.quote?.service && (
                       <p className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded w-fit">
