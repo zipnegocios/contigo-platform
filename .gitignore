@@ -25,10 +25,43 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment
+# Environment & Credentials
 .env
+.env.example
 .env.local
 .env.*.local
+.env.production
+.env.production.local
+
+# Credential & Sensitive Files
+credentials.json
+credentials*.json
+secrets.json
+secrets*.json
+.secrets
+.credentials
+*.pem
+*.key
+*.pfx
+*.p12
+private*.key
+
+# Documentation files containing credentials/instructions
+CREDENTIALS.md
+DEPLOY.md
+DEPLOYMENT-CHECKLIST.md
+EASYPANEL-ENV-SETUP.md
+ENV-COMPARISON.md
+SETUP-SUMMARY.md
+FINAL-SUMMARY.txt
+README.md
+
+# Setup instructions (contain API keys, passwords, sensitive info)
+*-ENV-SETUP.md
+*-COMPARISON.md
+*CREDENTIALS*
+*DEPLOY*
+*SETUP*
 
 # Docker
 docker-compose.override.yml
