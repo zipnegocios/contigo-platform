@@ -21,6 +21,7 @@ export class Quote {
   readonly trackingToken: string
   readonly status: QuoteStatus
   readonly createdAt: Date
+  readonly updatedAt: Date
 
   private constructor(props: {
     id: string
@@ -32,6 +33,7 @@ export class Quote {
     trackingToken: string
     status: QuoteStatus
     createdAt: Date
+    updatedAt: Date
   }) {
     this.id = props.id
     this.name = props.name
@@ -42,6 +44,7 @@ export class Quote {
     this.trackingToken = props.trackingToken
     this.status = props.status
     this.createdAt = props.createdAt
+    this.updatedAt = props.updatedAt
   }
 
   static create(input: CreateQuoteInput): Quote {
@@ -50,6 +53,7 @@ export class Quote {
 
     const id = crypto.randomUUID()
     const trackingToken = crypto.randomUUID()
+    const now = new Date()
 
     return new Quote({
       id,
@@ -60,7 +64,23 @@ export class Quote {
       message: input.message.trim(),
       trackingToken,
       status: 'new',
-      createdAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
+    })
+  }
+
+  withStatus(status: QuoteStatus): Quote {
+    return new Quote({
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      phone: this.phone,
+      service: this.service,
+      message: this.message,
+      trackingToken: this.trackingToken,
+      status,
+      createdAt: this.createdAt,
+      updatedAt: new Date(),
     })
   }
 }
