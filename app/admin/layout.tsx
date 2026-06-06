@@ -1,10 +1,7 @@
+import { SidebarProvider } from '@/presentation/components/ui/sidebar'
+import AdminSidebar from '@/presentation/components/admin/AdminSidebar'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { redirect } from 'next/navigation'
-import AdminSidebar from '@/presentation/components/admin/AdminSidebar'
-
-export const metadata = {
-  title: 'Admin Portal | Contigo',
-}
 
 export default async function AdminLayout({
   children,
@@ -18,16 +15,13 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <AdminSidebar />
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          {children}
-        </div>
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        <AdminSidebar />
+        <main className="flex-1 overflow-auto bg-gray-50">
+          <div className="p-8">{children}</div>
+        </main>
+      </div>
+    </SidebarProvider>
   )
 }
