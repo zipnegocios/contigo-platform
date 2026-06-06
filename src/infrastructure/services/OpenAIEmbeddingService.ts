@@ -1,12 +1,19 @@
 import OpenAI from 'openai'
 import { IEmbeddingService } from '@/core/services/IEmbeddingService'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+let openaiInstance: OpenAI | null = null
+
+function getOpenAI(): OpenAI {
+  if (openaiInstance) return openaiInstance
+  openaiInstance = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  })
+  return openaiInstance
+}
 
 export class OpenAIEmbeddingService implements IEmbeddingService {
   async generateEmbedding(text: string): Promise<number[]> {
+    const openai = getOpenAI()
     const response = await openai.embeddings.create({
       model: 'text-embedding-3-small',
       input: text,

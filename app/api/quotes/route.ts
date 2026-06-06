@@ -12,6 +12,8 @@ const CreateQuoteSchema = z.object({
   message: z.string().min(10, 'Message must be at least 10 characters'),
 })
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()

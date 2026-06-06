@@ -2,12 +2,23 @@ import { Resend } from 'resend'
 import { Quote } from '@/core/entities/Quote'
 import { IEmailService } from '@/core/services/IEmailService'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resendInstance: Resend | null = null
+
+function getResend(): Resend {
+  if (resendInstance) return resendInstance
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is not defined')
+  }
+  resendInstance = new Resend(apiKey)
+  return resendInstance
+}
 
 export class ResendEmailService implements IEmailService {
   private siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   async sendQuoteConfirmation(quote: Quote): Promise<void> {
+    const resend = getResend()
     const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
 
     const htmlContent = `
@@ -65,6 +76,7 @@ export class ResendEmailService implements IEmailService {
   }
 
   async sendAdminNotification(quote: Quote): Promise<void> {
+    const resend = getResend()
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@contigo-constructions.com.au'
 
     const htmlContent = `
