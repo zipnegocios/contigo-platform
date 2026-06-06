@@ -1,10 +1,11 @@
-import { eq } from 'drizzle-orm'
+import { eq, count as countFn } from 'drizzle-orm'
 import { db } from '../db/client'
 import { quotes } from '../db/schema'
 import { Quote } from '@/core/entities/Quote'
 import { Email } from '@/core/value-objects/Email'
 import { Phone } from '@/core/value-objects/Phone'
 import { IQuoteRepository } from '@/core/repositories/IQuoteRepository'
+import { QuoteStatus } from '@/core/entities/Quote'
 
 export class DrizzleQuoteRepository implements IQuoteRepository {
   async save(quote: Quote): Promise<void> {
@@ -65,6 +66,19 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
         updatedAt: new Date(),
       })
       .where(eq(quotes.id, quote.id))
+  }
+
+  async count(): Promise<number> {
+    const result = await db.select({ count: countFn() }).from(quotes)
+    return result[0]?.count || 0
+  }
+
+  async countByStatus(status: QuoteStatus): Promise<number> {
+    const result = await db
+      .select({ count: countFn() })
+      .from(quotes)
+      .where(eq(quotes.status, status))
+    return result[0]?.count || 0
   }
 
   private mapRowToQuote(row: any): Quote {
