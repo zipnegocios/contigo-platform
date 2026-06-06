@@ -2,6 +2,7 @@ import { SidebarProvider } from '@/presentation/components/ui/sidebar'
 import AdminSidebar from '@/presentation/components/admin/AdminSidebar'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { redirect } from 'next/navigation'
+import { Toaster } from '@/presentation/components/ui/sonner'
 
 export default async function AdminLayout({
   children,
@@ -22,6 +23,7 @@ export default async function AdminLayout({
           <div className="p-8">{children}</div>
         </main>
       </div>
+      <Toaster />
     </SidebarProvider>
   )
 }
