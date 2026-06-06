@@ -20,12 +20,7 @@ export async function PATCH(
       return Response.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    // Create a new Project instance with updated properties using the entity methods
-    let updated = project
-      .withFeaturedStatus(body.featured !== undefined ? body.featured : project.featured)
-      .withPublishedStatus(body.published !== undefined ? body.published : project.published)
-
-    // For other properties, we need to reconstruct the entity with all properties
+    // Reconstruct the entity with all properties, allowing partial updates
     const updatedProject = Project.reconstruct({
       id: project.id,
       slug: project.slug,
