@@ -77,4 +77,19 @@ export class Service {
       updatedAt: new Date(),
     })
   }
+
+  static reconstruct(props: {
+    id: string
+    slug: string
+    name: string
+    shortDescription: string
+    fullDescription: string
+    imageUrl: string
+    orderIndex: number
+    published: boolean
+    createdAt: Date
+    updatedAt: Date
+  }): Service {
+    return new Service(props)
+  }
 }

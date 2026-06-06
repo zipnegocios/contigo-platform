@@ -11,3 +11,25 @@ export function generateSlug(input: string): string {
     .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
 }
+
+/**
+ * Ensures a slug is unique by appending a counter if needed
+ * @param baseSlug - The base slug to check for uniqueness
+ * @param existingSlugs - Array of existing slugs to check against
+ * @returns A unique slug
+ */
+export function ensureUniqueSlug(
+  baseSlug: string,
+  existingSlugs: string[],
+): string {
+  if (!existingSlugs.includes(baseSlug)) {
+    return baseSlug
+  }
+
+  let counter = 1
+  while (existingSlugs.includes(`${baseSlug}-${counter}`)) {
+    counter++
+  }
+
+  return `${baseSlug}-${counter}`
+}

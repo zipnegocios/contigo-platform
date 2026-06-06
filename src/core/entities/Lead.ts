@@ -73,4 +73,15 @@ export class Lead {
       updatedAt: new Date(),
     })
   }
+
+  static reconstruct(props: {
+    id: string
+    quoteId: string
+    stage: LeadStage
+    adminNotes: string | null
+    estimatedValue: number | null
+    updatedAt: Date
+  }): Lead {
+    return new Lead(props)
+  }
 }

@@ -7,6 +7,8 @@ export const middleware = auth((req) => {
     loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname)
     return Response.redirect(loginUrl)
   }
+  // Allow the request to proceed
+  return undefined
 })
 
 export const config = {

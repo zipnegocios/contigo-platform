@@ -83,4 +83,19 @@ export class Quote {
       updatedAt: new Date(),
     })
   }
+
+  static reconstruct(props: {
+    id: string
+    name: string
+    email: Email
+    phone: Phone | null
+    service: string
+    message: string
+    trackingToken: string
+    status: QuoteStatus
+    createdAt: Date
+    updatedAt: Date
+  }): Quote {
+    return new Quote(props)
+  }
 }

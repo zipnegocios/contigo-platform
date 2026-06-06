@@ -71,7 +71,7 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
     const email = Email.create(row.email)
     const phone = row.phone ? Phone.create(row.phone) : null
 
-    return {
+    return Quote.reconstruct({
       id: row.id,
       name: row.name,
       email,
@@ -81,6 +81,7 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
       trackingToken: row.trackingToken,
       status: row.status,
       createdAt: row.createdAt,
-    } as Quote
+      updatedAt: row.updatedAt,
+    })
   }
 }

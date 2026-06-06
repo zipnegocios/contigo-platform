@@ -114,4 +114,22 @@ export class Project {
       updatedAt: new Date(),
     })
   }
+
+  static reconstruct(props: {
+    id: string
+    slug: string
+    title: string
+    category: string
+    description: string
+    location: string
+    completedDate: Date
+    featured: boolean
+    published: boolean
+    coverImageUrl: string
+    galleryUrls: string[]
+    createdAt: Date
+    updatedAt: Date
+  }): Project {
+    return new Project(props)
+  }
 }
