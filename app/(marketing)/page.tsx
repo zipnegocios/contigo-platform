@@ -1,7 +1,4 @@
-'use client'
-
-import { useState, useCallback } from 'react'
-import { Navigation } from '@/presentation/components/Navigation'
+import { VoiceSearchNav } from '@/presentation/components/VoiceSearchNav'
 import HeroSection from '@/presentation/sections/HeroSection'
 import BrandBar from '@/presentation/sections/BrandBar'
 import ServicesSection from '@/presentation/sections/ServicesSection'
@@ -9,72 +6,46 @@ import HeritageSection from '@/presentation/sections/HeritageSection'
 import ProjectsSection from '@/presentation/sections/ProjectsSection'
 import ContactSection from '@/presentation/sections/ContactSection'
 import Footer from '@/presentation/sections/Footer'
+import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 
-export default function HomePage() {
-  const [isListening, setIsListening] = useState(false)
+export default async function HomePage() {
+  // Fetch featured projects server-side — always fresh, no client fetch needed
+  let projects: {
+    id: string
+    slug: string
+    title: string
+    category: string
+    location: string
+    coverImageUrl: string
+  }[] = []
 
-  const handleVoiceSearch = useCallback(() => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition
-
-    if (!SpeechRecognition) {
-      alert('Voice search is not supported in your browser. Please use the contact form.')
-      return
+  try {
+    if (process.env.DATABASE_URL) {
+      const repo = new DrizzleProjectRepository()
+      const raw = await repo.findFeatured()
+      projects = raw.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        category: p.category,
+        location: p.location,
+        coverImageUrl: p.coverImageUrl,
+      }))
     }
-
-    if (isListening) {
-      setIsListening(false)
-      return
-    }
-
-    const recognition = new SpeechRecognition()
-    recognition.lang = 'en-AU'
-    recognition.continuous = false
-    recognition.interimResults = false
-
-    recognition.onstart = () => {
-      setIsListening(true)
-    }
-
-    recognition.onend = () => {
-      setIsListening(false)
-    }
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript.toLowerCase()
-      setIsListening(false)
-
-      if (transcript.includes('service') || transcript.includes('build')) {
-        document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
-      } else if (transcript.includes('project') || transcript.includes('work')) {
-        document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })
-      } else if (transcript.includes('contact') || transcript.includes('quote')) {
-        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-      } else if (transcript.includes('about') || transcript.includes('heritage')) {
-        document.getElementById('heritage')?.scrollIntoView({ behavior: 'smooth' })
-      } else {
-        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-      }
-    }
-
-    recognition.onerror = () => {
-      setIsListening(false)
-    }
-
-    recognition.start()
-  }, [isListening])
+  } catch (err) {
+    console.error('HomePage: failed to fetch featured projects', err)
+  }
 
   return (
     <>
-      <Navigation onVoiceSearch={handleVoiceSearch} isListening={isListening} />
+      <VoiceSearchNav />
 
       <main className="relative">
         <HeroSection />
         <BrandBar />
         <ServicesSection />
         <HeritageSection />
-        <ProjectsSection />
+        <ProjectsSection projects={projects} />
         <ContactSection />
       </main>
 

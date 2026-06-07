@@ -1,89 +1,68 @@
 'use client'
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-const projects = [
-  {
-    name: 'Seaton Residence',
-    category: 'New Home',
-    image: '/assets/project-seatons.jpg',
-  },
-  {
-    name: 'Henley Beach Extension',
-    category: 'Extension',
-    image: '/assets/project-henley.jpg',
-  },
-  {
-    name: 'Glenelg Renovation',
-    category: 'Renovation',
-    image: '/assets/project-glenelg.jpg',
-  },
-  {
-    name: 'Prospect Commercial',
-    category: 'Commercial',
-    image: '/assets/project-prospect.jpg',
-  },
-  {
-    name: 'Adelaide Heritage Restore',
-    category: 'Restoration',
-    image: '/assets/project-heritage.jpg',
-  },
-];
+gsap.registerPlugin(ScrollTrigger)
 
-export default function ProjectsSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
-  const metaRef = useRef<HTMLDivElement>(null);
+export interface ProjectItem {
+  id: string
+  slug: string
+  title: string
+  category: string
+  location: string
+  coverImageUrl: string
+}
+
+interface Props {
+  projects: ProjectItem[]
+}
+
+export default function ProjectsSection({ projects }: Props) {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const metaRef = useRef<HTMLDivElement>(null)
+
+  const isCarousel = projects.length > 5
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Header reveal
       gsap.from(headerRef.current, {
         opacity: 0,
         y: 30,
         duration: 0.8,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-        },
-      });
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
+      })
 
-      // Accordion panels slide up with stagger
-      const panels = listRef.current?.querySelectorAll('.accordion-item');
-      if (panels) {
-        gsap.from(panels, {
-          y: 60,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: listRef.current,
-            start: 'top 80%',
-          },
-        });
+      if (!isCarousel && listRef.current) {
+        const panels = listRef.current.querySelectorAll('.accordion-item')
+        if (panels.length) {
+          gsap.from(panels, {
+            y: 60,
+            opacity: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: listRef.current, start: 'top 80%' },
+          })
+        }
       }
 
-      // Meta line reveal
       gsap.from(metaRef.current, {
         opacity: 0,
         y: 20,
         duration: 0.6,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: metaRef.current,
-          start: 'top 90%',
-        },
-      });
-    }, sectionRef);
+        scrollTrigger: { trigger: metaRef.current, start: 'top 90%' },
+      })
+    }, sectionRef)
 
-    return () => ctx.revert();
-  }, []);
+    return () => ctx.revert()
+  }, [isCarousel])
 
   return (
     <section
@@ -94,39 +73,130 @@ export default function ProjectsSection() {
     >
       {/* Header */}
       <div ref={headerRef}>
-        <span
-          className="label block mb-4"
-          style={{ color: 'var(--monolith-slate)' }}
-        >
+        <span className="label block mb-4" style={{ color: 'var(--monolith-slate)' }}>
           PORTFOLIO
         </span>
         <h2 style={{ color: 'var(--monolith-ink)' }}>Featured Projects</h2>
       </div>
 
-      {/* Accordion */}
-      <ul ref={listRef} className="accordion-list">
-        {projects.map((project, i) => (
-          <li key={i} className="accordion-item">
-            <div
-              className="accordion-img"
-              style={{ backgroundImage: `url(${project.image})` }}
-            />
-            <a href="#" className="accordion-link" onClick={(e) => e.preventDefault()}>
-              <p className="accordion-title">{project.name}</p>
-              <p className="accordion-desc">{project.category}</p>
-            </a>
-          </li>
-        ))}
-      </ul>
+      {projects.length === 0 ? (
+        <p className="mt-8 text-sm" style={{ color: 'var(--monolith-slate)' }}>
+          No featured projects yet.
+        </p>
+      ) : isCarousel ? (
+        /* ── Carousel (>5) ────────────────────────────────────────────────── */
+        <CarouselView ref={carouselRef} projects={projects} />
+      ) : (
+        /* ── Accordion (≤5) ───────────────────────────────────────────────── */
+        <ul ref={listRef} className="accordion-list">
+          {projects.map((project) => (
+            <li key={project.id} className="accordion-item">
+              <div
+                className="accordion-img"
+                style={{ backgroundImage: `url(${project.coverImageUrl})` }}
+              />
+              <a href={`/projects/${project.slug}`} className="accordion-link">
+                <p className="accordion-title">{project.title}</p>
+                <p className="accordion-desc">{project.category}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
 
-      {/* Meta */}
+      {/* Footer row */}
       <div
         ref={metaRef}
-        className="data-text mt-8 text-sm"
+        className="flex items-center justify-between mt-8 text-sm"
         style={{ color: 'var(--monolith-slate)' }}
       >
-        Project count: 47 | Locations: Adelaide Metro | Est. 2015
+        <span className="data-text">Project count: {projects.length} | Locations: Adelaide Metro | Est. 2015</span>
+        <a
+          href="/projects"
+          className="text-sm font-medium transition-opacity hover:opacity-70"
+          style={{ color: 'var(--monolith-ink)' }}
+        >
+          View all →
+        </a>
       </div>
     </section>
-  );
+  )
 }
+
+/* ── Carousel sub-component ───────────────────────────────────────────────── */
+import { useState, forwardRef } from 'react'
+
+const CarouselView = forwardRef<HTMLDivElement, { projects: ProjectItem[] }>(
+  ({ projects }, ref) => {
+    const [index, setIndex] = useState(0)
+    const prev = () => setIndex((i) => (i - 1 + projects.length) % projects.length)
+    const next = () => setIndex((i) => (i + 1) % projects.length)
+
+    return (
+      <div ref={ref} className="relative mt-8">
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${index * 100}%)` }}
+          >
+            {projects.map((project) => (
+              <div key={project.id} className="min-w-full">
+                <a
+                  href={`/projects/${project.slug}`}
+                  className="block relative overflow-hidden"
+                  style={{ height: 420 }}
+                >
+                  <img
+                    src={project.coverImageUrl}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div
+                    className="absolute inset-0 flex flex-col justify-end p-8"
+                    style={{ background: 'linear-gradient(to top, rgba(30,26,22,0.85) 0%, transparent 60%)' }}
+                  >
+                    <p className="text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--gold)' }}>
+                      {project.category}
+                    </p>
+                    <p
+                      className="text-2xl font-semibold"
+                      style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+                    >
+                      {project.title}
+                    </p>
+                  </div>
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={prev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
+          style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
+          aria-label="Previous"
+        >‹</button>
+        <button
+          onClick={next}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
+          style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
+          aria-label="Next"
+        >›</button>
+
+        <div className="flex justify-center gap-2 mt-4">
+          {projects.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIndex(i)}
+              className="w-2 h-2 rounded-full transition-all duration-200"
+              style={{ backgroundColor: i === index ? '#E2C063' : 'rgba(226,192,99,0.25)' }}
+              aria-label={`Project ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+)
+CarouselView.displayName = 'CarouselView'
