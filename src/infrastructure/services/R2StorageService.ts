@@ -39,10 +39,14 @@ export async function generatePresignedPutUrl(
   expiresIn = 300,
 ): Promise<string> {
   const client = getR2Client()
+  // ContentType is intentionally omitted from the signed command.
+  // R2 enforces signed headers strictly — if included here, any Content-Type
+  // mismatch between the signed value and the actual PUT request causes 400.
+  // The client sets Content-Type in the XHR headers directly, which R2 stores
+  // without requiring it to be in the presigned signature.
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
-    ContentType: contentType,
   })
   return getSignedUrl(client, command, { expiresIn })
 }

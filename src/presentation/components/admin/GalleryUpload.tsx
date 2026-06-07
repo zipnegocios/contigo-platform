@@ -1,8 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import Image from 'next/image'
-import { Plus, X, Loader2, ImageIcon } from 'lucide-react'
+import { Plus, X, Loader2 } from 'lucide-react'
 import { uploadFileToR2 } from '@/presentation/lib/uploadToR2'
 
 interface GalleryUploadProps {
@@ -76,19 +75,11 @@ export function GalleryUpload({
             className="relative rounded-lg overflow-hidden group"
             style={{ border: '1px solid #E5DDD0', aspectRatio: '1' }}
           >
-            {url.startsWith('https://') ? (
-              <Image
-                src={url}
-                alt={`Gallery image ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 33vw, 200px"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full bg-[#FAF6F0]">
-                <ImageIcon className="h-6 w-6" style={{ color: '#C5BDB5' }} />
-              </div>
-            )}
+            <img
+              src={url}
+              alt={`Gallery image ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
             {/* Remove overlay */}
             <button
               type="button"

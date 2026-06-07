@@ -1,8 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import Image from 'next/image'
-import { Upload, X, Loader2, ImageIcon } from 'lucide-react'
+import { Upload, X, Loader2 } from 'lucide-react'
 import { uploadFileToR2 } from '@/presentation/lib/uploadToR2'
 
 type AllowedPrefix = 'projects/cover' | 'projects/gallery' | 'services'
@@ -55,11 +54,6 @@ export function FileUpload({
     setErrorMsg(null)
   }
 
-  const isExternalImage = value && (
-    value.startsWith('https://assets.contigoconstructions.com.au') ||
-    value.startsWith('https://')
-  )
-
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium" style={{ color: '#2D2924' }}>
@@ -82,19 +76,12 @@ export function FileUpload({
           style={{ border: '1px solid #E5DDD0' }}
         >
           <div className="relative w-full h-48 bg-[#FAF6F0]">
-            {isExternalImage ? (
-              <Image
-                src={value}
-                alt={label}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <ImageIcon className="h-8 w-8" style={{ color: '#C5BDB5' }} />
-              </div>
-            )}
+            {/* Plain img — no Next.js optimization needed in admin context */}
+            <img
+              src={value}
+              alt={label}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div
             className="flex items-center justify-between px-3 py-2"
