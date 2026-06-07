@@ -12,6 +12,8 @@ import {
   Trello,
   Settings,
   LogOut,
+  Tag,
+  Images,
 } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
 
@@ -20,6 +22,8 @@ const navItems = [
   { label: 'Inbox', href: '/admin/inbox', icon: Inbox },
   { label: 'Projects', href: '/admin/projects', icon: FolderOpen },
   { label: 'Services', href: '/admin/services', icon: Briefcase },
+  { label: 'Categories', href: '/admin/categories', icon: Tag },
+  { label: 'Media Library', href: '/admin/media', icon: Images },
   { label: 'Leads', href: '/admin/leads', icon: Trello },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]

@@ -3,50 +3,30 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 
-interface ProjectDetailPageProps {
-  params: {
-    slug: string
-  }
+function isVideo(url: string) {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
 }
 
-/**
- * Generate static params for all published projects
- * This enables static generation for better performance
- * Returns empty array if DATABASE_URL is not available (e.g., during Docker build)
- * dynamicParams = true ensures runtime generation still works
- */
 export async function generateStaticParams() {
   try {
-    if (!process.env.DATABASE_URL) {
-      return []
-    }
-    const projectRepo = new DrizzleProjectRepository()
-    const projects = await projectRepo.findPublished(100)
-    return projects.map((project) => ({
-      slug: project.slug,
-    }))
-  } catch (error) {
-    console.warn('generateStaticParams: Could not fetch projects, will use dynamic params:', error)
+    if (!process.env.DATABASE_URL) return []
+    const repo = new DrizzleProjectRepository()
+    const projects = await repo.findPublished(100)
+    return projects.map((p) => ({ slug: p.slug }))
+  } catch {
     return []
   }
 }
 
-/**
- * Generate dynamic metadata for each project
- * This improves SEO with project-specific title and description
- */
 export async function generateMetadata({
   params,
-}: ProjectDetailPageProps): Promise<Metadata> {
-  const projectRepo = new DrizzleProjectRepository()
-  const project = await projectRepo.findBySlug(params.slug)
-
-  if (!project || !project.published) {
-    return {
-      title: 'Project not found',
-    }
-  }
-
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const repo = new DrizzleProjectRepository()
+  const project = await repo.findBySlug(slug)
+  if (!project || !project.published) return { title: 'Project not found' }
   return {
     title: `${project.title} | Contigo Constructions`,
     description: project.description,
@@ -54,164 +34,220 @@ export async function generateMetadata({
       title: `${project.title} | Contigo Constructions`,
       description: project.description,
       type: 'website',
-      images: [
-        {
-          url: project.coverImageUrl,
-          width: 1200,
-          height: 630,
-          alt: project.title,
-        },
-      ],
+      images: [{ url: project.coverImageUrl, width: 1200, height: 630, alt: project.title }],
     },
   }
 }
 
-/**
- * Enable dynamic parameters to handle new projects at runtime
- * Even though we generate static params, this allows for runtime generation
- */
 export const dynamicParams = true
 
 export default async function ProjectDetailPage({
   params,
-}: ProjectDetailPageProps) {
-  const projectRepo = new DrizzleProjectRepository()
-  const project = await projectRepo.findBySlug(params.slug)
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const repo = new DrizzleProjectRepository()
+  const project = await repo.findBySlug(slug)
 
-  // Return 404 for unpublished or non-existent projects
-  if (!project || !project.published) {
-    notFound()
-  }
+  if (!project || !project.published) notFound()
 
-  const formattedDate = new Date(project.completedDate).toLocaleDateString(
-    'en-AU',
-    {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }
-  )
+  const completedLabel = new Date(project.completedDate).toLocaleDateString('en-AU', {
+    year: 'numeric',
+    month: 'long',
+  })
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
-      {/* Back to Projects Link */}
-      <div className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link
-            href="/projects"
-            className="inline-flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium"
+    <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
+      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
+      <div className="relative" style={{ height: '90vh', maxHeight: 720, minHeight: 480 }}>
+        <img
+          src={project.coverImageUrl}
+          alt={project.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(30,26,22,0.15) 0%, rgba(30,26,22,0.72) 70%, rgba(30,26,22,0.92) 100%)',
+          }}
+        />
+
+        {/* Back link */}
+        <Link
+          href="/projects"
+          className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium tracking-wide transition-opacity duration-200 hover:opacity-70"
+          style={{ color: '#E2C063' }}
+        >
+          ← All Projects
+        </Link>
+
+        {/* Title block */}
+        <div className="absolute bottom-0 left-0 right-0 px-8 pb-12 md:px-16 md:pb-16">
+          <p
+            className="text-xs uppercase tracking-widest mb-3"
+            style={{ color: '#E2C063' }}
           >
-            <span className="mr-2">←</span>
-            Back to Projects
-          </Link>
+            {project.category}
+          </p>
+          <h1
+            className="text-5xl md:text-7xl font-semibold leading-none"
+            style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+          >
+            {project.title}
+          </h1>
+          <div className="flex flex-wrap gap-6 mt-5">
+            <span className="text-sm" style={{ color: 'rgba(250,246,240,0.7)' }}>
+              {project.location}
+            </span>
+            <span className="text-sm" style={{ color: 'rgba(250,246,240,0.7)' }}>
+              Completed {completedLabel}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Cover Image */}
-        <div className="mb-12 overflow-hidden rounded-lg">
-          <img
-            src={project.coverImageUrl}
-            alt={project.title}
-            className="w-full h-96 object-cover"
-          />
-        </div>
+      {/* ── Body ──────────────────────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+        <div className="flex flex-col lg:flex-row gap-12">
 
-        {/* Project Header */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-bold text-slate-900 dark:text-white mb-6">
-            {project.title}
-          </h1>
+          {/* ── Left: Description + Gallery ─────────────────────────────────── */}
+          <div className="flex-1 min-w-0">
+            {/* Description */}
+            <p
+              className="text-lg md:text-xl leading-relaxed mb-12"
+              style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)', fontSize: '1.25rem' }}
+            >
+              {project.description}
+            </p>
 
-          {/* Project Meta Information */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-8 border-t border-b border-slate-200 dark:border-slate-700">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Category
-              </p>
-              <p className="text-lg text-slate-900 dark:text-white font-medium">
-                {project.category}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Location
-              </p>
-              <p className="text-lg text-slate-900 dark:text-white font-medium">
-                {project.location}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Completed
-              </p>
-              <p className="text-lg text-slate-900 dark:text-white font-medium">
-                {formattedDate}
-              </p>
-            </div>
-            {project.featured && (
+            {/* Gallery */}
+            {project.galleryUrls && project.galleryUrls.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                  Status
-                </p>
-                <div className="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-sm font-semibold rounded-lg">
-                  Featured
+                <h2
+                  className="text-2xl font-semibold mb-6"
+                  style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
+                >
+                  Gallery
+                </h2>
+                <div
+                  className="grid gap-4"
+                  style={{
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  }}
+                >
+                  {project.galleryUrls.map((url, i) =>
+                    isVideo(url) ? (
+                      <div
+                        key={i}
+                        className="overflow-hidden rounded-lg"
+                        style={{ backgroundColor: '#1E1A16', aspectRatio: '16/9' }}
+                      >
+                        <video
+                          src={url}
+                          controls
+                          preload="metadata"
+                          className="w-full h-full object-cover"
+                          style={{ borderRadius: 8 }}
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        key={i}
+                        className="overflow-hidden rounded-lg"
+                        style={{ aspectRatio: '4/3' }}
+                      >
+                        <img
+                          src={url}
+                          alt={`${project.title} — ${i + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Description */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-            Project Overview
-          </h2>
-          <div className="prose prose-slate dark:prose-invert max-w-none">
-            <p className="text-lg text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-              {project.description}
-            </p>
-          </div>
-        </div>
+          {/* ── Right: Ficha sidebar ─────────────────────────────────────────── */}
+          <aside className="lg:w-80 xl:w-96 flex-shrink-0">
+            <div
+              className="rounded-2xl p-8 sticky top-8"
+              style={{
+                backgroundColor: '#1E1A16',
+                border: '1px solid rgba(226,192,99,0.18)',
+              }}
+            >
+              <h3
+                className="text-xs uppercase tracking-widest mb-6"
+                style={{ color: '#E2C063' }}
+              >
+                Project Details
+              </h3>
 
-        {/* Gallery Section */}
-        {project.galleryUrls && project.galleryUrls.length > 0 && (
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">
-              Project Gallery
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {project.galleryUrls.map((url, index) => (
-                <div
-                  key={index}
-                  className="overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800"
-                >
-                  <img
-                    src={url}
-                    alt={`${project.title} - Gallery ${index + 1}`}
-                    className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
-                  />
+              <dl className="space-y-5">
+                <div>
+                  <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                    Category
+                  </dt>
+                  <dd className="text-base font-medium" style={{ color: '#E8DCC4' }}>
+                    {project.category}
+                  </dd>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+                <div>
+                  <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                    Location
+                  </dt>
+                  <dd className="text-base font-medium" style={{ color: '#E8DCC4' }}>
+                    {project.location}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                    Completed
+                  </dt>
+                  <dd className="text-base font-medium" style={{ color: '#E8DCC4' }}>
+                    {completedLabel}
+                  </dd>
+                </div>
+                {project.featured && (
+                  <div>
+                    <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                      Recognition
+                    </dt>
+                    <dd>
+                      <span
+                        className="text-xs uppercase tracking-widest px-3 py-1 rounded-full"
+                        style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063' }}
+                      >
+                        Featured Project
+                      </span>
+                    </dd>
+                  </div>
+                )}
+              </dl>
 
-        {/* CTA Section */}
-        <div className="mt-16 pt-12 border-t border-slate-200 dark:border-slate-700">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-            Interested in a similar project?
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-8">
-            Contact us to discuss your construction needs and how we can help bring your vision to life.
-          </p>
-          <Link
-            href="/?section=contact"
-            className="inline-block px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors duration-200"
-          >
-            Get in Touch
-          </Link>
+              <div
+                className="my-7"
+                style={{ height: 1, backgroundColor: 'rgba(226,192,99,0.15)' }}
+              />
+
+              <p className="text-sm mb-5" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
+                Interested in a similar project? Our team would love to discuss how we can bring your vision to life.
+              </p>
+
+              <Link
+                href="/#contact"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold transition-all duration-200"
+                style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+              >
+                Request a Quote
+              </Link>
+            </div>
+          </aside>
         </div>
       </div>
     </div>

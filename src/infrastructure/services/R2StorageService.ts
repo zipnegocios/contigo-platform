@@ -1,5 +1,18 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+
+export interface R2MediaObject {
+  key: string
+  size: number
+  lastModified: Date
+  publicUrl: string
+  mediaType: 'image' | 'video' | 'other'
+}
 
 let r2Client: S3Client | null = null
 
@@ -54,6 +67,55 @@ export async function generatePresignedPutUrl(
     Key: key,
   })
   return getSignedUrl(client, command, { expiresIn })
+}
+
+/**
+ * Lists objects in a bucket under the given prefix.
+ */
+export async function listObjects(
+  bucket: string,
+  prefix?: string,
+  maxKeys = 200,
+): Promise<R2MediaObject[]> {
+  const client = getR2Client()
+  const assetsUrl = process.env.NEXT_PUBLIC_ASSETS_URL || 'https://assets.contigoconstructions.com.au'
+
+  const command = new ListObjectsV2Command({
+    Bucket: bucket,
+    Prefix: prefix,
+    MaxKeys: maxKeys,
+  })
+
+  const response = await client.send(command)
+  const contents = response.Contents ?? []
+
+  return contents
+    .filter((obj) => obj.Key && obj.Size !== undefined)
+    .map((obj) => {
+      const key = obj.Key!
+      const ext = key.split('.').pop()?.toLowerCase() ?? ''
+      const mediaType: R2MediaObject['mediaType'] = ['mp4', 'webm', 'ogg', 'mov'].includes(ext)
+        ? 'video'
+        : ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext)
+          ? 'image'
+          : 'other'
+
+      return {
+        key,
+        size: obj.Size ?? 0,
+        lastModified: obj.LastModified ?? new Date(),
+        publicUrl: `${assetsUrl}/${key}`,
+        mediaType,
+      }
+    })
+}
+
+/**
+ * Deletes an object from a bucket.
+ */
+export async function deleteObject(bucket: string, key: string): Promise<void> {
+  const client = getR2Client()
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
 }
 
 /**

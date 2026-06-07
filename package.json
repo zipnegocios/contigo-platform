@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:test": "node scripts/test-db.mjs",
-    "seed": "node scripts/seed-admin.mjs"
+    "seed": "node scripts/seed-admin.mjs",
+    "seed:portfolio": "npx tsx scripts/seed-portfolio.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",

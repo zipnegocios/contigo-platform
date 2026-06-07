@@ -107,6 +107,22 @@ export const services = pgTable(
   (table) => [index('idx_services_order').on(table.orderIndex)],
 )
 
+// ============ CATEGORIES TABLE ============
+export const categories = pgTable(
+  'categories',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 255 }).notNull().unique(),
+    slug: varchar('slug', { length: 255 }).notNull().unique(),
+    isSystem: boolean('is_system').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_categories_slug').on(table.slug),
+    index('idx_categories_is_system').on(table.isSystem),
+  ],
+)
+
 // ============ LEADS TABLE ============
 export const leads = pgTable(
   'leads',

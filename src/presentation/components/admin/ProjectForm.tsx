@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/presentation/components/ui/button'
@@ -33,17 +33,17 @@ interface ProjectFormProps {
   }
 }
 
-const categories = [
-  'Residential',
-  'Commercial',
-  'Industrial',
-  'Renovation',
-  'Custom',
-]
-
 export function ProjectForm({ project }: ProjectFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+
+  useEffect(() => {
+    fetch('/api/admin/categories')
+      .then((r) => r.json())
+      .then((data) => Array.isArray(data) && setCategories(data))
+      .catch(() => {})
+  }, [])
   const [formData, setFormData] = useState({
     title: project?.title || '',
     category: project?.category || '',
@@ -108,8 +108,8 @@ export function ProjectForm({ project }: ProjectFormProps) {
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                  <SelectItem key={cat.id} value={cat.name}>
+                    {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
