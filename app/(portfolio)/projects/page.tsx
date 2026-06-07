@@ -13,8 +13,16 @@ export const metadata: Metadata = {
 }
 
 export default async function ProjectsPage() {
-  const projectRepo = new DrizzleProjectRepository()
-  const projects = await projectRepo.findPublished(100)
+  let projects = []
+
+  try {
+    if (process.env.DATABASE_URL) {
+      const projectRepo = new DrizzleProjectRepository()
+      projects = await projectRepo.findPublished(100)
+    }
+  } catch (error) {
+    console.warn('ProjectsPage: Could not fetch projects:', error)
+  }
 
   const featuredProjects = projects.filter((p) => p.featured)
   const allProjects = projects
