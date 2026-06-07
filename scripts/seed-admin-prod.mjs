@@ -1,31 +1,15 @@
-import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import bcryptjs from 'bcryptjs'
-import * as schema from '../src/infrastructure/db/schema.ts'
-import { migrate } from 'drizzle-orm/postgres-js/migrator'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DATABASE_URL = process.env.DATABASE_URL
 
 if (!DATABASE_URL) {
-  console.warn('⚠️  DATABASE_URL not set - skipping initialization (will run at first deploy)')
+  console.warn('⚠️  DATABASE_URL not set - skipping initialization')
   process.exit(0)
 }
 
 async function seedAdmin() {
   const client = postgres(DATABASE_URL)
-  const db = drizzle(client, { schema })
-
-  try {
-    // Apply migrations first
-    console.log('📦 Running database migrations...\n')
-    await migrate(db, { migrationsFolder: path.resolve(__dirname, '../drizzle') })
-    console.log('✅ Migrations completed\n')
-  } catch (error) {
-    console.warn('⚠️  Migrations skipped or already applied:', error.message)
-  }
 
   try {
     console.log('🌱 Seeding admin user...\n')
@@ -34,32 +18,33 @@ async function seedAdmin() {
     const password = 'admin123'
     const passwordHash = await bcryptjs.hash(password, 10)
 
-    // Insert admin user
-    const adminUser = {
-      email: 'admin@contigoconstructions.com.au',
-      passwordHash,
-      name: 'Admin Contigo',
-      role: 'owner',
-      isActive: true,
-    }
+    // Insert admin user using raw SQL
+    const adminEmail = 'admin@contigoconstructions.com.au'
+    const adminName = 'Admin Contigo'
+    const adminRole = 'owner'
 
-    const result = await db.insert(schema.adminUsers).values(adminUser).returning()
+    await client`
+      INSERT INTO admin_users (email, password_hash, name, role, is_active, created_at, updated_at)
+      VALUES (${adminEmail}, ${passwordHash}, ${adminName}, ${adminRole}, true, now(), now())
+      ON CONFLICT (email) DO NOTHING
+    `
 
-    console.log('✅ Admin user created successfully!\n')
+    console.log('✅ Admin user ready!\n')
     console.log('📋 Login Credentials:')
-    console.log(`   Email: ${adminUser.email}`)
+    console.log(`   Email: ${adminEmail}`)
     console.log(`   Password: ${password}\n`)
     console.log('🔐 Access admin portal:')
-    console.log('   Production: https://contigoconstructions.com.au/admin/login\n')
+    console.log('   https://contigoconstructions.com.au/admin/login\n')
     console.log('⚠️  IMPORTANT: Change this password after first login!')
     console.log('   Go to /admin/settings → Change Password\n')
 
     await client.end()
     process.exit(0)
   } catch (error) {
-    if (error.code === '23505') {
-      // Unique constraint violation - user already exists
-      console.log('ℹ️  Admin user already exists in database')
+    if (error.message.includes('admin_users') || error.message.includes('does not exist')) {
+      // Table doesn't exist yet - migrations haven't run
+      console.warn('⚠️  Database not initialized - run migrations first')
+      console.warn('   (Tables will be created automatically on database migrations)')
       await client.end()
       process.exit(0)
     } else {
