@@ -15,17 +15,8 @@ export default async function AdminDashboardPage() {
   const totalLeads = (await leadRepo.findAll(1000)).length
   const totalProjects = (await projectRepo.findPublished(1000)).length
 
-  // Generate trend data for last 7 days
-  const quotesTrend = Array.from({ length: 7 }).map((_, i) => {
-    const date = new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000)
-    return {
-      date: date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      }),
-      count: Math.floor(Math.random() * 10) + 1,
-    }
-  })
+  // Real quote counts per day for the last 7 days
+  const quotesTrend = await quoteRepo.countByDay(7)
 
   return (
     <DashboardView

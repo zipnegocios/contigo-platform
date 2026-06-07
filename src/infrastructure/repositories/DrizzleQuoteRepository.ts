@@ -1,4 +1,4 @@
-import { eq, count as countFn } from 'drizzle-orm'
+import { eq, gte, count as countFn } from 'drizzle-orm'
 import { db } from '../db/client'
 import { quotes } from '../db/schema'
 import { Quote } from '@/core/entities/Quote'
@@ -79,6 +79,37 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
       .from(quotes)
       .where(eq(quotes.status, status))
     return result[0]?.count || 0
+  }
+
+  /**
+   * Returns real quote counts per day for the last `days` days.
+   * Buckets by local calendar day in JS to avoid DB/JS timezone mismatches.
+   */
+  async countByDay(days = 7): Promise<{ date: string; count: number }[]> {
+    const since = new Date()
+    since.setHours(0, 0, 0, 0)
+    since.setDate(since.getDate() - (days - 1))
+
+    const rows = await db
+      .select({ createdAt: quotes.createdAt })
+      .from(quotes)
+      .where(gte(quotes.createdAt, since))
+
+    const buckets = new Map<string, number>()
+    for (const r of rows) {
+      const key = new Date(r.createdAt).toDateString()
+      buckets.set(key, (buckets.get(key) ?? 0) + 1)
+    }
+
+    return Array.from({ length: days }).map((_, i) => {
+      const d = new Date()
+      d.setHours(0, 0, 0, 0)
+      d.setDate(d.getDate() - (days - 1 - i))
+      return {
+        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        count: buckets.get(d.toDateString()) ?? 0,
+      }
+    })
   }
 
   private mapRowToQuote(row: any): Quote {
