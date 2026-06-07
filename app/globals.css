@@ -97,8 +97,34 @@
     cursor: none;
   }
 
+  /* Prevent any element's cursor: pointer from overriding the hidden cursor —
+     native pointer must never compete with the custom cursor ring. */
+  body a,
+  body button,
+  body [role="button"],
+  body label,
+  body select,
+  body input[type="submit"],
+  body input[type="button"],
+  body input[type="reset"] {
+    cursor: none;
+  }
+
+  /* Text inputs/textareas keep their caret cursor for usability. */
+  body input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+  body textarea {
+    cursor: text;
+  }
+
   @media (hover: none) {
-    body {
+    body,
+    body a,
+    body button,
+    body [role="button"],
+    body label,
+    body select,
+    body input,
+    body textarea {
       cursor: auto;
     }
   }
@@ -356,7 +382,7 @@
     flex: 1;
     height: 500px;
     border-radius: 4px;
-    cursor: pointer;
+    cursor: none;
     transition: flex 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
     will-change: flex;
   }
