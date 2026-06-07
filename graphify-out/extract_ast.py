@@ -1,15 +1,13 @@
-import sys, json
+﻿import sys
+sys.stdout.reconfigure(encoding='utf-8')
+import json
 from graphify.extract import collect_files, extract
 from pathlib import Path
 
 code_files = []
-detect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding='utf-8'))
+detect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding='utf-8-sig'))
 for f in detect.get('files', {}).get('code', []):
-    p = Path(f)
-    if p.is_dir():
-        code_files.extend(collect_files(p))
-    else:
-        code_files.append(p)
+    code_files.extend(collect_files(Path(f)) if Path(f).is_dir() else [Path(f)])
 
 if code_files:
     result = extract(code_files, cache_root=Path('.'))
