@@ -18,10 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/presentation/components/ui/select'
-import { Quote } from '@/core/entities/Quote'
+import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 
 interface QuoteInboxTableProps {
-  quotes: Quote[]
+  quotes: QuoteDTO[]
   onFilterChange?: (status: string) => void
 }
 

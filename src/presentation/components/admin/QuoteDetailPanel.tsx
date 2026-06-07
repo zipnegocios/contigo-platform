@@ -12,10 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/presentation/components/ui/select'
-import { Quote, QuoteStatus } from '@/core/entities/Quote'
+import { QuoteStatus } from '@/core/entities/Quote'
+import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 
 interface QuoteDetailPanelProps {
-  quote: Quote
+  quote: QuoteDTO
   initialNotes?: string
 }
 

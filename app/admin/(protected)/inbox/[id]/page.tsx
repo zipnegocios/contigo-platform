@@ -2,16 +2,17 @@ import { notFound } from 'next/navigation'
 import { QuoteDetailPanel } from '@/presentation/components/admin/QuoteDetailPanel'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
+import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 
-export default async function QuoteDetailPage({ params }: { params: { id: string } }) {
+export default async function QuoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const quoteRepo = new DrizzleQuoteRepository()
-  const quote = await quoteRepo.findById(params.id)
+  const quote = await quoteRepo.findById(id)
 
   if (!quote) {
     notFound()
   }
 
-  // Fetch associated lead notes if any
   const leadRepo = new DrizzleLeadRepository()
   const lead = await leadRepo.findByQuoteId(quote.id)
 
@@ -22,7 +23,7 @@ export default async function QuoteDetailPage({ params }: { params: { id: string
         <p className="text-muted-foreground">Track and manage this quote</p>
       </div>
 
-      <QuoteDetailPanel quote={quote} initialNotes={lead?.adminNotes || undefined} />
+      <QuoteDetailPanel quote={toQuoteDTO(quote)} initialNotes={lead?.adminNotes || undefined} />
     </div>
   )
 }
