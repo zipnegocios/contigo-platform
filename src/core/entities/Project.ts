@@ -1,4 +1,5 @@
 import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
+import type { GalleryItem } from '@/types/media'
 
 export type ProjectStatus = 'draft' | 'published' | 'archived'
 
@@ -9,7 +10,8 @@ export interface CreateProjectInput {
   location: string
   completedDate: Date
   coverImageUrl: string
-  galleryUrls?: string[]
+  coverPosterUrl?: string | null
+  galleryItems?: GalleryItem[]
 }
 
 export class Project {
@@ -23,7 +25,8 @@ export class Project {
   readonly featured: boolean
   readonly published: boolean
   readonly coverImageUrl: string
-  readonly galleryUrls: string[]
+  readonly coverPosterUrl: string | null
+  readonly galleryItems: GalleryItem[]
   readonly createdAt: Date
   readonly updatedAt: Date
 
@@ -38,7 +41,8 @@ export class Project {
     featured: boolean
     published: boolean
     coverImageUrl: string
-    galleryUrls: string[]
+    coverPosterUrl: string | null
+    galleryItems: GalleryItem[]
     createdAt: Date
     updatedAt: Date
   }) {
@@ -52,7 +56,8 @@ export class Project {
     this.featured = props.featured
     this.published = props.published
     this.coverImageUrl = props.coverImageUrl
-    this.galleryUrls = props.galleryUrls
+    this.coverPosterUrl = props.coverPosterUrl
+    this.galleryItems = props.galleryItems
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }
@@ -73,7 +78,8 @@ export class Project {
       featured: false,
       published: false,
       coverImageUrl: input.coverImageUrl.trim(),
-      galleryUrls: input.galleryUrls || [],
+      coverPosterUrl: input.coverPosterUrl ?? null,
+      galleryItems: input.galleryItems || [],
       createdAt: now,
       updatedAt: now,
     })
@@ -91,7 +97,8 @@ export class Project {
       featured: this.featured,
       published,
       coverImageUrl: this.coverImageUrl,
-      galleryUrls: this.galleryUrls,
+      coverPosterUrl: this.coverPosterUrl,
+      galleryItems: this.galleryItems,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     })
@@ -109,7 +116,8 @@ export class Project {
       featured,
       published: this.published,
       coverImageUrl: this.coverImageUrl,
-      galleryUrls: this.galleryUrls,
+      coverPosterUrl: this.coverPosterUrl,
+      galleryItems: this.galleryItems,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     })
@@ -126,7 +134,8 @@ export class Project {
     featured: boolean
     published: boolean
     coverImageUrl: string
-    galleryUrls: string[]
+    coverPosterUrl: string | null
+    galleryItems: GalleryItem[]
     createdAt: Date
     updatedAt: Date
   }): Project {

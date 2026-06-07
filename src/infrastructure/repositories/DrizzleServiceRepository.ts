@@ -2,6 +2,16 @@ import { eq, asc } from 'drizzle-orm'
 import { db } from '../db/client'
 import { services } from '../db/schema'
 import { Service } from '@/core/entities/Service'
+import type { GalleryItem } from '@/types/media'
+
+function normaliseGalleryRow(raw: unknown): GalleryItem[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map((item, idx) => {
+    if (typeof item === 'string') return { url: item, order: idx }
+    if (item && typeof item === 'object' && 'url' in item) return item as GalleryItem
+    return { url: String(item), order: idx }
+  })
+}
 
 export class DrizzleServiceRepository {
   async save(service: Service): Promise<void> {
@@ -14,6 +24,8 @@ export class DrizzleServiceRepository {
         shortDescription: service.shortDescription,
         fullDescription: service.fullDescription,
         imageUrl: service.imageUrl,
+        posterUrl: service.posterUrl,
+        galleryItems: service.galleryItems,
         orderIndex: service.orderIndex,
         published: service.published,
       })
@@ -22,6 +34,14 @@ export class DrizzleServiceRepository {
 
   async findById(id: string): Promise<Service | null> {
     const rows = await db.select().from(services).where(eq(services.id, id)).limit(1)
+
+    if (!rows || rows.length === 0) return null
+
+    return this.mapRowToService(rows[0])
+  }
+
+  async findBySlug(slug: string): Promise<Service | null> {
+    const rows = await db.select().from(services).where(eq(services.slug, slug)).limit(1)
 
     if (!rows || rows.length === 0) return null
 
@@ -57,6 +77,8 @@ export class DrizzleServiceRepository {
         shortDescription: service.shortDescription,
         fullDescription: service.fullDescription,
         imageUrl: service.imageUrl,
+        posterUrl: service.posterUrl,
+        galleryItems: service.galleryItems,
         orderIndex: service.orderIndex,
         published: service.published,
         updatedAt: new Date(),
@@ -77,18 +99,20 @@ export class DrizzleServiceRepository {
     await db.delete(services).where(eq(services.id, id))
   }
 
-  private mapRowToService(row: any): Service {
+  private mapRowToService(row: Record<string, unknown>): Service {
     return Service.reconstruct({
-      id: row.id,
-      slug: row.slug,
-      name: row.name,
-      shortDescription: row.shortDescription,
-      fullDescription: row.fullDescription,
-      imageUrl: row.imageUrl,
-      orderIndex: row.orderIndex,
-      published: row.published,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      id: row.id as string,
+      slug: row.slug as string,
+      name: row.name as string,
+      shortDescription: row.shortDescription as string,
+      fullDescription: row.fullDescription as string,
+      imageUrl: row.imageUrl as string,
+      posterUrl: (row.posterUrl as string | null) ?? null,
+      galleryItems: normaliseGalleryRow(row.galleryItems),
+      orderIndex: row.orderIndex as number,
+      published: row.published as boolean,
+      createdAt: row.createdAt as Date,
+      updatedAt: row.updatedAt as Date,
     })
   }
 }

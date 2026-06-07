@@ -29,7 +29,8 @@ export default async function EditProjectPage({ params }: { params: { id: string
           featured: project.featured,
           published: project.published,
           coverImageUrl: project.coverImageUrl,
-          galleryUrls: project.galleryUrls,
+          coverPosterUrl: project.coverPosterUrl,
+          galleryItems: project.galleryItems,
         }}
       />
     </div>

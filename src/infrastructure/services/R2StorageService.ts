@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   ListObjectsV2Command,
   DeleteObjectCommand,
+  CopyObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -116,6 +117,45 @@ export async function listObjects(
 export async function deleteObject(bucket: string, key: string): Promise<void> {
   const client = getR2Client()
   await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
+}
+
+/**
+ * Renames all objects under oldPrefix to newPrefix (copy + delete).
+ * Returns a Map<oldUrl, newUrl> so callers can update DB references.
+ */
+export async function renamePrefix(
+  bucket: string,
+  oldPrefix: string,
+  newPrefix: string,
+): Promise<Map<string, string>> {
+  const client = getR2Client()
+  const assetsUrl = process.env.NEXT_PUBLIC_ASSETS_URL || 'https://assets.contigoconstructions.com.au'
+
+  const listCmd = new ListObjectsV2Command({ Bucket: bucket, Prefix: oldPrefix, MaxKeys: 1000 })
+  const listRes = await client.send(listCmd)
+  const objects = listRes.Contents ?? []
+
+  const urlMap = new Map<string, string>()
+  const oldKeys: string[] = []
+
+  for (const obj of objects) {
+    if (!obj.Key) continue
+    const suffix = obj.Key.slice(oldPrefix.length)
+    const newKey = `${newPrefix}${suffix}`
+    await client.send(new CopyObjectCommand({
+      Bucket: bucket,
+      CopySource: `${bucket}/${obj.Key}`,
+      Key: newKey,
+    }))
+    urlMap.set(`${assetsUrl}/${obj.Key}`, `${assetsUrl}/${newKey}`)
+    oldKeys.push(obj.Key)
+  }
+
+  for (const key of oldKeys) {
+    await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
+  }
+
+  return urlMap
 }
 
 /**

@@ -1,10 +1,13 @@
 import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
+import type { GalleryItem } from '@/types/media'
 
 export interface CreateServiceInput {
   name: string
   shortDescription: string
   fullDescription: string
   imageUrl: string
+  posterUrl?: string | null
+  galleryItems?: GalleryItem[]
   orderIndex?: number
 }
 
@@ -15,6 +18,8 @@ export class Service {
   readonly shortDescription: string
   readonly fullDescription: string
   readonly imageUrl: string
+  readonly posterUrl: string | null
+  readonly galleryItems: GalleryItem[]
   readonly orderIndex: number
   readonly published: boolean
   readonly createdAt: Date
@@ -27,6 +32,8 @@ export class Service {
     shortDescription: string
     fullDescription: string
     imageUrl: string
+    posterUrl: string | null
+    galleryItems: GalleryItem[]
     orderIndex: number
     published: boolean
     createdAt: Date
@@ -38,6 +45,8 @@ export class Service {
     this.shortDescription = props.shortDescription
     this.fullDescription = props.fullDescription
     this.imageUrl = props.imageUrl
+    this.posterUrl = props.posterUrl
+    this.galleryItems = props.galleryItems
     this.orderIndex = props.orderIndex
     this.published = props.published
     this.createdAt = props.createdAt
@@ -56,6 +65,8 @@ export class Service {
       shortDescription: input.shortDescription.trim(),
       fullDescription: input.fullDescription.trim(),
       imageUrl: input.imageUrl.trim(),
+      posterUrl: input.posterUrl ?? null,
+      galleryItems: input.galleryItems || [],
       orderIndex: input.orderIndex || 0,
       published: true,
       createdAt: now,
@@ -71,6 +82,8 @@ export class Service {
       shortDescription: this.shortDescription,
       fullDescription: this.fullDescription,
       imageUrl: this.imageUrl,
+      posterUrl: this.posterUrl,
+      galleryItems: this.galleryItems,
       orderIndex,
       published: this.published,
       createdAt: this.createdAt,
@@ -85,6 +98,8 @@ export class Service {
     shortDescription: string
     fullDescription: string
     imageUrl: string
+    posterUrl: string | null
+    galleryItems: GalleryItem[]
     orderIndex: number
     published: boolean
     createdAt: Date

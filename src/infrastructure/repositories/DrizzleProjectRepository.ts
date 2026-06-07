@@ -2,6 +2,16 @@ import { eq, desc, and } from 'drizzle-orm'
 import { db } from '../db/client'
 import { projects } from '../db/schema'
 import { Project } from '@/core/entities/Project'
+import type { GalleryItem } from '@/types/media'
+
+function normaliseGalleryRow(raw: unknown): GalleryItem[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map((item, idx) => {
+    if (typeof item === 'string') return { url: item, order: idx }
+    if (item && typeof item === 'object' && 'url' in item) return item as GalleryItem
+    return { url: String(item), order: idx }
+  })
+}
 
 export class DrizzleProjectRepository {
   async save(project: Project): Promise<void> {
@@ -18,7 +28,8 @@ export class DrizzleProjectRepository {
         featured: project.featured,
         published: project.published,
         coverImageUrl: project.coverImageUrl,
-        galleryUrls: project.galleryUrls,
+        coverPosterUrl: project.coverPosterUrl,
+        galleryUrls: project.galleryItems,
       })
       .onConflictDoNothing()
   }
@@ -85,7 +96,8 @@ export class DrizzleProjectRepository {
         featured: project.featured,
         published: project.published,
         coverImageUrl: project.coverImageUrl,
-        galleryUrls: project.galleryUrls,
+        coverPosterUrl: project.coverPosterUrl,
+        galleryUrls: project.galleryItems,
         updatedAt: new Date(),
       })
       .where(eq(projects.id, project.id))
@@ -105,21 +117,22 @@ export class DrizzleProjectRepository {
     return rows.length > 0
   }
 
-  private mapRowToProject(row: any): Project {
+  private mapRowToProject(row: Record<string, unknown>): Project {
     return Project.reconstruct({
-      id: row.id,
-      slug: row.slug,
-      title: row.title,
-      category: row.category,
-      description: row.description,
-      location: row.location,
-      completedDate: row.completedDate,
-      featured: row.featured,
-      published: row.published,
-      coverImageUrl: row.coverImageUrl,
-      galleryUrls: row.galleryUrls || [],
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      id: row.id as string,
+      slug: row.slug as string,
+      title: row.title as string,
+      category: row.category as string,
+      description: row.description as string,
+      location: row.location as string,
+      completedDate: row.completedDate as Date,
+      featured: row.featured as boolean,
+      published: row.published as boolean,
+      coverImageUrl: row.coverImageUrl as string,
+      coverPosterUrl: (row.coverPosterUrl as string | null) ?? null,
+      galleryItems: normaliseGalleryRow(row.galleryUrls),
+      createdAt: row.createdAt as Date,
+      updatedAt: row.updatedAt as Date,
     })
   }
 }

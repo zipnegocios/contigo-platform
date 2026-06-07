@@ -37,6 +37,8 @@ export default async function EditServicePage({ params }: PageProps) {
           shortDescription: service.shortDescription,
           fullDescription: service.fullDescription,
           imageUrl: service.imageUrl,
+          posterUrl: service.posterUrl,
+          galleryItems: service.galleryItems,
           published: service.published,
         }}
       />

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { ProjectGallery } from '@/presentation/components/ProjectGallery'
 
 function isVideo(url: string) {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
@@ -40,6 +41,7 @@ export async function generateMetadata({
 }
 
 export const dynamicParams = true
+export const dynamic = 'force-dynamic'
 
 export default async function ProjectDetailPage({
   params,
@@ -61,11 +63,24 @@ export default async function ProjectDetailPage({
     <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <div className="relative" style={{ height: '90vh', maxHeight: 720, minHeight: 480 }}>
-        <img
-          src={project.coverImageUrl}
-          alt={project.title}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        {isVideo(project.coverImageUrl) ? (
+          <video
+            src={project.coverImageUrl}
+            poster={project.coverPosterUrl ?? undefined}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={project.coverImageUrl}
+            alt={project.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+
         {/* Gradient overlay */}
         <div
           className="absolute inset-0"
@@ -115,7 +130,6 @@ export default async function ProjectDetailPage({
 
           {/* ── Left: Description + Gallery ─────────────────────────────────── */}
           <div className="flex-1 min-w-0">
-            {/* Description */}
             <p
               className="text-lg md:text-xl leading-relaxed mb-12"
               style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)', fontSize: '1.25rem' }}
@@ -123,53 +137,7 @@ export default async function ProjectDetailPage({
               {project.description}
             </p>
 
-            {/* Gallery */}
-            {project.galleryUrls && project.galleryUrls.length > 0 && (
-              <div>
-                <h2
-                  className="text-2xl font-semibold mb-6"
-                  style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
-                >
-                  Gallery
-                </h2>
-                <div
-                  className="grid gap-4"
-                  style={{
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                  }}
-                >
-                  {project.galleryUrls.map((url, i) =>
-                    isVideo(url) ? (
-                      <div
-                        key={i}
-                        className="overflow-hidden rounded-lg"
-                        style={{ backgroundColor: '#1E1A16', aspectRatio: '16/9' }}
-                      >
-                        <video
-                          src={url}
-                          controls
-                          preload="metadata"
-                          className="w-full h-full object-cover"
-                          style={{ borderRadius: 8 }}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        key={i}
-                        className="overflow-hidden rounded-lg"
-                        style={{ aspectRatio: '4/3' }}
-                      >
-                        <img
-                          src={url}
-                          alt={`${project.title} — ${i + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        />
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
+            <ProjectGallery items={project.galleryItems} />
           </div>
 
           {/* ── Right: Ficha sidebar ─────────────────────────────────────────── */}

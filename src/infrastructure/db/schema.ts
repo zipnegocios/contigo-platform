@@ -11,6 +11,7 @@ import {
   index,
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
+import type { GalleryItem } from '@/types/media'
 
 // ============ ENUMS ============
 export const quoteStatusEnum = pgEnum('quote_status', [
@@ -76,7 +77,8 @@ export const projects = pgTable(
     featured: boolean('featured').notNull().default(false),
     published: boolean('published').notNull().default(false),
     coverImageUrl: text('cover_image_url').notNull(),
-    galleryUrls: jsonb('gallery_urls').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    coverPosterUrl: text('cover_poster_url'),
+    galleryUrls: jsonb('gallery_urls').$type<GalleryItem[]>().notNull().default(sql`'[]'::jsonb`),
     descriptionVector: jsonb('description_vector').$type<number[]>(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -99,6 +101,8 @@ export const services = pgTable(
     shortDescription: text('short_description').notNull(),
     fullDescription: text('full_description').notNull(),
     imageUrl: text('image_url').notNull(),
+    posterUrl: text('poster_url'),
+    galleryItems: jsonb('gallery_items').$type<GalleryItem[]>().notNull().default(sql`'[]'::jsonb`),
     orderIndex: integer('order_index').notNull().default(0),
     published: boolean('published').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

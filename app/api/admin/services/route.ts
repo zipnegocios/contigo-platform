@@ -1,6 +1,7 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { Service } from '@/core/entities/Service'
+import type { GalleryItem } from '@/types/media'
 
 export async function PATCH(request: Request) {
   try {
@@ -42,6 +43,8 @@ export async function POST(request: Request) {
       shortDescription: body.shortDescription,
       fullDescription: body.fullDescription || '',
       imageUrl: body.imageUrl,
+      posterUrl: body.posterUrl ?? null,
+      galleryItems: (body.galleryItems as GalleryItem[]) || [],
     })
 
     await serviceRepo.save(service)

@@ -1,6 +1,11 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { Service } from '@/core/entities/Service'
+import { renamePrefix } from '@/infrastructure/services/R2StorageService'
+import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
+import type { GalleryItem } from '@/types/media'
+
+const BUCKET = process.env.R2_ASSETS_BUCKET || 'contigo-assets'
 
 export async function PATCH(
   request: Request,
@@ -22,13 +27,35 @@ export async function PATCH(
       return Response.json({ error: 'Service not found' }, { status: 404 })
     }
 
+    let newImageUrl: string = body.imageUrl ?? service.imageUrl
+    let newPosterUrl: string | null =
+      body.posterUrl !== undefined ? body.posterUrl : service.posterUrl
+    let newGalleryItems: GalleryItem[] =
+      body.galleryItems !== undefined ? (body.galleryItems as GalleryItem[]) : service.galleryItems
+
+    // Detect slug change → rename R2 prefix
+    const newName: string = body.name ?? service.name
+    const newSlug = newName !== service.name ? generateSlug(newName) : service.slug
+
+    if (newSlug !== service.slug) {
+      const urlMap = await renamePrefix(BUCKET, `services/${service.slug}`, `services/${newSlug}`)
+      newImageUrl = urlMap.get(newImageUrl) ?? newImageUrl
+      newPosterUrl = newPosterUrl ? (urlMap.get(newPosterUrl) ?? newPosterUrl) : null
+      newGalleryItems = newGalleryItems.map((item) => ({
+        ...item,
+        url: urlMap.get(item.url) ?? item.url,
+      }))
+    }
+
     const updated = Service.reconstruct({
       id: service.id,
-      slug: service.slug,
-      name: body.name ?? service.name,
+      slug: newSlug,
+      name: newName,
       shortDescription: body.shortDescription ?? service.shortDescription,
       fullDescription: body.fullDescription ?? service.fullDescription,
-      imageUrl: body.imageUrl ?? service.imageUrl,
+      imageUrl: newImageUrl,
+      posterUrl: newPosterUrl,
+      galleryItems: newGalleryItems,
       orderIndex: service.orderIndex,
       published: body.published !== undefined ? Boolean(body.published) : service.published,
       createdAt: service.createdAt,
@@ -36,7 +63,7 @@ export async function PATCH(
     })
 
     await serviceRepo.update(updated)
-    return Response.json({ success: true })
+    return Response.json({ success: true, slug: updated.slug })
   } catch (error) {
     console.error(error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })

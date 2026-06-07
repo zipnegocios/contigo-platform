@@ -1,6 +1,7 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { Project } from '@/core/entities/Project'
+import type { GalleryItem } from '@/types/media'
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +20,8 @@ export async function POST(request: Request) {
       location: body.location,
       completedDate: new Date(body.completedDate),
       coverImageUrl: body.coverImageUrl,
-      galleryUrls: body.galleryUrls || [],
+      coverPosterUrl: body.coverPosterUrl ?? null,
+      galleryItems: (body.galleryItems as GalleryItem[]) || [],
     })
 
     await projectRepo.save(project)
