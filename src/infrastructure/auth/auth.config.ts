@@ -7,6 +7,8 @@ import { adminUsers } from '../db/schema'
 import { eq } from 'drizzle-orm'
 
 export const authConfig: NextAuthConfig = {
+  basePath: '/api/auth',
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: 'Credentials',
