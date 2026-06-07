@@ -35,7 +35,7 @@ export default function AdminSidebar() {
         style={{ borderBottom: '1px solid rgba(226, 192, 99, 0.12)' }}
       >
         <Image
-          src="/isotipo.png"
+          src="/assets/isotipo.png"
           alt="Contigo"
           width={32}
           height={32}

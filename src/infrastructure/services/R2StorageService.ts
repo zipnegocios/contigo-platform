@@ -18,6 +18,11 @@ function getR2Client(): S3Client {
     region: 'auto',
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId, secretAccessKey },
+    // SDK v3 defaults to 'when_supported', which adds x-amz-checksum-crc32 to
+    // presigned URLs. The browser XHR doesn't send a matching header, so R2
+    // rejects the PUT with 400. 'when_required' disables automatic checksums.
+    requestChecksumCalculation: 'WHEN_REQUIRED' as const,
+    responseChecksumValidation: 'WHEN_REQUIRED' as const,
   })
 
   return r2Client
