@@ -1,19 +1,18 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 
 export const middleware = auth((req) => {
-  // Allow access to login page without authentication
+  // Allow unauthenticated access to login page
   if (req.nextUrl.pathname === '/admin/login') {
     return undefined
   }
 
-  // If no session and trying to access other admin pages, redirect to login
-  if (!req.auth && req.nextUrl.pathname.startsWith('/admin')) {
+  // Protect other admin routes - redirect to login if not authenticated
+  if (req.nextUrl.pathname.startsWith('/admin') && !req.auth) {
     const loginUrl = new URL('/admin/login', req.url)
     loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname)
     return Response.redirect(loginUrl)
   }
 
-  // Allow the request to proceed
   return undefined
 })
 

@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm'
 export const authConfig: NextAuthConfig = {
   basePath: '/api/auth',
   trustHost: true,
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: 'Credentials',
