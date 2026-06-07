@@ -29,7 +29,14 @@ export default async function ServicesPage() {
         </Link>
       </div>
 
-      <ServiceTable services={services} />
+      <ServiceTable services={services.map((s) => ({
+        id: s.id,
+        name: s.name,
+        shortDescription: s.shortDescription,
+        orderIndex: s.orderIndex,
+        published: s.published,
+        imageUrl: s.imageUrl,
+      }))} />
     </div>
   )
 }

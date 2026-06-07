@@ -1,25 +1,27 @@
 import { LeadsKanban } from '@/presentation/components/admin/LeadsKanban'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
+import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 
 export default async function LeadsPage() {
   const leadRepo = new DrizzleLeadRepository()
   const quoteRepo = new DrizzleQuoteRepository()
 
-  // Fetch all leads
   const allLeads = await leadRepo.findAll(1000)
 
-  // Enrich leads with quote information
   const leads = await Promise.all(
-    allLeads.map(async (lead) => ({
-      id: lead.id,
-      quoteId: lead.quoteId,
-      stage: lead.stage,
-      adminNotes: lead.adminNotes,
-      estimatedValue: lead.estimatedValue,
-      updatedAt: lead.updatedAt,
-      quote: await quoteRepo.findById(lead.quoteId),
-    })),
+    allLeads.map(async (lead) => {
+      const quote = await quoteRepo.findById(lead.quoteId)
+      return {
+        id: lead.id,
+        quoteId: lead.quoteId,
+        stage: lead.stage,
+        adminNotes: lead.adminNotes,
+        estimatedValue: lead.estimatedValue,
+        updatedAt: lead.updatedAt,
+        quote: quote ? toQuoteDTO(quote) : null,
+      }
+    }),
   )
 
   return (

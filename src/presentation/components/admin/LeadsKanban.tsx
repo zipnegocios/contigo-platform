@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Quote } from '@/core/entities/Quote'
+import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 
 interface LeadsKanbanProps {
   leads: Array<{
@@ -12,7 +12,7 @@ interface LeadsKanbanProps {
     adminNotes: string | null
     estimatedValue: number | null
     updatedAt: Date
-    quote: Quote | null
+    quote: QuoteDTO | null
   }>
 }
 
@@ -212,7 +212,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                             {lead.quote?.name || 'Unknown'}
                           </p>
                           <p className="text-xs truncate" style={{ color: '#A89E8C' }}>
-                            {lead.quote?.email ? lead.quote.email.toString() : '—'}
+                            {lead.quote?.email ?? '—'}
                           </p>
                         </div>
 
