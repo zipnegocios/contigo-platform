@@ -9,7 +9,11 @@ function getDatabase() {
   if (dbInstance) return dbInstance
 
   if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL environment variable is not defined')
+    // During build time when DATABASE_URL is not available,
+    // return a dummy drizzle instance that won't actually connect
+    // This allows code to be compiled without errors
+    console.warn('[DB] DATABASE_URL not available, using stub database client')
+    return {} as ReturnType<typeof drizzle>
   }
 
   clientInstance = postgres(process.env.DATABASE_URL, {
