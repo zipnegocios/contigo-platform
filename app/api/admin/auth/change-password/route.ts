@@ -30,9 +30,13 @@ export async function POST(request: Request) {
     }
 
     // Get current user
-    const user = await db.query.adminUsers.findFirst({
-      where: eq(schema.adminUsers.email, session.user.email),
-    })
+    const users = await db
+      .select()
+      .from(schema.adminUsers)
+      .where(eq(schema.adminUsers.email, session.user.email))
+      .limit(1)
+
+    const user = users[0]
 
     if (!user) {
       return Response.json({ error: 'User not found' }, { status: 404 })
