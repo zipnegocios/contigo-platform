@@ -8,6 +8,8 @@ import ContactSection from '@/presentation/sections/ContactSection'
 import Footer from '@/presentation/sections/Footer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   // Fetch featured projects server-side — always fresh, no client fetch needed
   let projects: {
