@@ -2,9 +2,6 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Card, CardContent } from '@/presentation/components/ui/card'
-import { Badge } from '@/presentation/components/ui/badge'
-import { Lead } from '@/core/entities/Lead'
 import { Quote } from '@/core/entities/Quote'
 
 interface LeadsKanbanProps {
@@ -20,36 +17,55 @@ interface LeadsKanbanProps {
 }
 
 const stages = ['prospect', 'contacted', 'quoted', 'won', 'lost']
-const stageLabels: Record<string, string> = {
-  prospect: 'Prospect',
-  contacted: 'Contacted',
-  quoted: 'Quoted',
-  won: 'Won',
-  lost: 'Lost',
-}
 
-const stageColors: Record<string, string> = {
-  prospect: 'bg-blue-100',
-  contacted: 'bg-yellow-100',
-  quoted: 'bg-purple-100',
-  won: 'bg-green-100',
-  lost: 'bg-red-100',
-}
-
-const stageBorderColors: Record<string, string> = {
-  prospect: 'border-blue-200',
-  contacted: 'border-yellow-200',
-  quoted: 'border-purple-200',
-  won: 'border-green-200',
-  lost: 'border-red-200',
-}
-
-const stageBadgeColors: Record<string, string> = {
-  prospect: 'bg-blue-200 text-blue-800',
-  contacted: 'bg-yellow-200 text-yellow-800',
-  quoted: 'bg-purple-200 text-purple-800',
-  won: 'bg-green-200 text-green-800',
-  lost: 'bg-red-200 text-red-800',
+const stageConfig: Record<string, {
+  label: string
+  columnBg: string
+  borderColor: string
+  headerColor: string
+  badgeBg: string
+  badgeText: string
+}> = {
+  prospect: {
+    label: 'Prospect',
+    columnBg: 'rgba(226,192,99,0.05)',
+    borderColor: 'rgba(226,192,99,0.25)',
+    headerColor: '#E2C063',
+    badgeBg: 'rgba(226,192,99,0.2)',
+    badgeText: '#A08040',
+  },
+  contacted: {
+    label: 'Contacted',
+    columnBg: 'rgba(228,193,92,0.06)',
+    borderColor: 'rgba(228,193,92,0.28)',
+    headerColor: '#C8A55C',
+    badgeBg: 'rgba(228,193,92,0.2)',
+    badgeText: '#7A5C00',
+  },
+  quoted: {
+    label: 'Quoted',
+    columnBg: 'rgba(13,60,76,0.04)',
+    borderColor: 'rgba(13,60,76,0.18)',
+    headerColor: '#0D3C4C',
+    badgeBg: 'rgba(13,60,76,0.12)',
+    badgeText: '#0D3C4C',
+  },
+  won: {
+    label: 'Won',
+    columnBg: 'rgba(34,197,94,0.04)',
+    borderColor: 'rgba(34,197,94,0.22)',
+    headerColor: '#15803d',
+    badgeBg: 'rgba(34,197,94,0.15)',
+    badgeText: '#15803d',
+  },
+  lost: {
+    label: 'Lost',
+    columnBg: 'rgba(107,101,96,0.06)',
+    borderColor: 'rgba(107,101,96,0.18)',
+    headerColor: '#6B6560',
+    badgeBg: 'rgba(107,101,96,0.12)',
+    badgeText: '#6B6560',
+  },
 }
 
 export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
@@ -86,10 +102,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
       return
     }
 
-    // Store original state for rollback
     const originalLeads = leads
-
-    // Optimistic update
     const newLeads = leads.map((l) =>
       l.id === draggedId ? { ...l, stage: targetStage, updatedAt: new Date() } : l,
     )
@@ -97,7 +110,6 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
     setDraggedId(null)
     setIsLoading(true)
 
-    // Save to API
     try {
       const response = await fetch(`/api/admin/leads/${draggedId}`, {
         method: 'PATCH',
@@ -105,13 +117,10 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
         body: JSON.stringify({ stage: targetStage }),
       })
 
-      if (!response.ok) {
-        throw new Error(`Failed to update lead: ${response.statusText}`)
-      }
+      if (!response.ok) throw new Error(`Failed to update lead: ${response.statusText}`)
 
-      toast.success(`Lead moved to ${stageLabels[targetStage]}`)
+      toast.success(`Lead moved to ${stageConfig[targetStage].label}`)
     } catch (error) {
-      // Revert optimistic update
       setLeads(originalLeads)
       toast.error(error instanceof Error ? error.message : 'Failed to move lead')
       console.error(error)
@@ -120,81 +129,134 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
     }
   }
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    // Only leave if we're leaving the entire stage column
-    if (e.currentTarget === e.target) {
-      e.currentTarget.classList.remove('opacity-50')
-    }
-  }
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-screen bg-gray-50 p-4 rounded-lg">
-      {stages.map((stage) => (
-        <div key={stage} className="flex flex-col">
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-sm text-gray-700">{stageLabels[stage]}</h2>
-              <Badge variant="secondary" className={`${stageBadgeColors[stage]} font-medium`}>
-                {groupedByStage[stage].length}
-              </Badge>
-            </div>
-            <div className="h-1 bg-gradient-to-r from-gray-200 to-transparent mt-2"></div>
-          </div>
+    <div>
+      <h1
+        className="text-4xl font-semibold mb-6"
+        style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924', lineHeight: 1.2 }}
+      >
+        Lead Pipeline
+      </h1>
 
-          <div
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, stage)}
-            onDragLeave={handleDragLeave}
-            className={`flex-1 space-y-3 p-3 rounded-lg border-2 border-dashed ${stageBorderColors[stage]} ${stageColors[stage]} transition-opacity min-h-96`}
-          >
-            {groupedByStage[stage].length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
-                Drop leads here
-              </div>
-            ) : (
-              groupedByStage[stage].map((lead) => (
-                <Card
-                  key={lead.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, lead.id)}
-                  className={`cursor-grab active:cursor-grabbing transition-all hover:shadow-md ${
-                    draggedId === lead.id ? 'opacity-50' : ''
-                  } border-0 bg-white`}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {stages.map((stage) => {
+          const cfg = stageConfig[stage]
+          const stagLeads = groupedByStage[stage]
+
+          return (
+            <div key={stage} className="flex flex-col">
+              {/* Column header */}
+              <div className="mb-3 flex items-center justify-between px-1">
+                <span
+                  className="text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: cfg.headerColor }}
                 >
-                  <CardContent className="pt-4 text-sm space-y-2">
-                    <div>
-                      <p className="font-semibold text-gray-900 truncate">
-                        {lead.quote?.name || 'Unknown'}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {lead.quote?.email ? lead.quote.email.toString() : '-'}
-                      </p>
-                    </div>
-                    {lead.quote?.service && (
-                      <p className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded w-fit">
-                        {lead.quote.service}
-                      </p>
-                    )}
-                    {lead.estimatedValue && (
-                      <div className="flex items-center justify-between pt-1 border-t">
-                        <span className="text-xs text-gray-600">Est. Value:</span>
-                        <span className="font-bold text-green-700">
-                          ${(lead.estimatedValue / 100).toFixed(2)}
-                        </span>
+                  {cfg.label}
+                </span>
+                <span
+                  className="text-xs font-bold rounded-full px-2 py-0.5"
+                  style={{ backgroundColor: cfg.badgeBg, color: cfg.badgeText }}
+                >
+                  {stagLeads.length}
+                </span>
+              </div>
+
+              {/* Column accent line */}
+              <div
+                className="h-0.5 mb-3 rounded-full"
+                style={{ backgroundColor: cfg.headerColor, opacity: 0.4 }}
+              />
+
+              {/* Drop zone */}
+              <div
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, stage)}
+                className="flex-1 space-y-3 p-3 rounded-xl border-2 border-dashed transition-all min-h-96"
+                style={{
+                  backgroundColor: cfg.columnBg,
+                  borderColor: cfg.borderColor,
+                }}
+              >
+                {stagLeads.length === 0 ? (
+                  <div
+                    className="flex items-center justify-center h-28 text-xs"
+                    style={{ color: '#A89E8C' }}
+                  >
+                    Drop here
+                  </div>
+                ) : (
+                  stagLeads.map((lead) => (
+                    <div
+                      key={lead.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, lead.id)}
+                      className="rounded-lg p-4 cursor-grab active:cursor-grabbing transition-all"
+                      style={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #E5DDD0',
+                        boxShadow: '0 1px 4px rgba(45,41,36,0.06)',
+                        opacity: draggedId === lead.id ? 0.45 : 1,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(45,41,36,0.12)'
+                        e.currentTarget.style.borderColor = cfg.borderColor
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = '0 1px 4px rgba(45,41,36,0.06)'
+                        e.currentTarget.style.borderColor = '#E5DDD0'
+                      }}
+                    >
+                      <div className="space-y-2">
+                        <div>
+                          <p className="font-semibold text-sm truncate" style={{ color: '#2D2924' }}>
+                            {lead.quote?.name || 'Unknown'}
+                          </p>
+                          <p className="text-xs truncate" style={{ color: '#A89E8C' }}>
+                            {lead.quote?.email ? lead.quote.email.toString() : '—'}
+                          </p>
+                        </div>
+
+                        {lead.quote?.service && (
+                          <span
+                            className="inline-block text-xs px-2 py-0.5 rounded"
+                            style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#A08040' }}
+                          >
+                            {lead.quote.service}
+                          </span>
+                        )}
+
+                        {lead.estimatedValue && (
+                          <div
+                            className="flex items-center justify-between pt-2"
+                            style={{ borderTop: '1px solid #F0E8DC' }}
+                          >
+                            <span className="text-xs" style={{ color: '#A89E8C' }}>Est. Value</span>
+                            <span
+                              className="text-xs font-bold"
+                              style={{ fontFamily: 'var(--font-space)', color: '#15803d' }}
+                            >
+                              ${(lead.estimatedValue / 100).toFixed(0)}
+                            </span>
+                          </div>
+                        )}
+
+                        {lead.adminNotes && (
+                          <p
+                            className="text-xs italic pl-2"
+                            style={{ color: '#A89E8C', borderLeft: '2px solid #E5DDD0' }}
+                          >
+                            {lead.adminNotes}
+                          </p>
+                        )}
                       </div>
-                    )}
-                    {lead.adminNotes && (
-                      <p className="text-xs text-gray-600 italic border-l-2 border-gray-300 pl-2">
-                        {lead.adminNotes}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </div>
-      ))}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

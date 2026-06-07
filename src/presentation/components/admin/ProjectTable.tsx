@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { Badge } from '@/presentation/components/ui/badge'
 import { Button } from '@/presentation/components/ui/button'
 import {
   Table,
@@ -11,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/presentation/components/ui/table'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -38,12 +37,8 @@ export function ProjectTable({ projects }: ProjectTableProps) {
 
     setDeleting(id)
     try {
-      const response = await fetch(`/api/admin/projects/${id}`, {
-        method: 'DELETE',
-      })
-
+      const response = await fetch(`/api/admin/projects/${id}`, { method: 'DELETE' })
       if (!response.ok) throw new Error('Failed to delete')
-
       toast.success('Project deleted')
       router.refresh()
     } catch (error) {
@@ -55,53 +50,107 @@ export function ProjectTable({ projects }: ProjectTableProps) {
   }
 
   return (
-    <div className="rounded-lg border">
+    <div
+      className="rounded-lg overflow-hidden bg-white"
+      style={{ border: '1px solid #E5DDD0', boxShadow: '0 2px 8px rgba(45,41,36,0.06)' }}
+    >
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Featured</TableHead>
-            <TableHead>Action</TableHead>
+          <TableRow style={{ backgroundColor: '#FAF6F0', borderBottom: '1px solid #E5DDD0' }}>
+            <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Title</TableHead>
+            <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Category</TableHead>
+            <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
+            <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Featured</TableHead>
+            <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {projects.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                No projects yet. <Link href="/admin/projects/new" className="text-primary underline">Create one</Link>
+              <TableCell colSpan={5} className="text-center py-12 text-sm" style={{ color: '#A89E8C' }}>
+                No projects yet.{' '}
+                <Link href="/admin/projects/new" style={{ color: '#E2C063', textDecoration: 'underline' }}>
+                  Create one
+                </Link>
               </TableCell>
             </TableRow>
           ) : (
             projects.map((project) => (
-              <TableRow key={project.id}>
-                <TableCell className="font-medium">{project.title}</TableCell>
-                <TableCell>{project.category}</TableCell>
-                <TableCell>
-                  <Badge variant={project.published ? 'default' : 'secondary'}>
-                    {project.published ? 'Published' : 'Draft'}
-                  </Badge>
+              <TableRow
+                key={project.id}
+                style={{ borderBottom: '1px solid #F0E8DC' }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FAF6F0' }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+              >
+                <TableCell className="font-medium py-3.5" style={{ color: '#2D2924' }}>
+                  {project.title}
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-3.5 text-sm" style={{ color: '#6B6560' }}>
+                  {project.category}
+                </TableCell>
+                <TableCell className="py-3.5">
+                  <span
+                    className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide"
+                    style={
+                      project.published
+                        ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' }
+                        : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
+                    }
+                  >
+                    {project.published ? 'Published' : 'Draft'}
+                  </span>
+                </TableCell>
+                <TableCell className="py-3.5">
                   {project.featured ? (
-                    <Badge variant="outline">Featured</Badge>
+                    <span
+                      className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      style={{ backgroundColor: 'rgba(226,192,99,0.15)', color: '#A08040' }}
+                    >
+                      Featured
+                    </span>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span style={{ color: '#E5DDD0' }}>—</span>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-3.5">
                   <div className="flex gap-2">
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/admin/projects/${project.id}/edit`}>Edit</Link>
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="outline"
+                      className="text-xs h-8 transition-all duration-150"
+                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#E2C063'
+                        e.currentTarget.style.color = '#E2C063'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#E5DDD0'
+                        e.currentTarget.style.color = '#6B6560'
+                      }}
+                    >
+                      <Link href={`/admin/projects/${project.id}/edit`}>
+                        <Pencil className="h-3.5 w-3.5 mr-1" />
+                        Edit
+                      </Link>
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
+                      className="h-8 w-8 p-0 transition-all duration-150"
+                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
                       onClick={() => handleDelete(project.id)}
                       disabled={deleting === project.id}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#dc2626'
+                        e.currentTarget.style.color = '#dc2626'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#E5DDD0'
+                        e.currentTarget.style.color = '#6B6560'
+                      }}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </TableCell>

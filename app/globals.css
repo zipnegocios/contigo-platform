@@ -63,6 +63,20 @@
     --font-cormorant: var(--font-cormorant-garamond);
     --font-inter: var(--font-inter-regular);
     --font-space: var(--font-space-grotesk);
+
+    /* Admin Portal Design Tokens */
+    --admin-sidebar-bg: #1E1A16;
+    --admin-sidebar-text: #E8DCC4;
+    --admin-sidebar-muted: #A89E8C;
+    --admin-sidebar-border: rgba(226, 192, 99, 0.12);
+    --admin-sidebar-active-bg: rgba(226, 192, 99, 0.15);
+    --admin-sidebar-active-text: #E2C063;
+    --admin-gold: #E2C063;
+    --admin-gold-hover: #D4AF37;
+    --admin-bg: #FAF6F0;
+    --admin-card-border: #E5DDD0;
+    --admin-ink: #2D2924;
+    --admin-muted: #6B6560;
   }
 }
 

@@ -1,11 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import { FormEvent, Suspense, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Input } from '@/presentation/components/ui/input'
-import { Button } from '@/presentation/components/ui/button'
 
 function LoginForm() {
   const router = useRouter()
@@ -42,28 +41,35 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+        <div
+          className="px-4 py-3 rounded-lg text-sm"
+          style={{ backgroundColor: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#dc2626' }}
+        >
           {error}
         </div>
       )}
 
-      <div className="space-y-1">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">
-          Email
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="text-xs font-medium uppercase tracking-wider" style={{ color: '#6B6560' }}>
+          Email Address
         </label>
         <Input
           id="email"
           type="email"
-          placeholder="admin@example.com"
+          placeholder="admin@contigoconstructions.com.au"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
           required
+          className="bg-white"
+          style={{ borderColor: '#E5DDD0', outline: 'none' }}
+          onFocus={(e) => { e.target.style.borderColor = '#E2C063'; e.target.style.boxShadow = '0 0 0 3px rgba(226,192,99,0.15)' }}
+          onBlur={(e) => { e.target.style.borderColor = '#E5DDD0'; e.target.style.boxShadow = 'none' }}
         />
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="password" className="text-sm font-medium text-gray-700">
+      <div className="space-y-1.5">
+        <label htmlFor="password" className="text-xs font-medium uppercase tracking-wider" style={{ color: '#6B6560' }}>
           Password
         </label>
         <Input
@@ -74,33 +80,89 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
           required
+          className="bg-white"
+          style={{ borderColor: '#E5DDD0' }}
+          onFocus={(e) => { e.target.style.borderColor = '#E2C063'; e.target.style.boxShadow = '0 0 0 3px rgba(226,192,99,0.15)' }}
+          onBlur={(e) => { e.target.style.borderColor = '#E5DDD0'; e.target.style.boxShadow = 'none' }}
         />
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? 'Signing in...' : 'Sign In'}
-      </Button>
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all duration-200 mt-2"
+        style={{
+          backgroundColor: isLoading ? '#C8A55C' : '#E2C063',
+          color: '#1E1A16',
+          cursor: isLoading ? 'not-allowed' : 'pointer',
+        }}
+        onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#D4AF37' }}
+        onMouseLeave={(e) => { if (!isLoading) e.currentTarget.style.backgroundColor = '#E2C063' }}
+      >
+        {isLoading ? 'Signing in…' : 'Sign In'}
+      </button>
     </form>
   )
 }
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Admin Portal</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={<div className="text-center text-sm text-gray-500">Loading...</div>}>
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ backgroundColor: '#1E1A16' }}
+    >
+      {/* Subtle background pattern */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-5"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(45deg, #E2C063 0, #E2C063 1px, transparent 0, transparent 50%)',
+          backgroundSize: '24px 24px',
+        }}
+      />
+
+      <div className="relative w-full max-w-md">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <Image
+            src="/logo-principal.png"
+            alt="Contigo Constructions"
+            width={200}
+            height={64}
+            className="object-contain"
+            priority
+          />
+        </div>
+
+        {/* Card */}
+        <div
+          className="rounded-xl p-8"
+          style={{
+            backgroundColor: '#FAF6F0',
+            border: '1px solid rgba(226, 192, 99, 0.2)',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+          }}
+        >
+          <div className="mb-6 text-center">
+            <h1
+              className="text-2xl font-semibold"
+              style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
+            >
+              Administration Portal
+            </h1>
+            <p className="text-xs mt-1 uppercase tracking-widest" style={{ color: '#A89E8C' }}>
+              Contigo Constructions
+            </p>
+          </div>
+
+          <Suspense fallback={<div className="text-center text-sm py-4" style={{ color: '#6B6560' }}>Loading…</div>}>
             <LoginForm />
           </Suspense>
+        </div>
 
-          <p className="text-xs text-gray-500 text-center mt-4">
-            Demo credentials: Use your seeded admin account
-          </p>
-        </CardContent>
-      </Card>
+        <p className="text-center mt-6 text-xs" style={{ color: 'rgba(168,158,140,0.6)' }}>
+          Authorised personnel only
+        </p>
+      </div>
     </div>
   )
 }

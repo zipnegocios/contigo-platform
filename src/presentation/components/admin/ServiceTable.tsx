@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/presentation/components/ui/button'
-import { Badge } from '@/presentation/components/ui/badge'
 import { Trash2, GripVertical } from 'lucide-react'
 import {
   Table,
@@ -51,12 +50,11 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
     const targetIndex = services.findIndex((s) => s.id === targetId)
 
     const newServices = [...services]
-    ;[newServices[draggedIndex], newServices[targetIndex]] = [newServices[targetIndex], newServices[draggedIndex]]
-
-    // Update order indices
-    newServices.forEach((service, index) => {
-      service.orderIndex = index
-    })
+    ;[newServices[draggedIndex], newServices[targetIndex]] = [
+      newServices[targetIndex],
+      newServices[draggedIndex],
+    ]
+    newServices.forEach((service, index) => { service.orderIndex = index })
 
     setServices(newServices)
     setDraggedId(null)
@@ -89,12 +87,8 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
     if (!confirm('Delete this service?')) return
 
     try {
-      const response = await fetch(`/api/admin/services/${id}`, {
-        method: 'DELETE',
-      })
-
+      const response = await fetch(`/api/admin/services/${id}`, { method: 'DELETE' })
       if (!response.ok) throw new Error('Failed to delete')
-
       toast.success('Service deleted')
       router.refresh()
     } catch (error) {
@@ -107,21 +101,24 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border">
+      <div
+        className="rounded-lg overflow-hidden bg-white"
+        style={{ border: '1px solid #E5DDD0', boxShadow: '0 2px 8px rgba(45,41,36,0.06)' }}
+      >
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-8"></TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Action</TableHead>
+            <TableRow style={{ backgroundColor: '#FAF6F0', borderBottom: '1px solid #E5DDD0' }}>
+              <TableHead className="w-8 py-3"></TableHead>
+              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Name</TableHead>
+              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Description</TableHead>
+              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
+              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {services.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-12 text-sm" style={{ color: '#A89E8C' }}>
                   No services yet
                 </TableCell>
               </TableRow>
@@ -133,25 +130,52 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
                   onDragStart={(e) => handleDragStart(e, service.id)}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, service.id)}
-                  className={`cursor-move ${draggedId === service.id ? 'opacity-50' : ''}`}
+                  className="cursor-move"
+                  style={{
+                    borderBottom: '1px solid #F0E8DC',
+                    opacity: draggedId === service.id ? 0.4 : 1,
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FAF6F0' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
                 >
-                  <TableCell className="cursor-move">
-                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  <TableCell className="py-3.5">
+                    <GripVertical className="h-4 w-4" style={{ color: '#C5BDB5' }} />
                   </TableCell>
-                  <TableCell className="font-medium">{service.name}</TableCell>
-                  <TableCell className="text-sm">{service.shortDescription}</TableCell>
-                  <TableCell>
-                    <Badge variant={service.published ? 'default' : 'secondary'}>
+                  <TableCell className="font-medium py-3.5 text-sm" style={{ color: '#2D2924' }}>
+                    {service.name}
+                  </TableCell>
+                  <TableCell className="text-sm py-3.5" style={{ color: '#6B6560' }}>
+                    {service.shortDescription}
+                  </TableCell>
+                  <TableCell className="py-3.5">
+                    <span
+                      className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide"
+                      style={
+                        service.published
+                          ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' }
+                          : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
+                      }
+                    >
                       {service.published ? 'Active' : 'Inactive'}
-                    </Badge>
+                    </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-3.5">
                     <Button
                       size="sm"
                       variant="outline"
+                      className="h-8 w-8 p-0 transition-all duration-150"
+                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
                       onClick={() => handleDelete(service.id)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#dc2626'
+                        e.currentTarget.style.color = '#dc2626'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#E5DDD0'
+                        e.currentTarget.style.color = '#6B6560'
+                      }}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -162,9 +186,20 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
       </div>
 
       {hasChanges && (
-        <Button onClick={handleSaveOrder} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Order'}
-        </Button>
+        <button
+          onClick={handleSaveOrder}
+          disabled={saving}
+          className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
+          style={{
+            backgroundColor: saving ? '#C8A55C' : '#E2C063',
+            color: '#1E1A16',
+            cursor: saving ? 'not-allowed' : 'pointer',
+          }}
+          onMouseEnter={(e) => { if (!saving) e.currentTarget.style.backgroundColor = '#D4AF37' }}
+          onMouseLeave={(e) => { if (!saving) e.currentTarget.style.backgroundColor = '#E2C063' }}
+        >
+          {saving ? 'Saving…' : 'Save Order'}
+        </button>
       )}
     </div>
   )

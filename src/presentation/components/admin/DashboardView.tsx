@@ -1,9 +1,16 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 import { KPICard } from './KPICard'
-import { MessageSquare, TrendingUp, FolderOpen, Users } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
+import { MessageSquare, TrendingUp, Users, FolderOpen } from 'lucide-react'
 
 interface DashboardViewProps {
   totalQuotes: number
@@ -12,6 +19,30 @@ interface DashboardViewProps {
   totalLeads: number
   totalProjects: number
   quotesTrend: Array<{ date: string; count: number }>
+}
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className="rounded-lg px-4 py-3 text-sm"
+        style={{
+          backgroundColor: '#fff',
+          border: '1px solid #E5DDD0',
+          boxShadow: '0 4px 12px rgba(45,41,36,0.08)',
+          color: '#2D2924',
+        }}
+      >
+        <p className="font-medium mb-1" style={{ color: '#6B6560' }}>
+          {label}
+        </p>
+        <p style={{ color: '#E2C063', fontFamily: 'var(--font-space)', fontWeight: 700 }}>
+          {payload[0].value} quotes
+        </p>
+      </div>
+    )
+  }
+  return null
 }
 
 export function DashboardView({
@@ -28,11 +59,18 @@ export function DashboardView({
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Welcome back! Here's your business overview.</p>
+        <h1
+          className="text-4xl font-semibold"
+          style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924', lineHeight: 1.2 }}
+        >
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm" style={{ color: '#6B6560' }}>
+          Business overview — real-time data
+        </p>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard
           title="Total Quotes"
@@ -58,42 +96,77 @@ export function DashboardView({
       </div>
 
       {/* Chart */}
-      <Card className="bg-white">
-        <CardHeader className="px-6 pt-6 pb-4">
-          <CardTitle>Quotes Trend (Last 7 Days)</CardTitle>
-        </CardHeader>
-        <CardContent className="px-6 pb-6">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={quotesTrend}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="count" fill="#8b5cf6" name="Quotes" />
+      <div
+        className="bg-white rounded-lg"
+        style={{ border: '1px solid #E5DDD0', boxShadow: '0 2px 8px rgba(45,41,36,0.06)' }}
+      >
+        <div className="px-6 pt-6 pb-4" style={{ borderBottom: '1px solid #F0E8DC' }}>
+          <h2
+            className="text-xl font-semibold"
+            style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
+          >
+            Quote Volume — Last 7 Days
+          </h2>
+        </div>
+        <div className="px-6 pb-6 pt-4">
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={quotesTrend} barSize={28}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5DDD0" vertical={false} />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: '#6B6560', fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fill: '#6B6560', fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
+              />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(226,192,99,0.06)' }} />
+              <Bar dataKey="count" fill="#E2C063" radius={[4, 4, 0, 0]} name="Quotes" />
             </BarChart>
           </ResponsiveContainer>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Quick Links */}
+      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="bg-white">
-          <CardHeader className="px-6 pt-6 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Projects</CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <p className="text-3xl font-bold text-gray-900">{totalProjects}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-white">
-          <CardHeader className="px-6 pt-6 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Active Leads</CardTitle>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <p className="text-3xl font-bold text-gray-900">{totalLeads}</p>
-          </CardContent>
-        </Card>
+        <div
+          className="bg-white rounded-lg p-6"
+          style={{ border: '1px solid #E5DDD0', boxShadow: '0 2px 8px rgba(45,41,36,0.06)' }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <FolderOpen className="h-4 w-4" style={{ color: '#E2C063' }} />
+            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: '#6B6560' }}>
+              Total Projects
+            </p>
+          </div>
+          <p
+            className="text-3xl font-bold"
+            style={{ fontFamily: 'var(--font-space)', color: '#2D2924' }}
+          >
+            {totalProjects}
+          </p>
+        </div>
+        <div
+          className="bg-white rounded-lg p-6"
+          style={{ border: '1px solid #E5DDD0', boxShadow: '0 2px 8px rgba(45,41,36,0.06)' }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <Users className="h-4 w-4" style={{ color: '#E2C063' }} />
+            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: '#6B6560' }}>
+              Active Leads
+            </p>
+          </div>
+          <p
+            className="text-3xl font-bold"
+            style={{ fontFamily: 'var(--font-space)', color: '#2D2924' }}
+          >
+            {totalLeads}
+          </p>
+        </div>
       </div>
     </div>
   )
