@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
+import { Project } from '@/core/entities/Project'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 }
 
 export default async function ProjectsPage() {
-  let projects = []
+  let projects: Project[] = []
 
   try {
     if (process.env.DATABASE_URL) {
