@@ -1,9 +1,6 @@
-import { authConfig } from '@/infrastructure/auth/auth.config'
-import NextAuth from 'next-auth'
+import { handlers } from '@/infrastructure/auth/auth.config'
 
-const handler = NextAuth(authConfig)
-
-export { handler as GET, handler as POST }
+export const { GET, POST } = handlers
 
 // Prevent static generation for this route
 export const dynamic = 'force-dynamic'
