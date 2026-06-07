@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Film, Loader2 } from 'lucide-react'
+import { X, Film, Loader2, Check } from 'lucide-react'
 
 interface MediaObject {
   key: string
@@ -24,6 +24,8 @@ interface MediaPickerModalProps {
   open: boolean
   onClose: () => void
   onSelect: (publicUrl: string) => void
+  onMultiSelect?: (publicUrls: string[]) => void
+  multiSelect?: boolean
   defaultTab?: Tab
   allowVideo?: boolean
 }
@@ -32,12 +34,15 @@ export function MediaPickerModal({
   open,
   onClose,
   onSelect,
+  onMultiSelect,
+  multiSelect = false,
   defaultTab = 'all',
   allowVideo = false,
 }: MediaPickerModalProps) {
   const [tab, setTab] = useState<Tab>(defaultTab)
   const [items, setItems] = useState<MediaObject[]>([])
   const [loading, setLoading] = useState(false)
+  const [selectedUrls, setSelectedUrls] = useState<string[]>([])
 
   const loadMedia = useCallback(async () => {
     setLoading(true)
@@ -55,10 +60,12 @@ export function MediaPickerModal({
   }, [tab])
 
   useEffect(() => {
-    if (open) loadMedia()
+    if (open) {
+      loadMedia()
+      setSelectedUrls([])
+    }
   }, [open, loadMedia])
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     if (open) document.addEventListener('keydown', handler)
@@ -77,14 +84,32 @@ export function MediaPickerModal({
     { key: 'services', label: 'Services' },
   ]
 
+  const toggleSelect = (url: string) => {
+    setSelectedUrls((prev) =>
+      prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]
+    )
+  }
+
+  const handleItemClick = (item: MediaObject) => {
+    if (multiSelect) {
+      toggleSelect(item.publicUrl)
+    } else {
+      onSelect(item.publicUrl)
+      onClose()
+    }
+  }
+
+  const handleConfirmMultiSelect = () => {
+    if (onMultiSelect) onMultiSelect(selectedUrls)
+    onClose()
+  }
+
   return (
-    /* Backdrop */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(30,26,22,0.72)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      {/* Modal */}
       <div
         className="relative w-full flex flex-col rounded-2xl overflow-hidden"
         style={{
@@ -104,7 +129,7 @@ export function MediaPickerModal({
             className="text-xl font-semibold"
             style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
           >
-            Media Library
+            {multiSelect ? 'Select Media' : 'Media Library'}
           </h2>
           <button
             onClick={onClose}
@@ -141,65 +166,114 @@ export function MediaPickerModal({
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-sm" style={{ color: '#A89E8C' }}>
-                No media found in this section.
-              </p>
-              <p className="text-xs mt-1" style={{ color: '#C5BDB5' }}>
-                Upload files from the Media Library page first.
-              </p>
+              <p className="text-sm" style={{ color: '#A89E8C' }}>No media found in this section.</p>
+              <p className="text-xs mt-1" style={{ color: '#C5BDB5' }}>Upload files from the Media Library page first.</p>
             </div>
           ) : (
             <div
               className="grid gap-3"
               style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}
             >
-              {visibleItems.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => { onSelect(item.publicUrl); onClose() }}
-                  className="group relative rounded-xl overflow-hidden text-left transition-all duration-150 hover:ring-2"
-                  style={{
-                    aspectRatio: '4/3',
-                    backgroundColor: '#1E1A16',
-                    border: '1px solid rgba(226,192,99,0.12)',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.outline = '2px solid #E2C063' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.outline = 'none' }}
-                >
-                  {item.mediaType === 'video' ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Film size={28} style={{ color: '#A89E8C' }} />
-                    </div>
-                  ) : (
-                    <img
-                      src={item.publicUrl}
-                      alt={item.key}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  )}
-                  {/* filename tooltip on hover */}
-                  <div
-                    className="absolute bottom-0 left-0 right-0 px-2 py-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200"
-                    style={{ backgroundColor: 'rgba(30,26,22,0.88)' }}
+              {visibleItems.map((item) => {
+                const isSelected = selectedUrls.includes(item.publicUrl)
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => handleItemClick(item)}
+                    className="group relative rounded-xl overflow-hidden text-left transition-all duration-150"
+                    style={{
+                      aspectRatio: '4/3',
+                      backgroundColor: '#1E1A16',
+                      border: isSelected
+                        ? '2px solid #E2C063'
+                        : '1px solid rgba(226,192,99,0.12)',
+                      outline: 'none',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.outline = '2px solid rgba(226,192,99,0.5)'
+                    }}
+                    onMouseLeave={(e) => { e.currentTarget.style.outline = 'none' }}
                   >
-                    <p className="text-[10px] truncate" style={{ color: '#E8DCC4' }}>
-                      {item.key.split('/').pop()}
-                    </p>
-                  </div>
-                </button>
-              ))}
+                    {item.mediaType === 'video' ? (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Film size={28} style={{ color: '#A89E8C' }} />
+                      </div>
+                    ) : (
+                      <img
+                        src={item.publicUrl}
+                        alt={item.key}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    )}
+
+                    {/* Multiselect checkmark */}
+                    {multiSelect && (
+                      <div
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-150"
+                        style={{
+                          backgroundColor: isSelected ? '#E2C063' : 'rgba(30,26,22,0.6)',
+                          border: isSelected ? 'none' : '1.5px solid rgba(226,192,99,0.5)',
+                        }}
+                      >
+                        {isSelected && <Check size={13} strokeWidth={3} style={{ color: '#1E1A16' }} />}
+                      </div>
+                    )}
+
+                    {/* filename tooltip on hover */}
+                    <div
+                      className="absolute bottom-0 left-0 right-0 px-2 py-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200"
+                      style={{ backgroundColor: 'rgba(30,26,22,0.88)' }}
+                    >
+                      <p className="text-[10px] truncate" style={{ color: '#E8DCC4' }}>
+                        {item.key.split('/').pop()}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
 
         {/* Footer */}
         <div
-          className="px-6 py-3 text-xs flex-shrink-0"
-          style={{ borderTop: '1px solid #E5DDD0', color: '#A89E8C' }}
+          className="px-6 py-3 flex items-center justify-between flex-shrink-0"
+          style={{ borderTop: '1px solid #E5DDD0' }}
         >
-          {visibleItems.length} file{visibleItems.length !== 1 ? 's' : ''} — click any to select
+          {multiSelect ? (
+            <>
+              <p className="text-xs" style={{ color: '#A89E8C' }}>
+                {selectedUrls.length > 0
+                  ? `${selectedUrls.length} item${selectedUrls.length !== 1 ? 's' : ''} selected`
+                  : 'Click images to select'}
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-sm px-4 py-1.5 rounded-lg transition-colors"
+                  style={{ color: '#6B6560' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmMultiSelect}
+                  disabled={selectedUrls.length === 0}
+                  className="text-sm px-5 py-1.5 rounded-lg font-semibold transition-all disabled:opacity-40"
+                  style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+                >
+                  Add {selectedUrls.length > 0 ? selectedUrls.length : ''} to gallery
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-xs" style={{ color: '#A89E8C' }}>
+              {visibleItems.length} file{visibleItems.length !== 1 ? 's' : ''} — click any to select
+            </p>
+          )}
         </div>
       </div>
     </div>

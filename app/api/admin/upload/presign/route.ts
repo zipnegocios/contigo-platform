@@ -12,6 +12,7 @@ const PresignSchema = z.object({
   prefix: z.enum(ALLOWED_PREFIXES),
   filename: z.string().min(1).max(255),
   contentType: z.enum(ALLOWED_TYPES),
+  folder: z.string().regex(/^[a-z0-9-]{1,100}$/).optional(),
 })
 
 export async function POST(request: Request) {
@@ -22,14 +23,15 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { prefix, filename, contentType } = PresignSchema.parse(body)
+    const { prefix, filename, contentType, folder } = PresignSchema.parse(body)
 
     const bucket = process.env.R2_ASSETS_BUCKET
     if (!bucket) {
       return Response.json({ error: 'R2_ASSETS_BUCKET not configured' }, { status: 500 })
     }
 
-    const key = buildKey(prefix, filename)
+    const effectivePrefix = folder ? `${prefix}/${folder}` : prefix
+    const key = buildKey(effectivePrefix, filename)
     const presignedUrl = await generatePresignedPutUrl(bucket, key, contentType)
 
     const assetsBaseUrl = process.env.NEXT_PUBLIC_ASSETS_URL || 'https://assets.contigoconstructions.com.au'

@@ -20,6 +20,7 @@ export default async function EditProjectPage({ params }: { params: { id: string
       <ProjectForm
         project={{
           id: project.id,
+          slug: project.slug,
           title: project.title,
           category: project.category,
           description: project.description,

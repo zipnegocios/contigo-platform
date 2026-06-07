@@ -13,6 +13,7 @@ interface FileUploadProps {
   prefix: AllowedPrefix
   label: string
   accept?: string
+  folder?: string
 }
 
 type UploadState = 'idle' | 'uploading' | 'error'
@@ -23,6 +24,7 @@ export function FileUpload({
   prefix,
   label,
   accept = 'image/jpeg,image/png,image/webp,image/gif',
+  folder,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [state, setState] = useState<UploadState>('idle')
@@ -39,7 +41,7 @@ export function FileUpload({
     setProgress(0)
 
     try {
-      const { publicUrl } = await uploadFileToR2(file, prefix, setProgress)
+      const { publicUrl } = await uploadFileToR2(file, prefix, setProgress, folder)
       onChange(publicUrl)
       setState('idle')
     } catch (err) {

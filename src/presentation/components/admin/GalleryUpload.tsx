@@ -10,6 +10,7 @@ interface GalleryUploadProps {
   onChange: (urls: string[]) => void
   prefix?: 'projects/gallery'
   maxImages?: number
+  folder?: string
 }
 
 export function GalleryUpload({
@@ -17,6 +18,7 @@ export function GalleryUpload({
   onChange,
   prefix = 'projects/gallery',
   maxImages = 20,
+  folder,
 }: GalleryUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -37,7 +39,7 @@ export function GalleryUpload({
     setProgress(0)
 
     try {
-      const { publicUrl } = await uploadFileToR2(file, prefix, setProgress)
+      const { publicUrl } = await uploadFileToR2(file, prefix, setProgress, folder)
       onChange([...value, publicUrl])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
@@ -51,10 +53,11 @@ export function GalleryUpload({
     onChange(value.filter((_, i) => i !== index))
   }
 
-  const handlePickerSelect = (url: string) => {
-    if (!value.includes(url) && value.length < maxImages) {
-      onChange([...value, url])
-    }
+  const handlePickerMultiSelect = (urls: string[]) => {
+    const existing = new Set(value)
+    const incoming = urls.filter((u) => !existing.has(u))
+    const combined = [...value, ...incoming]
+    onChange(combined.slice(0, maxImages))
   }
 
   return (
@@ -78,7 +81,9 @@ export function GalleryUpload({
       <MediaPickerModal
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
-        onSelect={handlePickerSelect}
+        onSelect={() => {}}
+        onMultiSelect={handlePickerMultiSelect}
+        multiSelect
         defaultTab="gallery"
         allowVideo
       />

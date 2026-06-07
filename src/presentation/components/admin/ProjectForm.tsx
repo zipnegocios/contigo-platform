@@ -20,6 +20,7 @@ import { GalleryUpload } from '@/presentation/components/admin/GalleryUpload'
 interface ProjectFormProps {
   project?: {
     id: string
+    slug: string
     title: string
     category: string
     description: string
@@ -153,11 +154,13 @@ export function ProjectForm({ project }: ProjectFormProps) {
             label="Cover Image"
             value={formData.coverImageUrl || null}
             onChange={(url) => setFormData({ ...formData, coverImageUrl: url })}
+            folder={project?.slug}
           />
 
           <GalleryUpload
             value={formData.galleryUrls}
             onChange={(urls) => setFormData({ ...formData, galleryUrls: urls })}
+            folder={project?.slug}
           />
 
           <div className="flex gap-4">

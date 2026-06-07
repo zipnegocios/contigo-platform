@@ -153,6 +153,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
             label="Service Image"
             value={formData.imageUrl || null}
             onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+            folder={formData.slug || undefined}
           />
 
           <label className="flex items-center gap-2">

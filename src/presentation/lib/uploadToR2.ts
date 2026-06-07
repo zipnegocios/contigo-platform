@@ -17,12 +17,13 @@ export async function uploadFileToR2(
   file: File,
   prefix: string,
   onProgress?: (pct: number) => void,
+  folder?: string,
 ): Promise<UploadResult> {
   // Step 1: Request presigned PUT URL from Next.js admin API
   const presignRes = await fetch('/api/admin/upload/presign', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prefix, filename: file.name, contentType: file.type }),
+    body: JSON.stringify({ prefix, filename: file.name, contentType: file.type, ...(folder ? { folder } : {}) }),
   })
 
   if (!presignRes.ok) {
