@@ -2,17 +2,30 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import bcryptjs from 'bcryptjs'
 import * as schema from '../src/infrastructure/db/schema.ts'
+import { migrate } from 'drizzle-orm/postgres-js/migrator'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DATABASE_URL = process.env.DATABASE_URL
 
 if (!DATABASE_URL) {
-  console.warn('⚠️  DATABASE_URL not set - skipping seed (will run at first deploy)')
+  console.warn('⚠️  DATABASE_URL not set - skipping initialization (will run at first deploy)')
   process.exit(0)
 }
 
 async function seedAdmin() {
   const client = postgres(DATABASE_URL)
   const db = drizzle(client, { schema })
+
+  try {
+    // Apply migrations first
+    console.log('📦 Running database migrations...\n')
+    await migrate(db, { migrationsFolder: path.resolve(__dirname, '../drizzle') })
+    console.log('✅ Migrations completed\n')
+  } catch (error) {
+    console.warn('⚠️  Migrations skipped or already applied:', error.message)
+  }
 
   try {
     console.log('🌱 Seeding admin user...\n')
