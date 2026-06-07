@@ -114,6 +114,26 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
           />
           <InfoField label="Submitted" value={quote.createdAt.toLocaleString()} />
         </SectionCard>
+
+        {quote.attachmentUrls.length > 0 && (
+          <SectionCard title="Attachments">
+            <div className="space-y-2">
+              {quote.attachmentUrls.map((key, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 rounded px-3 py-2 text-xs font-mono"
+                  style={{ backgroundColor: '#FAF6F0', border: '1px solid #E5DDD0', color: '#6B6560', wordBreak: 'break-all' }}
+                >
+                  {key}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs mt-3" style={{ color: '#A89E8C' }}>
+              These are stored in the private <code className="font-mono">contigo-quotes</code> bucket.
+              Presigned view URLs will be added in a future update.
+            </p>
+          </SectionCard>
+        )}
       </div>
 
       {/* Actions */}

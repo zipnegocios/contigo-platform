@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Phone, Mail, MapPin, Clock, Loader } from 'lucide-react'
+import { Phone, Mail, MapPin, Clock, Loader, Paperclip, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { uploadQuoteAttachment } from '@/presentation/lib/uploadToR2'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -25,7 +26,13 @@ export default function ContactSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const leftColRef = useRef<HTMLDivElement>(null)
   const rightColRef = useRef<HTMLDivElement>(null)
+  const attachmentInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  // Attachment state managed outside react-hook-form (async upload side-effect)
+  const [attachmentKeys, setAttachmentKeys] = useState<string[]>([])
+  const [attachmentUploading, setAttachmentUploading] = useState(false)
+  const [attachmentError, setAttachmentError] = useState<string | null>(null)
 
   const {
     register,
@@ -36,12 +43,40 @@ export default function ContactSection() {
     resolver: zodResolver(ContactFormSchema),
   })
 
+  const handleAttachmentChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    if (attachmentKeys.length + files.length > 3) {
+      setAttachmentError('Maximum 3 images allowed')
+      return
+    }
+    setAttachmentUploading(true)
+    setAttachmentError(null)
+    try {
+      const uploadedKeys: string[] = []
+      for (const file of files) {
+        const key = await uploadQuoteAttachment(file)
+        uploadedKeys.push(key)
+      }
+      setAttachmentKeys((prev) => [...prev, ...uploadedKeys])
+    } catch {
+      setAttachmentError('Failed to upload image. Please try again.')
+    } finally {
+      setAttachmentUploading(false)
+      if (attachmentInputRef.current) attachmentInputRef.current.value = ''
+    }
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachmentKeys((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const onSubmit = async (data: ContactFormInput) => {
     try {
       const response = await fetch('/api/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, attachmentUrls: attachmentKeys }),
       })
 
       const result = await response.json()
@@ -59,6 +94,7 @@ export default function ContactSection() {
 
       // Success: redirect to tracking page
       reset()
+      setAttachmentKeys([])
       router.push(`/quote-status/${result.trackingToken}`)
     } catch (error) {
       console.error('Form submission error:', error)
@@ -198,9 +234,91 @@ export default function ContactSection() {
                     )}
                   </div>
 
+                  {/* Attachment upload (optional, up to 3 images) */}
+                  <div className="form-group">
+                    <input
+                      ref={attachmentInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      multiple
+                      onChange={handleAttachmentChange}
+                      className="hidden"
+                      aria-label="Attach project images"
+                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => attachmentInputRef.current?.click()}
+                        disabled={attachmentUploading || attachmentKeys.length >= 3}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 16px',
+                          border: '1px dashed rgba(226,192,99,0.5)',
+                          borderRadius: '8px',
+                          backgroundColor: 'transparent',
+                          color: 'rgba(255,255,255,0.7)',
+                          fontSize: '13px',
+                          cursor: attachmentUploading || attachmentKeys.length >= 3 ? 'not-allowed' : 'pointer',
+                          width: '100%',
+                          justifyContent: 'center',
+                          opacity: attachmentKeys.length >= 3 ? 0.5 : 1,
+                        }}
+                      >
+                        {attachmentUploading ? (
+                          <Loader size={14} className="animate-spin" />
+                        ) : (
+                          <Paperclip size={14} />
+                        )}
+                        {attachmentUploading
+                          ? 'Uploading…'
+                          : attachmentKeys.length >= 3
+                            ? 'Max 3 images'
+                            : `Attach Images (${attachmentKeys.length}/3)`}
+                      </button>
+
+                      {/* Attached file list */}
+                      {attachmentKeys.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          {attachmentKeys.map((key, i) => (
+                            <div
+                              key={i}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                backgroundColor: 'rgba(226,192,99,0.1)',
+                                fontSize: '12px',
+                                color: 'rgba(255,255,255,0.8)',
+                              }}
+                            >
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>
+                                {key.split('/').pop()}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeAttachment(i)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'rgba(255,255,255,0.5)', flexShrink: 0 }}
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {attachmentError && (
+                        <span style={{ fontSize: '12px', color: '#e74c3c' }}>{attachmentError}</span>
+                      )}
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || attachmentUploading}
                     className="btn-primary w-full"
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   >

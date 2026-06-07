@@ -18,6 +18,7 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
       message: quote.message,
       trackingToken: quote.trackingToken,
       status: quote.status,
+      attachmentUrls: quote.attachmentUrls,
       createdAt: quote.createdAt,
       updatedAt: new Date(),
     })
@@ -63,6 +64,7 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
         service: quote.service,
         message: quote.message,
         status: quote.status,
+        attachmentUrls: quote.attachmentUrls,
         updatedAt: new Date(),
       })
       .where(eq(quotes.id, quote.id))
@@ -125,6 +127,7 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
       message: row.message,
       trackingToken: row.trackingToken,
       status: row.status,
+      attachmentUrls: (row.attachmentUrls as string[]) || [],
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     })

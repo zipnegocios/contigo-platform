@@ -15,6 +15,8 @@ import {
 } from '@/presentation/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Checkbox } from '@/presentation/components/ui/checkbox'
+import { FileUpload } from '@/presentation/components/admin/FileUpload'
+import { GalleryUpload } from '@/presentation/components/admin/GalleryUpload'
 
 interface ProjectFormProps {
   project?: {
@@ -147,17 +149,17 @@ export function ProjectForm({ project }: ProjectFormProps) {
             />
           </div>
 
-          <div>
-            <label className="text-sm font-medium">Cover Image URL</label>
-            <Input
-              type="url"
-              value={formData.coverImageUrl}
-              onChange={(e) => setFormData({ ...formData, coverImageUrl: e.target.value })}
-              placeholder="https://example.com/image.jpg"
-              className="mt-2"
-              required
-            />
-          </div>
+          <FileUpload
+            prefix="projects/cover"
+            label="Cover Image"
+            value={formData.coverImageUrl || null}
+            onChange={(url) => setFormData({ ...formData, coverImageUrl: url })}
+          />
+
+          <GalleryUpload
+            value={formData.galleryUrls}
+            onChange={(urls) => setFormData({ ...formData, galleryUrls: urls })}
+          />
 
           <div className="flex gap-4">
             <label className="flex items-center gap-2">

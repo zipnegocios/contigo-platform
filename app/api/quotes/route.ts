@@ -10,6 +10,7 @@ const CreateQuoteSchema = z.object({
   phone: z.string().optional(),
   service: z.string().min(2, 'Please select a service'),
   message: z.string().min(10, 'Message must be at least 10 characters'),
+  attachmentUrls: z.array(z.string()).max(3).optional().default([]),
 })
 
 export const dynamic = 'force-dynamic'

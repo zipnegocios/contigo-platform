@@ -50,6 +50,7 @@ export const quotes = pgTable(
     status: quoteStatusEnum('status').notNull().default('new'),
     trackingToken: varchar('tracking_token', { length: 255 }).notNull().unique(),
     descriptionVector: jsonb('description_vector').$type<number[]>(),
+    attachmentUrls: jsonb('attachment_urls').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

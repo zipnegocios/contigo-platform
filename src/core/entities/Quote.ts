@@ -9,6 +9,7 @@ export interface CreateQuoteInput {
   phone?: string
   service: string
   message: string
+  attachmentUrls?: string[]
 }
 
 export class Quote {
@@ -20,6 +21,7 @@ export class Quote {
   readonly message: string
   readonly trackingToken: string
   readonly status: QuoteStatus
+  readonly attachmentUrls: string[]
   readonly createdAt: Date
   readonly updatedAt: Date
 
@@ -32,6 +34,7 @@ export class Quote {
     message: string
     trackingToken: string
     status: QuoteStatus
+    attachmentUrls: string[]
     createdAt: Date
     updatedAt: Date
   }) {
@@ -43,6 +46,7 @@ export class Quote {
     this.message = props.message
     this.trackingToken = props.trackingToken
     this.status = props.status
+    this.attachmentUrls = props.attachmentUrls
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }
@@ -64,6 +68,7 @@ export class Quote {
       message: input.message.trim(),
       trackingToken,
       status: 'new',
+      attachmentUrls: input.attachmentUrls ?? [],
       createdAt: now,
       updatedAt: now,
     })
@@ -79,6 +84,7 @@ export class Quote {
       message: this.message,
       trackingToken: this.trackingToken,
       status,
+      attachmentUrls: this.attachmentUrls,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     })
@@ -93,6 +99,7 @@ export class Quote {
     message: string
     trackingToken: string
     status: QuoteStatus
+    attachmentUrls: string[]
     createdAt: Date
     updatedAt: Date
   }): Quote {

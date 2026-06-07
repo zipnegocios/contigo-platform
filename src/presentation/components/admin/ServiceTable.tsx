@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import Link from 'next/link'
 import { Button } from '@/presentation/components/ui/button'
-import { Trash2, GripVertical } from 'lucide-react'
+import { Trash2, GripVertical, Pencil } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -20,6 +21,7 @@ interface Service {
   shortDescription: string
   orderIndex: number
   published: boolean
+  imageUrl: string
 }
 
 interface ServiceTableProps {
@@ -112,7 +114,7 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
               <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Name</TableHead>
               <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Description</TableHead>
               <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Action</TableHead>
+              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -160,23 +162,44 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
                     </span>
                   </TableCell>
                   <TableCell className="py-3.5">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 w-8 p-0 transition-all duration-150"
-                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
-                      onClick={() => handleDelete(service.id)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = '#dc2626'
-                        e.currentTarget.style.color = '#dc2626'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = '#E5DDD0'
-                        e.currentTarget.style.color = '#6B6560'
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 transition-all duration-150"
+                        style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#E2C063'
+                          e.currentTarget.style.color = '#E2C063'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#E5DDD0'
+                          e.currentTarget.style.color = '#6B6560'
+                        }}
+                      >
+                        <Link href={`/admin/services/${service.id}/edit`}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 transition-all duration-150"
+                        style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                        onClick={() => handleDelete(service.id)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#dc2626'
+                          e.currentTarget.style.color = '#dc2626'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#E5DDD0'
+                          e.currentTarget.style.color = '#6B6560'
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
