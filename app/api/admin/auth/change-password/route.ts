@@ -30,16 +30,16 @@ export async function POST(request: Request) {
     }
 
     // Get current user
-    const users = await db.query.adminUsers.findFirst({
+    const user = await db.query.adminUsers.findFirst({
       where: eq(schema.adminUsers.email, session.user.email),
     })
 
-    if (!users) {
+    if (!user) {
       return Response.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Verify current password
-    const isValid = await compare(currentPassword, users.passwordHash)
+    const isValid = await compare(currentPassword, user.passwordHash)
     if (!isValid) {
       return Response.json({ error: 'Current password is incorrect' }, { status: 400 })
     }
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     await db
       .update(schema.adminUsers)
       .set({ passwordHash: newHash, updatedAt: new Date() })
-      .where(eq(schema.adminUsers.id, users.id))
+      .where(eq(schema.adminUsers.id, user.id))
 
     return Response.json({ success: true })
   } catch (error) {
