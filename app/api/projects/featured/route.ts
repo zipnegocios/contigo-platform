@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 
+// Never cache — admin edits must reflect immediately
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const repo = new DrizzleProjectRepository()
@@ -15,11 +18,7 @@ export async function GET() {
       coverImageUrl: p.coverImageUrl,
     }))
 
-    return NextResponse.json(data, {
-      headers: {
-        'Cache-Control': 's-maxage=60, stale-while-revalidate',
-      },
-    })
+    return NextResponse.json(data)
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

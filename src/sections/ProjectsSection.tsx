@@ -13,14 +13,6 @@ interface ProjectItem {
   coverImageUrl: string;
 }
 
-const FALLBACK_PROJECTS: ProjectItem[] = [
-  { id: '1', slug: 'seaton-residence', title: 'Seaton Residence', category: 'New Home', coverImageUrl: '/assets/project-seatons.jpg' },
-  { id: '2', slug: 'henley-beach-extension', title: 'Henley Beach Extension', category: 'Extension', coverImageUrl: '/assets/project-henley.jpg' },
-  { id: '3', slug: 'glenelg-renovation', title: 'Glenelg Renovation', category: 'Renovation', coverImageUrl: '/assets/project-glenelg.jpg' },
-  { id: '4', slug: 'prospect-commercial', title: 'Prospect Commercial', category: 'Commercial', coverImageUrl: '/assets/project-prospect.jpg' },
-  { id: '5', slug: 'adelaide-heritage-restore', title: 'Adelaide Heritage Restore', category: 'Restoration', coverImageUrl: '/assets/project-heritage.jpg' },
-];
-
 export default function ProjectsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -28,46 +20,39 @@ export default function ProjectsSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
 
-  const [projects, setProjects] = useState<ProjectItem[]>(FALLBACK_PROJECTS);
+  const [projects, setProjects] = useState<ProjectItem[] | null>(null); // null = loading
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   useEffect(() => {
     fetch('/api/projects/featured')
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setProjects(data);
-      })
-      .catch(() => {});
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: ProjectItem[]) => setProjects(Array.isArray(data) ? data : []))
+      .catch(() => setProjects([]));
   }, []);
 
-  const isCarousel = projects.length > 5;
+  const isCarousel = projects !== null && projects.length > 5;
 
   useEffect(() => {
+    if (projects === null) return; // wait for data before animating
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
         opacity: 0,
         y: 30,
         duration: 0.8,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-        },
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
       });
 
-      if (!isCarousel) {
-        const panels = listRef.current?.querySelectorAll('.accordion-item');
-        if (panels) {
+      if (!isCarousel && listRef.current) {
+        const panels = listRef.current.querySelectorAll('.accordion-item');
+        if (panels.length) {
           gsap.from(panels, {
             y: 60,
             opacity: 0,
             duration: 0.6,
             stagger: 0.1,
             ease: 'power3.out',
-            scrollTrigger: {
-              trigger: listRef.current,
-              start: 'top 80%',
-            },
+            scrollTrigger: { trigger: listRef.current, start: 'top 80%' },
           });
         }
       }
@@ -77,21 +62,18 @@ export default function ProjectsSection() {
         y: 20,
         duration: 0.6,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: metaRef.current,
-          start: 'top 90%',
-        },
+        scrollTrigger: { trigger: metaRef.current, start: 'top 90%' },
       });
     }, sectionRef);
-
     return () => ctx.revert();
-  }, [isCarousel, projects.length]);
+  }, [isCarousel, projects]);
 
   function prev() {
+    if (!projects) return;
     setCarouselIndex((i) => (i - 1 + projects.length) % projects.length);
   }
-
   function next() {
+    if (!projects) return;
     setCarouselIndex((i) => (i + 1) % projects.length);
   }
 
@@ -110,8 +92,28 @@ export default function ProjectsSection() {
         <h2 style={{ color: 'var(--monolith-ink)' }}>Featured Projects</h2>
       </div>
 
-      {isCarousel ? (
-        /* ── Carousel (>5 projects) ─────────────────────────────────────────── */
+      {/* Loading skeleton */}
+      {projects === null && (
+        <ul className="accordion-list" style={{ marginTop: '2rem' }}>
+          {[...Array(5)].map((_, i) => (
+            <li
+              key={i}
+              className="accordion-item"
+              style={{ backgroundColor: 'rgba(45,41,36,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }}
+            />
+          ))}
+        </ul>
+      )}
+
+      {/* No projects */}
+      {projects !== null && projects.length === 0 && (
+        <p className="mt-8 text-sm" style={{ color: 'var(--monolith-slate)' }}>
+          No featured projects yet.
+        </p>
+      )}
+
+      {/* Carousel (>5 projects) */}
+      {projects !== null && isCarousel && (
         <div ref={carouselRef} className="relative mt-8">
           <div className="overflow-hidden">
             <div
@@ -138,7 +140,10 @@ export default function ProjectsSection() {
                       <p className="text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--gold)' }}>
                         {project.category}
                       </p>
-                      <p className="text-2xl font-semibold" style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}>
+                      <p
+                        className="text-2xl font-semibold"
+                        style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+                      >
                         {project.title}
                       </p>
                     </div>
@@ -147,26 +152,18 @@ export default function ProjectsSection() {
               ))}
             </div>
           </div>
-
-          {/* Prev / Next */}
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
             style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
-            aria-label="Previous project"
-          >
-            ‹
-          </button>
+            aria-label="Previous"
+          >‹</button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
             style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
-            aria-label="Next project"
-          >
-            ›
-          </button>
-
-          {/* Dots */}
+            aria-label="Next"
+          >›</button>
           <div className="flex justify-center gap-2 mt-4">
             {projects.map((_, i) => (
               <button
@@ -174,13 +171,15 @@ export default function ProjectsSection() {
                 onClick={() => setCarouselIndex(i)}
                 className="w-2 h-2 rounded-full transition-all duration-200"
                 style={{ backgroundColor: i === carouselIndex ? '#E2C063' : 'rgba(226,192,99,0.25)' }}
-                aria-label={`Go to project ${i + 1}`}
+                aria-label={`Project ${i + 1}`}
               />
             ))}
           </div>
         </div>
-      ) : (
-        /* ── Accordion (≤5 projects) ────────────────────────────────────────── */
+      )}
+
+      {/* Accordion (≤5 projects) */}
+      {projects !== null && !isCarousel && projects.length > 0 && (
         <ul ref={listRef} className="accordion-list">
           {projects.map((project) => (
             <li key={project.id} className="accordion-item">
@@ -197,13 +196,20 @@ export default function ProjectsSection() {
         </ul>
       )}
 
-      {/* Meta */}
+      {/* Footer row */}
       <div
         ref={metaRef}
-        className="data-text mt-8 text-sm"
+        className="flex items-center justify-between mt-8 text-sm"
         style={{ color: 'var(--monolith-slate)' }}
       >
-        Project count: 47 | Locations: Adelaide Metro | Est. 2015
+        <span className="data-text">Project count: 47 | Locations: Adelaide Metro | Est. 2015</span>
+        <a
+          href="/projects"
+          className="text-sm font-medium transition-opacity hover:opacity-70"
+          style={{ color: 'var(--monolith-ink)' }}
+        >
+          View all →
+        </a>
       </div>
     </section>
   );
