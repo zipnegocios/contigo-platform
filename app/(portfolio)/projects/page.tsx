@@ -1,142 +1,95 @@
-import Link from 'next/link'
 import { Metadata } from 'next'
-import { Project } from '@/core/entities/Project'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { ProjectsGrid } from '@/presentation/components/ProjectsGrid'
 
 export const metadata: Metadata = {
   title: 'Projects | Contigo Constructions',
-  description: 'View our completed construction projects across residential, commercial, and industrial sectors.',
+  description: 'Explore our portfolio of completed construction projects across Adelaide.',
   openGraph: {
     title: 'Our Projects | Contigo Constructions',
-    description: 'View our completed construction projects',
+    description: 'Explore our portfolio of completed construction projects across Adelaide.',
     type: 'website',
   },
 }
 
 export default async function ProjectsPage() {
-  let projects: Project[] = []
+  let projects: {
+    id: string
+    slug: string
+    title: string
+    category: string
+    location: string
+    coverImageUrl: string
+    featured: boolean
+    completedDate: Date
+  }[] = []
 
   try {
     if (process.env.DATABASE_URL) {
-      const projectRepo = new DrizzleProjectRepository()
-      projects = await projectRepo.findPublished(100)
+      const repo = new DrizzleProjectRepository()
+      const raw = await repo.findPublished(100)
+      projects = raw.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        category: p.category,
+        location: p.location,
+        coverImageUrl: p.coverImageUrl,
+        featured: p.featured,
+        completedDate: p.completedDate,
+      }))
     }
   } catch (error) {
     console.warn('ProjectsPage: Could not fetch projects:', error)
   }
 
-  const featuredProjects = projects.filter((p) => p.featured)
-  const allProjects = projects
+  // Unique categories in the order they appear
+  const categories = [...new Set(projects.map((p) => p.category))].sort()
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="mb-16">
-          <h1 className="text-5xl font-bold text-slate-900 dark:text-white mb-4">
-            Our Projects
-          </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl">
-            Explore our collection of completed construction projects across residential, commercial, and industrial sectors.
-          </p>
-        </div>
+    <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
+      {/* Header */}
+      <div
+        className="relative py-24 px-6 md:px-16"
+        style={{
+          backgroundColor: '#1E1A16',
+          borderBottom: '1px solid rgba(226,192,99,0.15)',
+        }}
+      >
+        <span
+          className="block text-xs uppercase tracking-widest mb-4"
+          style={{ color: '#E2C063' }}
+        >
+          Portfolio
+        </span>
+        <h1
+          className="text-5xl md:text-7xl font-semibold leading-none mb-4"
+          style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+        >
+          Our Projects
+        </h1>
+        <p className="text-base max-w-xl" style={{ color: 'rgba(250,246,240,0.6)' }}>
+          From heritage restorations to contemporary new builds — explore the work that defines Contigo.
+        </p>
+        <p
+          className="absolute bottom-6 right-8 text-xs"
+          style={{ color: 'rgba(250,246,240,0.3)' }}
+        >
+          {projects.length} project{projects.length !== 1 ? 's' : ''}
+        </p>
+      </div>
 
-        {/* Featured Projects Section */}
-        {featuredProjects.length > 0 && (
-          <section className="mb-20">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-10">
-              Featured Projects
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredProjects.map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.slug}`}
-                  className="group"
-                >
-                  <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow duration-300">
-                    {/* Image Container */}
-                    <div className="relative h-64 bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                      <img
-                        src={project.coverImageUrl}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6">
-                      <div className="mb-3">
-                        <span className="inline-block px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 text-xs font-semibold rounded-full">
-                          Featured
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-amber-600 transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                        {project.category}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-500">
-                        {project.location}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+        {projects.length === 0 ? (
+          <div className="py-32 text-center">
+            <p className="text-sm" style={{ color: '#A89E8C' }}>
+              No projects published yet. Check back soon.
+            </p>
+          </div>
+        ) : (
+          <ProjectsGrid projects={projects} categories={categories} />
         )}
-
-        {/* All Projects Section */}
-        <section>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-10">
-            All Projects
-          </h2>
-          {allProjects.length === 0 ? (
-            <div className="py-12 text-center">
-              <p className="text-slate-600 dark:text-slate-400">
-                No projects published yet. Check back soon!
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {allProjects.map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.slug}`}
-                  className="group"
-                >
-                  <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow duration-300">
-                    {/* Image Container */}
-                    <div className="relative h-64 bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                      <img
-                        src={project.coverImageUrl}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-amber-600 transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                        {project.category}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-500">
-                        {project.location}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
       </div>
     </div>
   )

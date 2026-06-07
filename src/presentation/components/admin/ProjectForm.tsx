@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 import { Textarea } from '@/presentation/components/ui/textarea'
 import {
@@ -183,17 +182,27 @@ export function ProjectForm({ project }: ProjectFormProps) {
             </label>
           </div>
 
-          <div className="flex gap-2">
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : project ? 'Update Project' : 'Create Project'}
-            </Button>
-            <Button
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-60"
+              style={{ backgroundColor: '#E2C063', color: '#1E1A16', cursor: loading ? 'not-allowed' : 'pointer' }}
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = '#D4AF37' }}
+              onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = '#E2C063' }}
+            >
+              {loading ? 'Saving…' : project ? 'Update Project' : 'Create Project'}
+            </button>
+            <button
               type="button"
-              variant="outline"
               onClick={() => router.back()}
+              className="px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
+              style={{ border: '1px solid #E5DDD0', color: '#6B6560' }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#E2C063'; e.currentTarget.style.color = '#E2C063' }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E5DDD0'; e.currentTarget.style.color = '#6B6560' }}
             >
               Cancel
-            </Button>
+            </button>
           </div>
         </CardContent>
       </Card>
