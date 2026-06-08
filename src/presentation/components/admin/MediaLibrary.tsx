@@ -9,133 +9,15 @@ import { MediaBankSidebar } from './MediaBankSidebar'
 import { MediaDetailDrawer } from './MediaDetailDrawer'
 import { extractMediaMetadata } from '@/presentation/lib/extractMediaMetadata'
 
-// ─── Association sidebar (non-Bank tabs) ─────────────────────────────────────
-
-function AssociationSidebar() {
-  const { items, filters, setFilters } = useMediaLibrary()
-
-  const projectEntries = Array.from(
-    new Map(
-      items.flatMap((i) =>
-        i.usedIn
-          .filter((a) => a.entityType === 'project')
-          .map((a) => [a.title, a] as [string, typeof a])
-      )
-    ).values()
-  )
-  const serviceEntries = Array.from(
-    new Map(
-      items.flatMap((i) =>
-        i.usedIn
-          .filter((a) => a.entityType === 'service')
-          .map((a) => [a.title, a] as [string, typeof a])
-      )
-    ).values()
-  )
-  const hasUnassigned = items.some((i) => i.usedIn.length === 0)
-
-  if (!hasUnassigned && projectEntries.length === 0 && serviceEntries.length === 0) return null
-
-  const SidebarBtn = ({
-    label,
-    count,
-    active,
-    onClick,
-  }: { label: string; count: number; active: boolean; onClick: () => void }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-all"
-      style={active ? { backgroundColor: 'rgba(226,192,99,0.15)', color: '#E2C063' } : { color: '#6B6560' }}
-    >
-      <span className="text-xs font-medium truncate flex-1">{label}</span>
-      <span
-        className="text-[10px] px-1.5 py-0.5 rounded-full"
-        style={{
-          backgroundColor: active ? 'rgba(226,192,99,0.2)' : 'rgba(107,101,96,0.15)',
-          color: active ? '#E2C063' : '#A89E8C',
-        }}
-      >
-        {count}
-      </span>
-    </button>
-  )
-
-  const assocTitle = filters.associatedWith?.title ?? null
-  const isUnassigned = filters.folderId === 'unassigned-filter'
-
-  return (
-    <aside
-      className="flex-shrink-0 rounded-xl p-3 space-y-1"
-      style={{ width: 210, backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
-    >
-      <SidebarBtn
-        label="All"
-        count={items.length}
-        active={!assocTitle && !isUnassigned}
-        onClick={() => setFilters({ associatedWith: null, folderId: null })}
-      />
-      {hasUnassigned && (
-        <SidebarBtn
-          label="Unassigned"
-          count={items.filter((i) => i.usedIn.length === 0).length}
-          active={isUnassigned}
-          onClick={() => setFilters({ folderId: 'unassigned-filter', associatedWith: null })}
-        />
-      )}
-      {projectEntries.length > 0 && (
-        <>
-          <p className="text-[9px] uppercase tracking-widest px-2 pt-3 pb-1" style={{ color: '#A89E8C' }}>
-            Projects
-          </p>
-          {projectEntries.map((a) => (
-            <SidebarBtn
-              key={a.title}
-              label={a.title}
-              count={items.filter((i) => i.usedIn.some((u) => u.title === a.title)).length}
-              active={assocTitle === a.title}
-              onClick={() => setFilters({ associatedWith: { entityType: 'project', title: a.title }, folderId: null })}
-            />
-          ))}
-        </>
-      )}
-      {serviceEntries.length > 0 && (
-        <>
-          <p className="text-[9px] uppercase tracking-widest px-2 pt-3 pb-1" style={{ color: '#A89E8C' }}>
-            Services
-          </p>
-          {serviceEntries.map((a) => (
-            <SidebarBtn
-              key={a.title}
-              label={a.title}
-              count={items.filter((i) => i.usedIn.some((u) => u.title === a.title)).length}
-              active={assocTitle === a.title}
-              onClick={() => setFilters({ associatedWith: { entityType: 'service', title: a.title }, folderId: null })}
-            />
-          ))}
-        </>
-      )}
-    </aside>
-  )
-}
-
 // ─── Tab configuration ────────────────────────────────────────────────────────
 
 const TAB_LIST = [
   { key: 'all', label: 'All' },
-  { key: 'cover', label: 'Covers' },
-  { key: 'gallery', label: 'Gallery' },
+  { key: 'projects', label: 'Projects' },
   { key: 'services', label: 'Services' },
+  { key: 'unassigned', label: 'Unassigned' },
   { key: 'bank', label: 'Bank' },
 ] as const
-
-const TAB_UPLOAD_PREFIX: Record<string, string> = {
-  cover: 'projects/cover',
-  gallery: 'projects/gallery',
-  services: 'services',
-  all: 'projects/gallery',
-  bank: 'projects/gallery',
-}
 
 // ─── Inner orchestrator ───────────────────────────────────────────────────────
 
@@ -147,16 +29,15 @@ function MediaLibraryInner() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const prefix = TAB_UPLOAD_PREFIX[tab] ?? 'projects/gallery'
     setUploading(true)
     try {
       const meta = await extractMediaMetadata(file)
       const presignRes = await fetch('/api/admin/upload/presign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefix, filename: file.name, contentType: file.type }),
+        body: JSON.stringify({ prefix: 'projects/gallery', filename: file.name, contentType: file.type }),
       })
-      if (!presignRes.ok) { alert('Error al obtener URL de subida'); return }
+      if (!presignRes.ok) { alert('Error obtaining upload URL'); return }
       const { presignedUrl, key } = await presignRes.json()
       await fetch(presignedUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })
       if (Object.keys(meta).length > 0) {
@@ -219,7 +100,6 @@ function MediaLibraryInner() {
       {/* Body */}
       <div className="flex gap-5 items-start">
         {tab === 'bank' && !loading && <MediaBankSidebar />}
-        {tab !== 'bank' && !loading && <AssociationSidebar />}
         <MediaGrid />
         {detailItem && <MediaDetailDrawer />}
       </div>

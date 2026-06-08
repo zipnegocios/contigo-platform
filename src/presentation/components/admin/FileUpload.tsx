@@ -77,7 +77,6 @@ export function FileUpload({
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelect={(url) => { onChange(url); setState('idle') }}
-        defaultTab={prefix === 'services' ? 'services' : 'cover'}
       />
 
       {value ? (

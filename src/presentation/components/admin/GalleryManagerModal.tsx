@@ -22,12 +22,14 @@ import { X, GripVertical, ChevronUp, ChevronDown, Trash2, Upload, Film, Plus } f
 import type { GalleryItem } from '@/types/media'
 import { MediaPickerModal } from '@/presentation/components/admin/MediaPickerModal'
 import { uploadFileToR2 } from '@/presentation/lib/uploadToR2'
+import type { EntityContext } from '@/presentation/components/admin/MediaLibraryContext'
 
 interface GalleryManagerModalProps {
   items: GalleryItem[]
   onSave: (items: GalleryItem[]) => void
   onClose: () => void
   folder?: string
+  entityContext?: EntityContext | null
 }
 
 function isVideo(url: string) {
@@ -151,7 +153,7 @@ function SortableItem({
 
 type GalleryItemWithId = GalleryItem & { _id: string }
 
-export function GalleryManagerModal({ items: initialItems, onSave, onClose, folder }: GalleryManagerModalProps) {
+export function GalleryManagerModal({ items: initialItems, onSave, onClose, folder, entityContext }: GalleryManagerModalProps) {
   const [localItems, setLocalItems] = useState<GalleryItemWithId[]>(() =>
     initialItems.map((item, i) => ({ ...item, order: i, _id: `item-${i}-${item.url}` }))
   )
@@ -370,6 +372,7 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
         }}
         multiSelect={true}
         allowVideo={true}
+        entityContext={entityContext}
       />
     </div>
   )

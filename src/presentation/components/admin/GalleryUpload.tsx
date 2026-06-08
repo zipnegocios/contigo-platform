@@ -84,7 +84,6 @@ export function GalleryUpload({
         onSelect={() => {}}
         onMultiSelect={handlePickerMultiSelect}
         multiSelect
-        defaultTab="gallery"
         allowVideo
       />
 

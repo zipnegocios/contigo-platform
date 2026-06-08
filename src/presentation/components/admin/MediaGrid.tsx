@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -11,9 +11,187 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core'
-import { LayoutGrid, Folder, FolderOpen } from 'lucide-react'
+import { LayoutGrid, Folder, FolderOpen, X, ChevronDown } from 'lucide-react'
 import { MediaCard } from './MediaCard'
 import { useMediaLibrary, type MediaObject } from './MediaLibraryContext'
+
+const PAGE_SIZE = 24
+
+// ─── Bulk action bar ──────────────────────────────────────────────────────────
+
+function BulkActionBar() {
+  const {
+    selectedKeys, clearSelection, selectAllFiltered,
+    bulkMoveToFolder, bulkDelete, bulkAddTag, bulkRemoveTag,
+    folders, tags, filteredItems,
+  } = useMediaLibrary()
+
+  const [folderMenuOpen, setFolderMenuOpen] = useState(false)
+  const [addTagMenuOpen, setAddTagMenuOpen] = useState(false)
+  const [removeTagMenuOpen, setRemoveTagMenuOpen] = useState(false)
+
+  const closeAll = () => { setFolderMenuOpen(false); setAddTagMenuOpen(false); setRemoveTagMenuOpen(false) }
+
+  async function handleBulkDelete() {
+    if (!confirm(`Delete ${selectedKeys.length} file${selectedKeys.length !== 1 ? 's' : ''}? This cannot be undone.`)) return
+    await bulkDelete()
+  }
+
+  return (
+    <>
+      {/* Backdrop to close menus */}
+      {(folderMenuOpen || addTagMenuOpen || removeTagMenuOpen) && (
+        <div className="fixed inset-0 z-30" onClick={closeAll} />
+      )}
+      <div
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-3 flex-wrap"
+        style={{ backgroundColor: 'rgba(226,192,99,0.1)', border: '1px solid rgba(226,192,99,0.25)' }}
+      >
+        <span className="text-xs font-semibold" style={{ color: '#E2C063' }}>
+          {selectedKeys.length} selected
+        </span>
+
+        <button
+          type="button"
+          onClick={selectAllFiltered}
+          className="text-xs px-2.5 py-1 rounded-lg transition-colors"
+          style={{ color: '#A89E8C', border: '1px solid rgba(107,101,96,0.3)' }}
+        >
+          Select all ({filteredItems.length})
+        </button>
+
+        <div className="flex-1" />
+
+        {/* Move to folder */}
+        {folders.length > 0 && (
+          <div className="relative z-40">
+            <button
+              type="button"
+              onClick={() => { setFolderMenuOpen((v) => !v); setAddTagMenuOpen(false); setRemoveTagMenuOpen(false) }}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all"
+              style={{ backgroundColor: 'rgba(226,192,99,0.08)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+            >
+              Move to folder <ChevronDown size={12} />
+            </button>
+            {folderMenuOpen && (
+              <div
+                className="absolute top-full mt-1 left-0 rounded-xl overflow-hidden py-1 min-w-[180px]"
+                style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => { bulkMoveToFolder(null); closeAll() }}
+                  className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/5"
+                  style={{ color: '#6B6560' }}
+                >
+                  No folder (remove)
+                </button>
+                {folders.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => { bulkMoveToFolder(f.id); closeAll() }}
+                    className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/5"
+                    style={{ color: '#E8DCC4' }}
+                  >
+                    {f.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Add tag */}
+        {tags.length > 0 && (
+          <div className="relative z-40">
+            <button
+              type="button"
+              onClick={() => { setAddTagMenuOpen((v) => !v); setFolderMenuOpen(false); setRemoveTagMenuOpen(false) }}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all"
+              style={{ backgroundColor: 'rgba(226,192,99,0.08)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+            >
+              Add tag <ChevronDown size={12} />
+            </button>
+            {addTagMenuOpen && (
+              <div
+                className="absolute top-full mt-1 left-0 rounded-xl overflow-hidden py-1 min-w-[160px]"
+                style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+              >
+                {tags.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => { bulkAddTag(t.name); closeAll() }}
+                    className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/5 flex items-center gap-2"
+                    style={{ color: '#E8DCC4' }}
+                  >
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Remove tag */}
+        {tags.length > 0 && (
+          <div className="relative z-40">
+            <button
+              type="button"
+              onClick={() => { setRemoveTagMenuOpen((v) => !v); setFolderMenuOpen(false); setAddTagMenuOpen(false) }}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all"
+              style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.15)', color: '#A89E8C' }}
+            >
+              Remove tag <ChevronDown size={12} />
+            </button>
+            {removeTagMenuOpen && (
+              <div
+                className="absolute top-full mt-1 left-0 rounded-xl overflow-hidden py-1 min-w-[160px]"
+                style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+              >
+                {tags.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => { bulkRemoveTag(t.name); closeAll() }}
+                    className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/5 flex items-center gap-2"
+                    style={{ color: '#E8DCC4' }}
+                  >
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Delete */}
+        <button
+          type="button"
+          onClick={handleBulkDelete}
+          className="text-xs px-3 py-1.5 rounded-lg transition-all"
+          style={{ backgroundColor: 'rgba(232,112,112,0.1)', border: '1px solid rgba(232,112,112,0.2)', color: '#e87070' }}
+        >
+          Delete
+        </button>
+
+        {/* Clear */}
+        <button
+          type="button"
+          onClick={clearSelection}
+          className="p-1 rounded-lg transition-colors"
+          style={{ color: '#A89E8C' }}
+          title="Clear selection"
+        >
+          <X size={14} />
+        </button>
+      </div>
+    </>
+  )
+}
 
 // ─── Context menu ─────────────────────────────────────────────────────────────
 
@@ -33,8 +211,7 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
       <div
         className="fixed z-50 rounded-xl overflow-hidden py-1 min-w-[180px]"
         style={{
-          top: state.y,
-          left: state.x,
+          top: state.y, left: state.x,
           backgroundColor: '#1E1A16',
           border: '1px solid rgba(226,192,99,0.2)',
           boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
@@ -86,11 +263,7 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
 }
 
 function MenuItem({
-  children,
-  onClick,
-  danger,
-  dimmed,
-  rightArrow,
+  children, onClick, danger, dimmed, rightArrow,
 }: {
   children: React.ReactNode
   onClick?: () => void
@@ -165,16 +338,21 @@ function FloatingFolderTargets() {
 
 export function MediaGrid() {
   const {
-    filteredItems,
-    loading,
-    tags,
-    openDetail,
-    deleteItem,
-    moveToFolder,
+    filteredItems, loading, tags,
+    openDetail, deleteItem, moveToFolder,
+    selectedKeys, toggleSelectKey,
   } = useMediaLibrary()
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [activeDragKey, setActiveDragKey] = useState<string | null>(null)
+  const [displayLimit, setDisplayLimit] = useState(PAGE_SIZE)
+
+  const isSelecting = selectedKeys.length > 0
+
+  // Reset pagination when filtered set changes
+  useEffect(() => {
+    setDisplayLimit(PAGE_SIZE)
+  }, [filteredItems.length])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -212,16 +390,19 @@ export function MediaGrid() {
     [deleteItem]
   )
 
+  const displayedItems = filteredItems.slice(0, displayLimit)
+  const hasMore = filteredItems.length > displayLimit
+
   const isEmpty = !loading && filteredItems.length === 0
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex-1 min-w-0">
+        {/* Bulk action bar */}
+        {isSelecting && <BulkActionBar />}
+
         {loading ? (
-          <div
-            className="grid gap-4"
-            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px,1fr))' }}
-          >
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px,1fr))' }}>
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -239,22 +420,45 @@ export function MediaGrid() {
             <p className="text-sm">No media matches the current filters.</p>
           </div>
         ) : (
-          <div
-            className="grid gap-4"
-            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px,1fr))' }}
-          >
-            {filteredItems.map((item) => (
-              <MediaCard
-                key={item.key}
-                item={item}
-                tags={tags}
-                onOpenDetail={() => openDetail(item)}
-                onDelete={() => handleDelete(item.key)}
-                onContextMenu={(e) => handleContextMenu(e, item)}
-                isDragging={activeDragKey === item.key}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px,1fr))' }}>
+              {displayedItems.map((item) => (
+                <MediaCard
+                  key={item.key}
+                  item={item}
+                  tags={tags}
+                  isSelected={selectedKeys.includes(item.key)}
+                  isSelecting={isSelecting}
+                  onToggleSelect={() => toggleSelectKey(item.key)}
+                  onOpenDetail={() => openDetail(item)}
+                  onDelete={() => handleDelete(item.key)}
+                  onContextMenu={(e) => handleContextMenu(e, item)}
+                  isDragging={activeDragKey === item.key}
+                />
+              ))}
+            </div>
+
+            {/* Load more + count */}
+            <div className="mt-6 flex items-center justify-between">
+              <p className="text-xs" style={{ color: '#6B6560' }}>
+                Showing {displayedItems.length} of {filteredItems.length}
+              </p>
+              {hasMore && (
+                <button
+                  type="button"
+                  onClick={() => setDisplayLimit((v) => v + PAGE_SIZE)}
+                  className="px-5 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    backgroundColor: 'rgba(226,192,99,0.08)',
+                    border: '1px solid rgba(226,192,99,0.25)',
+                    color: '#E2C063',
+                  }}
+                >
+                  Load more ({filteredItems.length - displayLimit} remaining)
+                </button>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -263,6 +467,9 @@ export function MediaGrid() {
           <MediaCard
             item={activeDragItem}
             tags={tags}
+            isSelected={false}
+            isSelecting={false}
+            onToggleSelect={() => {}}
             onOpenDetail={() => {}}
             onDelete={() => {}}
             onContextMenu={() => {}}

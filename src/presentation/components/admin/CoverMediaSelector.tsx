@@ -4,19 +4,21 @@ import { useState, useRef } from 'react'
 import { Film, Image as ImageIcon, Upload, X } from 'lucide-react'
 import { MediaPickerModal } from '@/presentation/components/admin/MediaPickerModal'
 import { uploadFileToR2 } from '@/presentation/lib/uploadToR2'
+import type { EntityContext } from '@/presentation/components/admin/MediaLibraryContext'
 
 interface CoverMediaSelectorProps {
   coverUrl: string | null
   posterUrl: string | null
   onChange: (coverUrl: string | null, posterUrl: string | null) => void
   folder?: string
+  entityContext?: EntityContext | null
 }
 
 function isVideo(url: string) {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
 }
 
-export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder }: CoverMediaSelectorProps) {
+export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, entityContext }: CoverMediaSelectorProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [posterPickerOpen, setPosterPickerOpen] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
@@ -178,6 +180,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder }: Co
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         allowVideo={true}
+        entityContext={entityContext}
         onSelect={(url) => {
           onChange(url, isVideo(url) ? posterUrl : null)
           setPickerOpen(false)
@@ -188,6 +191,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder }: Co
         open={posterPickerOpen}
         onClose={() => setPosterPickerOpen(false)}
         allowVideo={false}
+        entityContext={entityContext}
         onSelect={(url) => {
           onChange(coverUrl, url)
           setPosterPickerOpen(false)

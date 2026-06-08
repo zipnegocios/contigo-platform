@@ -65,6 +65,9 @@ export function ProjectForm({ project }: ProjectFormProps) {
   })
 
   const mediaLocked = !formData.title.trim()
+  const entityCtx = project
+    ? { type: 'project' as const, id: project.id, name: formData.title }
+    : null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -255,6 +258,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                     setFormData({ ...formData, coverImageUrl: coverUrl || '', coverPosterUrl: posterUrl })
                   }
                   folder={project?.slug || undefined}
+                  entityContext={entityCtx}
                 />
 
                 <div
@@ -334,6 +338,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
         <GalleryManagerModal
           items={formData.galleryItems}
           folder={project?.slug || undefined}
+          entityContext={entityCtx}
           onSave={(items) => {
             setFormData({ ...formData, galleryItems: items })
             setGalleryModalOpen(false)

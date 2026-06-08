@@ -37,7 +37,7 @@ export interface EntityContext {
   name: string
 }
 
-export type LibTab = 'all' | 'cover' | 'gallery' | 'services' | 'bank'
+export type LibTab = 'all' | 'projects' | 'services' | 'unassigned' | 'bank'
 
 const DEFAULT_FILTERS: AdvancedFilters = {
   mediaType: 'all',
@@ -45,12 +45,6 @@ const DEFAULT_FILTERS: AdvancedFilters = {
   tagNames: [],
   associatedWith: null,
   dateRange: null,
-}
-
-const TAB_PREFIXES: Partial<Record<LibTab, string>> = {
-  cover: 'projects/cover',
-  gallery: 'projects/gallery',
-  services: 'services',
 }
 
 // ─── Context shape ────────────────────────────────────────────────────────────
@@ -77,6 +71,7 @@ interface MediaLibraryContextValue {
   openDetail: (item: MediaObject) => void
   closeDetail: () => void
   entityContext: EntityContext | null
+  // Single-item mutations
   moveToFolder: (key: string, folderId: string | null) => Promise<void>
   updateMetadata: (key: string, patch: Partial<MediaMetadata>) => Promise<void>
   deleteItem: (key: string) => Promise<void>
@@ -86,6 +81,15 @@ interface MediaLibraryContextValue {
   renameFolder: (id: string, name: string) => Promise<void>
   createTag: (name: string, color: string) => Promise<MediaTag>
   deleteTag: (id: string) => Promise<void>
+  // Bulk selection
+  selectedKeys: string[]
+  toggleSelectKey: (key: string) => void
+  clearSelection: () => void
+  selectAllFiltered: () => void
+  bulkMoveToFolder: (folderId: string | null) => Promise<void>
+  bulkDelete: () => Promise<void>
+  bulkAddTag: (tagName: string) => Promise<void>
+  bulkRemoveTag: (tagName: string) => Promise<void>
 }
 
 const MediaLibraryContext = createContext<MediaLibraryContextValue | null>(null)
@@ -114,11 +118,15 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null)
   const [selectedTagNames, setSelectedTagNames] = useState<string[]>([])
   const [detailItem, setDetailItem] = useState<MediaObject | null>(null)
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([])
 
   const setTab = useCallback((t: LibTab) => {
     setTabState(t)
     setActiveFolderId(null)
     setSelectedTagNames([])
+    setSelectedKeys([])
+    setFiltersState(DEFAULT_FILTERS)
+    setSearchQuery('')
   }, [])
 
   const setFilters = useCallback((patch: Partial<AdvancedFilters>) => {
@@ -141,11 +149,7 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
   const refreshItems = useCallback(async () => {
     setLoading(true)
     try {
-      const prefix = TAB_PREFIXES[tab]
-      const base = prefix
-        ? `/api/admin/media?prefix=${encodeURIComponent(prefix)}`
-        : '/api/admin/media'
-      const res = await fetch(`${base}&withAssociations=1&withMetadata=1`)
+      const res = await fetch('/api/admin/media?withAssociations=1&withMetadata=1')
       if (res.ok) {
         const data = await res.json()
         setItems(Array.isArray(data) ? data : [])
@@ -153,7 +157,7 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
     } finally {
       setLoading(false)
     }
-  }, [tab])
+  }, [])
 
   const loadBank = useCallback(async () => {
     const [fRes, tRes] = await Promise.all([
@@ -177,6 +181,15 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
 
   const filteredItems = useMemo(() => {
     let result = items
+
+    // Tab-level association filter
+    if (tab === 'projects') {
+      result = result.filter((i) => i.usedIn.some((a) => a.entityType === 'project'))
+    } else if (tab === 'services') {
+      result = result.filter((i) => i.usedIn.some((a) => a.entityType === 'service'))
+    } else if (tab === 'unassigned') {
+      result = result.filter((i) => i.usedIn.length === 0)
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
@@ -248,26 +261,17 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
     return count
   }, [filters])
 
-  // ── Mutations ─────────────────────────────────────────────────────────────
+  // ── Single-item mutations ─────────────────────────────────────────────────
 
   const blankMeta = (key: string): MediaMetadata => ({
-    id: '',
-    key,
-    tags: [],
-    folderId: null,
-    notes: null,
-    width: null,
-    height: null,
-    duration: null,
-    format: null,
+    id: '', key, tags: [], folderId: null, notes: null,
+    width: null, height: null, duration: null, format: null,
   })
 
   const moveToFolder = useCallback(async (key: string, folderId: string | null) => {
     setItems((prev) =>
       prev.map((i) =>
-        i.key === key
-          ? { ...i, metadata: { ...(i.metadata ?? blankMeta(key)), folderId } }
-          : i
+        i.key === key ? { ...i, metadata: { ...(i.metadata ?? blankMeta(key)), folderId } } : i
       )
     )
     await fetch('/api/admin/media/metadata', {
@@ -280,15 +284,11 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
   const updateMetadata = useCallback(async (key: string, patch: Partial<MediaMetadata>) => {
     setItems((prev) =>
       prev.map((i) =>
-        i.key === key
-          ? { ...i, metadata: { ...(i.metadata ?? blankMeta(key)), ...patch } }
-          : i
+        i.key === key ? { ...i, metadata: { ...(i.metadata ?? blankMeta(key)), ...patch } } : i
       )
     )
     setDetailItem((prev) =>
-      prev?.key === key
-        ? { ...prev, metadata: { ...(prev.metadata ?? blankMeta(key)), ...patch } }
-        : prev
+      prev?.key === key ? { ...prev, metadata: { ...(prev.metadata ?? blankMeta(key)), ...patch } } : prev
     )
     await fetch('/api/admin/media/metadata', {
       method: 'PATCH',
@@ -300,6 +300,7 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
   const deleteItem = useCallback(async (key: string) => {
     setItems((prev) => prev.filter((i) => i.key !== key))
     setDetailItem((prev) => (prev?.key === key ? null : prev))
+    setSelectedKeys((prev) => prev.filter((k) => k !== key))
     await fetch('/api/admin/media', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -323,9 +324,7 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
     setActiveFolderId((prev) => (prev === id ? null : prev))
     setItems((prev) =>
       prev.map((i) =>
-        i.metadata?.folderId === id
-          ? { ...i, metadata: { ...i.metadata!, folderId: null } }
-          : i
+        i.metadata?.folderId === id ? { ...i, metadata: { ...i.metadata!, folderId: null } } : i
       )
     )
     await fetch('/api/admin/media/folders', {
@@ -371,39 +370,116 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
   const openDetail = useCallback((item: MediaObject) => setDetailItem(item), [])
   const closeDetail = useCallback(() => setDetailItem(null), [])
 
+  // ── Bulk selection ────────────────────────────────────────────────────────
+
+  const toggleSelectKey = useCallback((key: string) => {
+    setSelectedKeys((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key])
+  }, [])
+
+  const clearSelection = useCallback(() => setSelectedKeys([]), [])
+
+  const selectAllFiltered = useCallback(() => {
+    setSelectedKeys(filteredItems.map((i) => i.key))
+  }, [filteredItems])
+
+  const bulkMoveToFolder = useCallback(async (folderId: string | null) => {
+    const keys = selectedKeys.slice()
+    setItems((prev) =>
+      prev.map((i) =>
+        keys.includes(i.key) ? { ...i, metadata: { ...(i.metadata ?? blankMeta(i.key)), folderId } } : i
+      )
+    )
+    setSelectedKeys([])
+    await Promise.all(
+      keys.map((key) =>
+        fetch('/api/admin/media/metadata', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, folderId }),
+        })
+      )
+    )
+  }, [selectedKeys]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const bulkDelete = useCallback(async () => {
+    const keys = selectedKeys.slice()
+    setItems((prev) => prev.filter((i) => !keys.includes(i.key)))
+    setDetailItem((prev) => (prev && keys.includes(prev.key) ? null : prev))
+    setSelectedKeys([])
+    await Promise.all(
+      keys.map((key) =>
+        fetch('/api/admin/media', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key }),
+        })
+      )
+    )
+  }, [selectedKeys])
+
+  const bulkAddTag = useCallback(async (tagName: string) => {
+    const keys = selectedKeys.slice()
+    const snapshot = items
+    setItems((prev) =>
+      prev.map((i) => {
+        if (!keys.includes(i.key)) return i
+        const cur = i.metadata?.tags ?? []
+        if (cur.includes(tagName)) return i
+        return { ...i, metadata: { ...(i.metadata ?? blankMeta(i.key)), tags: [...cur, tagName] } }
+      })
+    )
+    await Promise.all(
+      keys.map(async (key) => {
+        const item = snapshot.find((i) => i.key === key)
+        const cur = item?.metadata?.tags ?? []
+        if (cur.includes(tagName)) return
+        await fetch('/api/admin/media/metadata', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, tags: [...cur, tagName] }),
+        })
+      })
+    )
+  }, [selectedKeys, items]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const bulkRemoveTag = useCallback(async (tagName: string) => {
+    const keys = selectedKeys.slice()
+    const snapshot = items
+    setItems((prev) =>
+      prev.map((i) => {
+        if (!keys.includes(i.key)) return i
+        const cur = i.metadata?.tags ?? []
+        return { ...i, metadata: { ...(i.metadata ?? blankMeta(i.key)), tags: cur.filter((t) => t !== tagName) } }
+      })
+    )
+    await Promise.all(
+      keys.map(async (key) => {
+        const item = snapshot.find((i) => i.key === key)
+        const cur = item?.metadata?.tags ?? []
+        await fetch('/api/admin/media/metadata', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key, tags: cur.filter((t) => t !== tagName) }),
+        })
+      })
+    )
+  }, [selectedKeys, items]) // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <MediaLibraryContext.Provider
       value={{
-        items,
-        folders,
-        tags,
-        loading,
-        tab,
-        setTab,
-        searchQuery,
-        setSearchQuery,
-        filters,
-        setFilters,
-        clearFilters,
-        activeFilterCount,
+        items, folders, tags, loading, tab, setTab,
+        searchQuery, setSearchQuery,
+        filters, setFilters, clearFilters, activeFilterCount,
         filteredItems,
-        activeFolderId,
-        setActiveFolderId,
-        selectedTagNames,
-        toggleTag,
-        detailItem,
-        openDetail,
-        closeDetail,
+        activeFolderId, setActiveFolderId,
+        selectedTagNames, toggleTag,
+        detailItem, openDetail, closeDetail,
         entityContext,
-        moveToFolder,
-        updateMetadata,
-        deleteItem,
-        refreshItems,
-        createFolder,
-        deleteFolder,
-        renameFolder,
-        createTag,
-        deleteTag,
+        moveToFolder, updateMetadata, deleteItem, refreshItems,
+        createFolder, deleteFolder, renameFolder, createTag, deleteTag,
+        selectedKeys, toggleSelectKey, clearSelection, selectAllFiltered,
+        bulkMoveToFolder, bulkDelete, bulkAddTag, bulkRemoveTag,
       }}
     >
       {children}

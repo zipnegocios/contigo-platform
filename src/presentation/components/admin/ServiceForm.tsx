@@ -61,6 +61,9 @@ export function ServiceForm({ service }: ServiceFormProps) {
   }, [formData.name, service])
 
   const mediaLocked = !formData.name.trim()
+  const entityCtx = service
+    ? { type: 'service' as const, id: service.id, name: formData.name }
+    : null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -229,6 +232,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
                     setFormData({ ...formData, imageUrl: coverUrl || '', posterUrl })
                   }
                   folder={service?.slug || formData.slug || undefined}
+                  entityContext={entityCtx}
                 />
 
                 <div
@@ -311,6 +315,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
         <GalleryManagerModal
           items={formData.galleryItems}
           folder={service?.slug || formData.slug || undefined}
+          entityContext={entityCtx}
           onSave={(items) => {
             setFormData({ ...formData, galleryItems: items })
             setGalleryModalOpen(false)

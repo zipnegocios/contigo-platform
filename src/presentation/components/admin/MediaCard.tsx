@@ -1,6 +1,6 @@
 'use client'
 
-import { Film, Image, Info, Trash2 } from 'lucide-react'
+import { Film, Image, Info, Trash2, Check } from 'lucide-react'
 import { useDraggable } from '@dnd-kit/core'
 import type { MediaTag } from '@/types/media'
 import type { MediaObject } from './MediaLibraryContext'
@@ -8,6 +8,9 @@ import type { MediaObject } from './MediaLibraryContext'
 interface MediaCardProps {
   item: MediaObject
   tags: MediaTag[]
+  isSelected: boolean
+  isSelecting: boolean
+  onToggleSelect: () => void
   onOpenDetail: () => void
   onDelete: () => void
   onContextMenu: (e: React.MouseEvent) => void
@@ -24,6 +27,9 @@ function formatBytes(bytes: number) {
 export function MediaCard({
   item,
   tags,
+  isSelected,
+  isSelecting,
+  onToggleSelect,
   onOpenDetail,
   onDelete,
   onContextMenu,
@@ -33,6 +39,7 @@ export function MediaCard({
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: item.key,
     data: { key: item.key, mediaType: item.mediaType, publicUrl: item.publicUrl },
+    disabled: isSelecting,
   })
 
   const itemTags = (item.metadata?.tags ?? [])
@@ -51,6 +58,8 @@ export function MediaCard({
       >
         {item.mediaType === 'image' ? (
           <img src={item.publicUrl} alt="" className="w-full h-full object-cover" />
+        ) : item.mediaType === 'video' ? (
+          <video src={item.publicUrl} className="w-full h-full object-cover" muted preload="metadata" style={{ pointerEvents: 'none' }} />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Film size={24} style={{ color: '#A89E8C' }} />
@@ -67,31 +76,42 @@ export function MediaCard({
         ...style,
         opacity: isDragging ? 0.4 : 1,
         backgroundColor: '#1E1A16',
-        border: isDragging
+        border: isSelected
+          ? '2px solid #E2C063'
+          : isDragging
           ? '1.5px dashed rgba(226,192,99,0.5)'
           : '1px solid rgba(226,192,99,0.1)',
       }}
       className="group relative rounded-xl overflow-hidden transition-opacity"
       onContextMenu={onContextMenu}
     >
-      {/* Drag handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute inset-0 z-10"
-        style={{ touchAction: 'none', cursor: isDragging ? 'grabbing' : 'grab' }}
-      />
+      {/* Drag handle — disabled in selection mode */}
+      {!isSelecting && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute inset-0 z-10"
+          style={{ touchAction: 'none', cursor: isDragging ? 'grabbing' : 'grab' }}
+        />
+      )}
+
+      {/* Selection overlay — clicking anywhere in the card selects when in selection mode */}
+      {isSelecting && (
+        <div
+          className="absolute inset-0 z-10 cursor-pointer"
+          onClick={onToggleSelect}
+        />
+      )}
 
       <div style={{ aspectRatio: '4/3' }}>
         {item.mediaType === 'video' ? (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-            <Film size={28} style={{ color: '#A89E8C' }} />
-            {item.metadata?.duration != null && (
-              <span className="text-[9px]" style={{ color: '#6B6560' }}>
-                {Math.floor(item.metadata.duration / 60)}:{String(item.metadata.duration % 60).padStart(2, '0')}
-              </span>
-            )}
-          </div>
+          <video
+            src={item.publicUrl}
+            className="w-full h-full object-cover"
+            muted
+            preload="metadata"
+            style={{ pointerEvents: 'none' }}
+          />
         ) : item.mediaType === 'image' ? (
           <img src={item.publicUrl} alt={item.key} className="w-full h-full object-cover" loading="lazy" />
         ) : (
@@ -100,36 +120,66 @@ export function MediaCard({
           </div>
         )}
 
+        {/* Video badge */}
         {item.mediaType === 'video' && (
           <span
             className="absolute top-2 left-2 text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded z-20"
-            style={{ backgroundColor: 'rgba(226,192,99,0.2)', color: '#E2C063' }}
+            style={{ backgroundColor: 'rgba(226,192,99,0.2)', color: '#E2C063', pointerEvents: 'none' }}
           >
             Video
           </span>
         )}
 
-        {/* Action buttons */}
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onOpenDetail() }}
-            className="p-1.5 rounded-full"
-            style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063' }}
-            title="Details"
+        {/* Duration badge for videos */}
+        {item.mediaType === 'video' && item.metadata?.duration != null && (
+          <span
+            className="absolute bottom-8 right-1.5 text-[9px] px-1.5 py-0.5 rounded-full z-20"
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: '#E8DCC4', pointerEvents: 'none' }}
           >
-            <Info size={11} />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onDelete() }}
-            className="p-1.5 rounded-full"
-            style={{ backgroundColor: 'rgba(232,112,112,0.18)', color: '#e87070' }}
-            title="Delete"
+            {Math.floor(item.metadata.duration / 60)}:{String(item.metadata.duration % 60).padStart(2, '0')}
+          </span>
+        )}
+
+        {/* Checkbox — visible when selected, or when any item is selected (isSelecting), or on hover */}
+        <div
+          className={`absolute top-2 left-2 z-20 transition-opacity ${isSelected || isSelecting ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+          onClick={(e) => { e.stopPropagation(); onToggleSelect() }}
+        >
+          <div
+            className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
+            style={{
+              backgroundColor: isSelected ? '#E2C063' : 'rgba(22,18,14,0.75)',
+              border: isSelected ? 'none' : '1.5px solid rgba(226,192,99,0.7)',
+              backdropFilter: 'blur(2px)',
+            }}
           >
-            <Trash2 size={11} />
-          </button>
+            {isSelected && <Check size={11} strokeWidth={3} style={{ color: '#1E1A16' }} />}
+          </div>
         </div>
+
+        {/* Action buttons (hidden in selection mode) */}
+        {!isSelecting && (
+          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onOpenDetail() }}
+              className="p-1.5 rounded-full"
+              style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063' }}
+              title="Details"
+            >
+              <Info size={11} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onDelete() }}
+              className="p-1.5 rounded-full"
+              style={{ backgroundColor: 'rgba(232,112,112,0.18)', color: '#e87070' }}
+              title="Delete"
+            >
+              <Trash2 size={11} />
+            </button>
+          </div>
+        )}
 
         {/* Bottom info overlay */}
         <div
