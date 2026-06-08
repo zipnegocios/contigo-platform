@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { X, Copy, Check, Film, Image } from 'lucide-react'
-import type { AssociationInfo } from '@/types/media'
+import { useState, useEffect } from 'react'
+import { X, Copy, Check, Film, Image, Maximize2 } from 'lucide-react'
+import type { AssociationInfo, MediaMetadata } from '@/types/media'
+import { aspectRatio, formatDuration } from '@/presentation/lib/extractMediaMetadata'
 
 interface MediaDetailsModalProps {
   item: {
@@ -12,6 +13,7 @@ interface MediaDetailsModalProps {
     publicUrl: string
     mediaType: 'image' | 'video' | 'other'
     usedIn: AssociationInfo[]
+    metadata?: MediaMetadata | null
   }
   onClose: () => void
 }
@@ -20,6 +22,25 @@ function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / 1048576).toFixed(1)} MB`
+}
+
+function formatMime(format: string | null | undefined): string {
+  if (!format) return '—'
+  // Convert mime to short label
+  const map: Record<string, string> = {
+    'image/jpeg': 'JPEG',
+    'image/jpg': 'JPEG',
+    'image/png': 'PNG',
+    'image/webp': 'WebP',
+    'image/gif': 'GIF',
+    'image/avif': 'AVIF',
+    'image/svg+xml': 'SVG',
+    'video/mp4': 'MP4',
+    'video/webm': 'WebM',
+    'video/ogg': 'OGG',
+    'video/quicktime': 'MOV',
+  }
+  return map[format] ?? format.split('/')[1]?.toUpperCase() ?? format
 }
 
 const FIELD_LABELS: Record<AssociationInfo['field'], string> = {
@@ -31,6 +52,49 @@ const FIELD_LABELS: Record<AssociationInfo['field'], string> = {
 
 export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
   const [copied, setCopied] = useState(false)
+  // Lazily extracted dimensions for items without DB metadata
+  const [measuredDims, setMeasuredDims] = useState<{ width: number; height: number } | null>(null)
+  const [measuredDuration, setMeasuredDuration] = useState<number | null>(null)
+  const [measuring, setMeasuring] = useState(false)
+
+  const dbMeta = item.metadata
+  const hasDbDimensions = dbMeta?.width != null && dbMeta?.height != null
+  const hasDbDuration = dbMeta?.duration != null
+
+  // Lazily extract dimensions from the media URL if not in DB
+  useEffect(() => {
+    if (hasDbDimensions) return
+    if (item.mediaType === 'image') {
+      setMeasuring(true)
+      const img = document.createElement('img')
+      img.onload = () => {
+        setMeasuredDims({ width: img.naturalWidth, height: img.naturalHeight })
+        setMeasuring(false)
+      }
+      img.onerror = () => setMeasuring(false)
+      img.src = item.publicUrl
+    }
+  }, [item.publicUrl, item.mediaType, hasDbDimensions])
+
+  useEffect(() => {
+    if (hasDbDuration) return
+    if (item.mediaType === 'video') {
+      setMeasuring(true)
+      const video = document.createElement('video')
+      video.onloadedmetadata = () => {
+        if (isFinite(video.duration)) setMeasuredDuration(Math.round(video.duration))
+        if (!hasDbDimensions && video.videoWidth) setMeasuredDims({ width: video.videoWidth, height: video.videoHeight })
+        setMeasuring(false)
+      }
+      video.onerror = () => setMeasuring(false)
+      video.src = item.publicUrl
+    }
+  }, [item.publicUrl, item.mediaType, hasDbDuration, hasDbDimensions])
+
+  const width = dbMeta?.width ?? measuredDims?.width ?? null
+  const height = dbMeta?.height ?? measuredDims?.height ?? null
+  const duration = dbMeta?.duration ?? measuredDuration ?? null
+  const format = dbMeta?.format ?? null
 
   const handleCopy = () => {
     navigator.clipboard.writeText(item.publicUrl)
@@ -58,11 +122,7 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
           <h2 className="text-base font-semibold truncate pr-4" style={{ color: '#E8DCC4', fontFamily: 'var(--font-cormorant)' }}>
             {filename}
           </h2>
-          <button
-            onClick={onClose}
-            className="flex-shrink-0 p-1.5 rounded-lg transition-colors"
-            style={{ color: '#A89E8C' }}
-          >
+          <button onClick={onClose} className="flex-shrink-0 p-1.5 rounded-lg" style={{ color: '#A89E8C' }}>
             <X size={18} />
           </button>
         </div>
@@ -87,23 +147,67 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
         </div>
 
         {/* File info */}
-        <div className="px-6 py-4 space-y-3">
+        <div className="px-6 py-4 space-y-4">
+          {/* Basic info grid */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Size</p>
               <p style={{ color: '#E8DCC4' }}>{formatBytes(item.size)}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Type</p>
-              <p style={{ color: '#E8DCC4' }} className="capitalize">{item.mediaType}</p>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Format</p>
+              <p style={{ color: '#E8DCC4' }}>{formatMime(format) || <span style={{ color: '#6B6560' }}>Unknown</span>}</p>
             </div>
-            <div className="col-span-2">
+            <div>
               <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Last Modified</p>
               <p style={{ color: '#E8DCC4' }}>
                 {new Date(item.lastModified).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}
               </p>
             </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Type</p>
+              <p style={{ color: '#E8DCC4' }} className="capitalize">{item.mediaType}</p>
+            </div>
           </div>
+
+          {/* Dimensions + aspect ratio */}
+          {(width != null || measuring) && (
+            <div
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+              style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
+            >
+              <Maximize2 size={15} style={{ color: '#E2C063', flexShrink: 0 }} />
+              {measuring && !width ? (
+                <span className="text-xs" style={{ color: '#A89E8C' }}>Measuring…</span>
+              ) : width && height ? (
+                <div className="flex items-center gap-3 text-sm flex-wrap">
+                  <span style={{ color: '#E8DCC4' }}>{width} × {height}px</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#E2C063' }}>
+                    {aspectRatio(width, height)}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {/* Duration (video only) */}
+          {item.mediaType === 'video' && duration != null && (
+            <div
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+              style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
+            >
+              <Film size={15} style={{ color: '#E2C063', flexShrink: 0 }} />
+              <span className="text-sm" style={{ color: '#E8DCC4' }}>Duration: {formatDuration(duration)}</span>
+            </div>
+          )}
+
+          {/* Notes */}
+          {dbMeta?.notes && (
+            <div>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Notes</p>
+              <p className="text-sm" style={{ color: '#E8DCC4' }}>{dbMeta.notes}</p>
+            </div>
+          )}
 
           {/* URL + copy */}
           <div>
@@ -118,7 +222,10 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
               <button
                 onClick={handleCopy}
                 className="flex-shrink-0 p-2 rounded-lg transition-all"
-                style={{ backgroundColor: copied ? 'rgba(82,183,136,0.15)' : 'rgba(226,192,99,0.1)', color: copied ? '#52B788' : '#E2C063' }}
+                style={{
+                  backgroundColor: copied ? 'rgba(82,183,136,0.15)' : 'rgba(226,192,99,0.1)',
+                  color: copied ? '#52B788' : '#E2C063',
+                }}
                 title="Copy URL"
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}

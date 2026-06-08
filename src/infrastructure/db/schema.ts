@@ -146,6 +146,48 @@ export const leads = pgTable(
   ],
 )
 
+// ============ MEDIA FOLDERS TABLE ============
+export const mediaFolders = pgTable(
+  'media_folders',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 255 }).notNull(),
+    parentId: uuid('parent_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('idx_media_folders_parent').on(table.parentId)],
+)
+
+// ============ MEDIA TAGS TABLE ============
+export const mediaTags = pgTable('media_tags', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 100 }).notNull().unique(),
+  color: varchar('color', { length: 7 }).notNull().default('#E2C063'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ============ MEDIA METADATA TABLE ============
+export const mediaMetadata = pgTable(
+  'media_metadata',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    key: text('key').notNull().unique(),
+    folderId: uuid('folder_id'),
+    tags: jsonb('tags').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    notes: text('notes'),
+    width: integer('width'),
+    height: integer('height'),
+    duration: integer('duration'),
+    format: varchar('format', { length: 100 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_media_metadata_key').on(table.key),
+    index('idx_media_metadata_folder').on(table.folderId),
+  ],
+)
+
 // ============ ADMIN_USERS TABLE ============
 export const adminUsers = pgTable('admin_users', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -1,22 +1,24 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Film, Loader2, Check } from 'lucide-react'
+import { X, Film, Loader2, Check, ChevronDown } from 'lucide-react'
+import type { AssociationInfo } from '@/types/media'
 
 interface MediaObject {
   key: string
   size: number
   publicUrl: string
   mediaType: 'image' | 'video' | 'other'
+  usedIn?: AssociationInfo[]
 }
 
-type Tab = 'all' | 'cover' | 'gallery' | 'video' | 'services'
+type Tab = 'all' | 'cover' | 'gallery' | 'services'
+type AssocFilterValue = { entityType: 'project' | 'service'; title: string } | null
 
 const TAB_PREFIXES: Record<Tab, string | undefined> = {
   all: undefined,
   cover: 'projects/cover',
   gallery: 'projects/gallery',
-  video: 'projects/video',
   services: 'services',
 }
 
@@ -43,13 +45,15 @@ export function MediaPickerModal({
   const [items, setItems] = useState<MediaObject[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedUrls, setSelectedUrls] = useState<string[]>([])
+  const [assocFilter, setAssocFilter] = useState<AssocFilterValue>(null)
+  const [assocDropdownOpen, setAssocDropdownOpen] = useState(false)
 
   const loadMedia = useCallback(async () => {
     setLoading(true)
     try {
       const prefix = TAB_PREFIXES[tab]
-      const url = prefix ? `/api/admin/media?prefix=${encodeURIComponent(prefix)}` : '/api/admin/media'
-      const res = await fetch(url)
+      const base = prefix ? `/api/admin/media?prefix=${encodeURIComponent(prefix)}` : '/api/admin/media'
+      const res = await fetch(`${base}&withAssociations=1`)
       if (res.ok) {
         const data = await res.json()
         setItems(Array.isArray(data) ? data : [])
@@ -74,21 +78,44 @@ export function MediaPickerModal({
 
   if (!open) return null
 
-  const visibleItems = allowVideo ? items : items.filter((i) => i.mediaType !== 'video')
+  // Filter by type (videos only shown when allowVideo=true)
+  const typeFiltered = allowVideo ? items : items.filter((i) => i.mediaType !== 'video')
+
+  // Filter by association
+  const visibleItems =
+    assocFilter === null
+      ? typeFiltered
+      : typeFiltered.filter((i) =>
+          (i.usedIn ?? []).some(
+            (a) => a.entityType === assocFilter.entityType && a.title === assocFilter.title
+          )
+        )
+
+  // Build association lists for dropdown
+  const projectTitles = Array.from(
+    new Set(
+      items.flatMap((i) =>
+        (i.usedIn ?? []).filter((a) => a.entityType === 'project').map((a) => a.title)
+      )
+    )
+  )
+  const serviceTitles = Array.from(
+    new Set(
+      items.flatMap((i) =>
+        (i.usedIn ?? []).filter((a) => a.entityType === 'service').map((a) => a.title)
+      )
+    )
+  )
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'cover', label: 'Cover' },
     { key: 'gallery', label: 'Gallery' },
-    ...(allowVideo ? [{ key: 'video' as Tab, label: 'Videos' }] : []),
     { key: 'services', label: 'Services' },
   ]
 
-  const toggleSelect = (url: string) => {
-    setSelectedUrls((prev) =>
-      prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]
-    )
-  }
+  const toggleSelect = (url: string) =>
+    setSelectedUrls((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url])
 
   const handleItemClick = (item: MediaObject) => {
     if (multiSelect) {
@@ -99,10 +126,10 @@ export function MediaPickerModal({
     }
   }
 
-  const handleConfirmMultiSelect = () => {
-    if (onMultiSelect) onMultiSelect(selectedUrls)
-    onClose()
-  }
+  const assocFilterLabel =
+    assocFilter === null
+      ? 'All'
+      : `${assocFilter.entityType === 'project' ? 'Project' : 'Service'}: ${assocFilter.title}`
 
   return (
     <div
@@ -125,55 +152,125 @@ export function MediaPickerModal({
           className="flex items-center justify-between px-6 py-4 flex-shrink-0"
           style={{ borderBottom: '1px solid #E5DDD0' }}
         >
-          <h2
-            className="text-xl font-semibold"
-            style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
-          >
+          <h2 className="text-xl font-semibold" style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}>
             {multiSelect ? 'Select Media' : 'Media Library'}
           </h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg transition-colors hover:bg-black/5"
-            style={{ color: '#A89E8C' }}
-          >
+          <button onClick={onClose} className="p-1.5 rounded-lg transition-colors hover:bg-black/5" style={{ color: '#A89E8C' }}>
             <X size={18} />
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 px-6 pt-3 flex-shrink-0">
-          {tabs.map((t) => (
+        {/* Tabs + association filter */}
+        <div className="flex items-center justify-between px-6 pt-3 pb-2 flex-shrink-0 gap-4">
+          <div className="flex gap-1">
+            {tabs.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
+                style={
+                  tab === t.key
+                    ? { backgroundColor: '#E2C063', color: '#1E1A16' }
+                    : { color: '#6B6560' }
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Association filter dropdown */}
+          <div className="relative flex-shrink-0">
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
-              style={
-                tab === t.key
-                  ? { backgroundColor: '#E2C063', color: '#1E1A16' }
-                  : { color: '#6B6560' }
-              }
+              type="button"
+              onClick={() => setAssocDropdownOpen((v) => !v)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors"
+              style={{
+                border: '1px solid #E5DDD0',
+                color: assocFilter ? '#2D2924' : '#A89E8C',
+                backgroundColor: assocFilter ? 'rgba(226,192,99,0.08)' : 'transparent',
+                maxWidth: 220,
+              }}
             >
-              {t.label}
+              <span className="truncate">{assocFilterLabel}</span>
+              <ChevronDown size={14} className="flex-shrink-0" />
             </button>
-          ))}
+
+            {assocDropdownOpen && (
+              <div
+                className="absolute right-0 top-full mt-1 z-10 rounded-xl overflow-hidden py-1 min-w-[200px]"
+                style={{ backgroundColor: '#FAF6F0', border: '1px solid #E5DDD0', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => { setAssocFilter(null); setAssocDropdownOpen(false) }}
+                  className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-black/5"
+                  style={{ color: assocFilter === null ? '#2D2924' : '#6B6560', fontWeight: assocFilter === null ? 600 : 400 }}
+                >
+                  All
+                </button>
+
+                {projectTitles.length > 0 && (
+                  <>
+                    <p className="px-4 py-1 text-[9px] uppercase tracking-widest" style={{ color: '#A89E8C' }}>Projects</p>
+                    {projectTitles.map((title) => (
+                      <button
+                        key={title}
+                        type="button"
+                        onClick={() => { setAssocFilter({ entityType: 'project', title }); setAssocDropdownOpen(false) }}
+                        className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-black/5 truncate"
+                        style={{
+                          color: assocFilter?.title === title ? '#2D2924' : '#6B6560',
+                          fontWeight: assocFilter?.title === title ? 600 : 400,
+                        }}
+                      >
+                        {title}
+                      </button>
+                    ))}
+                  </>
+                )}
+
+                {serviceTitles.length > 0 && (
+                  <>
+                    <p className="px-4 py-1 text-[9px] uppercase tracking-widest" style={{ color: '#A89E8C' }}>Services</p>
+                    {serviceTitles.map((title) => (
+                      <button
+                        key={title}
+                        type="button"
+                        onClick={() => { setAssocFilter({ entityType: 'service', title }); setAssocDropdownOpen(false) }}
+                        className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-black/5 truncate"
+                        style={{
+                          color: assocFilter?.title === title ? '#2D2924' : '#6B6560',
+                          fontWeight: assocFilter?.title === title ? 600 : 400,
+                        }}
+                      >
+                        {title}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6" onClick={() => assocDropdownOpen && setAssocDropdownOpen(false)}>
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 size={28} className="animate-spin" style={{ color: '#E2C063' }} />
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-sm" style={{ color: '#A89E8C' }}>No media found in this section.</p>
-              <p className="text-xs mt-1" style={{ color: '#C5BDB5' }}>Upload files from the Media Library page first.</p>
+              <p className="text-sm" style={{ color: '#A89E8C' }}>
+                {assocFilter ? `No media found for "${assocFilter.title}".` : 'No media found in this section.'}
+              </p>
+              {!assocFilter && (
+                <p className="text-xs mt-1" style={{ color: '#C5BDB5' }}>Upload files from the Media Library page first.</p>
+              )}
             </div>
           ) : (
-            <div
-              className="grid gap-3"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}
-            >
+            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
               {visibleItems.map((item) => {
                 const isSelected = selectedUrls.includes(item.publicUrl)
                 return (
@@ -185,19 +282,16 @@ export function MediaPickerModal({
                     style={{
                       aspectRatio: '4/3',
                       backgroundColor: '#1E1A16',
-                      border: isSelected
-                        ? '2px solid #E2C063'
-                        : '1px solid rgba(226,192,99,0.12)',
+                      border: isSelected ? '2px solid #E2C063' : '1px solid rgba(226,192,99,0.12)',
                       outline: 'none',
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) e.currentTarget.style.outline = '2px solid rgba(226,192,99,0.5)'
-                    }}
+                    onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.outline = '2px solid rgba(226,192,99,0.5)' }}
                     onMouseLeave={(e) => { e.currentTarget.style.outline = 'none' }}
                   >
                     {item.mediaType === 'video' ? (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Film size={28} style={{ color: '#A89E8C' }} />
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-1">
+                        <Film size={24} style={{ color: '#A89E8C' }} />
+                        <span className="text-[8px] uppercase tracking-wider" style={{ color: '#6B6560' }}>Video</span>
                       </div>
                     ) : (
                       <img
@@ -206,6 +300,16 @@ export function MediaPickerModal({
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
                       />
+                    )}
+
+                    {/* Type badge */}
+                    {item.mediaType === 'video' && (
+                      <span
+                        className="absolute top-1.5 left-1.5 text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{ backgroundColor: 'rgba(226,192,99,0.2)', color: '#E2C063' }}
+                      >
+                        MP4
+                      </span>
                     )}
 
                     {/* Multiselect checkmark */}
@@ -221,7 +325,7 @@ export function MediaPickerModal({
                       </div>
                     )}
 
-                    {/* filename tooltip on hover */}
+                    {/* Filename on hover */}
                     <div
                       className="absolute bottom-0 left-0 right-0 px-2 py-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200"
                       style={{ backgroundColor: 'rgba(30,26,22,0.88)' }}
@@ -250,19 +354,14 @@ export function MediaPickerModal({
                   : 'Click images to select'}
               </p>
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-sm px-4 py-1.5 rounded-lg transition-colors"
-                  style={{ color: '#6B6560' }}
-                >
+                <button type="button" onClick={onClose} className="text-sm px-4 py-1.5 rounded-lg" style={{ color: '#6B6560' }}>
                   Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={handleConfirmMultiSelect}
+                  onClick={() => { if (onMultiSelect) onMultiSelect(selectedUrls); onClose() }}
                   disabled={selectedUrls.length === 0}
-                  className="text-sm px-5 py-1.5 rounded-lg font-semibold transition-all disabled:opacity-40"
+                  className="text-sm px-5 py-1.5 rounded-lg font-semibold disabled:opacity-40"
                   style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
                 >
                   Add {selectedUrls.length > 0 ? selectedUrls.length : ''} to gallery
