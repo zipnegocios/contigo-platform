@@ -97,35 +97,23 @@
     cursor: none;
   }
 
-  /* Prevent any element's cursor: pointer from overriding the hidden cursor —
-     native pointer must never compete with the custom cursor ring. */
-  body a,
-  body button,
-  body [role="button"],
-  body label,
-  body select,
-  body input[type="submit"],
-  body input[type="button"],
-  body input[type="reset"] {
-    cursor: none;
+  /* Force cursor: none on every element — catches shadcn/Radix roles,
+     Tailwind cursor-pointer classes, and any inline cursor styles. */
+  body * {
+    cursor: none !important;
   }
 
-  /* Text inputs/textareas keep their caret cursor for usability. */
+  /* Text inputs and textareas keep the caret cursor for usability. */
   body input:not([type="submit"]):not([type="button"]):not([type="reset"]),
-  body textarea {
-    cursor: text;
+  body textarea,
+  body [contenteditable="true"] {
+    cursor: text !important;
   }
 
   @media (hover: none) {
     body,
-    body a,
-    body button,
-    body [role="button"],
-    body label,
-    body select,
-    body input,
-    body textarea {
-      cursor: auto;
+    body * {
+      cursor: auto !important;
     }
   }
 
