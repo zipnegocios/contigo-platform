@@ -40,7 +40,7 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
           boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
         }}
       >
-        <MenuItem onClick={() => { openDetail(state.item); onClose() }}>Ver detalles</MenuItem>
+        <MenuItem onClick={() => { openDetail(state.item); onClose() }}>View details</MenuItem>
 
         <div style={{ borderTop: '1px solid rgba(226,192,99,0.08)' }} className="my-1" />
 
@@ -49,14 +49,14 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
           onMouseEnter={() => setShowFolderSub(true)}
           onMouseLeave={() => setShowFolderSub(false)}
         >
-          <MenuItem rightArrow>Mover a carpeta</MenuItem>
+          <MenuItem rightArrow>Move to folder</MenuItem>
           {showFolderSub && (
             <div
               className="absolute left-full top-0 rounded-xl overflow-hidden py-1 min-w-[160px]"
               style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
             >
               <MenuItem dimmed onClick={() => { moveToFolder(state.item.key, null); onClose() }}>
-                Sin carpeta
+                No folder
               </MenuItem>
               {folders.map((f) => (
                 <MenuItem key={f.id} onClick={() => { moveToFolder(state.item.key, f.id); onClose() }}>
@@ -72,13 +72,13 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
         <MenuItem
           danger
           onClick={() => {
-            if (confirm(`Eliminar "${state.item.key.split('/').pop()}"?`)) {
+            if (confirm(`Delete "${state.item.key.split('/').pop()}"?`)) {
               deleteItem(state.item.key)
             }
             onClose()
           }}
         >
-          Eliminar
+          Delete
         </MenuItem>
       </div>
     </>
@@ -151,9 +151,9 @@ function FloatingFolderTargets() {
       }}
     >
       <p className="text-[9px] uppercase tracking-widest px-1 pb-1" style={{ color: '#A89E8C' }}>
-        Soltar en carpeta
+        Drop into folder
       </p>
-      <DroppableFolderTarget folderId="unfiled" label="Sin carpeta" />
+      <DroppableFolderTarget folderId="unfiled" label="No folder" />
       {folders.map((f) => (
         <DroppableFolderTarget key={f.id} folderId={f.id} label={f.name} />
       ))}
@@ -206,7 +206,7 @@ export function MediaGrid() {
 
   const handleDelete = useCallback(
     async (key: string) => {
-      if (!confirm(`Eliminar "${key.split('/').pop()}"?`)) return
+      if (!confirm(`Delete "${key.split('/').pop()}"?`)) return
       await deleteItem(key)
     },
     [deleteItem]
@@ -236,7 +236,7 @@ export function MediaGrid() {
             style={{ border: '1px dashed rgba(226,192,99,0.2)', color: '#A89E8C' }}
           >
             <LayoutGrid size={32} className="mb-3 opacity-40" />
-            <p className="text-sm">No hay medios que coincidan con los filtros.</p>
+            <p className="text-sm">No media matches the current filters.</p>
           </div>
         ) : (
           <div

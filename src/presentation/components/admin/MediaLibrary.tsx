@@ -70,14 +70,14 @@ function AssociationSidebar() {
       style={{ width: 210, backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
     >
       <SidebarBtn
-        label="Todos"
+        label="All"
         count={items.length}
         active={!assocTitle && !isUnassigned}
         onClick={() => setFilters({ associatedWith: null, folderId: null })}
       />
       {hasUnassigned && (
         <SidebarBtn
-          label="Sin asignar"
+          label="Unassigned"
           count={items.filter((i) => i.usedIn.length === 0).length}
           active={isUnassigned}
           onClick={() => setFilters({ folderId: 'unassigned-filter', associatedWith: null })}
@@ -86,7 +86,7 @@ function AssociationSidebar() {
       {projectEntries.length > 0 && (
         <>
           <p className="text-[9px] uppercase tracking-widest px-2 pt-3 pb-1" style={{ color: '#A89E8C' }}>
-            Proyectos
+            Projects
           </p>
           {projectEntries.map((a) => (
             <SidebarBtn
@@ -102,7 +102,7 @@ function AssociationSidebar() {
       {serviceEntries.length > 0 && (
         <>
           <p className="text-[9px] uppercase tracking-widest px-2 pt-3 pb-1" style={{ color: '#A89E8C' }}>
-            Servicios
+            Services
           </p>
           {serviceEntries.map((a) => (
             <SidebarBtn
@@ -122,10 +122,10 @@ function AssociationSidebar() {
 // ─── Tab configuration ────────────────────────────────────────────────────────
 
 const TAB_LIST = [
-  { key: 'all', label: 'Todos' },
-  { key: 'cover', label: 'Portadas' },
-  { key: 'gallery', label: 'Galería' },
-  { key: 'services', label: 'Servicios' },
+  { key: 'all', label: 'All' },
+  { key: 'cover', label: 'Covers' },
+  { key: 'gallery', label: 'Gallery' },
+  { key: 'services', label: 'Services' },
   { key: 'bank', label: 'Bank' },
 ] as const
 
@@ -211,7 +211,7 @@ function MediaLibraryInner() {
             style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
           >
             <Upload size={15} />
-            {uploading ? 'Subiendo…' : 'Subir archivo'}
+            {uploading ? 'Uploading…' : 'Upload file'}
           </button>
         </div>
       </div>

@@ -104,7 +104,7 @@ function DroppableFolderRow({
           onClick={onDelete}
           className="opacity-0 group-hover:opacity-100 p-1 rounded flex-shrink-0 transition-opacity"
           style={{ color: '#e87070' }}
-          title="Eliminar carpeta"
+          title="Delete folder"
         >
           <X size={11} />
         </button>
@@ -173,21 +173,21 @@ export function MediaBankSidebar() {
         style={{ color: '#A89E8C' }}
       >
         {foldersExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-        Carpetas
+        Folders
       </button>
 
       {foldersExpanded && (
         <>
           <DroppableFolderRow
             folderId="all"
-            label="Todos"
+            label="All"
             count={items.length}
             active={activeFolderId === null}
             onClick={() => setActiveFolderId(null)}
           />
           <DroppableFolderRow
             folderId="unfiled"
-            label="Sin carpeta"
+            label="No folder"
             count={unfiledCount}
             active={activeFolderId === 'unfiled'}
             onClick={() => setActiveFolderId('unfiled')}
@@ -202,7 +202,7 @@ export function MediaBankSidebar() {
               active={activeFolderId === f.id}
               onClick={() => setActiveFolderId(f.id)}
               onDelete={() => {
-                if (confirm(`¿Eliminar carpeta "${f.name}"?`)) deleteFolder(f.id)
+                if (confirm(`Delete folder "${f.name}"?`)) deleteFolder(f.id)
               }}
               onRename={(name) => renameFolder(f.id, name)}
             />
@@ -219,7 +219,7 @@ export function MediaBankSidebar() {
                   if (e.key === 'Enter') submitFolder()
                   if (e.key === 'Escape') setCreatingFolder(false)
                 }}
-                placeholder="Nombre de carpeta…"
+                placeholder="Folder name…"
                 className="flex-1 text-xs px-2 py-1 rounded outline-none min-w-0"
                 style={{
                   backgroundColor: 'rgba(226,192,99,0.1)',
@@ -241,7 +241,7 @@ export function MediaBankSidebar() {
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs"
               style={{ color: '#6B6560' }}
             >
-              <Plus size={12} /> Nueva carpeta
+              <Plus size={12} /> New folder
             </button>
           )}
         </>
@@ -284,7 +284,7 @@ export function MediaBankSidebar() {
                   <button
                     type="button"
                     onClick={() => {
-                      if (confirm(`¿Eliminar tag "${t.name}"?`)) deleteTag(t.id)
+                      if (confirm(`Delete tag "${t.name}"?`)) deleteTag(t.id)
                     }}
                     className="opacity-0 group-hover/tag:opacity-100 p-0.5 rounded transition-opacity"
                     style={{ color: '#e87070' }}
@@ -307,7 +307,7 @@ export function MediaBankSidebar() {
                   if (e.key === 'Enter') submitTag()
                   if (e.key === 'Escape') setCreatingTag(false)
                 }}
-                placeholder="Nombre del tag…"
+                placeholder="Tag name…"
                 className="w-full text-xs px-2 py-1 rounded outline-none"
                 style={{
                   backgroundColor: 'rgba(226,192,99,0.1)',
@@ -336,14 +336,14 @@ export function MediaBankSidebar() {
                   className="flex-1 text-xs py-1 rounded font-medium"
                   style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
                 >
-                  Crear
+                  Create
                 </button>
                 <button
                   onClick={() => setCreatingTag(false)}
                   className="flex-1 text-xs py-1 rounded"
                   style={{ color: '#A89E8C', border: '1px solid rgba(107,101,96,0.2)' }}
                 >
-                  Cancelar
+                  Cancel
                 </button>
               </div>
             </div>
@@ -354,7 +354,7 @@ export function MediaBankSidebar() {
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs"
               style={{ color: '#6B6560' }}
             >
-              <Tag size={12} /> Nuevo tag
+              <Tag size={12} /> New tag
             </button>
           )}
         </>

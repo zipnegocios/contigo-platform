@@ -116,7 +116,7 @@ export function MediaCard({
             onClick={(e) => { e.stopPropagation(); onOpenDetail() }}
             className="p-1.5 rounded-full"
             style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063' }}
-            title="Detalles"
+            title="Details"
           >
             <Info size={11} />
           </button>
@@ -125,7 +125,7 @@ export function MediaCard({
             onClick={(e) => { e.stopPropagation(); onDelete() }}
             className="p-1.5 rounded-full"
             style={{ backgroundColor: 'rgba(232,112,112,0.18)', color: '#e87070' }}
-            title="Eliminar"
+            title="Delete"
           >
             <Trash2 size={11} />
           </button>

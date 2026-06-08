@@ -25,7 +25,7 @@ function formatMime(fmt: string | null | undefined): string {
 }
 
 const FIELD_LABELS: Record<string, string> = {
-  cover: 'Cover', gallery: 'Galería', poster: 'Poster', image: 'Imagen',
+  cover: 'Cover', gallery: 'Gallery', poster: 'Poster', image: 'Image',
 }
 
 function MetaField({ label, value, gold }: { label: string; value: string; gold?: boolean }) {
@@ -108,7 +108,7 @@ export function MediaDetailDrawer() {
   }
 
   const handleDelete = async () => {
-    if (!confirm(`Eliminar "${filename}"?`)) return
+    if (!confirm(`Delete "${filename}"?`)) return
     await deleteItem(item.key)
   }
 
@@ -138,7 +138,7 @@ export function MediaDetailDrawer() {
       body = { galleryItems: [...currentGallery, { url: item.publicUrl, order: currentGallery.length }] }
     }
     await fetch(apiBase, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    showConfirm(field === 'cover' ? `Cover de "${entityContext.name}" actualizado ✓` : `Agregado a galería de "${entityContext.name}" ✓`)
+    showConfirm(field === 'cover' ? `Cover updated for "${entityContext.name}" ✓` : `Added to gallery of "${entityContext.name}" ✓`)
   }
 
   return (
@@ -192,24 +192,24 @@ export function MediaDetailDrawer() {
           <div className="px-4 py-4 space-y-5">
             {/* Metadata grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-              <MetaField label="Tamaño" value={formatBytes(item.size)} />
-              <MetaField label="Formato" value={formatMime(item.metadata?.format)} />
+              <MetaField label="Size" value={formatBytes(item.size)} />
+              <MetaField label="Format" value={formatMime(item.metadata?.format)} />
               <MetaField
-                label="Modificado"
-                value={new Date(item.lastModified).toLocaleDateString('es-AR', { dateStyle: 'medium' })}
+                label="Modified"
+                value={new Date(item.lastModified).toLocaleDateString('en-US', { dateStyle: 'medium' })}
               />
               <MetaField
-                label="Tipo"
-                value={item.mediaType === 'image' ? 'Imagen' : item.mediaType === 'video' ? 'Video' : 'Otro'}
+                label="Type"
+                value={item.mediaType === 'image' ? 'Image' : item.mediaType === 'video' ? 'Video' : 'Other'}
               />
               {width != null && height != null && (
                 <>
-                  <MetaField label="Dimensiones" value={`${width} × ${height}`} />
+                  <MetaField label="Dimensions" value={`${width} × ${height}`} />
                   <MetaField label="Aspect Ratio" value={aspectRatio(width, height)} gold />
                 </>
               )}
               {duration != null && (
-                <MetaField label="Duración" value={formatDuration(duration)} />
+                <MetaField label="Duration" value={formatDuration(duration)} />
               )}
             </div>
 
@@ -217,17 +217,17 @@ export function MediaDetailDrawer() {
 
             {/* Organization */}
             <div className="space-y-3">
-              <p className="text-[10px] uppercase tracking-widest" style={{ color: '#A89E8C' }}>Organización</p>
+              <p className="text-[10px] uppercase tracking-widest" style={{ color: '#A89E8C' }}>Organization</p>
 
               <div>
-                <label className="text-[10px] block mb-1" style={{ color: '#6B6560' }}>Carpeta</label>
+                <label className="text-[10px] block mb-1" style={{ color: '#6B6560' }}>Folder</label>
                 <select
                   value={localFolderId}
                   onChange={(e) => handleFolderChange(e.target.value)}
                   className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none"
                   style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
                 >
-                  <option value="">Sin carpeta</option>
+                  <option value="">No folder</option>
                   {folders.map((f) => (
                     <option key={f.id} value={f.id} style={{ backgroundColor: '#1E1A16' }}>{f.name}</option>
                   ))}
@@ -262,13 +262,13 @@ export function MediaDetailDrawer() {
               )}
 
               <div>
-                <label className="text-[10px] block mb-1" style={{ color: '#6B6560' }}>Notas</label>
+                <label className="text-[10px] block mb-1" style={{ color: '#6B6560' }}>Notes</label>
                 <textarea
                   value={localNotes}
                   onChange={(e) => setLocalNotes(e.target.value)}
                   onBlur={handleNotesBlur}
                   rows={2}
-                  placeholder="Notas internas…"
+                  placeholder="Internal notes…"
                   className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none resize-none"
                   style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
                 />
@@ -298,7 +298,7 @@ export function MediaDetailDrawer() {
             {/* Used In */}
             {item.usedIn.length > 0 && (
               <div>
-                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: '#A89E8C' }}>Usado en</p>
+                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: '#A89E8C' }}>Used in</p>
                 <div className="space-y-1">
                   {item.usedIn.map((a, i) => (
                     <div
@@ -343,7 +343,7 @@ export function MediaDetailDrawer() {
               style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
             >
               <ImageIcon size={13} />
-              Usar como Cover
+              Use as Cover
             </button>
             <button
               type="button"
@@ -352,7 +352,7 @@ export function MediaDetailDrawer() {
               style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
             >
               <ImagePlus size={13} />
-              Agregar a Galería
+              Add to Gallery
             </button>
           </div>
 
@@ -363,7 +363,7 @@ export function MediaDetailDrawer() {
             style={{ backgroundColor: 'rgba(232,112,112,0.1)', border: '1px solid rgba(232,112,112,0.2)', color: '#e87070' }}
           >
             <Trash2 size={13} />
-            Eliminar archivo
+            Delete file
           </button>
         </div>
       </aside>
@@ -373,7 +373,7 @@ export function MediaDetailDrawer() {
           item={item}
           onClose={() => setAssignModalOpen(false)}
           onAssigned={(_id, _type, field) => {
-            showConfirm(field === 'cover' ? 'Asignado como cover ✓' : 'Agregado a galería ✓')
+            showConfirm(field === 'cover' ? 'Assigned as cover ✓' : 'Added to gallery ✓')
           }}
         />
       )}

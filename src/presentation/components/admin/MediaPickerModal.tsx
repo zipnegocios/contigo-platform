@@ -355,12 +355,12 @@ export function MediaPickerModal({
                             style={{ backgroundColor: 'rgba(82,183,136,0.22)' }}
                           >
                             <Check size={9} strokeWidth={3} style={{ color: '#52B788', flexShrink: 0 }} />
-                            <span className="text-[9px] truncate" style={{ color: '#52B788' }}>Ya asignado</span>
+                            <span className="text-[9px] truncate" style={{ color: '#52B788' }}>Already assigned</span>
                           </div>
                         )
                       }
                       const first = (item.usedIn ?? [])[0]
-                      const FIELDS: Record<string, string> = { cover: 'Cover', gallery: 'Galería', poster: 'Poster', image: 'Imagen' }
+                      const FIELDS: Record<string, string> = { cover: 'Cover', gallery: 'Gallery', poster: 'Poster', image: 'Image' }
                       return (
                         <div
                           className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full flex items-center gap-1"

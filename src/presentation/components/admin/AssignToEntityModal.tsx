@@ -108,7 +108,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
       >
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}>
           <h2 className="text-base font-semibold" style={{ color: '#E8DCC4', fontFamily: 'var(--font-cormorant)' }}>
-            Asignar medio
+            Assign Media
           </h2>
           <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#A89E8C' }}>
             <X size={16} />
@@ -127,7 +127,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
 
           {/* Assign as */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: '#A89E8C' }}>Asignar como</label>
+            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: '#A89E8C' }}>Assign as</label>
             <div className="grid grid-cols-2 gap-2">
               {(['cover', 'gallery'] as const).map((opt) => (
                 <button
@@ -143,7 +143,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                 >
                   <div className="flex items-center gap-2">
                     {assignAs === opt && <Check size={14} strokeWidth={3} />}
-                    {opt === 'cover' ? 'Cover / Portada' : 'Agregar a Galería'}
+                    {opt === 'cover' ? 'Cover / Hero' : 'Add to Gallery'}
                   </div>
                 </button>
               ))}
@@ -152,7 +152,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
 
           {/* Search */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: '#A89E8C' }}>Proyecto / Servicio</label>
+            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: '#A89E8C' }}>Project / Service</label>
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2"
               style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)' }}
@@ -162,19 +162,19 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar…"
+                placeholder="Search…"
                 className="flex-1 bg-transparent outline-none text-sm"
                 style={{ color: '#E8DCC4' }}
               />
             </div>
 
             {loading ? (
-              <div className="py-6 text-center text-sm" style={{ color: '#A89E8C' }}>Cargando…</div>
+              <div className="py-6 text-center text-sm" style={{ color: '#A89E8C' }}>Loading…</div>
             ) : (
               <div className="space-y-3 max-h-48 overflow-y-auto">
                 {projects.length > 0 && (
                   <div>
-                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: '#A89E8C' }}>Proyectos</p>
+                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: '#A89E8C' }}>Projects</p>
                     {projects.map((e) => (
                       <EntityRow key={e.id} entity={e} selected={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
                     ))}
@@ -182,14 +182,14 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                 )}
                 {services.length > 0 && (
                   <div>
-                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: '#A89E8C' }}>Servicios</p>
+                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: '#A89E8C' }}>Services</p>
                     {services.map((e) => (
                       <EntityRow key={e.id} entity={e} selected={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
                     ))}
                   </div>
                 )}
                 {filtered.length === 0 && (
-                  <p className="text-sm text-center py-4" style={{ color: '#6B6560' }}>Sin resultados</p>
+                  <p className="text-sm text-center py-4" style={{ color: '#6B6560' }}>No results</p>
                 )}
               </div>
             )}
@@ -197,14 +197,14 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
         </div>
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(226,192,99,0.1)' }}>
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm" style={{ color: '#A89E8C' }}>Cancelar</button>
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm" style={{ color: '#A89E8C' }}>Cancel</button>
           <button
             onClick={handleAssign}
             disabled={!selectedId || saving}
             className="px-5 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
             style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
           >
-            {saving ? 'Asignando…' : 'Asignar'}
+            {saving ? 'Assigning…' : 'Assign'}
           </button>
         </div>
       </div>
