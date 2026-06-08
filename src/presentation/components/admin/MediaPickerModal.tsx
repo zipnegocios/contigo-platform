@@ -22,6 +22,12 @@ const TAB_PREFIXES: Record<Tab, string | undefined> = {
   services: 'services',
 }
 
+interface EntityContext {
+  type: 'project' | 'service'
+  id: string
+  name: string
+}
+
 interface MediaPickerModalProps {
   open: boolean
   onClose: () => void
@@ -30,6 +36,7 @@ interface MediaPickerModalProps {
   multiSelect?: boolean
   defaultTab?: Tab
   allowVideo?: boolean
+  entityContext?: EntityContext | null
 }
 
 export function MediaPickerModal({
@@ -40,6 +47,7 @@ export function MediaPickerModal({
   multiSelect = false,
   defaultTab = 'all',
   allowVideo = false,
+  entityContext = null,
 }: MediaPickerModalProps) {
   const [tab, setTab] = useState<Tab>(defaultTab)
   const [items, setItems] = useState<MediaObject[]>([])
@@ -334,6 +342,39 @@ export function MediaPickerModal({
                         {item.key.split('/').pop()}
                       </p>
                     </div>
+
+                    {/* Association badge */}
+                    {(item.usedIn ?? []).length > 0 && (() => {
+                      const isOwnEntity = entityContext && (item.usedIn ?? []).some(
+                        (a) => a.entityType === entityContext.type && a.title === entityContext.name
+                      )
+                      if (isOwnEntity) {
+                        return (
+                          <div
+                            className="absolute top-0 left-0 right-0 px-2 py-0.5 flex items-center gap-1"
+                            style={{ backgroundColor: 'rgba(82,183,136,0.22)' }}
+                          >
+                            <Check size={9} strokeWidth={3} style={{ color: '#52B788', flexShrink: 0 }} />
+                            <span className="text-[9px] truncate" style={{ color: '#52B788' }}>Ya asignado</span>
+                          </div>
+                        )
+                      }
+                      const first = (item.usedIn ?? [])[0]
+                      const FIELDS: Record<string, string> = { cover: 'Cover', gallery: 'Galería', poster: 'Poster', image: 'Imagen' }
+                      return (
+                        <div
+                          className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full flex items-center gap-1"
+                          style={{ backgroundColor: 'rgba(226,192,99,0.22)', border: '1px solid rgba(226,192,99,0.35)' }}
+                        >
+                          <span className="text-[8px] truncate max-w-[90px]" style={{ color: '#E2C063' }}>
+                            {FIELDS[first.field] ?? first.field}
+                          </span>
+                          {(item.usedIn ?? []).length > 1 && (
+                            <span className="text-[8px]" style={{ color: '#E2C063' }}>+{(item.usedIn ?? []).length - 1}</span>
+                          )}
+                        </div>
+                      )
+                    })()}
                   </button>
                 )
               })}
