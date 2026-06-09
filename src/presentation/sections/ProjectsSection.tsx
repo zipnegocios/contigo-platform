@@ -13,8 +13,83 @@ export interface ProjectItem {
   title: string
   category: string
   location: string
+  completedDate?: string | null
   coverImageUrl: string
   coverPosterUrl: string | null
+}
+
+// ── Rotating location labels ──────────────────────────────────────────────────
+
+function formatLocationLabel(location: string, date?: string | null): string {
+  if (!date) return location
+  try {
+    const d = new Date(date)
+    const month = d.toLocaleDateString('en-AU', { month: 'long' })
+    return `${location} — ${month} ${d.getFullYear()}`
+  } catch {
+    return location
+  }
+}
+
+function RotatingText({ items, externalPaused }: { items: string[]; externalPaused: boolean }) {
+  const outerRef   = useRef<HTMLSpanElement>(null)
+  const innerRef   = useRef<HTMLSpanElement>(null)
+  const idxRef     = useRef(0)
+  const hoverRef   = useRef(false)
+
+  useEffect(() => {
+    if (items.length === 0) return
+    // seed initial text
+    if (innerRef.current) innerRef.current.textContent = items[0]
+  }, [items])
+
+  useEffect(() => {
+    if (items.length <= 1) return
+
+    const delay = () => 3500 + Math.random() * 1000   // 3.5–4.5 s
+
+    let timer: ReturnType<typeof setTimeout>
+
+    const schedule = () => {
+      timer = setTimeout(tick, delay())
+    }
+
+    const tick = () => {
+      if (externalPaused || hoverRef.current || !innerRef.current) {
+        schedule()
+        return
+      }
+      // pick random index ≠ current
+      let next = idxRef.current
+      while (next === idxRef.current) next = Math.floor(Math.random() * items.length)
+
+      const el = innerRef.current
+      const tl = gsap.timeline({ onComplete: schedule })
+      tl.to(el, { y: -22, opacity: 0, duration: 0.35, ease: 'power2.in' })
+      tl.call(() => {
+        el.textContent = items[next]
+        idxRef.current = next
+        gsap.set(el, { y: 22, opacity: 0 })
+      })
+      tl.to(el, { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' })
+    }
+
+    schedule()
+    return () => clearTimeout(timer)
+  }, [items, externalPaused])
+
+  if (items.length === 0) return <span>—</span>
+
+  return (
+    <span
+      ref={outerRef}
+      style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom', height: '1.35em' }}
+      onMouseEnter={() => { hoverRef.current = true }}
+      onMouseLeave={() => { hoverRef.current = false }}
+    >
+      <span ref={innerRef} style={{ display: 'inline-block' }} />
+    </span>
+  )
 }
 
 interface Props {
@@ -287,8 +362,17 @@ export default function ProjectsSection({ projects }: Props) {
         className="flex items-center justify-between mt-8 text-sm"
         style={{ color: 'var(--monolith-slate)' }}
       >
-        <span className="data-text">
-          Project count: {projects.length} | Locations: Adelaide Metro | Est. 2015
+        <span className="data-text flex items-center gap-1 flex-wrap">
+          <span>Project count: {projects.length}</span>
+          <span style={{ opacity: 0.4 }}>|</span>
+          <span>
+            <RotatingText
+              items={projects.map((p) => formatLocationLabel(p.location, p.completedDate))}
+              externalPaused={isPaused}
+            />
+          </span>
+          <span style={{ opacity: 0.4 }}>|</span>
+          <span>Est. 2015</span>
         </span>
         <a
           href="/projects"

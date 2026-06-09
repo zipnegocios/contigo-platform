@@ -18,6 +18,7 @@ export default async function HomePage() {
     title: string
     category: string
     location: string
+    completedDate: string | null
     coverImageUrl: string
     coverPosterUrl: string | null
   }[] = []
@@ -32,6 +33,7 @@ export default async function HomePage() {
         title: p.title,
         category: p.category,
         location: p.location,
+        completedDate: p.completedDate ? p.completedDate.toISOString() : null,
         coverImageUrl: p.coverImageUrl,
         coverPosterUrl: p.coverPosterUrl ?? null,
       }))
