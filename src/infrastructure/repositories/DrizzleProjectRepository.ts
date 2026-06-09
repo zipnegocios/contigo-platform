@@ -80,7 +80,7 @@ export class DrizzleProjectRepository {
       .from(projects)
       .where(and(eq(projects.published, true), eq(projects.featured, true)))
       .orderBy(desc(projects.createdAt))
-      .limit(5)
+      .limit(50)
 
     return rows.map((row) => this.mapRowToProject(row))
   }
