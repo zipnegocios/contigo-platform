@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -179,13 +180,9 @@ export default function ServicesSection() {
 
       {/* CTA */}
       <div className="text-center mt-12">
-        <a
+        <Link
           ref={ctaRef}
-          href="#contact"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-          }}
+          href="/services"
           className="inline-flex items-center gap-2 text-sm font-medium transition-colors group"
           style={{ color: 'var(--atelier-ink)' }}
         >
@@ -194,7 +191,7 @@ export default function ServicesSection() {
             className="block h-[1px] w-0 group-hover:w-12 transition-all duration-300"
             style={{ backgroundColor: 'var(--brand-gold)' }}
           />
-        </a>
+        </Link>
       </div>
     </section>
   );

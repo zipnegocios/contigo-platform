@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -110,6 +110,18 @@ function getCardsPerPage(): number {
   return 1
 }
 
+/** Reactive cards-per-page from the viewport — SSR-safe, no setState-in-effect. */
+function useCardsPerPage(): number {
+  return useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener('resize', onChange)
+      return () => window.removeEventListener('resize', onChange)
+    },
+    getCardsPerPage,
+    () => 5,
+  )
+}
+
 export default function ProjectsSection({ projects }: Props) {
   const sectionRef  = useRef<HTMLDivElement>(null)
   const headerRef   = useRef<HTMLDivElement>(null)
@@ -119,14 +131,13 @@ export default function ProjectsSection({ projects }: Props) {
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const cloneRef    = useRef<HTMLUListElement | null>(null) // active DOM clone
 
-  const [cardsPerPage, setCardsPerPage] = useState<number>(5)
+  const cardsPerPage = useCardsPerPage()
   const [startIndex,   setStartIndex]   = useState(0)
   const [isPaused,     setIsPaused]     = useState(false)
   const animatingRef = useRef(false)
 
-  /* ── responsive cardsPerPage ─────────────────────────────────────────── */
+  /* ── On resize: reset carousel + clean up any in-flight animation ────── */
   useEffect(() => {
-    setCardsPerPage(getCardsPerPage())
     const handler = () => {
       // Kill animation and clean up any orphaned clone
       if (timelineRef.current) timelineRef.current.kill()
@@ -140,7 +151,6 @@ export default function ProjectsSection({ projects }: Props) {
         gsap.set(Array.from(lis), { clearProps: 'all' })
       }
       animatingRef.current = false
-      setCardsPerPage(getCardsPerPage())
       setStartIndex(0)
     }
     window.addEventListener('resize', handler)
