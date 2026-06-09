@@ -1,86 +1,99 @@
-import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+'use client'
 
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 function isVideo(url: string) {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
 }
 
+/**
+ * Returns how many cards are visible at the current viewport width.
+ * xl (≥1280): 5 | lg (≥1024): 4 | md (≥768): 3 | sm (≥560): 2 | xs: 1
+ */
+function useCardsPerView() {
+  const [count, setCount] = useState(1)
+  useEffect(() => {
+    function update() {
+      const w = window.innerWidth
+      if (w >= 1280)      setCount(5)
+      else if (w >= 1024) setCount(4)
+      else if (w >= 768)  setCount(3)
+      else if (w >= 560)  setCount(2)
+      else                setCount(1)
+    }
+    update()
+    window.addEventListener('resize', update, { passive: true })
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  return count
+}
+
 interface ProjectItem {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  location?: string;
-  coverImageUrl: string;
-  coverPosterUrl?: string | null;
+  id: string
+  slug: string
+  title: string
+  category: string
+  location?: string
+  coverImageUrl: string
+  coverPosterUrl?: string | null
 }
 
 export default function ProjectsSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const metaRef = useRef<HTMLDivElement>(null);
+  const sectionRef  = useRef<HTMLDivElement>(null)
+  const headerRef   = useRef<HTMLDivElement>(null)
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const metaRef     = useRef<HTMLDivElement>(null)
 
-  const [projects, setProjects] = useState<ProjectItem[] | null>(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [projects, setProjects] = useState<ProjectItem[] | null>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
 
+  const cardsPerView = useCardsPerView()
+  const total        = projects?.length ?? 0
+  const maxIndex     = Math.max(0, total - cardsPerView)
+  const showNav      = total > cardsPerView
+  // pill dots: show when positions ≤ 10, otherwise show counter text
+  const dotCount     = maxIndex + 1
+  const useDots      = dotCount <= 10
+
+  // Clamp index when breakpoint changes
+  useEffect(() => {
+    setCurrentIndex(i => Math.min(i, maxIndex))
+  }, [maxIndex])
+
+  // Fetch featured projects
   useEffect(() => {
     fetch('/api/projects/featured')
-      .then((r) => (r.ok ? r.json() : []))
+      .then(r => (r.ok ? r.json() : []))
       .then((data: ProjectItem[]) => setProjects(Array.isArray(data) ? data : []))
-      .catch(() => setProjects([]));
-  }, []);
+      .catch(() => setProjects([]))
+  }, [])
 
-  const isCarousel = projects !== null && projects.length > 5;
-
+  // GSAP scroll entrance
   useEffect(() => {
-    if (projects === null) return;
+    if (projects === null) return
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        ease: 'power3.out',
+        opacity: 0, y: 30, duration: 0.8, ease: 'power3.out',
         scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
-      });
-
-      if (!isCarousel && listRef.current) {
-        const panels = listRef.current.querySelectorAll('.accordion-item');
-        if (panels.length) {
-          gsap.from(panels, {
-            y: 60,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: listRef.current, start: 'top 80%' },
-          });
-        }
-      }
-
+      })
+      gsap.from(carouselRef.current, {
+        opacity: 0, y: 40, duration: 0.7, ease: 'power3.out',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' },
+      })
       gsap.from(metaRef.current, {
-        opacity: 0,
-        y: 20,
-        duration: 0.6,
-        ease: 'power3.out',
+        opacity: 0, y: 20, duration: 0.6, ease: 'power3.out',
         scrollTrigger: { trigger: metaRef.current, start: 'top 90%' },
-      });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, [isCarousel, projects]);
+      })
+    }, sectionRef)
+    return () => ctx.revert()
+  }, [projects])
 
-  function prev() {
-    if (!projects) return;
-    setCarouselIndex((i) => (i - 1 + projects.length) % projects.length);
-  }
-  function next() {
-    if (!projects) return;
-    setCarouselIndex((i) => (i + 1) % projects.length);
-  }
+  const prev = () => setCurrentIndex(i => Math.max(0, i - 1))
+  const next = () => setCurrentIndex(i => Math.min(maxIndex, i + 1))
 
   return (
     <section
@@ -89,49 +102,71 @@ export default function ProjectsSection() {
       className="section-gap page-padding"
       style={{ backgroundColor: 'var(--monolith-concrete)' }}
     >
-      {/* Header */}
-      <div ref={headerRef}>
-        <span className="label block mb-4" style={{ color: 'var(--monolith-slate)' }}>
-          PORTFOLIO
-        </span>
-        <h2 style={{ color: 'var(--monolith-ink)' }}>Featured Projects</h2>
+      {/* ── Header ── */}
+      <div ref={headerRef} className="flex items-end justify-between mb-8">
+        <div>
+          <span className="label block mb-4" style={{ color: 'var(--monolith-slate)' }}>
+            PORTFOLIO
+          </span>
+          <h2 style={{ color: 'var(--monolith-ink)' }}>Featured Projects</h2>
+        </div>
+        <a
+          href="/projects"
+          className="text-sm font-medium transition-opacity hover:opacity-70 hidden sm:block"
+          style={{ color: 'var(--monolith-ink)', paddingBottom: '0.25rem' }}
+        >
+          View all →
+        </a>
       </div>
 
-      {/* Loading skeleton */}
+      {/* ── Loading skeleton ── */}
       {projects === null && (
-        <ul className="accordion-list" style={{ marginTop: '2rem' }}>
-          {[...Array(5)].map((_, i) => (
-            <li
+        <div className="flex gap-3 overflow-hidden">
+          {[...Array(3)].map((_, i) => (
+            <div
               key={i}
-              className="accordion-item"
-              style={{ backgroundColor: 'rgba(45,41,36,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }}
+              className="flex-shrink-0 rounded-2xl"
+              style={{
+                width: '33.333%',
+                aspectRatio: '4/3',
+                backgroundColor: 'rgba(45,41,36,0.08)',
+                animation: 'pulse 1.5s ease-in-out infinite',
+              }}
             />
           ))}
-        </ul>
+        </div>
       )}
 
-      {/* No projects */}
+      {/* ── Empty state ── */}
       {projects !== null && projects.length === 0 && (
         <p className="mt-8 text-sm" style={{ color: 'var(--monolith-slate)' }}>
           No featured projects yet.
         </p>
       )}
 
-      {/* Carousel (>5 projects) */}
-      {projects !== null && isCarousel && (
-        <div ref={carouselRef} className="relative mt-8">
-          <div className="overflow-hidden">
+      {/* ── Multi-card carousel ── */}
+      {projects !== null && projects.length > 0 && (
+        <>
+          {/* Track */}
+          <div ref={carouselRef} className="overflow-hidden">
             <div
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
+              className="flex"
+              style={{
+                transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`,
+                transition: 'transform 480ms cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
             >
               {projects.map((project) => (
-                <div key={project.id} className="min-w-full">
+                <div
+                  key={project.id}
+                  style={{ width: `${100 / cardsPerView}%`, flexShrink: 0, padding: '0 6px' }}
+                >
                   <a
                     href={`/projects/${project.slug}`}
-                    className="block relative overflow-hidden"
-                    style={{ height: '420px' }}
+                    className="block relative overflow-hidden rounded-2xl group"
+                    style={{ aspectRatio: '4/3', backgroundColor: '#1E1A16', display: 'block' }}
                   >
+                    {/* Cover: video or image */}
                     {isVideo(project.coverImageUrl) ? (
                       <video
                         src={project.coverImageUrl}
@@ -141,110 +176,142 @@ export default function ProjectsSection() {
                         loop
                         playsInline
                         preload="metadata"
-                        className="w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     ) : (
                       <img
                         src={project.coverImageUrl}
                         alt={project.title}
-                        className="w-full h-full object-cover"
-                        style={{ transition: 'transform 0.6s ease' }}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     )}
+
+                    {/* Dark gradient */}
                     <div
-                      className="absolute inset-0 flex flex-col justify-end p-8"
-                      style={{ background: 'linear-gradient(to top, rgba(30,26,22,0.85) 0%, transparent 60%)' }}
-                    >
-                      <p className="text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--gold)' }}>
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          'linear-gradient(to top, rgba(30,26,22,0.90) 0%, rgba(30,26,22,0.18) 55%, transparent 100%)',
+                      }}
+                    />
+
+                    {/* Caption */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+                      <p
+                        className="text-[10px] uppercase tracking-widest mb-1 truncate"
+                        style={{ color: '#E2C063' }}
+                      >
                         {project.category}
                       </p>
                       <p
-                        className="text-2xl font-semibold"
-                        style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+                        className="font-semibold leading-tight line-clamp-2"
+                        style={{
+                          fontFamily: 'var(--font-cormorant)',
+                          color: '#FAF6F0',
+                          fontSize: cardsPerView >= 4 ? '1rem' : '1.2rem',
+                        }}
                       >
                         {project.title}
                       </p>
+                    </div>
+
+                    {/* Arrow hover badge */}
+                    <div
+                      className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0"
+                      style={{
+                        backgroundColor: 'rgba(226,192,99,0.18)',
+                        color: '#E2C063',
+                        border: '1px solid rgba(226,192,99,0.35)',
+                      }}
+                    >
+                      <span className="text-xs">→</span>
                     </div>
                   </a>
                 </div>
               ))}
             </div>
           </div>
-          <button
-            onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
-            aria-label="Previous"
-          >‹</button>
-          <button
-            onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
-            style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
-            aria-label="Next"
-          >›</button>
-          <div className="flex justify-center gap-2 mt-4">
-            {projects.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCarouselIndex(i)}
-                className="w-2 h-2 rounded-full transition-all duration-200"
-                style={{ backgroundColor: i === carouselIndex ? '#E2C063' : 'rgba(226,192,99,0.25)' }}
-                aria-label={`Project ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Accordion (≤5 projects) */}
-      {projects !== null && !isCarousel && projects.length > 0 && (
-        <ul ref={listRef} className="accordion-list">
-          {projects.map((project) => (
-            <li key={project.id} className="accordion-item">
-              <div className="accordion-img relative overflow-hidden">
-                {isVideo(project.coverImageUrl) ? (
-                  <video
-                    src={project.coverImageUrl}
-                    poster={project.coverPosterUrl ?? undefined}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                ) : (
-                  <img
-                    src={project.coverImageUrl}
-                    alt={project.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                )}
+          {/* ── Navigation row ── */}
+          {showNav && (
+            <div className="flex items-center justify-between mt-5">
+              {/* Dots / counter */}
+              <div className="flex items-center gap-1.5">
+                {useDots
+                  ? Array.from({ length: dotCount }).map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentIndex(i)}
+                        aria-label={`Go to position ${i + 1}`}
+                        className="rounded-full transition-all duration-250"
+                        style={{
+                          height: 8,
+                          width: i === currentIndex ? 22 : 8,
+                          backgroundColor:
+                            i === currentIndex
+                              ? '#E2C063'
+                              : 'rgba(226,192,99,0.22)',
+                        }}
+                      />
+                    ))
+                  : (
+                    <span className="text-xs tabular-nums" style={{ color: 'var(--monolith-slate)' }}>
+                      {currentIndex + 1} — {dotCount}
+                    </span>
+                  )}
               </div>
-              <a href={`/projects/${project.slug}`} className="accordion-link">
-                <p className="accordion-title">{project.title}</p>
-                <p className="accordion-desc">{project.category}</p>
-              </a>
-            </li>
-          ))}
-        </ul>
+
+              {/* Prev / Next */}
+              <div className="flex gap-2">
+                <button
+                  onClick={prev}
+                  disabled={currentIndex === 0}
+                  aria-label="Previous"
+                  className="w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-25"
+                  style={{
+                    backgroundColor: 'rgba(226,192,99,0.10)',
+                    color: '#E2C063',
+                    border: '1px solid rgba(226,192,99,0.28)',
+                  }}
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={next}
+                  disabled={currentIndex >= maxIndex}
+                  aria-label="Next"
+                  className="w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-25"
+                  style={{
+                    backgroundColor: 'rgba(226,192,99,0.10)',
+                    color: '#E2C063',
+                    border: '1px solid rgba(226,192,99,0.28)',
+                  }}
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Footer row */}
+      {/* ── Footer meta ── */}
       <div
         ref={metaRef}
         className="flex items-center justify-between mt-8 text-sm"
         style={{ color: 'var(--monolith-slate)' }}
       >
-        <span className="data-text">Project count: 47 | Locations: Adelaide Metro | Est. 2015</span>
+        <span className="data-text">
+          Project count: 47 | Locations: Adelaide Metro | Est. 2015
+        </span>
         <a
           href="/projects"
-          className="text-sm font-medium transition-opacity hover:opacity-70"
+          className="text-sm font-medium transition-opacity hover:opacity-70 sm:hidden"
           style={{ color: 'var(--monolith-ink)' }}
         >
           View all →
         </a>
       </div>
     </section>
-  );
+  )
 }
