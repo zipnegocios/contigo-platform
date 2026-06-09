@@ -49,7 +49,7 @@ export default function ProjectsSection() {
   const metaRef     = useRef<HTMLDivElement>(null)
 
   const [projects, setProjects] = useState<ProjectItem[] | null>(null)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [rawIndex, setRawIndex] = useState(0)
 
   const cardsPerView = useCardsPerView()
   const total        = projects?.length ?? 0
@@ -59,10 +59,8 @@ export default function ProjectsSection() {
   const dotCount     = maxIndex + 1
   const useDots      = dotCount <= 10
 
-  // Clamp index when breakpoint changes
-  useEffect(() => {
-    setCurrentIndex(i => Math.min(i, maxIndex))
-  }, [maxIndex])
+  // Clamp during render so a breakpoint change can't leave us past the end.
+  const currentIndex = Math.min(rawIndex, maxIndex)
 
   // Fetch featured projects
   useEffect(() => {
@@ -92,8 +90,8 @@ export default function ProjectsSection() {
     return () => ctx.revert()
   }, [projects])
 
-  const prev = () => setCurrentIndex(i => Math.max(0, i - 1))
-  const next = () => setCurrentIndex(i => Math.min(maxIndex, i + 1))
+  const prev = () => setRawIndex(Math.max(0, currentIndex - 1))
+  const next = () => setRawIndex(Math.min(maxIndex, currentIndex + 1))
 
   return (
     <section
@@ -241,7 +239,7 @@ export default function ProjectsSection() {
                   ? Array.from({ length: dotCount }).map((_, i) => (
                       <button
                         key={i}
-                        onClick={() => setCurrentIndex(i)}
+                        onClick={() => setRawIndex(i)}
                         aria-label={`Go to position ${i + 1}`}
                         className="rounded-full transition-all duration-250"
                         style={{
