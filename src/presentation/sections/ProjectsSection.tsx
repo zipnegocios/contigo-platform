@@ -33,26 +33,35 @@ function getCardsPerPage(): number {
 }
 
 export default function ProjectsSection({ projects }: Props) {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const headerRef = useRef<HTMLDivElement>(null)
-  const listRef = useRef<HTMLUListElement>(null)
-  const metaRef = useRef<HTMLDivElement>(null)
+  const sectionRef  = useRef<HTMLDivElement>(null)
+  const headerRef   = useRef<HTMLDivElement>(null)
+  const listRef     = useRef<HTMLUListElement>(null)
+  const trackRef    = useRef<HTMLDivElement>(null)       // overflow-hidden wrapper
+  const metaRef     = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
+  const cloneRef    = useRef<HTMLUListElement | null>(null) // active DOM clone
 
   const [cardsPerPage, setCardsPerPage] = useState<number>(5)
-  const [startIndex, setStartIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
+  const [startIndex,   setStartIndex]   = useState(0)
+  const [isPaused,     setIsPaused]     = useState(false)
   const animatingRef = useRef(false)
 
-  /* ── responsive cardsPerPage + resize handler ─────────────────────────── */
+  /* ── responsive cardsPerPage ─────────────────────────────────────────── */
   useEffect(() => {
     setCardsPerPage(getCardsPerPage())
     const handler = () => {
-      // Kill any animation in progress
-      if (timelineRef.current) {
-        timelineRef.current.kill()
-        animatingRef.current = false
+      // Kill animation and clean up any orphaned clone
+      if (timelineRef.current) timelineRef.current.kill()
+      if (cloneRef.current) {
+        cloneRef.current.remove()
+        cloneRef.current = null
       }
+      if (trackRef.current) trackRef.current.style.position = ''
+      if (listRef.current) {
+        const lis = listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item')
+        gsap.set(Array.from(lis), { clearProps: 'all' })
+      }
+      animatingRef.current = false
       setCardsPerPage(getCardsPerPage())
       setStartIndex(0)
     }
@@ -64,66 +73,69 @@ export default function ProjectsSection({ projects }: Props) {
   const visibleProjects = projects.slice(startIndex, startIndex + cardsPerPage)
   const hasNav = totalPositions > 1
 
-  /* ── staggered navigation with GSAP timeline ──────────────────────────── */
+  /* ── clone-based crossfade navigation ───────────────────────────────── */
   const navigate = useCallback(
     (newIndex: number, dir: 'next' | 'prev') => {
-      if (animatingRef.current || !listRef.current) return
+      if (animatingRef.current || !listRef.current || !trackRef.current) return
       animatingRef.current = true
       setIsPaused(true)
 
-      const outX = dir === 'next' ? -100 : 100  // pixels
-      const inX = dir === 'next' ? 100 : -100
+      const trackWidth = trackRef.current.offsetWidth
+      const outX = dir === 'next' ? -trackWidth :  trackWidth
+      const inX  = dir === 'next' ?  trackWidth : -trackWidth
 
-      // Snapshot current <li> elements BEFORE state update
-      const currentLis = Array.from(
-        listRef.current.querySelectorAll('.accordion-item'),
-      ) as HTMLLIElement[]
+      // ── A: Clone current <ul> absolutely over the track ──────────────
+      const clone = listRef.current.cloneNode(true) as HTMLUListElement
+      Object.assign(clone.style, {
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        margin: '0',
+        pointerEvents: 'none',
+        zIndex: '1',
+      })
+      trackRef.current.style.position = 'relative'
+      trackRef.current.appendChild(clone)
+      cloneRef.current = clone
 
-      let newLis: HTMLLIElement[] = []
+      // ── B: Swap DOM content synchronously (new cards behind clone) ───
+      flushSync(() => setStartIndex(newIndex))
 
-      // Create main timeline
-      const tl = gsap.timeline()
+      // ── C: Immediately hide new cards before any browser paint ───────
+      const newLis = Array.from(
+        listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item'),
+      )
+      gsap.set(newLis, { x: inX, opacity: 0 })
 
-      // PHASE 1: animate current cards OUT with stagger
-      tl.to(
-        currentLis,
-        {
-          x: outX,
-          opacity: 0,
-          duration: 0.35,
-          stagger: 0.06,
-          ease: 'power2.in',
-        },
-        0,
+      // ── D: Simultaneous exit (clones) + entrance (new cards) ─────────
+      const cloneLis = Array.from(
+        clone.querySelectorAll<HTMLLIElement>('.accordion-item'),
       )
 
-      // PHASE 1.5: update DOM (new cards render)
-      tl.call(() => {
-        flushSync(() => setStartIndex(newIndex))
+      const tl = gsap.timeline({
+        onComplete() {
+          clone.remove()
+          cloneRef.current = null
+          if (trackRef.current) trackRef.current.style.position = ''
+          // clearProps restores natural CSS so accordion flex works again
+          gsap.set(newLis, { clearProps: 'all' })
+          animatingRef.current = false
+          setIsPaused(false)
+        },
       })
 
-      // PHASE 1.75: prepare new cards (off-screen)
-      tl.call(() => {
-        newLis = Array.from(
-          listRef.current!.querySelectorAll('.accordion-item'),
-        ) as HTMLLIElement[]
-        gsap.set(newLis, { x: inX, opacity: 0 })
-      })
-
-      // PHASE 2: animate new cards IN with stagger
+      // Clones exit with stagger
+      tl.to(
+        cloneLis,
+        { x: outX, opacity: 0, duration: 0.4, stagger: 0.07, ease: 'power2.in' },
+        0,
+      )
+      // New cards enter with stagger, 100ms after exit starts (push feel)
       tl.to(
         newLis,
-        {
-          x: 0,
-          opacity: 1,
-          duration: 0.35,
-          stagger: 0.06,
-          ease: 'power2.out',
-          onComplete() {
-            animatingRef.current = false
-            setIsPaused(false)
-          },
-        },
+        { x: 0, opacity: 1, duration: 0.4, stagger: 0.07, ease: 'power2.out' },
+        0.1,
       )
 
       timelineRef.current = tl
@@ -135,7 +147,7 @@ export default function ProjectsSection({ projects }: Props) {
   const next = () => navigate((startIndex + 1) % totalPositions, 'next')
   const goTo = (i: number) => navigate(i, i > startIndex ? 'next' : 'prev')
 
-  /* ── autoplay: 4s interval, paused when isPaused ───────────────────────── */
+  /* ── autoplay: 4 s, pauses while isPaused ───────────────────────────── */
   useEffect(() => {
     if (!hasNav || isPaused) return
     const timer = setInterval(
@@ -145,21 +157,15 @@ export default function ProjectsSection({ projects }: Props) {
     return () => clearInterval(timer)
   }, [hasNav, isPaused, startIndex, totalPositions, navigate])
 
-  /* ── GSAP scroll reveals ──────────────────────────────────────────────── */
+  /* ── GSAP scroll reveals ─────────────────────────────────────────────── */
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        ease: 'power3.out',
+        opacity: 0, y: 30, duration: 0.8, ease: 'power3.out',
         scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
       })
       gsap.from(metaRef.current, {
-        opacity: 0,
-        y: 20,
-        duration: 0.6,
-        ease: 'power3.out',
+        opacity: 0, y: 20, duration: 0.6, ease: 'power3.out',
         scrollTrigger: { trigger: metaRef.current, start: 'top 90%' },
       })
     }, sectionRef)
@@ -200,13 +206,11 @@ export default function ProjectsSection({ projects }: Props) {
               aria-label="Previous"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
               style={arrowBtn}
-            >
-              ‹
-            </button>
+            >‹</button>
           )}
 
-          {/* Track — clips the sliding cards */}
-          <div className="flex-1 overflow-hidden">
+          {/* Track — clips sliding cards; ref needed for offsetWidth */}
+          <div ref={trackRef} className="flex-1 overflow-hidden">
             <ul
               ref={listRef}
               className="accordion-list"
@@ -215,7 +219,9 @@ export default function ProjectsSection({ projects }: Props) {
                 setIsPaused(true)
               }}
               onMouseLeave={() => {
-                if (timelineRef.current) timelineRef.current.resume()
+                if (timelineRef.current && animatingRef.current) {
+                  timelineRef.current.resume()
+                }
                 setIsPaused(false)
               }}
             >
@@ -226,10 +232,7 @@ export default function ProjectsSection({ projects }: Props) {
                     <video
                       src={project.coverImageUrl}
                       poster={project.coverPosterUrl ?? undefined}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
+                      autoPlay muted loop playsInline
                       className="accordion-video"
                     />
                   ) : (
@@ -238,7 +241,6 @@ export default function ProjectsSection({ projects }: Props) {
                       style={{ backgroundImage: `url(${project.coverImageUrl})` }}
                     />
                   )}
-
                   {/* Link overlay */}
                   <a href={`/projects/${project.slug}`} className="accordion-link">
                     <p className="accordion-title">{project.title}</p>
@@ -256,9 +258,7 @@ export default function ProjectsSection({ projects }: Props) {
               aria-label="Next"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
               style={arrowBtn}
-            >
-              ›
-            </button>
+            >›</button>
           )}
         </div>
       )}
@@ -272,9 +272,7 @@ export default function ProjectsSection({ projects }: Props) {
               onClick={() => goTo(i)}
               aria-label={`Position ${i + 1}`}
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
+                width: 8, height: 8, borderRadius: '50%',
                 backgroundColor: i === startIndex ? '#2D2924' : 'rgba(30,26,22,0.28)',
                 transition: 'background-color 0.2s ease',
               }}
