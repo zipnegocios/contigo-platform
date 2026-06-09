@@ -46,17 +46,19 @@ function RotatingText({ items, externalPaused }: { items: string[]; externalPaus
   useEffect(() => {
     if (items.length <= 1) return
 
-    const delay = () => 3500 + Math.random() * 1000   // 3.5–4.5 s
+    // Visible hold: 1500 ms fixed + 0–1000 ms random jitter, then 0.7 s of animation
+    const holdDelay = () => 1500 + Math.random() * 1000
 
     let timer: ReturnType<typeof setTimeout>
 
     const schedule = () => {
-      timer = setTimeout(tick, delay())
+      timer = setTimeout(tick, holdDelay())
     }
 
     const tick = () => {
       if (externalPaused || hoverRef.current || !innerRef.current) {
-        schedule()
+        // paused — check again after a short poll so we don't lose the beat
+        timer = setTimeout(tick, 300)
         return
       }
       // pick random index ≠ current
@@ -64,6 +66,7 @@ function RotatingText({ items, externalPaused }: { items: string[]; externalPaus
       while (next === idxRef.current) next = Math.floor(Math.random() * items.length)
 
       const el = innerRef.current
+      // onComplete schedules the next hold immediately after entrance finishes
       const tl = gsap.timeline({ onComplete: schedule })
       tl.to(el, { y: -22, opacity: 0, duration: 0.35, ease: 'power2.in' })
       tl.call(() => {
@@ -366,13 +369,12 @@ export default function ProjectsSection({ projects }: Props) {
           <span>Project count: {projects.length}</span>
           <span style={{ opacity: 0.4 }}>|</span>
           <span>
+            Project Location:{' '}
             <RotatingText
               items={projects.map((p) => formatLocationLabel(p.location, p.completedDate))}
               externalPaused={isPaused}
             />
           </span>
-          <span style={{ opacity: 0.4 }}>|</span>
-          <span>Est. 2015</span>
         </span>
         <a
           href="/projects"
