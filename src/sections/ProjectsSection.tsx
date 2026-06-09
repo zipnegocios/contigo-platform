@@ -4,6 +4,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function isVideo(url: string) {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
+}
+
 interface ProjectItem {
   id: string;
   slug: string;
@@ -11,6 +15,7 @@ interface ProjectItem {
   category: string;
   location?: string;
   coverImageUrl: string;
+  coverPosterUrl?: string | null;
 }
 
 export default function ProjectsSection() {
@@ -20,7 +25,7 @@ export default function ProjectsSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
 
-  const [projects, setProjects] = useState<ProjectItem[] | null>(null); // null = loading
+  const [projects, setProjects] = useState<ProjectItem[] | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   useEffect(() => {
@@ -33,7 +38,7 @@ export default function ProjectsSection() {
   const isCarousel = projects !== null && projects.length > 5;
 
   useEffect(() => {
-    if (projects === null) return; // wait for data before animating
+    if (projects === null) return;
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
         opacity: 0,
@@ -127,12 +132,25 @@ export default function ProjectsSection() {
                     className="block relative overflow-hidden"
                     style={{ height: '420px' }}
                   >
-                    <img
-                      src={project.coverImageUrl}
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                      style={{ transition: 'transform 0.6s ease' }}
-                    />
+                    {isVideo(project.coverImageUrl) ? (
+                      <video
+                        src={project.coverImageUrl}
+                        poster={project.coverPosterUrl ?? undefined}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={project.coverImageUrl}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                        style={{ transition: 'transform 0.6s ease' }}
+                      />
+                    )}
                     <div
                       className="absolute inset-0 flex flex-col justify-end p-8"
                       style={{ background: 'linear-gradient(to top, rgba(30,26,22,0.85) 0%, transparent 60%)' }}
@@ -183,10 +201,26 @@ export default function ProjectsSection() {
         <ul ref={listRef} className="accordion-list">
           {projects.map((project) => (
             <li key={project.id} className="accordion-item">
-              <div
-                className="accordion-img"
-                style={{ backgroundImage: `url(${project.coverImageUrl})` }}
-              />
+              <div className="accordion-img relative overflow-hidden">
+                {isVideo(project.coverImageUrl) ? (
+                  <video
+                    src={project.coverImageUrl}
+                    poster={project.coverPosterUrl ?? undefined}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={project.coverImageUrl}
+                    alt={project.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
+              </div>
               <a href={`/projects/${project.slug}`} className="accordion-link">
                 <p className="accordion-title">{project.title}</p>
                 <p className="accordion-desc">{project.category}</p>

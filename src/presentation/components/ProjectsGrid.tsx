@@ -3,6 +3,10 @@
 import Link from 'next/link'
 import { CategoryFilterPills } from './CategoryFilterPills'
 
+function isVideo(url: string) {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
+}
+
 interface ProjectItem {
   id: string
   slug: string
@@ -10,6 +14,7 @@ interface ProjectItem {
   category: string
   location: string
   coverImageUrl: string
+  coverPosterUrl?: string | null
   featured: boolean
   completedDate: Date
 }
@@ -48,17 +53,31 @@ export function ProjectsGrid({ projects, allCategories, activeSlug }: ProjectsGr
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => {
             const year = new Date(project.completedDate).getFullYear()
+            const video = isVideo(project.coverImageUrl)
             return (
               <Link key={project.id} href={`/projects/${project.slug}`} className="group block">
                 <div
                   className="relative overflow-hidden rounded-2xl"
                   style={{ aspectRatio: '4/3', backgroundColor: '#1E1A16' }}
                 >
-                  <img
-                    src={project.coverImageUrl}
-                    alt={project.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
+                  {video ? (
+                    <video
+                      src={project.coverImageUrl}
+                      poster={project.coverPosterUrl ?? undefined}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <img
+                      src={project.coverImageUrl}
+                      alt={project.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  )}
 
                   <div
                     className="absolute inset-0"

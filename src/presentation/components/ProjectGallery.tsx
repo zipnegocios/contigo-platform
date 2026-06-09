@@ -24,23 +24,28 @@ export function ProjectGallery({ items }: { items: GalleryItem[] }) {
         >
           Gallery
         </h2>
-        <div
-          className="grid gap-4"
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}
-        >
+
+        {/*
+          CSS columns masonry — each item renders at its natural aspect ratio.
+          Breakpoints:
+            mobile  (<640px):  1 column
+            sm      (640px+):  2 columns
+            lg      (1024px+): 3 columns
+        */}
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-3">
           {items.map((item, i) =>
             isVideo(item.url) ? (
               <div
                 key={i}
-                className="overflow-hidden rounded-lg"
+                className="break-inside-avoid mb-3 overflow-hidden rounded-xl"
                 style={{ backgroundColor: '#1E1A16', aspectRatio: '16/9' }}
               >
                 <video
                   src={item.url}
                   controls
                   preload="metadata"
+                  playsInline
                   className="w-full h-full object-cover"
-                  style={{ borderRadius: 8 }}
                 />
               </div>
             ) : (
@@ -48,13 +53,14 @@ export function ProjectGallery({ items }: { items: GalleryItem[] }) {
                 key={i}
                 type="button"
                 onClick={() => setLightboxIndex(imageItems.indexOf(item))}
-                className="overflow-hidden rounded-lg text-left group cursor-pointer"
-                style={{ aspectRatio: '4/3' }}
+                className="break-inside-avoid mb-3 block w-full overflow-hidden rounded-xl text-left group cursor-pointer"
               >
                 <img
                   src={item.url}
                   alt={item.title || `Gallery ${i + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  decoding="async"
                 />
               </button>
             ),

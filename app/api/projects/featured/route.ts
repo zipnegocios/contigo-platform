@@ -16,6 +16,7 @@ export async function GET() {
       category: p.category,
       location: p.location,
       coverImageUrl: p.coverImageUrl,
+      coverPosterUrl: p.coverPosterUrl ?? null,
     }))
 
     return NextResponse.json(data)

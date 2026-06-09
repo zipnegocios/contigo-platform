@@ -52,6 +52,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         categoryId: p.categoryId,
         location: p.location,
         coverImageUrl: p.coverImageUrl,
+        coverPosterUrl: p.coverPosterUrl ?? null,
         featured: p.featured,
         completedDate: p.completedDate,
       }))
