@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { VideoWithFallback } from '@/presentation/components/VideoWithFallback'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -12,12 +11,11 @@ function isVideo(url: string) {
 }
 
 /**
- * Returns the number of cards visible at the current viewport width.
- * Starts at 0 (sentinel) to avoid SSR/client hydration mismatch.
- * The carousel defers rendering until after the first client effect.
+ * Returns how many cards are visible at the current viewport width.
+ * xl (≥1280): 5 | lg (≥1024): 4 | md (≥768): 3 | sm (≥560): 2 | xs: 1
  */
 function useCardsPerView() {
-  const [count, setCount] = useState(0) // 0 = not yet measured client-side
+  const [count, setCount] = useState(1)
   useEffect(() => {
     function update() {
       const w = window.innerWidth
@@ -55,17 +53,18 @@ export default function ProjectsSection() {
 
   const cardsPerView = useCardsPerView()
   const total        = projects?.length ?? 0
-  const maxIndex     = cardsPerView > 0 ? Math.max(0, total - cardsPerView) : 0
-  const showNav      = cardsPerView > 0 && total > cardsPerView
+  const maxIndex     = Math.max(0, total - cardsPerView)
+  const showNav      = total > cardsPerView
+  // pill dots: show when positions ≤ 10, otherwise show counter text
   const dotCount     = maxIndex + 1
   const useDots      = dotCount <= 10
 
-  // Clamp index when breakpoint or project count changes
+  // Clamp index when breakpoint changes
   useEffect(() => {
     setCurrentIndex(i => Math.min(i, maxIndex))
   }, [maxIndex])
 
-  // Fetch all featured projects
+  // Fetch featured projects
   useEffect(() => {
     fetch('/api/projects/featured')
       .then(r => (r.ok ? r.json() : []))
@@ -73,7 +72,7 @@ export default function ProjectsSection() {
       .catch(() => setProjects([]))
   }, [])
 
-  // GSAP scroll entrance — runs after data arrives
+  // GSAP scroll entrance
   useEffect(() => {
     if (projects === null) return
     const ctx = gsap.context(() => {
@@ -122,7 +121,7 @@ export default function ProjectsSection() {
 
       {/* ── Loading skeleton ── */}
       {projects === null && (
-        <div className="flex gap-3 overflow-hidden" aria-busy="true" aria-label="Loading projects">
+        <div className="flex gap-3 overflow-hidden">
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
@@ -145,10 +144,10 @@ export default function ProjectsSection() {
         </p>
       )}
 
-      {/* ── Multi-card carousel (deferred until cardsPerView is measured) ── */}
-      {projects !== null && projects.length > 0 && cardsPerView > 0 && (
+      {/* ── Multi-card carousel ── */}
+      {projects !== null && projects.length > 0 && (
         <>
-          {/* Carousel track */}
+          {/* Track */}
           <div ref={carouselRef} className="overflow-hidden">
             <div
               className="flex"
@@ -157,102 +156,93 @@ export default function ProjectsSection() {
                 transition: 'transform 480ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              {projects.map((project) => {
-                const hasVideo = isVideo(project.coverImageUrl)
-                const poster   = project.coverPosterUrl ?? project.coverImageUrl
-
-                return (
-                  <div
-                    key={project.id}
-                    style={{ width: `${100 / cardsPerView}%`, flexShrink: 0, padding: '0 6px' }}
+              {projects.map((project) => (
+                <div
+                  key={project.id}
+                  style={{ width: `${100 / cardsPerView}%`, flexShrink: 0, padding: '0 6px' }}
+                >
+                  <a
+                    href={`/projects/${project.slug}`}
+                    className="block relative overflow-hidden rounded-2xl group"
+                    style={{ aspectRatio: '4/3', backgroundColor: '#1E1A16', display: 'block' }}
                   >
-                    <a
-                      href={`/projects/${project.slug}`}
-                      className="block relative overflow-hidden rounded-2xl group"
-                      style={{ aspectRatio: '4/3', display: 'block' }}
-                      aria-label={project.title}
-                    >
-                      {/* Cover: VideoWithFallback or plain image */}
-                      {hasVideo ? (
-                        <VideoWithFallback
-                          videoSrc={project.coverImageUrl}
-                          posterSrc={poster}
-                          className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <img
-                          src={project.coverImageUrl}
-                          alt={project.title}
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      )}
-
-                      {/* Dark gradient overlay */}
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            'linear-gradient(to top, rgba(30,26,22,0.90) 0%, rgba(30,26,22,0.15) 55%, transparent 100%)',
-                          zIndex: 3,
-                        }}
+                    {/* Cover: video or image */}
+                    {isVideo(project.coverImageUrl) ? (
+                      <video
+                        src={project.coverImageUrl}
+                        poster={project.coverPosterUrl ?? undefined}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
+                    ) : (
+                      <img
+                        src={project.coverImageUrl}
+                        alt={project.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    )}
 
-                      {/* Caption */}
-                      <div
-                        className="absolute bottom-0 left-0 right-0 p-4 md:p-5"
-                        style={{ zIndex: 4 }}
+                    {/* Dark gradient */}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          'linear-gradient(to top, rgba(30,26,22,0.90) 0%, rgba(30,26,22,0.18) 55%, transparent 100%)',
+                      }}
+                    />
+
+                    {/* Caption */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+                      <p
+                        className="text-[10px] uppercase tracking-widest mb-1 truncate"
+                        style={{ color: '#E2C063' }}
                       >
-                        <p
-                          className="text-[10px] uppercase tracking-widest mb-1 truncate"
-                          style={{ color: '#E2C063' }}
-                        >
-                          {project.category}
-                        </p>
-                        <p
-                          className="font-semibold leading-tight line-clamp-2"
-                          style={{
-                            fontFamily: 'var(--font-cormorant)',
-                            color: '#FAF6F0',
-                            fontSize: cardsPerView >= 4 ? '1rem' : '1.2rem',
-                          }}
-                        >
-                          {project.title}
-                        </p>
-                      </div>
-
-                      {/* Arrow hover badge */}
-                      <div
-                        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0"
+                        {project.category}
+                      </p>
+                      <p
+                        className="font-semibold leading-tight line-clamp-2"
                         style={{
-                          backgroundColor: 'rgba(226,192,99,0.18)',
-                          color: '#E2C063',
-                          border: '1px solid rgba(226,192,99,0.35)',
-                          zIndex: 4,
+                          fontFamily: 'var(--font-cormorant)',
+                          color: '#FAF6F0',
+                          fontSize: cardsPerView >= 4 ? '1rem' : '1.2rem',
                         }}
                       >
-                        <span className="text-xs" aria-hidden="true">→</span>
-                      </div>
-                    </a>
-                  </div>
-                )
-              })}
+                        {project.title}
+                      </p>
+                    </div>
+
+                    {/* Arrow hover badge */}
+                    <div
+                      className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0"
+                      style={{
+                        backgroundColor: 'rgba(226,192,99,0.18)',
+                        color: '#E2C063',
+                        border: '1px solid rgba(226,192,99,0.35)',
+                      }}
+                    >
+                      <span className="text-xs">→</span>
+                    </div>
+                  </a>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* ── Navigation ── */}
+          {/* ── Navigation row ── */}
           {showNav && (
             <div className="flex items-center justify-between mt-5">
               {/* Dots / counter */}
-              <div className="flex items-center gap-1.5" role="tablist" aria-label="Carousel position">
+              <div className="flex items-center gap-1.5">
                 {useDots
                   ? Array.from({ length: dotCount }).map((_, i) => (
                       <button
                         key={i}
-                        role="tab"
-                        aria-selected={i === currentIndex}
-                        aria-label={`Go to position ${i + 1}`}
                         onClick={() => setCurrentIndex(i)}
+                        aria-label={`Go to position ${i + 1}`}
                         className="rounded-full transition-all duration-250"
                         style={{
                           height: 8,
@@ -265,22 +255,18 @@ export default function ProjectsSection() {
                       />
                     ))
                   : (
-                    <span
-                      className="text-xs tabular-nums"
-                      aria-live="polite"
-                      style={{ color: 'var(--monolith-slate)' }}
-                    >
+                    <span className="text-xs tabular-nums" style={{ color: 'var(--monolith-slate)' }}>
                       {currentIndex + 1} — {dotCount}
                     </span>
                   )}
               </div>
 
-              {/* Prev / Next arrows */}
+              {/* Prev / Next */}
               <div className="flex gap-2">
                 <button
                   onClick={prev}
                   disabled={currentIndex === 0}
-                  aria-label="Previous projects"
+                  aria-label="Previous"
                   className="w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-25"
                   style={{
                     backgroundColor: 'rgba(226,192,99,0.10)',
@@ -293,7 +279,7 @@ export default function ProjectsSection() {
                 <button
                   onClick={next}
                   disabled={currentIndex >= maxIndex}
-                  aria-label="Next projects"
+                  aria-label="Next"
                   className="w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-25"
                   style={{
                     backgroundColor: 'rgba(226,192,99,0.10)',
