@@ -35,20 +35,24 @@ function getCardsPerPage(): number {
 export default function ProjectsSection({ projects }: Props) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
-  const listRef  = useRef<HTMLUListElement>(null)
-  const metaRef  = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
+  const metaRef = useRef<HTMLDivElement>(null)
+  const timelineRef = useRef<gsap.core.Timeline | null>(null)
 
   const [cardsPerPage, setCardsPerPage] = useState<number>(5)
-  const [startIndex,   setStartIndex]   = useState(0)
-  const [isPaused,     setIsPaused]     = useState(false)
-
-  // Ref so GSAP callbacks always see current value without needing it in deps
+  const [startIndex, setStartIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
   const animatingRef = useRef(false)
 
-  /* ── responsive cardsPerPage ─────────────────────────────────────────── */
+  /* ── responsive cardsPerPage + resize handler ─────────────────────────── */
   useEffect(() => {
     setCardsPerPage(getCardsPerPage())
     const handler = () => {
+      // Kill any animation in progress
+      if (timelineRef.current) {
+        timelineRef.current.kill()
+        animatingRef.current = false
+      }
       setCardsPerPage(getCardsPerPage())
       setStartIndex(0)
     }
@@ -60,50 +64,78 @@ export default function ProjectsSection({ projects }: Props) {
   const visibleProjects = projects.slice(startIndex, startIndex + cardsPerPage)
   const hasNav = totalPositions > 1
 
-  /* ── slide animation ─────────────────────────────────────────────────── */
+  /* ── staggered navigation with GSAP timeline ──────────────────────────── */
   const navigate = useCallback(
     (newIndex: number, dir: 'next' | 'prev') => {
       if (animatingRef.current || !listRef.current) return
       animatingRef.current = true
       setIsPaused(true)
 
-      const outX = dir === 'next' ? '-100%' : '100%'
-      const inX  = dir === 'next' ?  '100%' : '-100%'
+      const outX = dir === 'next' ? -100 : 100  // pixels
+      const inX = dir === 'next' ? 100 : -100
 
-      // Phase 1: slide current cards out
-      gsap.to(listRef.current, {
-        x: outX,
-        duration: 0.34,
-        ease: 'power2.inOut',
-        onComplete() {
-          // Swap content synchronously so new cards are in DOM before phase 2
-          flushSync(() => setStartIndex(newIndex))
+      // Snapshot current <li> elements BEFORE state update
+      const currentLis = Array.from(
+        listRef.current.querySelectorAll('.accordion-item'),
+      ) as HTMLLIElement[]
 
-          // Phase 2: snap new cards to the incoming side, then slide to center
-          gsap.fromTo(
-            listRef.current,
-            { x: inX },
-            {
-              x: 0,
-              duration: 0.34,
-              ease: 'power2.inOut',
-              onComplete() {
-                animatingRef.current = false
-                setIsPaused(false)
-              },
-            },
-          )
+      let newLis: HTMLLIElement[] = []
+
+      // Create main timeline
+      const tl = gsap.timeline()
+
+      // PHASE 1: animate current cards OUT with stagger
+      tl.to(
+        currentLis,
+        {
+          x: outX,
+          opacity: 0,
+          duration: 0.35,
+          stagger: 0.06,
+          ease: 'power2.in',
         },
+        0,
+      )
+
+      // PHASE 1.5: update DOM (new cards render)
+      tl.call(() => {
+        flushSync(() => setStartIndex(newIndex))
       })
+
+      // PHASE 1.75: prepare new cards (off-screen)
+      tl.call(() => {
+        newLis = Array.from(
+          listRef.current!.querySelectorAll('.accordion-item'),
+        ) as HTMLLIElement[]
+        gsap.set(newLis, { x: inX, opacity: 0 })
+      })
+
+      // PHASE 2: animate new cards IN with stagger
+      tl.to(
+        newLis,
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.35,
+          stagger: 0.06,
+          ease: 'power2.out',
+          onComplete() {
+            animatingRef.current = false
+            setIsPaused(false)
+          },
+        },
+      )
+
+      timelineRef.current = tl
     },
     [],
   )
 
-  const prev  = () => navigate((startIndex - 1 + totalPositions) % totalPositions, 'prev')
-  const next  = () => navigate((startIndex + 1) % totalPositions, 'next')
-  const goTo  = (i: number) => navigate(i, i > startIndex ? 'next' : 'prev')
+  const prev = () => navigate((startIndex - 1 + totalPositions) % totalPositions, 'prev')
+  const next = () => navigate((startIndex + 1) % totalPositions, 'next')
+  const goTo = (i: number) => navigate(i, i > startIndex ? 'next' : 'prev')
 
-  /* ── autoplay — resets 4 s after each position change ───────────────── */
+  /* ── autoplay: 4s interval, paused when isPaused ───────────────────────── */
   useEffect(() => {
     if (!hasNav || isPaused) return
     const timer = setInterval(
@@ -113,15 +145,21 @@ export default function ProjectsSection({ projects }: Props) {
     return () => clearInterval(timer)
   }, [hasNav, isPaused, startIndex, totalPositions, navigate])
 
-  /* ── GSAP scroll reveals ─────────────────────────────────────────────── */
+  /* ── GSAP scroll reveals ──────────────────────────────────────────────── */
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
-        opacity: 0, y: 30, duration: 0.8, ease: 'power3.out',
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: 'power3.out',
         scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
       })
       gsap.from(metaRef.current, {
-        opacity: 0, y: 20, duration: 0.6, ease: 'power3.out',
+        opacity: 0,
+        y: 20,
+        duration: 0.6,
+        ease: 'power3.out',
         scrollTrigger: { trigger: metaRef.current, start: 'top 90%' },
       })
     }, sectionRef)
@@ -155,7 +193,6 @@ export default function ProjectsSection({ projects }: Props) {
         </p>
       ) : (
         <div className="relative mt-8 flex items-center gap-3">
-
           {/* Prev arrow */}
           {hasNav && (
             <button
@@ -163,27 +200,36 @@ export default function ProjectsSection({ projects }: Props) {
               aria-label="Previous"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
               style={arrowBtn}
-            >‹</button>
+            >
+              ‹
+            </button>
           )}
 
-          {/* Track — clips the sliding ul so nothing bleeds outside */}
+          {/* Track — clips the sliding cards */}
           <div className="flex-1 overflow-hidden">
             <ul
               ref={listRef}
               className="accordion-list"
-              style={{ willChange: 'transform' }}
-              onMouseEnter={() => { if (!animatingRef.current) setIsPaused(true) }}
-              onMouseLeave={() => setIsPaused(false)}
+              onMouseEnter={() => {
+                if (timelineRef.current) timelineRef.current.pause()
+                setIsPaused(true)
+              }}
+              onMouseLeave={() => {
+                if (timelineRef.current) timelineRef.current.resume()
+                setIsPaused(false)
+              }}
             >
               {visibleProjects.map((project) => (
                 <li key={project.id} className="accordion-item">
-
                   {/* Media layer */}
                   {isVideo(project.coverImageUrl) ? (
                     <video
                       src={project.coverImageUrl}
                       poster={project.coverPosterUrl ?? undefined}
-                      autoPlay muted loop playsInline
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
                       className="accordion-video"
                     />
                   ) : (
@@ -198,7 +244,6 @@ export default function ProjectsSection({ projects }: Props) {
                     <p className="accordion-title">{project.title}</p>
                     <p className="accordion-desc">{project.category}</p>
                   </a>
-
                 </li>
               ))}
             </ul>
@@ -211,9 +256,10 @@ export default function ProjectsSection({ projects }: Props) {
               aria-label="Next"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
               style={arrowBtn}
-            >›</button>
+            >
+              ›
+            </button>
           )}
-
         </div>
       )}
 
@@ -226,7 +272,9 @@ export default function ProjectsSection({ projects }: Props) {
               onClick={() => goTo(i)}
               aria-label={`Position ${i + 1}`}
               style={{
-                width: 8, height: 8, borderRadius: '50%',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
                 backgroundColor: i === startIndex ? '#2D2924' : 'rgba(30,26,22,0.28)',
                 transition: 'background-color 0.2s ease',
               }}
