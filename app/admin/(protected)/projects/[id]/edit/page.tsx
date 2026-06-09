@@ -23,6 +23,7 @@ export default async function EditProjectPage({ params }: { params: { id: string
           slug: project.slug,
           title: project.title,
           category: project.category,
+          categoryId: project.categoryId,
           description: project.description,
           location: project.location,
           completedDate: project.completedDate.toISOString().split('T')[0],

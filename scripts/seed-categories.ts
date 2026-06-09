@@ -1,8 +1,8 @@
 /**
  * Seeds hierarchical service categories from the Contigo services document.
- * Also tags existing project categories with type='project'.
+ * Idempotent: skips categories that already exist (matched by slug + type).
  *
- * Usage: npx tsx scripts/seed-categories.ts
+ * Usage: node --env-file=.env.local node_modules/.bin/tsx scripts/seed-categories.ts
  */
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/postgres-js'
@@ -17,9 +17,18 @@ function makeSlug(name: string): string {
   return name
     .toLowerCase()
     .trim()
+    .replace(/[™®©]/g, '')
+    .replace(/\s*&\s*/g, '-')
+    .replace(/[/\\]/g, '-')
+    .replace(/[()]/g, '')
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
+
+let created = 0
+let skipped = 0
 
 async function upsertCategory(params: {
   name: string
@@ -31,7 +40,6 @@ async function upsertCategory(params: {
 }): Promise<string> {
   const slug = makeSlug(params.name)
 
-  // Check if it already exists (slug + type + parent match)
   const existing = await db
     .select()
     .from(schema.categories)
@@ -44,7 +52,7 @@ async function upsertCategory(params: {
     .limit(1)
 
   if (existing.length > 0) {
-    console.log(`  Skip (exists): ${params.name}`)
+    skipped++
     return existing[0].id
   }
 
@@ -57,6 +65,7 @@ async function upsertCategory(params: {
     parentId: params.parentId ?? null,
     type: params.type,
     description: params.description ?? null,
+    icon: null,
     orderIndex: params.orderIndex ?? 0,
     isActive: true,
     isSystem: params.isSystem ?? false,
@@ -64,188 +73,229 @@ async function upsertCategory(params: {
     updatedAt: now,
   })
 
-  console.log(`  Created: ${params.name} (${params.type})`)
+  created++
   return id
 }
 
 const SERVICE_CATEGORIES: Array<{
   name: string
-  subServices?: string[]
+  description: string
+  subServices: string[]
 }> = [
   {
     name: 'New Home Building',
+    description:
+      "Building your future from the ground up. At Contigo Constructions, we don't just build houses; we create custom homes tailored to the unique South Australian landscape and your specific lifestyle. Our end-to-end management ensures your dream home is delivered on time, within budget, and without the stress of council complexities.",
     subServices: [
-      'Design & Planning Consultation',
-      'Site Preparation & Earthworks',
-      'Concreting (Slab, Footings, Driveways)',
-      'Structural Framing',
-      'Roof Construction',
-      'External Cladding & Rendering',
-      'Internal Fit-Out',
-      'Carpentry & Joinery',
-      'Gyprock Fixing & Flushing',
+      'Approvals & Certifications',
+      'Bricklaying & Cladding',
+      'Carpentry',
+      'Concreting & Footings',
+      'Design & Drafting',
+      'Electrical & Plumbing',
+      'Engineering',
+      'Excavation & Earthworks',
+      'Framing (Timber or Steel)',
+      'Landscaping',
       'Painting',
-      'Landscaping & Outdoor Areas',
+      'Render & Solid Plastering',
+      'Roofing & Guttering',
+      'Windows & Glazing',
     ],
   },
   {
     name: 'Home Extensions',
+    description:
+      'Expand your horizons without moving house. We specialize in seamless home extensions that feel like they have always been part of the original structure. From adding a sun-drenched living area to a complete second-storey addition, we handle the entire lifecycle from pre-construction planning to final handover.',
     subServices: [
-      'Design & Planning Consultation',
-      'Site Preparation',
-      'Concreting',
-      'Framing & Structural Work',
-      'Roofing Integration',
-      'Cladding & Rendering',
-      'Internal Fit-Out',
+      'Approvals & Certifications',
       'Carpentry',
-      'Gyprock',
+      'Cladding',
+      'Concreting',
+      'Design & Drafting',
+      'Electrical & Plumbing',
+      'Engineering',
+      'Framing (Timber or Steel)',
+      'Gyprock Fixing & Flushing',
       'Painting',
-      'Landscaping Integration',
+      'Tiling',
+      'Render & Solid Plastering',
+      'Roofing',
     ],
   },
   {
     name: 'Home Renovations',
+    description:
+      'Elevate your everyday life. At Contigo Constructions, we transform kitchens, bathrooms, and laundries into high-performance spaces that add immediate value to your home. Our Adelaide-based team focuses on conceptual planning and space optimization, producing detailed drawings that ensure the construction phase is efficient and perfectly aligned with your vision.',
     subServices: [
-      'Kitchen Renovations',
-      'Bathroom Renovations',
-      'Laundry Renovations',
-      'Bedroom & Living Area Updates',
-      'Structural Alterations',
-      'Window & Door Replacements',
-      'Flooring',
-      'Painting & Finishing',
+      'Caulking',
+      'Cladding',
+      'Colour Consulting',
+      'Concreting',
+      'Demolition',
+      'Electrical & Plumbing',
+      'Grouting',
+      'Gyprock Fixing & Flushing',
+      'Painting',
+      'Render & Solid Plastering',
+      'Tiling',
+      'Timber Framing',
+      'Waterproofing',
     ],
   },
   {
     name: 'Carpentry',
+    description:
+      'Precision in every cut, soul in every finish. Our carpentry team brings structure and elegance together, working from detailed architectural drawings or helping you shape a custom brief. Whether it\'s high-performance outdoor decking or intricate interior skirting, we use materials specifically chosen to thrive in South Australian conditions.',
     subServices: [
-      'Custom Cabinetry & Joinery',
-      'Door & Window Frames',
-      'Decking & Pergola Structures',
-      'Staircase Construction',
-      'Skirting Boards, Architraves & Cornices',
-      'Structural Carpentry',
-      'Feature Walls & Decorative Timber Work',
+      '1st Fix & 2nd Fix',
+      'Architraves & Skirting',
+      'Decking & Pergolas',
+      'Eaves & Fencing',
+      'General Repairs & Maintenance',
+      'Interior & Exterior Doors',
+      'Renovations & Extensions',
+      'Shop Fitouts',
+      'Staircases & Studwork',
+      'Verandahs',
     ],
   },
   {
     name: 'Cladding',
+    description:
+      'The ultimate shield for your masterpiece. We install high-performance walling systems that ensure your home is weather-tight, thermally efficient, and visually striking. Our team coordinates every detail from substrate preparation to compliant fixings, using industry-leading systems like Hebel, Axon, and Weatherboard.',
     subServices: [
-      'Fiber Cement Cladding',
-      'Timber Cladding',
-      'Metal Cladding',
-      'Composite Cladding',
+      'Axon',
+      'Blueboard',
+      'ExoTec Facade',
+      'Foam',
+      'Hebel',
+      'Matrix',
+      'Stria',
       'Weatherboard',
-      'Brick Veneer',
-      'Cladding Repairs & Replacement',
     ],
   },
   {
     name: 'Gyprock Fixing & Flushing',
+    description:
+      'Flawless surfaces, ready for the spotlight. We are specialists in high-speed, expert-led plasterboard installation for new builds and luxury renovations. From complex bulkheads and raked ceilings to fire-rated systems, our team ensures straight lines, tight joints, and perfectly smooth edges.',
     subServices: [
-      'Standard Wall & Ceiling Sheeting',
-      'Curved & Feature Ceilings',
-      'Bulkheads & Soffits',
-      'Fire-Rated Lining Systems',
-      'Acoustic Partition Systems',
-      'Wet Area Sheeting',
-      'Cornice Installation',
-      'Stopping & Finishing (Levels 1–5)',
+      'Acoustic & Suspended Ceilings',
+      'Bulkheads & Pelmet Boxes',
+      'Commercial & Retail Fitouts',
+      'Fire-Rated Systems',
+      'Garage & Shed Conversions',
+      'Metal Stud & Track Framing',
+      'Partition Walls',
+      'Raked & Shadow Line Ceilings',
+      'Residential Plasterboard Fixing',
+      'Water-Resistant Boarding',
     ],
   },
   {
     name: 'Landscaping',
+    description:
+      "Living beyond the walls. Unlike many builders, Contigo Constructions views the garden as a core part of the architectural experience. We design and build outdoor spaces that thrive in Adelaide's climate, managing everything from concrete driveways and retaining walls to native drought-tolerant planting.",
     subServices: [
-      'Garden Design & Planning',
-      'Lawn Installation & Turfing',
+      'Concrete Paths & Driveways',
+      'Decking',
+      'Drainage',
+      'Fencing',
+      'Outdoor Kitchens',
+      'Paving',
       'Retaining Walls',
-      'Paths & Paving',
-      'Pergolas & Outdoor Structures',
+      'Garden Borders',
       'Irrigation Systems',
-      'Planting & Garden Beds',
-      'Drainage Solutions',
+      'Mulching',
+      'Native & Drought Tolerant Planting',
+      'Turf Supply & Laying',
     ],
   },
   {
-    name: 'Painting',
+    name: 'Internal & External Painting',
+    description:
+      'The final touch of perfection. We protect and beautify your investment with premium, long-lasting coating systems. Our meticulous preparation process—repairing, patching, and selecting the right primers—guarantees a sharp, even finish that looks great today and lasts for years, perfectly suited to the demanding South Australian sun.',
     subServices: [
-      'Interior Painting',
-      'Exterior Painting',
-      'Feature Walls',
-      'Texture Coating',
-      'Epoxy Flooring',
-      'Deck Staining & Sealing',
-      'Commercial Painting',
+      'ASU & PSU Sealers',
+      'Gloss & Semi-Gloss Finishes',
+      'Low Sheen & Matt Finishes',
+      'Oil-Based & Water-Based Enamels',
+      'Satin Finishes',
+      'Professional Stain-Blockers',
     ],
   },
   {
     name: 'Render & Solid Plastering',
+    description:
+      'Durable elegance for every surface. Render and solid plastering are core capabilities at Contigo Constructions. We deliver clean, durable finishes for brick, blueboard, and Hebel. Whether you need a contemporary acrylic texture coat or a classic white set finish, we provide surfaces that are expertly prepared to handle local moisture and movement.',
     subServices: [
-      'Acrylic Render',
-      'Cement Render',
-      'Texture Coatings',
-      'Bagging',
-      'Solid Plastering (Internal)',
-      'Foam Cornice & Decorative Details',
-      'Repair & Patching',
+      'Acrylic Texture Coat',
+      'Bagged Finish',
+      'Float & Set',
+      'Pebble Dash',
+      'Sponge & Steel Trowel Finish',
+      'Stucco & Tyrolean',
+      'White Set',
     ],
   },
   {
     name: 'Venetian Plastering',
+    description:
+      'Luxury you can touch. At Contigo Constructions, we create seamless mineral finishes that transform walls, fireplaces, and benchtops into works of art. These highly durable, low-maintenance plasters are tailored to elevate any space, offering everything from matte organic textures to high-polish finishes that redefine interior luxury in Adelaide.',
     subServices: [
-      'Traditional Venetian Plaster',
+      'Grassello & Marmorino',
+      'Micro Cement & Xbond',
       'Polished Plaster',
-      'Marmorino',
-      'Grassello',
-      'Feature Wall Applications',
-      'Restoration & Repair of Heritage Plasterwork',
+      'Split Stone',
+      'Stuco Lava',
+      'Tadelakt',
+      'Travertino',
     ],
   },
 ]
 
 async function main() {
-  console.log('Seeding service categories...\n')
+  console.log('=== Seeding service categories ===\n')
+  console.log(`Total root categories: ${SERVICE_CATEGORIES.length}`)
+  const totalSubs = SERVICE_CATEGORIES.reduce((sum, c) => sum + c.subServices.length, 0)
+  console.log(`Total sub-services: ${totalSubs}`)
+  console.log(`Total to process: ${SERVICE_CATEGORIES.length + totalSubs}\n`)
 
-  // Ensure existing project categories are tagged correctly
-  console.log('Tagging existing project categories...')
-  const projectSlugs = ['new-home', 'extension', 'renovation', 'commercial', 'restoration', 'uncategorized']
-  for (const slug of projectSlugs) {
-    await db
-      .update(schema.categories)
-      .set({ type: 'project', updatedAt: new Date() })
-      .where(eq(schema.categories.slug, slug))
-  }
-  console.log('Done tagging project categories.\n')
-
-  // Insert service categories
   for (let i = 0; i < SERVICE_CATEGORIES.length; i++) {
-    const { name, subServices } = SERVICE_CATEGORIES[i]
+    const { name, description, subServices } = SERVICE_CATEGORIES[i]
     console.log(`[${i + 1}/${SERVICE_CATEGORIES.length}] ${name}`)
 
     const parentId = await upsertCategory({
       name,
       type: 'service',
+      description,
       orderIndex: i,
+      isSystem: false,
     })
 
-    if (subServices) {
-      for (let j = 0; j < subServices.length; j++) {
-        await upsertCategory({
-          name: subServices[j],
-          type: 'service',
-          parentId,
-          orderIndex: j,
-        })
-      }
+    for (let j = 0; j < subServices.length; j++) {
+      const sub = subServices[j]
+      await upsertCategory({
+        name: sub,
+        type: 'service',
+        parentId,
+        orderIndex: j,
+      })
+      process.stdout.write(`  ✓ ${sub}\n`)
     }
+
+    console.log()
   }
 
-  console.log('\nDone! Service categories seeded successfully.')
+  console.log('=== Summary ===')
+  console.log(`Created: ${created}`)
+  console.log(`Skipped (already exist): ${skipped}`)
+  console.log(`Total processed: ${created + skipped}`)
+
   await client.end()
 }
 
 main().catch((err) => {
-  console.error(err)
+  console.error('Seed failed:', err)
   process.exit(1)
 })
