@@ -41,7 +41,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
       const [raw, flatCats] = await Promise.all([
         projectRepo.findPublished(100),
-        categoryRepo.findFlat('project'),
+        categoryRepo.findFlat('service'),
       ])
 
       allProjects = raw.map((p) => ({

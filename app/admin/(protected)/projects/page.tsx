@@ -10,7 +10,7 @@ export default async function ProjectsPage() {
 
   const [allProjects, flatCats] = await Promise.all([
     projectRepo.findAll(100),
-    categoryRepo.findFlat('project'),
+    categoryRepo.findFlat('service'),
   ])
 
   const catMap = new Map(flatCats.map((c) => [c.id, c.name]))
