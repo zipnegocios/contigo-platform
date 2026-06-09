@@ -169,8 +169,10 @@ export default function ServicesIndex({ services }: Props) {
               active === null ? 'rest' : i === active ? 'active' : 'dim'
             return (
               <li key={s.slug}>
+                {/* Phase 2: point at `/services/${s.slug}` once the
+                    category-driven detail page exists. For now → enquiry. */}
                 <Link
-                  href={`/services/${s.slug}`}
+                  href="/#contact"
                   className="atelier-row"
                   data-state={state}
                   onMouseEnter={() => onEnter(i)}
@@ -204,7 +206,7 @@ export default function ServicesIndex({ services }: Props) {
               <ServiceIcon name={s.iconKey} className="atelier-copy-icon" />
               {s.tagline && <p className="atelier-copy-tagline">{s.tagline}</p>}
               {s.support && <p className="atelier-copy-support">{s.support}</p>}
-              <span className="atelier-copy-cta">Explore this service →</span>
+              <span className="atelier-copy-cta">Enquire about this service →</span>
             </div>
           ))}
         </div>
