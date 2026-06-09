@@ -38,29 +38,32 @@ export default function ProjectsSection({ projects }: Props) {
   const metaRef = useRef<HTMLDivElement>(null)
 
   const [cardsPerPage, setCardsPerPage] = useState<number>(5)
-  const [currentPage, setCurrentPage] = useState(0)
+  const [startIndex, setStartIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
 
-  // Responsive cardsPerPage
+  // Responsive cardsPerPage — reset position on resize
   useEffect(() => {
     setCardsPerPage(getCardsPerPage())
     const handler = () => {
       setCardsPerPage(getCardsPerPage())
-      setCurrentPage(0)
+      setStartIndex(0)
     }
     window.addEventListener('resize', handler)
     return () => window.removeEventListener('resize', handler)
   }, [])
 
-  const totalPages = Math.ceil(projects.length / cardsPerPage)
-  const visibleProjects = projects.slice(currentPage * cardsPerPage, (currentPage + 1) * cardsPerPage)
+  // Sliding window: total navigable positions = projects.length - cardsPerPage + 1
+  const totalPositions = Math.max(1, projects.length - cardsPerPage + 1)
+  const visibleProjects = projects.slice(startIndex, startIndex + cardsPerPage)
+  const hasNav = totalPositions > 1
 
-  const navigate = (newPage: number) => {
+  const navigate = (newIndex: number) => {
     if (listRef.current) {
       listRef.current.style.opacity = '0'
       listRef.current.style.transform = 'translateX(8px)'
     }
     setTimeout(() => {
-      setCurrentPage(newPage)
+      setStartIndex(newIndex)
       if (listRef.current) {
         listRef.current.style.opacity = '1'
         listRef.current.style.transform = 'translateX(0)'
@@ -68,8 +71,31 @@ export default function ProjectsSection({ projects }: Props) {
     }, 180)
   }
 
-  const prev = () => navigate((currentPage - 1 + totalPages) % totalPages)
-  const next = () => navigate((currentPage + 1) % totalPages)
+  const prev = () => navigate((startIndex - 1 + totalPositions) % totalPositions)
+  const next = () => navigate((startIndex + 1) % totalPositions)
+
+  // Autoplay: advances 1 card every 4 s, pauses on hover
+  useEffect(() => {
+    if (!hasNav || isPaused) return
+    const timer = setInterval(() => {
+      // call next inline to avoid stale closure on navigate
+      setStartIndex((idx) => {
+        const newIdx = (idx + 1) % totalPositions
+        if (listRef.current) {
+          listRef.current.style.opacity = '0'
+          listRef.current.style.transform = 'translateX(8px)'
+          setTimeout(() => {
+            if (listRef.current) {
+              listRef.current.style.opacity = '1'
+              listRef.current.style.transform = 'translateX(0)'
+            }
+          }, 180)
+        }
+        return newIdx
+      })
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [hasNav, isPaused, totalPositions])
 
   // GSAP scroll animations
   useEffect(() => {
@@ -94,10 +120,11 @@ export default function ProjectsSection({ projects }: Props) {
     return () => ctx.revert()
   }, [])
 
-  const goldBtn: React.CSSProperties = {
-    backgroundColor: 'rgba(226,192,99,0.18)',
+  // Arrow / dot styles — dark semi-transparent for visibility on the concrete bg
+  const arrowBtn: React.CSSProperties = {
+    backgroundColor: 'rgba(30,26,22,0.60)',
     color: '#E2C063',
-    border: '1px solid rgba(226,192,99,0.4)',
+    border: '1px solid rgba(226,192,99,0.45)',
   }
 
   return (
@@ -122,22 +149,24 @@ export default function ProjectsSection({ projects }: Props) {
       ) : (
         <div className="relative mt-8 flex items-center gap-3">
           {/* Prev arrow */}
-          {totalPages > 1 && (
+          {hasNav && (
             <button
               onClick={prev}
               aria-label="Previous"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
-              style={goldBtn}
+              style={arrowBtn}
             >
               ‹
             </button>
           )}
 
-          {/* Accordion list */}
+          {/* Accordion list — hover pauses autoplay */}
           <ul
             ref={listRef}
             className="accordion-list flex-1"
             style={{ transition: 'opacity 0.35s ease, transform 0.35s ease' }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
           >
             {visibleProjects.map((project) => (
               <li key={project.id} className="accordion-item">
@@ -168,12 +197,12 @@ export default function ProjectsSection({ projects }: Props) {
           </ul>
 
           {/* Next arrow */}
-          {totalPages > 1 && (
+          {hasNav && (
             <button
               onClick={next}
               aria-label="Next"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
-              style={goldBtn}
+              style={arrowBtn}
             >
               ›
             </button>
@@ -181,19 +210,20 @@ export default function ProjectsSection({ projects }: Props) {
         </div>
       )}
 
-      {/* Dot indicators */}
-      {totalPages > 1 && (
+      {/* Dot indicators — one per navigable position */}
+      {hasNav && (
         <div className="flex justify-center gap-2 mt-4">
-          {Array.from({ length: totalPages }).map((_, i) => (
+          {Array.from({ length: totalPositions }).map((_, i) => (
             <button
               key={i}
               onClick={() => navigate(i)}
-              aria-label={`Page ${i + 1}`}
+              aria-label={`Position ${i + 1}`}
               style={{
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                backgroundColor: i === currentPage ? '#E2C063' : 'rgba(226,192,99,0.25)',
+                backgroundColor: i === startIndex ? '#2D2924' : 'rgba(30,26,22,0.28)',
+                transition: 'background-color 0.2s ease',
               }}
             />
           ))}
