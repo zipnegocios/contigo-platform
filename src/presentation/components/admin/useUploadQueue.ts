@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { extractMediaMetadata } from '@/presentation/lib/extractMediaMetadata'
 import type { MediaObject } from './MediaLibraryContext'
 
 const MAX_CONCURRENT = 3
-const UPLOAD_PREFIX = 'projects/gallery'
 
 export type UploadStatus = 'pending' | 'uploading' | 'done' | 'error' | 'skipped' | 'duplicate'
 
@@ -27,10 +26,13 @@ function makeId() {
 export function useUploadQueue(
   existingItems: MediaObject[],
   onFileUploaded: () => void,
+  uploadPrefix = 'projects/gallery',
 ) {
   const [queue, setQueue] = useState<QueueItem[]>([])
   const queueRef = useRef<QueueItem[]>([])
   const xhrsRef = useRef<Map<string, XMLHttpRequest>>(new Map())
+  const uploadPrefixRef = useRef(uploadPrefix)
+  useEffect(() => { uploadPrefixRef.current = uploadPrefix }, [uploadPrefix])
 
   // Keeps ref always in sync; must be used for all state mutations
   function sync(updater: (prev: QueueItem[]) => QueueItem[]) {
@@ -77,7 +79,7 @@ export function useUploadQueue(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prefix: UPLOAD_PREFIX,
+          prefix: uploadPrefixRef.current,
           filename: item.file.name,
           contentType: item.file.type,
         }),

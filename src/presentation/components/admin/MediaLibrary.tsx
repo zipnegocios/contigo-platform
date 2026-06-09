@@ -26,11 +26,12 @@ function MediaLibraryInner() {
   const { tab, setTab, detailItem, loading, refreshItems, items } = useMediaLibrary()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Upload queue
+  // Upload queue — files go to 'bank' prefix when on Bank tab, otherwise 'projects/gallery'
+  const uploadPrefix = tab === 'bank' ? 'bank' : 'projects/gallery'
   const {
     queue, addFiles, cancelItem, cancelAll, forceUpload, skipItem,
     removeItem, clearCompleted, clearAll, stats, isActive,
-  } = useUploadQueue(items, refreshItems)
+  } = useUploadQueue(items, refreshItems, uploadPrefix)
 
   const [queueVisible, setQueueVisible] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
