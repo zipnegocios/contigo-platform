@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { flushSync } from 'react-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -34,14 +35,17 @@ function getCardsPerPage(): number {
 export default function ProjectsSection({ projects }: Props) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
-  const listRef = useRef<HTMLUListElement>(null)
-  const metaRef = useRef<HTMLDivElement>(null)
+  const listRef  = useRef<HTMLUListElement>(null)
+  const metaRef  = useRef<HTMLDivElement>(null)
 
   const [cardsPerPage, setCardsPerPage] = useState<number>(5)
-  const [startIndex, setStartIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
+  const [startIndex,   setStartIndex]   = useState(0)
+  const [isPaused,     setIsPaused]     = useState(false)
 
-  // Responsive cardsPerPage — reset position on resize
+  // Ref so GSAP callbacks always see current value without needing it in deps
+  const animatingRef = useRef(false)
+
+  /* ── responsive cardsPerPage ─────────────────────────────────────────── */
   useEffect(() => {
     setCardsPerPage(getCardsPerPage())
     const handler = () => {
@@ -52,75 +56,78 @@ export default function ProjectsSection({ projects }: Props) {
     return () => window.removeEventListener('resize', handler)
   }, [])
 
-  // Sliding window: total navigable positions = projects.length - cardsPerPage + 1
   const totalPositions = Math.max(1, projects.length - cardsPerPage + 1)
   const visibleProjects = projects.slice(startIndex, startIndex + cardsPerPage)
   const hasNav = totalPositions > 1
 
-  const navigate = (newIndex: number) => {
-    if (listRef.current) {
-      listRef.current.style.opacity = '0'
-      listRef.current.style.transform = 'translateX(8px)'
-    }
-    setTimeout(() => {
-      setStartIndex(newIndex)
-      if (listRef.current) {
-        listRef.current.style.opacity = '1'
-        listRef.current.style.transform = 'translateX(0)'
-      }
-    }, 180)
-  }
+  /* ── slide animation ─────────────────────────────────────────────────── */
+  const navigate = useCallback(
+    (newIndex: number, dir: 'next' | 'prev') => {
+      if (animatingRef.current || !listRef.current) return
+      animatingRef.current = true
+      setIsPaused(true)
 
-  const prev = () => navigate((startIndex - 1 + totalPositions) % totalPositions)
-  const next = () => navigate((startIndex + 1) % totalPositions)
+      const outX = dir === 'next' ? '-100%' : '100%'
+      const inX  = dir === 'next' ?  '100%' : '-100%'
 
-  // Autoplay: advances 1 card every 4 s, pauses on hover
+      // Phase 1: slide current cards out
+      gsap.to(listRef.current, {
+        x: outX,
+        duration: 0.34,
+        ease: 'power2.inOut',
+        onComplete() {
+          // Swap content synchronously so new cards are in DOM before phase 2
+          flushSync(() => setStartIndex(newIndex))
+
+          // Phase 2: snap new cards to the incoming side, then slide to center
+          gsap.fromTo(
+            listRef.current,
+            { x: inX },
+            {
+              x: 0,
+              duration: 0.34,
+              ease: 'power2.inOut',
+              onComplete() {
+                animatingRef.current = false
+                setIsPaused(false)
+              },
+            },
+          )
+        },
+      })
+    },
+    [],
+  )
+
+  const prev  = () => navigate((startIndex - 1 + totalPositions) % totalPositions, 'prev')
+  const next  = () => navigate((startIndex + 1) % totalPositions, 'next')
+  const goTo  = (i: number) => navigate(i, i > startIndex ? 'next' : 'prev')
+
+  /* ── autoplay — resets 4 s after each position change ───────────────── */
   useEffect(() => {
     if (!hasNav || isPaused) return
-    const timer = setInterval(() => {
-      // call next inline to avoid stale closure on navigate
-      setStartIndex((idx) => {
-        const newIdx = (idx + 1) % totalPositions
-        if (listRef.current) {
-          listRef.current.style.opacity = '0'
-          listRef.current.style.transform = 'translateX(8px)'
-          setTimeout(() => {
-            if (listRef.current) {
-              listRef.current.style.opacity = '1'
-              listRef.current.style.transform = 'translateX(0)'
-            }
-          }, 180)
-        }
-        return newIdx
-      })
-    }, 4000)
+    const timer = setInterval(
+      () => navigate((startIndex + 1) % totalPositions, 'next'),
+      4000,
+    )
     return () => clearInterval(timer)
-  }, [hasNav, isPaused, totalPositions])
+  }, [hasNav, isPaused, startIndex, totalPositions, navigate])
 
-  // GSAP scroll animations
+  /* ── GSAP scroll reveals ─────────────────────────────────────────────── */
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        ease: 'power3.out',
+        opacity: 0, y: 30, duration: 0.8, ease: 'power3.out',
         scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
       })
-
       gsap.from(metaRef.current, {
-        opacity: 0,
-        y: 20,
-        duration: 0.6,
-        ease: 'power3.out',
+        opacity: 0, y: 20, duration: 0.6, ease: 'power3.out',
         scrollTrigger: { trigger: metaRef.current, start: 'top 90%' },
       })
     }, sectionRef)
-
     return () => ctx.revert()
   }, [])
 
-  // Arrow / dot styles — dark semi-transparent for visibility on the concrete bg
   const arrowBtn: React.CSSProperties = {
     backgroundColor: 'rgba(30,26,22,0.60)',
     color: '#E2C063',
@@ -148,6 +155,7 @@ export default function ProjectsSection({ projects }: Props) {
         </p>
       ) : (
         <div className="relative mt-8 flex items-center gap-3">
+
           {/* Prev arrow */}
           {hasNav && (
             <button
@@ -155,46 +163,46 @@ export default function ProjectsSection({ projects }: Props) {
               aria-label="Previous"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
               style={arrowBtn}
-            >
-              ‹
-            </button>
+            >‹</button>
           )}
 
-          {/* Accordion list — hover pauses autoplay */}
-          <ul
-            ref={listRef}
-            className="accordion-list flex-1"
-            style={{ transition: 'opacity 0.35s ease, transform 0.35s ease' }}
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-          >
-            {visibleProjects.map((project) => (
-              <li key={project.id} className="accordion-item">
-                {/* Media layer */}
-                {isVideo(project.coverImageUrl) ? (
-                  <video
-                    src={project.coverImageUrl}
-                    poster={project.coverPosterUrl ?? undefined}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="accordion-video"
-                  />
-                ) : (
-                  <div
-                    className="accordion-img"
-                    style={{ backgroundImage: `url(${project.coverImageUrl})` }}
-                  />
-                )}
-                {/* Link overlay */}
-                <a href={`/projects/${project.slug}`} className="accordion-link">
-                  <p className="accordion-title">{project.title}</p>
-                  <p className="accordion-desc">{project.category}</p>
-                </a>
-              </li>
-            ))}
-          </ul>
+          {/* Track — clips the sliding ul so nothing bleeds outside */}
+          <div className="flex-1 overflow-hidden">
+            <ul
+              ref={listRef}
+              className="accordion-list"
+              style={{ willChange: 'transform' }}
+              onMouseEnter={() => { if (!animatingRef.current) setIsPaused(true) }}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              {visibleProjects.map((project) => (
+                <li key={project.id} className="accordion-item">
+
+                  {/* Media layer */}
+                  {isVideo(project.coverImageUrl) ? (
+                    <video
+                      src={project.coverImageUrl}
+                      poster={project.coverPosterUrl ?? undefined}
+                      autoPlay muted loop playsInline
+                      className="accordion-video"
+                    />
+                  ) : (
+                    <div
+                      className="accordion-img"
+                      style={{ backgroundImage: `url(${project.coverImageUrl})` }}
+                    />
+                  )}
+
+                  {/* Link overlay */}
+                  <a href={`/projects/${project.slug}`} className="accordion-link">
+                    <p className="accordion-title">{project.title}</p>
+                    <p className="accordion-desc">{project.category}</p>
+                  </a>
+
+                </li>
+              ))}
+            </ul>
+          </div>
 
           {/* Next arrow */}
           {hasNav && (
@@ -203,25 +211,22 @@ export default function ProjectsSection({ projects }: Props) {
               aria-label="Next"
               className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
               style={arrowBtn}
-            >
-              ›
-            </button>
+            >›</button>
           )}
+
         </div>
       )}
 
-      {/* Dot indicators — one per navigable position */}
+      {/* Dot indicators */}
       {hasNav && (
         <div className="flex justify-center gap-2 mt-4">
           {Array.from({ length: totalPositions }).map((_, i) => (
             <button
               key={i}
-              onClick={() => navigate(i)}
+              onClick={() => goTo(i)}
               aria-label={`Position ${i + 1}`}
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
+                width: 8, height: 8, borderRadius: '50%',
                 backgroundColor: i === startIndex ? '#2D2924' : 'rgba(30,26,22,0.28)',
                 transition: 'background-color 0.2s ease',
               }}
