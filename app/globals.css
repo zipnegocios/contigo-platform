@@ -444,6 +444,41 @@
     transform: translateY(0);
   }
 
+  /* ── accordion-video: same visual behaviour as accordion-img ──────────── */
+  .accordion-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.85);
+    transition: filter 0.5s ease;
+  }
+  .accordion-item:hover .accordion-video {
+    filter: brightness(1);
+  }
+
+  /* ── accordion responsive heights ───────────────────────────────────────── */
+  @media (max-width: 1023px) {
+    .accordion-item {
+      height: 420px;
+    }
+  }
+  @media (max-width: 767px) {
+    .accordion-item {
+      height: 320px;
+    }
+  }
+  @media (max-width: 479px) {
+    .accordion-item {
+      height: 260px;
+    }
+    /* Disable expand effect on mobile-sm (single card, nothing to expand against) */
+    .accordion-list .accordion-item:hover {
+      flex: 1;
+    }
+  }
+
   /* Gooey form */
   .gooey-container {
     position: relative;

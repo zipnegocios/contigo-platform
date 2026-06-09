@@ -19,6 +19,7 @@ export default async function HomePage() {
     category: string
     location: string
     coverImageUrl: string
+    coverPosterUrl: string | null
   }[] = []
 
   try {
@@ -32,6 +33,7 @@ export default async function HomePage() {
         category: p.category,
         location: p.location,
         coverImageUrl: p.coverImageUrl,
+        coverPosterUrl: p.coverPosterUrl ?? null,
       }))
     }
   } catch (err) {

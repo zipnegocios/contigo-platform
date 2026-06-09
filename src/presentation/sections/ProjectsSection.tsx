@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -13,21 +13,65 @@ export interface ProjectItem {
   category: string
   location: string
   coverImageUrl: string
+  coverPosterUrl: string | null
 }
 
 interface Props {
   projects: ProjectItem[]
 }
 
+const isVideo = (url: string) => /\.(mp4|webm|ogg|mov)/i.test(url)
+
+function getCardsPerPage(): number {
+  if (typeof window === 'undefined') return 5
+  const w = window.innerWidth
+  if (w >= 1024) return 5
+  if (w >= 768) return 3
+  if (w >= 480) return 2
+  return 1
+}
+
 export default function ProjectsSection({ projects }: Props) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
-  const carouselRef = useRef<HTMLDivElement>(null)
   const metaRef = useRef<HTMLDivElement>(null)
 
-  const isCarousel = projects.length > 5
+  const [cardsPerPage, setCardsPerPage] = useState<number>(5)
+  const [currentPage, setCurrentPage] = useState(0)
 
+  // Responsive cardsPerPage
+  useEffect(() => {
+    setCardsPerPage(getCardsPerPage())
+    const handler = () => {
+      setCardsPerPage(getCardsPerPage())
+      setCurrentPage(0)
+    }
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
+  const totalPages = Math.ceil(projects.length / cardsPerPage)
+  const visibleProjects = projects.slice(currentPage * cardsPerPage, (currentPage + 1) * cardsPerPage)
+
+  const navigate = (newPage: number) => {
+    if (listRef.current) {
+      listRef.current.style.opacity = '0'
+      listRef.current.style.transform = 'translateX(8px)'
+    }
+    setTimeout(() => {
+      setCurrentPage(newPage)
+      if (listRef.current) {
+        listRef.current.style.opacity = '1'
+        listRef.current.style.transform = 'translateX(0)'
+      }
+    }, 180)
+  }
+
+  const prev = () => navigate((currentPage - 1 + totalPages) % totalPages)
+  const next = () => navigate((currentPage + 1) % totalPages)
+
+  // GSAP scroll animations
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(headerRef.current, {
@@ -37,20 +81,6 @@ export default function ProjectsSection({ projects }: Props) {
         ease: 'power3.out',
         scrollTrigger: { trigger: sectionRef.current, start: 'top 80%' },
       })
-
-      if (!isCarousel && listRef.current) {
-        const panels = listRef.current.querySelectorAll('.accordion-item')
-        if (panels.length) {
-          gsap.from(panels, {
-            y: 60,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: listRef.current, start: 'top 80%' },
-          })
-        }
-      }
 
       gsap.from(metaRef.current, {
         opacity: 0,
@@ -62,7 +92,13 @@ export default function ProjectsSection({ projects }: Props) {
     }, sectionRef)
 
     return () => ctx.revert()
-  }, [isCarousel])
+  }, [])
+
+  const goldBtn: React.CSSProperties = {
+    backgroundColor: 'rgba(226,192,99,0.18)',
+    color: '#E2C063',
+    border: '1px solid rgba(226,192,99,0.4)',
+  }
 
   return (
     <section
@@ -83,25 +119,85 @@ export default function ProjectsSection({ projects }: Props) {
         <p className="mt-8 text-sm" style={{ color: 'var(--monolith-slate)' }}>
           No featured projects yet.
         </p>
-      ) : isCarousel ? (
-        /* ── Carousel (>5) ────────────────────────────────────────────────── */
-        <CarouselView ref={carouselRef} projects={projects} />
       ) : (
-        /* ── Accordion (≤5) ───────────────────────────────────────────────── */
-        <ul ref={listRef} className="accordion-list">
-          {projects.map((project) => (
-            <li key={project.id} className="accordion-item">
-              <div
-                className="accordion-img"
-                style={{ backgroundImage: `url(${project.coverImageUrl})` }}
-              />
-              <a href={`/projects/${project.slug}`} className="accordion-link">
-                <p className="accordion-title">{project.title}</p>
-                <p className="accordion-desc">{project.category}</p>
-              </a>
-            </li>
+        <div className="relative mt-8 flex items-center gap-3">
+          {/* Prev arrow */}
+          {totalPages > 1 && (
+            <button
+              onClick={prev}
+              aria-label="Previous"
+              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
+              style={goldBtn}
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Accordion list */}
+          <ul
+            ref={listRef}
+            className="accordion-list flex-1"
+            style={{ transition: 'opacity 0.35s ease, transform 0.35s ease' }}
+          >
+            {visibleProjects.map((project) => (
+              <li key={project.id} className="accordion-item">
+                {/* Media layer */}
+                {isVideo(project.coverImageUrl) ? (
+                  <video
+                    src={project.coverImageUrl}
+                    poster={project.coverPosterUrl ?? undefined}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="accordion-video"
+                  />
+                ) : (
+                  <div
+                    className="accordion-img"
+                    style={{ backgroundImage: `url(${project.coverImageUrl})` }}
+                  />
+                )}
+                {/* Link overlay */}
+                <a href={`/projects/${project.slug}`} className="accordion-link">
+                  <p className="accordion-title">{project.title}</p>
+                  <p className="accordion-desc">{project.category}</p>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* Next arrow */}
+          {totalPages > 1 && (
+            <button
+              onClick={next}
+              aria-label="Next"
+              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
+              style={goldBtn}
+            >
+              ›
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Dot indicators */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => navigate(i)}
+              aria-label={`Page ${i + 1}`}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: i === currentPage ? '#E2C063' : 'rgba(226,192,99,0.25)',
+              }}
+            />
           ))}
-        </ul>
+        </div>
       )}
 
       {/* Footer row */}
@@ -110,7 +206,9 @@ export default function ProjectsSection({ projects }: Props) {
         className="flex items-center justify-between mt-8 text-sm"
         style={{ color: 'var(--monolith-slate)' }}
       >
-        <span className="data-text">Project count: {projects.length} | Locations: Adelaide Metro | Est. 2015</span>
+        <span className="data-text">
+          Project count: {projects.length} | Locations: Adelaide Metro | Est. 2015
+        </span>
         <a
           href="/projects"
           className="text-sm font-medium transition-opacity hover:opacity-70"
@@ -122,81 +220,3 @@ export default function ProjectsSection({ projects }: Props) {
     </section>
   )
 }
-
-/* ── Carousel sub-component ───────────────────────────────────────────────── */
-import { useState, forwardRef } from 'react'
-
-const CarouselView = forwardRef<HTMLDivElement, { projects: ProjectItem[] }>(
-  ({ projects }, ref) => {
-    const [index, setIndex] = useState(0)
-    const prev = () => setIndex((i) => (i - 1 + projects.length) % projects.length)
-    const next = () => setIndex((i) => (i + 1) % projects.length)
-
-    return (
-      <div ref={ref} className="relative mt-8">
-        <div className="overflow-hidden">
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${index * 100}%)` }}
-          >
-            {projects.map((project) => (
-              <div key={project.id} className="min-w-full">
-                <a
-                  href={`/projects/${project.slug}`}
-                  className="block relative overflow-hidden"
-                  style={{ height: 420 }}
-                >
-                  <img
-                    src={project.coverImageUrl}
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div
-                    className="absolute inset-0 flex flex-col justify-end p-8"
-                    style={{ background: 'linear-gradient(to top, rgba(30,26,22,0.85) 0%, transparent 60%)' }}
-                  >
-                    <p className="text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--gold)' }}>
-                      {project.category}
-                    </p>
-                    <p
-                      className="text-2xl font-semibold"
-                      style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
-                    >
-                      {project.title}
-                    </p>
-                  </div>
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <button
-          onClick={prev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
-          style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
-          aria-label="Previous"
-        >‹</button>
-        <button
-          onClick={next}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full"
-          style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
-          aria-label="Next"
-        >›</button>
-
-        <div className="flex justify-center gap-2 mt-4">
-          {projects.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setIndex(i)}
-              className="w-2 h-2 rounded-full transition-all duration-200"
-              style={{ backgroundColor: i === index ? '#E2C063' : 'rgba(226,192,99,0.25)' }}
-              aria-label={`Project ${i + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-    )
-  }
-)
-CarouselView.displayName = 'CarouselView'
