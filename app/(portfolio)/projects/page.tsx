@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { ProjectsGrid } from '@/presentation/components/ProjectsGrid'
 
 export const metadata: Metadata = {
@@ -12,39 +13,65 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function ProjectsPage() {
-  let projects: {
+interface ProjectsPageProps {
+  searchParams: Promise<{ category?: string }>
+}
+
+export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
+  const { category: categorySlug } = await searchParams
+
+  let allProjects: {
     id: string
     slug: string
     title: string
     category: string
+    categoryId: string | null
     location: string
     coverImageUrl: string
     featured: boolean
     completedDate: Date
   }[] = []
 
+  let allCategories: { name: string; slug: string }[] = []
+
   try {
     if (process.env.DATABASE_URL) {
-      const repo = new DrizzleProjectRepository()
-      const raw = await repo.findPublished(100)
-      projects = raw.map((p) => ({
+      const projectRepo = new DrizzleProjectRepository()
+      const categoryRepo = new DrizzleCategoryRepository()
+
+      const [raw, flatCats] = await Promise.all([
+        projectRepo.findPublished(100),
+        categoryRepo.findFlat('project'),
+      ])
+
+      allProjects = raw.map((p) => ({
         id: p.id,
         slug: p.slug,
         title: p.title,
         category: p.category,
+        categoryId: p.categoryId,
         location: p.location,
         coverImageUrl: p.coverImageUrl,
         featured: p.featured,
         completedDate: p.completedDate,
       }))
+
+      allCategories = flatCats
+        .filter((c) => c.isActive && c.parentId === null)
+        .map((c) => ({ name: c.name, slug: c.slug }))
     }
   } catch (error) {
     console.warn('ProjectsPage: Could not fetch projects:', error)
   }
 
-  // Unique categories in the order they appear
-  const categories = [...new Set(projects.map((p) => p.category))].sort()
+  // Filter by category slug if provided
+  let filtered = allProjects
+  if (categorySlug) {
+    filtered = allProjects.filter((p) =>
+      p.category.toLowerCase().replace(/\s+/g, '-') === categorySlug ||
+      allCategories.find((c) => c.slug === categorySlug)?.name.toLowerCase() === p.category.toLowerCase()
+    )
+  }
 
   return (
     <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
@@ -75,20 +102,24 @@ export default async function ProjectsPage() {
           className="absolute bottom-6 right-8 text-xs"
           style={{ color: 'rgba(250,246,240,0.3)' }}
         >
-          {projects.length} project{projects.length !== 1 ? 's' : ''}
+          {filtered.length} project{filtered.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        {projects.length === 0 ? (
+        {allProjects.length === 0 ? (
           <div className="py-32 text-center">
             <p className="text-sm" style={{ color: '#A89E8C' }}>
               No projects published yet. Check back soon.
             </p>
           </div>
         ) : (
-          <ProjectsGrid projects={projects} categories={categories} />
+          <ProjectsGrid
+            projects={filtered}
+            allCategories={allCategories}
+            activeSlug={categorySlug ?? null}
+          />
         )}
       </div>
     </div>

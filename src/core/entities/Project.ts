@@ -6,6 +6,7 @@ export type ProjectStatus = 'draft' | 'published' | 'archived'
 export interface CreateProjectInput {
   title: string
   category: string
+  categoryId?: string | null
   description: string
   location: string
   completedDate: Date
@@ -19,6 +20,7 @@ export class Project {
   readonly slug: string
   readonly title: string
   readonly category: string
+  readonly categoryId: string | null
   readonly description: string
   readonly location: string
   readonly completedDate: Date
@@ -35,6 +37,7 @@ export class Project {
     slug: string
     title: string
     category: string
+    categoryId: string | null
     description: string
     location: string
     completedDate: Date
@@ -50,6 +53,7 @@ export class Project {
     this.slug = props.slug
     this.title = props.title
     this.category = props.category
+    this.categoryId = props.categoryId
     this.description = props.description
     this.location = props.location
     this.completedDate = props.completedDate
@@ -72,6 +76,7 @@ export class Project {
       slug,
       title: input.title.trim(),
       category: input.category.trim(),
+      categoryId: input.categoryId ?? null,
       description: input.description.trim(),
       location: input.location.trim(),
       completedDate: input.completedDate,
@@ -91,6 +96,7 @@ export class Project {
       slug: this.slug,
       title: this.title,
       category: this.category,
+      categoryId: this.categoryId,
       description: this.description,
       location: this.location,
       completedDate: this.completedDate,
@@ -110,6 +116,7 @@ export class Project {
       slug: this.slug,
       title: this.title,
       category: this.category,
+      categoryId: this.categoryId,
       description: this.description,
       location: this.location,
       completedDate: this.completedDate,
@@ -128,6 +135,7 @@ export class Project {
     slug: string
     title: string
     category: string
+    categoryId?: string | null
     description: string
     location: string
     completedDate: Date
@@ -139,6 +147,6 @@ export class Project {
     createdAt: Date
     updatedAt: Date
   }): Project {
-    return new Project(props)
+    return new Project({ ...props, categoryId: props.categoryId ?? null })
   }
 }

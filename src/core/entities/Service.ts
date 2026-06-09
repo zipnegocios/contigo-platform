@@ -9,6 +9,7 @@ export interface CreateServiceInput {
   posterUrl?: string | null
   galleryItems?: GalleryItem[]
   orderIndex?: number
+  categoryId?: string | null
 }
 
 export class Service {
@@ -21,6 +22,7 @@ export class Service {
   readonly posterUrl: string | null
   readonly galleryItems: GalleryItem[]
   readonly orderIndex: number
+  readonly categoryId: string | null
   readonly published: boolean
   readonly createdAt: Date
   readonly updatedAt: Date
@@ -35,6 +37,7 @@ export class Service {
     posterUrl: string | null
     galleryItems: GalleryItem[]
     orderIndex: number
+    categoryId: string | null
     published: boolean
     createdAt: Date
     updatedAt: Date
@@ -48,6 +51,7 @@ export class Service {
     this.posterUrl = props.posterUrl
     this.galleryItems = props.galleryItems
     this.orderIndex = props.orderIndex
+    this.categoryId = props.categoryId
     this.published = props.published
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
@@ -68,6 +72,7 @@ export class Service {
       posterUrl: input.posterUrl ?? null,
       galleryItems: input.galleryItems || [],
       orderIndex: input.orderIndex || 0,
+      categoryId: input.categoryId ?? null,
       published: true,
       createdAt: now,
       updatedAt: now,
@@ -85,6 +90,7 @@ export class Service {
       posterUrl: this.posterUrl,
       galleryItems: this.galleryItems,
       orderIndex,
+      categoryId: this.categoryId,
       published: this.published,
       createdAt: this.createdAt,
       updatedAt: new Date(),
@@ -101,10 +107,11 @@ export class Service {
     posterUrl: string | null
     galleryItems: GalleryItem[]
     orderIndex: number
+    categoryId?: string | null
     published: boolean
     createdAt: Date
     updatedAt: Date
   }): Service {
-    return new Service(props)
+    return new Service({ ...props, categoryId: props.categoryId ?? null })
   }
 }

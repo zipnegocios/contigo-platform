@@ -27,6 +27,7 @@ export class DrizzleServiceRepository {
         posterUrl: service.posterUrl,
         galleryItems: service.galleryItems,
         orderIndex: service.orderIndex,
+        categoryId: service.categoryId,
         published: service.published,
       })
       .onConflictDoNothing()
@@ -80,6 +81,7 @@ export class DrizzleServiceRepository {
         posterUrl: service.posterUrl,
         galleryItems: service.galleryItems,
         orderIndex: service.orderIndex,
+        categoryId: service.categoryId,
         published: service.published,
         updatedAt: new Date(),
       })
@@ -110,6 +112,7 @@ export class DrizzleServiceRepository {
       posterUrl: (row.posterUrl as string | null) ?? null,
       galleryItems: normaliseGalleryRow(row.galleryItems),
       orderIndex: row.orderIndex as number,
+      categoryId: (row.categoryId as string | null) ?? null,
       published: row.published as boolean,
       createdAt: row.createdAt as Date,
       updatedAt: row.updatedAt as Date,

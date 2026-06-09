@@ -1,5 +1,15 @@
+import { z } from 'zod'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
+import { getDescendantIds } from '@/lib/buildCategoryTree'
+
+const UpdateSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  parentId: z.string().uuid().nullable().optional(),
+  description: z.string().nullable().optional(),
+  icon: z.string().max(100).nullable().optional(),
+  isActive: z.boolean().optional(),
+})
 
 export async function PATCH(
   request: Request,
@@ -13,10 +23,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-
-    if (!body.name?.trim()) {
-      return Response.json({ error: 'name is required' }, { status: 400 })
-    }
+    const input = UpdateSchema.parse(body)
 
     const repo = new DrizzleCategoryRepository()
     const category = await repo.findById(id)
@@ -25,14 +32,26 @@ export async function PATCH(
       return Response.json({ error: 'Category not found' }, { status: 404 })
     }
 
-    if (category.isSystem) {
+    if (category.isSystem && input.name && input.name !== category.name) {
       return Response.json({ error: 'Cannot rename system category' }, { status: 403 })
     }
 
-    const updated = category.withName(body.name.trim())
+    // Prevent circular reference: new parentId must not be self or a descendant
+    if (input.parentId !== undefined && input.parentId !== null) {
+      const flat = await repo.findFlat(category.type)
+      const descendantIds = getDescendantIds(flat, id)
+      if (input.parentId === id || descendantIds.includes(input.parentId)) {
+        return Response.json({ error: 'parentId creates circular reference' }, { status: 400 })
+      }
+    }
+
+    const updated = category.withUpdates(input)
     await repo.update(updated)
     return Response.json({ success: true })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return Response.json({ error: 'Invalid input', details: error.issues }, { status: 400 })
+    }
     console.error(error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -60,7 +79,7 @@ export async function DELETE(
       return Response.json({ error: 'Cannot delete system category' }, { status: 403 })
     }
 
-    await repo.delete(id, 'Uncategorized')
+    await repo.delete(id)
     return Response.json({ success: true })
   } catch (error) {
     console.error(error)

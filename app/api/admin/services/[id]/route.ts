@@ -57,6 +57,7 @@ export async function PATCH(
       posterUrl: newPosterUrl,
       galleryItems: newGalleryItems,
       orderIndex: service.orderIndex,
+      categoryId: body.categoryId !== undefined ? body.categoryId : service.categoryId,
       published: body.published !== undefined ? Boolean(body.published) : service.published,
       createdAt: service.createdAt,
       updatedAt: new Date(),

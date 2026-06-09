@@ -45,6 +45,7 @@ export async function POST(request: Request) {
       imageUrl: body.imageUrl,
       posterUrl: body.posterUrl ?? null,
       galleryItems: (body.galleryItems as GalleryItem[]) || [],
+      categoryId: body.categoryId ?? null,
     })
 
     await serviceRepo.save(service)

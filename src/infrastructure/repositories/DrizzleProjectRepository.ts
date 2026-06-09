@@ -22,6 +22,7 @@ export class DrizzleProjectRepository {
         slug: project.slug,
         title: project.title,
         category: project.category,
+        categoryId: project.categoryId,
         description: project.description,
         location: project.location,
         completedDate: project.completedDate,
@@ -90,6 +91,7 @@ export class DrizzleProjectRepository {
       .set({
         title: project.title,
         category: project.category,
+        categoryId: project.categoryId,
         description: project.description,
         location: project.location,
         completedDate: project.completedDate,
@@ -123,6 +125,7 @@ export class DrizzleProjectRepository {
       slug: row.slug as string,
       title: row.title as string,
       category: row.category as string,
+      categoryId: (row.categoryId as string | null) ?? null,
       description: row.description as string,
       location: row.location as string,
       completedDate: row.completedDate as Date,

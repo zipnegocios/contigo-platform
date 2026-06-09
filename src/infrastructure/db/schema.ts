@@ -10,6 +10,7 @@ import {
   pgEnum,
   index,
 } from 'drizzle-orm/pg-core'
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 import type { GalleryItem } from '@/types/media'
 
@@ -37,6 +38,33 @@ export const leadStageEnum = pgEnum('lead_stage', [
 ])
 
 export const adminRoleEnum = pgEnum('admin_role', ['owner', 'staff'])
+
+// ============ CATEGORIES TABLE ============
+// Must be declared before projects and services due to FK references
+export const categories = pgTable(
+  'categories',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
+    parentId: uuid('parent_id').references((): AnyPgColumn => categories.id, { onDelete: 'set null' }),
+    type: varchar('type', { length: 20 }).notNull().default('project'),
+    description: text('description'),
+    icon: varchar('icon', { length: 100 }),
+    orderIndex: integer('order_index').notNull().default(0),
+    isActive: boolean('is_active').notNull().default(true),
+    isSystem: boolean('is_system').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_categories_slug').on(table.slug),
+    index('idx_categories_is_system').on(table.isSystem),
+    index('idx_categories_parent_id').on(table.parentId),
+    index('idx_categories_type').on(table.type),
+    index('idx_categories_order').on(table.orderIndex),
+  ],
+)
 
 // ============ QUOTES TABLE ============
 export const quotes = pgTable(
@@ -71,6 +99,7 @@ export const projects = pgTable(
     slug: varchar('slug', { length: 255 }).notNull().unique(),
     title: varchar('title', { length: 255 }).notNull(),
     category: varchar('category', { length: 255 }).notNull(),
+    categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
     description: text('description').notNull(),
     location: varchar('location', { length: 255 }).notNull(),
     completedDate: timestamp('completed_date', { withTimezone: true }).notNull(),
@@ -88,6 +117,7 @@ export const projects = pgTable(
     index('idx_projects_status').on(table.published),
     index('idx_projects_featured').on(table.featured),
     index('idx_projects_created_at').on(table.createdAt),
+    index('idx_projects_category_id').on(table.categoryId),
   ],
 )
 
@@ -104,26 +134,14 @@ export const services = pgTable(
     posterUrl: text('poster_url'),
     galleryItems: jsonb('gallery_items').$type<GalleryItem[]>().notNull().default(sql`'[]'::jsonb`),
     orderIndex: integer('order_index').notNull().default(0),
+    categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
     published: boolean('published').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index('idx_services_order').on(table.orderIndex)],
-)
-
-// ============ CATEGORIES TABLE ============
-export const categories = pgTable(
-  'categories',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    name: varchar('name', { length: 255 }).notNull().unique(),
-    slug: varchar('slug', { length: 255 }).notNull().unique(),
-    isSystem: boolean('is_system').notNull().default(false),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  },
   (table) => [
-    index('idx_categories_slug').on(table.slug),
-    index('idx_categories_is_system').on(table.isSystem),
+    index('idx_services_order').on(table.orderIndex),
+    index('idx_services_category_id').on(table.categoryId),
   ],
 )
 

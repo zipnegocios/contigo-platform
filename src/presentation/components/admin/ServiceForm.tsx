@@ -9,6 +9,7 @@ import { Checkbox } from '@/presentation/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { CoverMediaSelector } from '@/presentation/components/admin/CoverMediaSelector'
 import { GalleryManagerModal } from '@/presentation/components/admin/GalleryManagerModal'
+import { HierarchicalCategorySelect } from '@/presentation/components/admin/HierarchicalCategorySelect'
 import type { GalleryItem } from '@/types/media'
 
 interface ServiceFormProps {
@@ -21,6 +22,7 @@ interface ServiceFormProps {
     imageUrl: string
     posterUrl?: string | null
     galleryItems?: GalleryItem[]
+    categoryId?: string | null
     published: boolean
   }
 }
@@ -50,6 +52,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
     imageUrl: service?.imageUrl || '',
     posterUrl: service?.posterUrl || null as string | null,
     galleryItems: service?.galleryItems || [] as GalleryItem[],
+    categoryId: service?.categoryId || null as string | null,
     published: service?.published ?? true,
   })
 
@@ -89,6 +92,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
           imageUrl: formData.imageUrl,
           posterUrl: formData.posterUrl,
           galleryItems: formData.galleryItems,
+          categoryId: formData.categoryId,
           published: formData.published,
         }),
       })
@@ -210,6 +214,13 @@ export function ServiceForm({ service }: ServiceFormProps) {
                     style={{ borderColor: '#E5DDD0' }}
                   />
                 </div>
+
+                <HierarchicalCategorySelect
+                  type="service"
+                  value={formData.categoryId}
+                  onChange={(id) => setFormData({ ...formData, categoryId: id })}
+                  label="Category"
+                />
 
                 <label className="flex items-center gap-2">
                   <Checkbox

@@ -1,21 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Input } from '@/presentation/components/ui/input'
 import { Textarea } from '@/presentation/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/presentation/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Checkbox } from '@/presentation/components/ui/checkbox'
 import { CoverMediaSelector } from '@/presentation/components/admin/CoverMediaSelector'
 import { GalleryManagerModal } from '@/presentation/components/admin/GalleryManagerModal'
+import { HierarchicalCategorySelect } from '@/presentation/components/admin/HierarchicalCategorySelect'
 import type { GalleryItem } from '@/types/media'
 
 interface ProjectFormProps {
@@ -24,6 +18,7 @@ interface ProjectFormProps {
     slug: string
     title: string
     category: string
+    categoryId?: string | null
     description: string
     location: string
     completedDate: string
@@ -42,18 +37,11 @@ export function ProjectForm({ project }: ProjectFormProps) {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<TabId>('info')
   const [galleryModalOpen, setGalleryModalOpen] = useState(false)
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
-
-  useEffect(() => {
-    fetch('/api/admin/categories')
-      .then((r) => r.json())
-      .then((data) => Array.isArray(data) && setCategories(data))
-      .catch(() => {})
-  }, [])
 
   const [formData, setFormData] = useState({
     title: project?.title || '',
     category: project?.category || '',
+    categoryId: project?.categoryId || null as string | null,
     description: project?.description || '',
     location: project?.location || '',
     completedDate: project?.completedDate || '',
@@ -83,6 +71,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
         body: JSON.stringify({
           title: formData.title,
           category: formData.category,
+          categoryId: formData.categoryId,
           description: formData.description,
           location: formData.location,
           completedDate: formData.completedDate,
@@ -173,20 +162,13 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   />
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium" style={{ color: '#2D2924' }}>Category</label>
-                  <Select value={formData.category} onValueChange={(cat) => setFormData({ ...formData, category: cat })}>
-                    <SelectTrigger className="mt-2" style={{ borderColor: '#E5DDD0' }}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="mt-2">
+                  <HierarchicalCategorySelect
+                    type="project"
+                    value={formData.categoryId}
+                    onChange={(id) => setFormData({ ...formData, categoryId: id })}
+                    label="Category"
+                  />
                 </div>
 
                 <div>

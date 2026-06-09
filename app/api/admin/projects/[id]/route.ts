@@ -60,6 +60,7 @@ export async function PATCH(
       slug: newSlug,
       title: newTitle,
       category: body.category || project.category,
+      categoryId: body.categoryId !== undefined ? body.categoryId : project.categoryId,
       description: body.description || project.description,
       location: body.location || project.location,
       completedDate: body.completedDate ? new Date(body.completedDate) : project.completedDate,

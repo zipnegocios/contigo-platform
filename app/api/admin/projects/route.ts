@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     const project = Project.create({
       title: body.title,
       category: body.category,
+      categoryId: body.categoryId ?? null,
       description: body.description,
       location: body.location,
       completedDate: new Date(body.completedDate),
