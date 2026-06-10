@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Mic, Menu, X } from 'lucide-react'
+import { Button } from '@/presentation/design-system/components/atoms'
 
 interface NavigationProps {
   onVoiceSearch: () => void
@@ -62,13 +63,13 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
                 onClick={() => scrollTo(item.id)}
                 className="relative text-sm font-medium transition-colors group"
                 style={{
-                  color: scrolled ? 'var(--atelier-ink)' : '#FAF6F0',
+                  color: scrolled ? 'var(--contigo-foreground)' : 'var(--contigo-background)',
                 }}
               >
                 {item.label}
                 <span
                   className="absolute -bottom-1 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full"
-                  style={{ backgroundColor: 'var(--brand-gold)' }}
+                  style={{ backgroundColor: 'var(--contigo-primary)' }}
                 />
               </button>
             ))}
@@ -76,20 +77,22 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-4">
-            <button
+            <Button
               onClick={() => scrollTo('contact')}
-              className="hidden sm:inline-flex btn-primary"
+              variant="primary"
+              size="md"
+              className="hidden sm:inline-flex"
             >
               Get a Quote
-            </button>
+            </Button>
 
             {/* Voice search button */}
             <button
               onClick={onVoiceSearch}
               className="relative p-2 rounded-full transition-colors"
               style={{
-                color: scrolled ? 'var(--atelier-ink)' : '#FAF6F0',
-                border: `1px solid ${scrolled ? 'var(--atelier-border)' : 'rgba(255,255,255,0.3)'}`,
+                color: scrolled ? 'var(--contigo-foreground)' : 'var(--contigo-background)',
+                border: `1px solid ${scrolled ? 'var(--contigo-border)' : 'rgba(255,255,255,0.3)'}`,
               }}
               title="Voice search"
             >
@@ -97,7 +100,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
               {isListening && (
                 <span
                   className="absolute inset-0 rounded-full voice-pulse"
-                  style={{ border: '2px solid var(--brand-gold)' }}
+                  style={{ border: '2px solid var(--contigo-primary)' }}
                 />
               )}
             </button>
@@ -106,7 +109,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             <button
               className="lg:hidden p-2"
               onClick={() => setMobileOpen(!mobileOpen)}
-              style={{ color: scrolled ? 'var(--atelier-ink)' : '#FAF6F0' }}
+              style={{ color: scrolled ? 'var(--contigo-foreground)' : 'var(--contigo-background)' }}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -119,7 +122,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
         className={`fixed inset-y-0 right-0 z-[110] w-80 transition-transform duration-500 lg:hidden ${
           mobileOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
-        style={{ backgroundColor: 'var(--heritage-sand)' }}
+        style={{ backgroundColor: 'var(--contigo-background)' }}
       >
         <div className="flex flex-col pt-24 px-8 gap-6">
           {[
@@ -132,14 +135,14 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
               key={item.id}
               onClick={() => scrollTo(item.id)}
               className="text-left text-lg font-medium"
-              style={{ color: 'var(--heritage-charcoal)' }}
+              style={{ color: 'var(--contigo-foreground)' }}
             >
               {item.label}
             </button>
           ))}
-          <button onClick={() => scrollTo('contact')} className="btn-primary mt-4">
+          <Button onClick={() => scrollTo('contact')} variant="primary" className="mt-4">
             Get a Quote
-          </button>
+          </Button>
         </div>
       </div>
 
