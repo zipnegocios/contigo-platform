@@ -104,7 +104,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
     <>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         {/* Tab bar */}
-        <div className="flex gap-1 border-b" style={{ borderColor: '#E5DDD0' }}>
+        <div className="flex gap-1 border-b" style={{ borderColor: 'var(--neutral-200)' }}>
           {tabs.map((tab) => {
             const disabled = tab.id === 'media' && mediaLocked
             return (
@@ -117,23 +117,23 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 style={{
                   color:
                     activeTab === tab.id
-                      ? '#2D2924'
+                      ? 'var(--neutral-800)'
                       : disabled
-                      ? '#C5BDB4'
-                      : '#6B6560',
+                      ? 'var(--neutral-300)'
+                      : 'var(--neutral-600)',
                   cursor: disabled ? 'not-allowed' : 'pointer',
                 }}
               >
                 {tab.label}
                 {disabled && (
-                  <span className="ml-1.5 text-[10px]" style={{ color: '#C5BDB4' }}>
+                  <span className="ml-1.5 text-[10px]" style={{ color: 'var(--neutral-300)' }}>
                     (enter title first)
                   </span>
                 )}
                 {activeTab === tab.id && (
                   <span
                     className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                    style={{ backgroundColor: '#E2C063' }}
+                    style={{ backgroundColor: 'var(--contigo-primary)' }}
                   />
                 )}
               </button>
@@ -143,7 +143,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}>
+            <CardTitle style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}>
               {project ? 'Edit Project' : 'New Project'}
             </CardTitle>
           </CardHeader>
@@ -151,13 +151,13 @@ export function ProjectForm({ project }: ProjectFormProps) {
             {activeTab === 'info' && (
               <>
                 <div>
-                  <label className="text-sm font-medium" style={{ color: '#2D2924' }}>Title</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Title</label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Project title"
                     className="mt-2"
-                    style={{ borderColor: '#E5DDD0' }}
+                    style={{ borderColor: 'var(--neutral-200)' }}
                     required
                   />
                 </div>
@@ -172,37 +172,37 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: '#2D2924' }}>Description</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Description</label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Project description"
                     className="mt-2 min-h-32"
-                    style={{ borderColor: '#E5DDD0' }}
+                    style={{ borderColor: 'var(--neutral-200)' }}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: '#2D2924' }}>Location</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Location</label>
                   <Input
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="Project location"
                     className="mt-2"
-                    style={{ borderColor: '#E5DDD0' }}
+                    style={{ borderColor: 'var(--neutral-200)' }}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: '#2D2924' }}>Completed Date</label>
+                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Completed Date</label>
                   <Input
                     type="date"
                     value={formData.completedDate}
                     onChange={(e) => setFormData({ ...formData, completedDate: e.target.value })}
                     className="mt-2"
-                    style={{ borderColor: '#E5DDD0' }}
+                    style={{ borderColor: 'var(--neutral-200)' }}
                     required
                   />
                 </div>
@@ -215,7 +215,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                         setFormData({ ...formData, featured: checked as boolean })
                       }
                     />
-                    <span className="text-sm font-medium" style={{ color: '#2D2924' }}>Featured Project</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Featured Project</span>
                   </label>
 
                   <label className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                         setFormData({ ...formData, published: checked as boolean })
                       }
                     />
-                    <span className="text-sm font-medium" style={{ color: '#2D2924' }}>Published</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Published</span>
                   </label>
                 </div>
               </>
@@ -245,12 +245,12 @@ export function ProjectForm({ project }: ProjectFormProps) {
 
                 <div
                   className="pt-4"
-                  style={{ borderTop: '1px solid #E5DDD0' }}
+                  style={{ borderTop: '1px solid var(--neutral-200)' }}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium" style={{ color: '#2D2924' }}>
+                    <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
                       Gallery
-                      <span className="ml-2 text-xs font-normal" style={{ color: '#A89E8C' }}>
+                      <span className="ml-2 text-xs font-normal" style={{ color: 'var(--neutral-400)' }}>
                         ({formData.galleryItems.length} items)
                       </span>
                     </p>
@@ -258,7 +258,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                       type="button"
                       onClick={() => setGalleryModalOpen(true)}
                       className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-                      style={{ border: '1px solid rgba(226,192,99,0.4)', color: '#E2C063', backgroundColor: 'rgba(226,192,99,0.08)' }}
+                      style={{ border: '1px solid var(--gold-a06)', color: 'var(--contigo-primary)', backgroundColor: 'var(--gold-a06)' }}
                     >
                       Manage Gallery
                     </button>
@@ -271,7 +271,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                         <div
                           key={i}
                           className="overflow-hidden rounded-lg flex-shrink-0"
-                          style={{ width: 64, height: 48, backgroundColor: '#F5EFE8' }}
+                          style={{ width: 64, height: 48, backgroundColor: 'var(--neutral-100)' }}
                         >
                           <img src={item.url} alt="" className="w-full h-full object-cover" />
                         </div>
@@ -279,7 +279,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                       {formData.galleryItems.length > 8 && (
                         <div
                           className="overflow-hidden rounded-lg flex-shrink-0 flex items-center justify-center text-xs"
-                          style={{ width: 64, height: 48, backgroundColor: 'rgba(226,192,99,0.1)', color: '#E2C063' }}
+                          style={{ width: 64, height: 48, backgroundColor: 'var(--gold-a06)', color: 'var(--contigo-primary)' }}
                         >
                           +{formData.galleryItems.length - 8}
                         </div>
@@ -295,9 +295,9 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 type="submit"
                 disabled={loading}
                 className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-60"
-                style={{ backgroundColor: '#E2C063', color: '#1E1A16', cursor: loading ? 'not-allowed' : 'pointer' }}
-                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = '#D4AF37' }}
-                onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = '#E2C063' }}
+                style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--neutral-900)', cursor: loading ? 'not-allowed' : 'pointer' }}
+                onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--gold-600)' }}
+                onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--contigo-primary)' }}
               >
                 {loading ? 'Saving…' : project ? 'Update Project' : 'Create Project'}
               </button>
@@ -305,9 +305,9 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 type="button"
                 onClick={() => router.back()}
                 className="px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
-                style={{ border: '1px solid #E5DDD0', color: '#6B6560', backgroundColor: 'transparent' }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#E2C063'; e.currentTarget.style.color = '#E2C063' }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E5DDD0'; e.currentTarget.style.color = '#6B6560' }}
+                style={{ border: '1px solid var(--neutral-200)', color: 'var(--neutral-600)', backgroundColor: 'transparent' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--contigo-primary)'; e.currentTarget.style.color = 'var(--contigo-primary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--neutral-200)'; e.currentTarget.style.color = 'var(--neutral-600)' }}
               >
                 Cancel
               </button>
