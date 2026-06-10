@@ -9,6 +9,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Phone, Mail, MapPin, Clock, Loader, Paperclip, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { uploadQuoteAttachment } from '@/presentation/lib/uploadToR2'
+import { FormField } from '@/presentation/design-system/components/molecules'
+import { Button } from '@/presentation/design-system/components/atoms'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -135,7 +137,7 @@ export default function ContactSection() {
       id="contact"
       ref={sectionRef}
       className="section-gap page-padding relative"
-      style={{ backgroundColor: 'var(--heritage-sand)' }}
+      style={{ backgroundColor: 'var(--neutral-50)' }}
     >
       {/* SVG Filter for Gooey Effect */}
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
@@ -164,74 +166,74 @@ export default function ContactSection() {
               <div className="form-overlay">
                 <form onSubmit={handleSubmit(onSubmit)} className="contact-form">
                   <div className="form-group">
-                    <input
+                    <FormField
                       {...register('name')}
                       type="text"
                       placeholder="Your Name"
+                      error={errors.name?.message}
                     />
-                    {errors.name && (
-                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
-                        {errors.name.message}
-                      </span>
-                    )}
                   </div>
 
                   <div className="form-group">
-                    <input
+                    <FormField
                       {...register('email')}
                       type="email"
                       placeholder="Email Address"
+                      error={errors.email?.message}
                     />
-                    {errors.email && (
-                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
-                        {errors.email.message}
-                      </span>
-                    )}
                   </div>
 
                   <div className="form-group">
-                    <input
+                    <FormField
                       {...register('phone')}
                       type="tel"
                       placeholder="Phone Number (optional)"
+                      error={errors.phone?.message}
                     />
-                    {errors.phone && (
-                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
-                        {errors.phone.message}
-                      </span>
-                    )}
                   </div>
 
                   <div className="form-group">
-                    <select {...register('service')}>
-                      <option value="">Select a Service</option>
-                      <option value="New Home Building">New Home Building</option>
-                      <option value="Home Extensions">Home Extensions</option>
-                      <option value="Home Renovations">Home Renovations</option>
-                      <option value="Carpentry">Carpentry</option>
-                      <option value="Cladding">Cladding</option>
-                      <option value="Painting">Painting</option>
-                      <option value="Landscaping">Landscaping</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    {errors.service && (
-                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
-                        {errors.service.message}
-                      </span>
-                    )}
+                    <div className="w-full space-y-1.5">
+                      <select
+                        {...register('service')}
+                        className={`flex h-10 w-full rounded-lg border bg-contigo-background px-3 py-2 text-sm placeholder:text-contigo-muted transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                          errors.service
+                            ? 'border-error-600 focus:ring-error-600'
+                            : 'border-contigo-border focus:ring-contigo-primary'
+                        }`}
+                      >
+                        <option value="">Select a Service</option>
+                        <option value="New Home Building">New Home Building</option>
+                        <option value="Home Extensions">Home Extensions</option>
+                        <option value="Home Renovations">Home Renovations</option>
+                        <option value="Carpentry">Carpentry</option>
+                        <option value="Cladding">Cladding</option>
+                        <option value="Painting">Painting</option>
+                        <option value="Landscaping">Landscaping</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      {errors.service && (
+                        <p className="text-xs text-error-600">{errors.service.message}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="form-group">
-                    <textarea
-                      {...register('message')}
-                      placeholder="Tell us about your project..."
-                      rows={4}
-                    />
-                    {errors.message && (
-                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
-                        {errors.message.message}
-                      </span>
-                    )}
+                    <div className="w-full space-y-1.5">
+                      <textarea
+                        {...register('message')}
+                        placeholder="Tell us about your project..."
+                        rows={4}
+                        className={`flex w-full rounded-lg border bg-contigo-background px-3 py-2 text-sm placeholder:text-contigo-muted transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                          errors.message
+                            ? 'border-error-600 focus:ring-error-600'
+                            : 'border-contigo-border focus:ring-contigo-primary'
+                        }`}
+                      />
+                      {errors.message && (
+                        <p className="text-xs text-error-600">{errors.message.message}</p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Attachment upload (optional, up to 3 images) */}
@@ -316,15 +318,16 @@ export default function ContactSection() {
                     </div>
                   </div>
 
-                  <button
+                  <Button
                     type="submit"
                     disabled={isSubmitting || attachmentUploading}
-                    className="btn-primary w-full"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
                   >
                     {isSubmitting && <Loader size={16} className="animate-spin" />}
                     {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </button>
+                  </Button>
                 </form>
               </div>
             </div>
@@ -340,14 +343,14 @@ export default function ContactSection() {
             </span>
             <h2
               className="mb-6"
-              style={{ color: 'var(--heritage-charcoal)' }}
+              style={{ color: 'var(--contigo-foreground)' }}
             >
               Start Your Project
             </h2>
             <p
               className="mb-8 text-base"
               style={{
-                color: 'var(--heritage-charcoal)',
+                color: 'var(--contigo-foreground)',
                 opacity: 0.8,
                 lineHeight: 1.7,
               }}
@@ -366,13 +369,13 @@ export default function ContactSection() {
                 <div>
                   <p
                     className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
+                    style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Phone
                   </p>
                   <p
                     className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
+                    style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     (08) 8123 4567
                   </p>
@@ -387,13 +390,13 @@ export default function ContactSection() {
                 <div>
                   <p
                     className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
+                    style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Email
                   </p>
                   <p
                     className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
+                    style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     info@contigoconstructions.com.au
                   </p>
@@ -408,13 +411,13 @@ export default function ContactSection() {
                 <div>
                   <p
                     className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
+                    style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Address
                   </p>
                   <p
                     className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
+                    style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     25 Green Avenue, Seaton SA 5023
                   </p>
@@ -429,13 +432,13 @@ export default function ContactSection() {
                 <div>
                   <p
                     className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
+                    style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Business Hours
                   </p>
                   <p
                     className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
+                    style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     Mon - Fri: 7:00 AM - 5:00 PM
                   </p>
