@@ -38,7 +38,7 @@ export default function Footer() {
       ref={footerRef}
       className="w-full page-padding"
       style={{
-        backgroundColor: 'var(--heritage-dark)',
+        backgroundColor: 'var(--petrol-800)',
         padding: '3rem clamp(1.5rem, 4vw, 4rem)',
       }}
     >
@@ -67,12 +67,12 @@ export default function Footer() {
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
                 className="text-sm transition-colors relative group"
-                style={{ color: 'var(--heritage-sand)' }}
+                style={{ color: 'var(--neutral-50)' }}
               >
                 {item.label}
                 <span
                   className="absolute -bottom-1 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full"
-                  style={{ backgroundColor: 'var(--brand-gold)' }}
+                  style={{ backgroundColor: 'var(--contigo-primary)' }}
                 />
               </button>
             ))}
@@ -91,15 +91,15 @@ export default function Footer() {
                 onClick={(e) => e.preventDefault()}
                 className="p-2 rounded-full transition-colors"
                 style={{
-                  color: 'var(--heritage-sand)',
+                  color: 'var(--neutral-50)',
                   border: '1px solid transparent',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--brand-gold)';
-                  e.currentTarget.style.borderColor = 'var(--brand-gold)';
+                  e.currentTarget.style.color = 'var(--contigo-primary)';
+                  e.currentTarget.style.borderColor = 'var(--contigo-primary)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--heritage-sand)';
+                  e.currentTarget.style.color = 'var(--neutral-50)';
                   e.currentTarget.style.borderColor = 'transparent';
                 }}
                 aria-label={label}
@@ -113,17 +113,17 @@ export default function Footer() {
         {/* Bottom bar */}
         <div
           className="mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4"
-          style={{ borderTop: '1px solid var(--heritage-charcoal)' }}
+          style={{ borderTop: '1px solid var(--neutral-700)' }}
         >
           <p
             className="text-xs"
-            style={{ color: 'var(--heritage-muted)' }}
+            style={{ color: 'var(--neutral-600)' }}
           >
             &copy; 2025 Contigo Constructions Pty Ltd. All rights reserved.
           </p>
           <p
             className="text-xs"
-            style={{ color: 'var(--heritage-muted)' }}
+            style={{ color: 'var(--neutral-600)' }}
           >
             ABN: 12 345 678 901
           </p>
