@@ -1,20 +1,24 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, Inter, Space_Grotesk } from 'next/font/google'
+import { Alegreya, Alegreya_Sans, Space_Grotesk } from 'next/font/google'
 import { LenisProvider } from '@/presentation/providers/LenisProvider'
 import './globals.css'
 
-const cormorant = Cormorant_Garamond({
+// Alegreya superfamily per the corporate manual (April 2026):
+// Alegreya (serif) for display, Alegreya Sans for UI/body.
+const alegreya = Alegreya({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
-  variable: '--font-cormorant-garamond',
+  variable: '--font-alegreya',
   display: 'swap',
 })
 
-const inter = Inter({
+// Alegreya Sans has no 600 weight — font-semibold resolves to 700.
+const alegreyaSans = Alegreya_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-inter-regular',
+  weight: ['300', '400', '500', '700', '800'],
+  style: ['normal', 'italic'],
+  variable: '--font-alegreya-sans',
   display: 'swap',
 })
 
@@ -52,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${inter.variable} ${spaceGrotesk.variable}`}
+      className={`${alegreya.variable} ${alegreyaSans.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
     >
       <body>

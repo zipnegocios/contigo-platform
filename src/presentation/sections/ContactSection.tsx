@@ -170,7 +170,7 @@ export default function ContactSection() {
                       placeholder="Your Name"
                     />
                     {errors.name && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
                         {errors.name.message}
                       </span>
                     )}
@@ -183,7 +183,7 @@ export default function ContactSection() {
                       placeholder="Email Address"
                     />
                     {errors.email && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
                         {errors.email.message}
                       </span>
                     )}
@@ -196,7 +196,7 @@ export default function ContactSection() {
                       placeholder="Phone Number (optional)"
                     />
                     {errors.phone && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
                         {errors.phone.message}
                       </span>
                     )}
@@ -215,7 +215,7 @@ export default function ContactSection() {
                       <option value="Other">Other</option>
                     </select>
                     {errors.service && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
                         {errors.service.message}
                       </span>
                     )}
@@ -228,7 +228,7 @@ export default function ContactSection() {
                       rows={4}
                     />
                     {errors.message && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
+                      <span className="error-text" style={{ fontSize: '12px', color: 'var(--error-600)' }}>
                         {errors.message.message}
                       </span>
                     )}
@@ -311,7 +311,7 @@ export default function ContactSection() {
                       )}
 
                       {attachmentError && (
-                        <span style={{ fontSize: '12px', color: '#e74c3c' }}>{attachmentError}</span>
+                        <span style={{ fontSize: '12px', color: 'var(--error-600)' }}>{attachmentError}</span>
                       )}
                     </div>
                   </div>

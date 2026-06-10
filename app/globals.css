@@ -8,75 +8,142 @@
   }
 
   :root {
-    /* Contigo Brand Colors */
-    --brand-gold: #E3C064;
-    --brand-gold-hover: #D4AF37;
-    --brand-gold-light: #C8A55C;
-    --brand-gold-antique: #A08040;
+    /* ============================================================
+       LAYER 1 — PRIMITIVES (Corporate Manual, April 2026)
+       Single source of truth. See docs/design-system/01-foundations.md
+       ============================================================ */
 
-    /* Atelier Gold Theme */
-    --atelier-ivory: #FAF6F0;
-    --atelier-cream: #F5EDE0;
-    --atelier-ink: #2D2924;
-    --atelier-muted: #6B6560;
-    --atelier-border: #E5DDD0;
+    /* Gold scale — brand primary #E2C063 at 400 */
+    --gold-50: #FBF7EC;
+    --gold-100: #F6EDD4;
+    --gold-200: #F0E1B2;
+    --gold-300: #EAD28C;
+    --gold-400: #E2C063; /* BRAND PRIMARY */
+    --gold-500: #C8A55C;
+    --gold-600: #D4AF37;
+    --gold-700: #A08040;
+    --gold-800: #6E5526;
+    --gold-900: #4A3A1A;
+    --gold-950: #2B2110;
+    --gold-a06: rgba(226, 192, 99, 0.06);
+    --gold-a12: rgba(226, 192, 99, 0.12);
+    --gold-a15: rgba(226, 192, 99, 0.15);
+    --gold-a30: rgba(226, 192, 99, 0.3);
 
-    /* Heritage Earth Theme */
+    /* Petrol scale — brand secondary #0D3C4C at 800 */
+    --petrol-50: #ECF5F8;
+    --petrol-100: #D5E9EF;
+    --petrol-200: #ABD3DF;
+    --petrol-300: #7DB7C8;
+    --petrol-400: #5295AA;
+    --petrol-500: #34758C;
+    --petrol-600: #1F5A70;
+    --petrol-700: #15485C;
+    --petrol-800: #0D3C4C; /* BRAND SECONDARY */
+    --petrol-900: #092B38;
+    --petrol-950: #051E27;
+
+    /* Warm neutral scale — brand neutral #1D1D1B at 900, ivory light end */
+    --neutral-50: #FAF6F0;
+    --neutral-100: #F5EDE0;
+    --neutral-200: #E5DDD0;
+    --neutral-300: #CFC5B6;
+    --neutral-400: #A89E8C;
+    --neutral-500: #847B6F;
+    --neutral-600: #6B6560;
+    --neutral-700: #4D4843;
+    --neutral-800: #2D2924;
+    --neutral-900: #1D1D1B; /* BRAND NEUTRAL */
+    --neutral-950: #141312;
+
+    /* Status */
+    --success-600: #15803D;
+    --success-a12: rgba(34, 197, 94, 0.12);
+    --warning-600: #9A6700;
+    --error-500: #D5483A;
+    --error-600: #C0392B;
+    --info-600: var(--petrol-600);
+
+    /* ============================================================
+       LAYER 2 — SEMANTIC ALIASES
+       DEPRECATED legacy names. Do not use in new code — reference
+       the Layer 1 scales (or shadcn tokens) instead.
+       ============================================================ */
+
+    /* Contigo Brand Colors (deprecated: prefer --gold-*) */
+    --brand-gold: var(--gold-400);
+    --brand-gold-hover: var(--gold-600);
+    --brand-gold-light: var(--gold-500);
+    --brand-gold-antique: var(--gold-700);
+
+    /* Atelier Gold Theme (deprecated: prefer --neutral-*) */
+    --atelier-ivory: var(--neutral-50);
+    --atelier-cream: var(--neutral-100);
+    --atelier-ink: var(--neutral-800);
+    --atelier-muted: var(--neutral-600);
+    --atelier-border: var(--neutral-200);
+
+    /* Heritage Earth Theme (deprecated; literals — no clean scale match) */
     --heritage-sand: #E8DCC4;
     --heritage-dark: #1E1812;
     --heritage-charcoal: #3A3028;
     --heritage-terracotta: #B8704A;
     --heritage-moss: #6B7B5E;
-    --heritage-muted: #A89E8C;
+    --heritage-muted: var(--neutral-400);
 
-    /* Monolith Theme */
-    --monolith-concrete: #E2E8F0;
-    --monolith-surface: #F8FAFC;
-    --monolith-ink: #1E293B;
-    --monolith-slate: #64748B;
-    --monolith-border: #CBD5E1;
-    --monolith-gold: #D4AF37;
+    /* Monolith Theme (deprecated; remapped from off-brand slate to petrol) */
+    --monolith-concrete: var(--petrol-100);
+    --monolith-surface: var(--petrol-50);
+    --monolith-ink: var(--petrol-900);
+    --monolith-slate: var(--petrol-500);
+    --monolith-border: var(--petrol-200);
+    --monolith-gold: var(--gold-600);
 
-    /* ShadCN overrides */
-    --background: 40 33% 96%;
-    --foreground: 30 8% 15%;
-    --card: 40 33% 96%;
-    --card-foreground: 30 8% 15%;
-    --popover: 40 33% 96%;
-    --popover-foreground: 30 8% 15%;
-    --primary: 43 72% 64%;
-    --primary-foreground: 30 8% 15%;
-    --secondary: 40 25% 90%;
-    --secondary-foreground: 30 8% 15%;
+    /* ShadCN overrides (HSL triplets — consumed as hsl(var(--x)) in tailwind.config) */
+    --background: 36 50% 96%; /* neutral-50 #FAF6F0 */
+    --foreground: 60 4% 11%; /* neutral-900 #1D1D1B */
+    --card: 36 50% 96%;
+    --card-foreground: 60 4% 11%;
+    --popover: 36 50% 96%;
+    --popover-foreground: 60 4% 11%;
+    --primary: 44 69% 64%; /* gold-400 #E2C063 */
+    --primary-foreground: 30 8% 15%; /* neutral-800 — contrast on gold */
+    --secondary: 195 71% 17%; /* petrol-800 #0D3C4C */
+    --secondary-foreground: 36 50% 96%; /* neutral-50 on petrol */
     --muted: 40 20% 92%;
     --muted-foreground: 30 5% 40%;
     --accent: 40 25% 90%;
     --accent-foreground: 30 8% 15%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 6 64% 47%; /* error-600 #C0392B */
     --destructive-foreground: 0 0% 98%;
     --border: 35 20% 85%;
     --input: 35 20% 85%;
-    --ring: 43 72% 64%;
+    --ring: 44 69% 64%; /* gold-400 */
     --radius: 0.5rem;
 
-    /* Font families */
-    --font-cormorant: var(--font-cormorant-garamond);
-    --font-inter: var(--font-inter-regular);
-    --font-space: var(--font-space-grotesk);
+    /* Font families — Layer 2 semantic names */
+    --font-display: var(--font-alegreya); /* Alegreya serif: display/headings */
+    --font-sans: var(--font-alegreya-sans); /* Alegreya Sans: UI/body/labels */
+    --font-data: var(--font-space-grotesk); /* numerals/KPIs (tabular) */
 
-    /* Admin Portal Design Tokens */
+    /* DEPRECATED font aliases — still referenced by ~29 components */
+    --font-cormorant: var(--font-display);
+    --font-inter: var(--font-sans);
+    --font-space: var(--font-data);
+
+    /* Admin Portal Design Tokens (deprecated: prefer Layer 1 scales) */
     --admin-sidebar-bg: #1E1A16;
-    --admin-sidebar-text: #E8DCC4;
-    --admin-sidebar-muted: #A89E8C;
-    --admin-sidebar-border: rgba(226, 192, 99, 0.12);
-    --admin-sidebar-active-bg: rgba(226, 192, 99, 0.15);
-    --admin-sidebar-active-text: #E2C063;
-    --admin-gold: #E2C063;
-    --admin-gold-hover: #D4AF37;
-    --admin-bg: #FAF6F0;
-    --admin-card-border: #E5DDD0;
-    --admin-ink: #2D2924;
-    --admin-muted: #6B6560;
+    --admin-sidebar-text: var(--heritage-sand);
+    --admin-sidebar-muted: var(--neutral-400);
+    --admin-sidebar-border: var(--gold-a12);
+    --admin-sidebar-active-bg: var(--gold-a15);
+    --admin-sidebar-active-text: var(--gold-400);
+    --admin-gold: var(--gold-400);
+    --admin-gold-hover: var(--gold-600);
+    --admin-bg: var(--neutral-50);
+    --admin-card-border: var(--neutral-200);
+    --admin-ink: var(--neutral-800);
+    --admin-muted: var(--neutral-600);
   }
 }
 
@@ -90,7 +157,7 @@
   }
 
   body {
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     color: var(--atelier-ink);
     background-color: var(--atelier-ivory);
     overflow-x: hidden;
@@ -119,7 +186,7 @@
 
   /* Typography */
   h1, h2, h3.display {
-    font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
+    font-family: var(--font-display, Georgia, serif);
   }
 
   h1 {
@@ -135,14 +202,14 @@
   }
 
   h3 {
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 1.25rem;
     font-weight: 500;
     line-height: 1.3;
   }
 
   h4, .label {
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -150,8 +217,9 @@
   }
 
   .data-text {
-    font-family: var(--font-space, 'Space Grotesk', sans-serif);
+    font-family: var(--font-data, sans-serif);
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -185,7 +253,7 @@
     color: var(--atelier-ink);
     padding: 0.875rem 2rem;
     border-radius: 8px;
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 0.875rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -197,7 +265,7 @@
   .btn-primary:hover {
     background-color: var(--brand-gold-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(227, 192, 100, 0.3);
+    box-shadow: 0 4px 12px var(--gold-a30);
   }
 
   .btn-secondary {
@@ -209,7 +277,7 @@
     color: var(--brand-gold);
     padding: 0.875rem 2rem;
     border-radius: 8px;
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 0.875rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -219,7 +287,7 @@
   }
 
   .btn-secondary:hover {
-    background-color: rgba(227, 192, 100, 0.1);
+    background-color: var(--gold-a12);
     transform: translateY(-2px);
   }
 
@@ -233,7 +301,7 @@
     color: var(--atelier-ink);
     padding: 0.875rem 2rem;
     border-radius: 8px;
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 0.875rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -323,13 +391,13 @@
   }
 
   .flip-text-block h2 {
-    font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
+    font-family: var(--font-display, Georgia, serif);
     font-size: clamp(2rem, 4vw, 3.5rem);
     color: var(--heritage-sand);
   }
 
   .flip-text-block p {
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 1rem;
     line-height: 1.6;
     color: var(--heritage-muted);
@@ -343,7 +411,7 @@
 
   .flip-letter {
     display: inline-block;
-    font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
+    font-family: var(--font-display, Georgia, serif);
     font-weight: 600;
     font-size: clamp(5rem, 12vw, 10rem);
     color: #3A3028;
@@ -411,12 +479,12 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(30, 41, 59, 0.85) 100%);
+    background: linear-gradient(to bottom, transparent 40%, rgba(13, 60, 76, 0.85) 100%);
     z-index: -1;
   }
 
   .accordion-title {
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-weight: 500;
     font-size: 1.25rem;
     color: white;
@@ -430,7 +498,7 @@
   }
 
   .accordion-desc {
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
     margin: 0.5rem 0 0;
@@ -511,7 +579,7 @@
   .blob-1 {
     width: 400px;
     height: 400px;
-    background: #E3C064;
+    background: var(--gold-400);
     top: -40px;
     left: -40px;
     animation-duration: 20s;
@@ -520,7 +588,7 @@
   .blob-2 {
     width: 300px;
     height: 300px;
-    background: #C8A55C;
+    background: var(--gold-500);
     top: 20%;
     right: -30px;
     animation-duration: 25s;
@@ -529,7 +597,7 @@
   .blob-3 {
     width: 250px;
     height: 250px;
-    background: #A08040;
+    background: var(--gold-700);
     bottom: 10%;
     left: 10%;
     animation-duration: 22s;
@@ -558,7 +626,7 @@
     border: 1px solid var(--atelier-border);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.7);
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 1rem;
     color: var(--atelier-ink);
     transition: all 0.3s ease;
@@ -569,7 +637,7 @@
   .form-overlay textarea:focus {
     outline: none;
     border-color: var(--brand-gold);
-    box-shadow: 0 0 0 3px rgba(227, 192, 100, 0.3);
+    box-shadow: 0 0 0 3px var(--gold-a30);
   }
 
   .form-overlay input::placeholder,
