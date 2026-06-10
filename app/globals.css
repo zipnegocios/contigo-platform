@@ -234,8 +234,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--heritage-dark);
-    color: var(--heritage-sand);
+    background: var(--petrol-800);
+    color: var(--neutral-50);
     padding: 10vh 4vw;
     perspective: 1000px;
   }
@@ -257,14 +257,14 @@
   .flip-text-block h2 {
     font-family: var(--font-display, Georgia, serif);
     font-size: clamp(2rem, 4vw, 3.5rem);
-    color: var(--heritage-sand);
+    color: var(--neutral-50);
   }
 
   .flip-text-block p {
     font-family: var(--font-sans, sans-serif);
     font-size: 1rem;
     line-height: 1.6;
-    color: var(--heritage-muted);
+    color: var(--neutral-200);
   }
 
   .flip-word {
