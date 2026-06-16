@@ -64,7 +64,7 @@ function PickerGrid({ items, multiSelect, selectedUrls, entityContext, onItemCli
             style={{
               aspectRatio: '4/3',
               backgroundColor: 'var(--petrol-800)',
-              border: isSelected ? '2px solid #E2C063' : '1px solid rgba(226,192,99,0.12)',
+              border: isSelected ? '2px solid var(--contigo-primary)' : '1px solid rgba(226,192,99,0.12)',
               outline: 'none',
             }}
             onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.outline = '2px solid rgba(226,192,99,0.5)' }}

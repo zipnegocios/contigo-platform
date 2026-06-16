@@ -53,7 +53,7 @@ function DroppableFolderRow({
             ? 'rgba(226,192,99,0.15)'
             : 'transparent',
           border: isOver
-            ? '1.5px solid #E2C063'
+            ? '1.5px solid var(--contigo-primary)'
             : '1.5px solid transparent',
           transform: isOver ? 'scale(1.02)' : 'scale(1)',
         }}

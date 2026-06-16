@@ -77,7 +77,7 @@ export function MediaCard({
         opacity: isDragging ? 0.4 : 1,
         backgroundColor: 'var(--petrol-800)',
         border: isSelected
-          ? '2px solid #E2C063'
+          ? '2px solid var(--contigo-primary)'
           : isDragging
           ? '1.5px dashed rgba(226,192,99,0.5)'
           : '1px solid rgba(226,192,99,0.1)',

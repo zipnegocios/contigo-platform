@@ -19,7 +19,7 @@ export function KPICard({ title, value, icon, trend }: KPICardProps) {
       className="bg-white rounded-lg p-6 flex flex-col gap-2"
       style={{
         border: '1px solid #E5DDD0',
-        borderLeft: '4px solid #E2C063',
+        borderLeft: '4px solid var(--contigo-primary)',
         boxShadow: '0 2px 8px rgba(45, 41, 36, 0.06)',
       }}
     >

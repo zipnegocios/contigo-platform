@@ -90,7 +90,7 @@ export function CategoryTable({ categories }: { categories: CategoryRow[] }) {
                   <input
                     className="rounded px-2 py-1 text-sm outline-none w-48"
                     style={{
-                      border: '1px solid #E2C063',
+                      border: '1px solid var(--contigo-primary)',
                       backgroundColor: 'var(--neutral-50)',
                       color: 'var(--neutral-800)',
                     }}

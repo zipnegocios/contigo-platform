@@ -137,7 +137,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                   className="px-4 py-2.5 rounded-xl text-sm font-medium text-left transition-all"
                   style={
                     assignAs === opt
-                      ? { backgroundColor: 'rgba(226,192,99,0.18)', border: '1.5px solid #E2C063', color: 'var(--contigo-primary)' }
+                      ? { backgroundColor: 'rgba(226,192,99,0.18)', border: '1.5px solid var(--contigo-primary)', color: 'var(--contigo-primary)' }
                       : { backgroundColor: 'rgba(226,192,99,0.04)', border: '1px solid rgba(226,192,99,0.15)', color: 'var(--neutral-600)' }
                   }
                 >

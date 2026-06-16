@@ -52,7 +52,7 @@ export function NewCategoryForm() {
         autoFocus
         className="rounded-lg px-4 py-2.5 text-sm outline-none"
         style={{
-          border: '1px solid #E2C063',
+          border: '1px solid var(--contigo-primary)',
           backgroundColor: 'var(--neutral-50)',
           color: 'var(--neutral-800)',
           minWidth: 200,

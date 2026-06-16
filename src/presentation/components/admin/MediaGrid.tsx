@@ -298,7 +298,7 @@ function DroppableFolderTarget({ folderId, label }: { folderId: string; label: s
       className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all duration-150"
       style={{
         backgroundColor: isOver ? 'rgba(226,192,99,0.18)' : 'rgba(226,192,99,0.04)',
-        border: isOver ? '1.5px solid #E2C063' : '1px solid rgba(226,192,99,0.12)',
+        border: isOver ? '1.5px solid var(--contigo-primary)' : '1px solid rgba(226,192,99,0.12)',
         transform: isOver ? 'scale(1.03)' : 'scale(1)',
         color: isOver ? 'var(--contigo-primary)' : 'var(--neutral-600)',
       }}

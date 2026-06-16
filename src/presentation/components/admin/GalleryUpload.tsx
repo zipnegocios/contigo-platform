@@ -127,7 +127,7 @@ export function GalleryUpload({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[#E2C063]"
+            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[var(--contigo-primary)]"
             style={{
               borderColor: 'var(--neutral-200)',
               backgroundColor: 'var(--neutral-50)',
@@ -154,7 +154,7 @@ export function GalleryUpload({
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
-            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[#E2C063]"
+            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[var(--contigo-primary)]"
             style={{
               borderColor: 'var(--neutral-200)',
               backgroundColor: 'var(--neutral-50)',

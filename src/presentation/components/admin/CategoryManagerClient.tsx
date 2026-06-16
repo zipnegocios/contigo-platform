@@ -24,7 +24,7 @@ export function CategoryManagerClient({ serviceFlat, projectFlat }: CategoryMana
             className="px-5 py-2.5 text-sm font-medium capitalize transition-all"
             style={
               activeTab === tab
-                ? { color: 'var(--contigo-primary)', borderBottom: '2px solid #E2C063' }
+                ? { color: 'var(--contigo-primary)', borderBottom: '2px solid var(--contigo-primary)' }
                 : { color: '#6B6560' }
             }
           >
