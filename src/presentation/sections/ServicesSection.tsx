@@ -163,11 +163,11 @@ export default function ServicesSection() {
       <div ref={headerRef} className="text-center mb-12 page-padding">
         <span
           className="label block mb-4"
-          style={{ color: 'var(--brand-gold)' }}
+          style={{ color: 'var(--contigo-primary)' }}
         >
           WHAT WE DO
         </span>
-        <h2 style={{ color: 'var(--atelier-ink)' }}>Our Services</h2>
+        <h2 style={{ color: 'var(--neutral-800)' }}>Our Services</h2>
       </div>
 
       {/* Parallax Gallery */}
@@ -187,12 +187,12 @@ export default function ServicesSection() {
             document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
           }}
           className="inline-flex items-center gap-2 text-sm font-medium transition-colors group"
-          style={{ color: 'var(--atelier-ink)' }}
+          style={{ color: 'var(--neutral-800)' }}
         >
           View All Services
           <span
             className="block h-[1px] w-0 group-hover:w-12 transition-all duration-300"
-            style={{ backgroundColor: 'var(--brand-gold)' }}
+            style={{ backgroundColor: 'var(--contigo-primary)' }}
           />
         </a>
       </div>

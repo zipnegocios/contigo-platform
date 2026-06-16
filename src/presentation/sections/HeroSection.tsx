@@ -84,7 +84,7 @@ export default function HeroSection() {
         className="absolute bottom-0 left-0 w-full pointer-events-none"
         style={{
           height: '15%',
-          background: 'linear-gradient(to bottom, transparent, var(--atelier-ivory))',
+          background: 'linear-gradient(to bottom, transparent, var(--neutral-50))',
           zIndex: 2,
         }}
       />
@@ -142,7 +142,7 @@ export default function HeroSection() {
               document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
             }
             className="btn-secondary"
-            style={{ borderColor: 'var(--brand-gold)', color: 'var(--brand-gold)' }}
+            style={{ borderColor: 'var(--contigo-primary)', color: 'var(--contigo-primary)' }}
           >
             Our Services
           </button>

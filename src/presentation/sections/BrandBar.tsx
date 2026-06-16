@@ -43,7 +43,7 @@ export default function BrandBar() {
       ref={sectionRef}
       className="w-full flex flex-col items-center justify-center"
       style={{
-        backgroundColor: 'var(--atelier-ivory)',
+        backgroundColor: 'var(--neutral-50)',
         padding: '3rem 0',
       }}
     >

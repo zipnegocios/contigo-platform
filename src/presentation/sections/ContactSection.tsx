@@ -337,7 +337,7 @@ export default function ContactSection() {
           <div ref={rightColRef} className="lg:w-1/2 flex flex-col justify-center">
             <span
               className="label block mb-4"
-              style={{ color: 'var(--heritage-terracotta)' }}
+              style={{ color: 'var(--error-600)' }}
             >
               GET IN TOUCH
             </span>
@@ -364,7 +364,7 @@ export default function ContactSection() {
               <div className="flex items-start gap-4">
                 <Phone
                   size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
+                  style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
@@ -385,7 +385,7 @@ export default function ContactSection() {
               <div className="flex items-start gap-4">
                 <Mail
                   size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
+                  style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
@@ -406,7 +406,7 @@ export default function ContactSection() {
               <div className="flex items-start gap-4">
                 <MapPin
                   size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
+                  style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
@@ -427,7 +427,7 @@ export default function ContactSection() {
               <div className="flex items-start gap-4">
                 <Clock
                   size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
+                  style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
