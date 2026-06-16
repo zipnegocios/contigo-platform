@@ -74,8 +74,12 @@
      ADMIN BACKGROUND & SURFACE COLORS
      ============================================================ */
   --admin-bg-dark: #16120E;                  /* very dark sidebar/panels */
+  --admin-bg-darkest: #0D0A08;               /* darkest overlay */
   --admin-bg-panel: #FAF6F0;                 /* light panel bg (neutral-50) */
   --admin-bg-surface: #FEFDFB;               /* slight variation for alternates */
+  --admin-bg-input: #F0EBE3;                 /* input field background */
+  --admin-bg-input-light: #F5EFE8;           /* lighter input variant */
+  --admin-bg-upload: #F5F0E8;                /* upload zone background */
 
   /* Admin Sidebar (legacy—kept for compatibility) */
   --admin-sidebar-bg: #1E1A16;               /* dark sidebar background */
