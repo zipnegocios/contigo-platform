@@ -1,0 +1,167 @@
+/**
+ * contigo-design-system — Layer 3: Admin Component Tokens
+ *
+ * Status colors, form styling, borders, and backgrounds specific to the admin panel.
+ * Extracted from hardcoded hex values across admin components (Bucket 4 refactoring).
+ *
+ * See AUDIT_HARDCODED_COLORS.md for mapping details and refactoring progress.
+ */
+
+:root {
+  /* ============================================================
+     ADMIN STATUS & STAGE COLORS
+     ============================================================ */
+
+  /* Upload/File Status */
+  --admin-upload-status-done: #52B788;       /* success green */
+  --admin-upload-status-error: #e87070;      /* error red */
+  --admin-upload-status-warning: #F4A261;    /* warning orange */
+  --admin-upload-status-pending: rgba(226, 192, 99, 0.3);
+  --admin-upload-status-skipped: #6B6560;    /* neutral-600 */
+  --admin-upload-status-duplicate: #F4A261;
+
+  /* Quote Stage Colors (QuoteInboxTable.tsx) */
+  --admin-quote-stage-new: #A08040;          /* gold-700 */
+  --admin-quote-stage-contacted: #7A5C00;    /* gold dark accent */
+  --admin-quote-stage-in-progress: #0D3C4C;  /* petrol-800 */
+  --admin-quote-stage-converted: #15803d;    /* success-600 */
+  --admin-quote-stage-closed: #6B6560;       /* neutral-600 */
+
+  /* Lead/Kanban Stage Colors (LeadsKanban.tsx) */
+  --admin-lead-stage-new: #F4A261;           /* warning orange */
+  --admin-lead-stage-contacted: #0D3C4C;     /* petrol-800 */
+  --admin-lead-stage-qualified: #52B788;     /* success green */
+  --admin-lead-stage-proposal: #E2C063;      /* gold primary */
+  --admin-lead-stage-negotiation: #D4AF37;   /* gold-600 */
+  --admin-lead-stage-closed-won: #15803d;    /* success dark */
+  --admin-lead-stage-closed-lost: #e87070;   /* error red */
+
+  /* ============================================================
+     ADMIN FORM & INPUT COLORS
+     ============================================================ */
+  --admin-form-border: #E5DDD0;              /* neutral-200 */
+  --admin-form-bg: #FAF6F0;                  /* neutral-50 */
+  --admin-form-text: #1D1D1B;                /* neutral-900 */
+  --admin-form-text-muted: #6B6560;          /* neutral-600 */
+  --admin-form-label: #4D4843;               /* neutral-700 */
+
+  /* Form States */
+  --admin-form-error-text: #e87070;          /* error red */
+  --admin-form-error-bg: rgba(232, 112, 112, 0.06);
+  --admin-form-error-border: rgba(232, 112, 112, 0.2);
+  --admin-form-success-text: #52B788;        /* success green */
+  --admin-form-success-bg: rgba(82, 183, 136, 0.06);
+  --admin-form-warning-text: #F4A261;        /* warning orange */
+  --admin-form-warning-bg: rgba(244, 162, 97, 0.06);
+
+  /* ============================================================
+     ADMIN TABLE & DATA GRID COLORS
+     ============================================================ */
+  --admin-table-border: #E5DDD0;             /* neutral-200 */
+  --admin-table-header-bg: #FAF6F0;          /* neutral-50 */
+  --admin-table-row-hover: rgba(226, 192, 99, 0.06);
+  --admin-table-row-alternate-bg: #FEFDFB;
+  --admin-table-text: #1D1D1B;               /* neutral-900 */
+  --admin-table-text-muted: #6B6560;         /* neutral-600 */
+
+  /* Table Status Colors */
+  --admin-table-status-pending: #F4A261;     /* warning */
+  --admin-table-status-active: #52B788;      /* success */
+  --admin-table-status-inactive: #6B6560;    /* neutral */
+  --admin-table-status-error: #e87070;       /* error */
+
+  /* ============================================================
+     ADMIN BACKGROUND & SURFACE COLORS
+     ============================================================ */
+  --admin-bg-dark: #16120E;                  /* very dark sidebar/panels */
+  --admin-bg-panel: #FAF6F0;                 /* light panel bg (neutral-50) */
+  --admin-bg-surface: #FEFDFB;               /* slight variation for alternates */
+
+  /* Admin Sidebar (legacy—kept for compatibility) */
+  --admin-sidebar-bg: #1E1A16;               /* dark sidebar background */
+  --admin-sidebar-text: #E8DCC4;             /* light text (heritage-sand) */
+  --admin-sidebar-muted: var(--neutral-400);
+  --admin-sidebar-border: var(--gold-a12);
+  --admin-sidebar-active-bg: var(--gold-a15);
+  --admin-sidebar-active-text: var(--gold-400);
+
+  /* ============================================================
+     ADMIN BORDERS & OUTLINES
+     ============================================================ */
+  --admin-border-light: #E5DDD0;             /* neutral-200 */
+  --admin-border-subtle: #F0E8DC;            /* neutral-100 light variant */
+  --admin-border-focus: var(--contigo-primary);
+  --admin-border-error: var(--error-500);
+  --admin-border-success: var(--success-600);
+
+  /* ============================================================
+     ADMIN TEXT & LABELS
+     ============================================================ */
+  --admin-label-text: #4D4843;               /* neutral-700 */
+  --admin-label-text-required: #e87070;      /* error red for required */
+  --admin-placeholder-text: #A89E8C;         /* neutral-400 */
+  --admin-hint-text: #6B6560;                /* neutral-600 */
+  --admin-disabled-text: #CFC5B6;            /* neutral-300 */
+
+  /* ============================================================
+     ADMIN BADGE & INDICATOR COLORS
+     ============================================================ */
+  --admin-badge-success: #52B788;
+  --admin-badge-error: #e87070;
+  --admin-badge-warning: #F4A261;
+  --admin-badge-info: #0D3C4C;
+  --admin-badge-default: #6B6560;
+
+  /* Semantic aliases for common patterns */
+  --admin-success: var(--success-600);
+  --admin-error: var(--error-500);
+  --admin-warning: var(--warning-600);
+  --admin-info: var(--petrol-600);
+}
+
+/* ============================================================
+   REFACTORING NOTES
+   ============================================================
+
+   These tokens were extracted from the following files (Bucket 4):
+
+   Quote/Lead Management:
+   - src/presentation/components/admin/QuoteInboxTable.tsx (20 colors)
+   - src/presentation/components/admin/LeadsKanban.tsx (14 colors)
+   - src/presentation/components/admin/QuoteDetailPanel.tsx (7 colors)
+
+   Media & Upload:
+   - src/presentation/components/admin/UploadQueuePanel.tsx (23 colors)
+   - src/presentation/components/admin/MediaDetailDrawer.tsx (11 colors)
+   - src/presentation/components/admin/MediaBankSidebar.tsx (6 colors)
+   - src/presentation/components/admin/MediaGrid.tsx (5 colors)
+   - src/presentation/components/admin/MediaPickerModal.tsx (7 colors)
+   - src/presentation/components/admin/MediaLibrary.tsx (2 colors)
+   - src/presentation/components/admin/MediaCard.tsx (2 colors)
+   - src/presentation/components/admin/MediaDetailsModal.tsx (4 colors)
+   - src/presentation/components/admin/GalleryManagerModal.tsx (6 colors)
+   - src/presentation/components/admin/GalleryUpload.tsx (5 colors)
+   - src/presentation/components/admin/CoverMediaSelector.tsx (5 colors)
+
+   Forms & Inputs:
+   - src/presentation/components/admin/CategoryFormModal.tsx (13 colors)
+   - src/presentation/components/admin/ServiceForm.tsx (9 colors)
+   - src/presentation/components/admin/FileUpload.tsx (12 colors)
+   - src/presentation/components/admin/NewCategoryForm.tsx (1 color)
+
+   Data Tables & Cards:
+   - src/presentation/components/admin/ProjectTable.tsx (18 colors)
+   - src/presentation/components/admin/ServiceTable.tsx (18 colors)
+   - src/presentation/components/admin/CategoryTable.tsx (5 colors)
+   - src/presentation/components/admin/KPICard.tsx (3 colors)
+   - src/presentation/components/admin/DashboardView.tsx (11 colors)
+
+   Other:
+   - src/presentation/components/admin/AssignToEntityModal.tsx (3 colors)
+   - src/presentation/components/admin/HierarchicalCategorySelect.tsx (2 colors)
+   - src/presentation/components/admin/CategoryManagerClient.tsx (2 colors)
+   - src/presentation/components/admin/CategoryTreeNode.tsx (3 colors)
+
+   Refactoring in progress — see AUDIT_HARDCODED_COLORS.md for details.
+   ============================================================
+*/

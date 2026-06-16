@@ -1,3 +1,21 @@
+/**
+ * ParticleScene — Three.js WebGL Particle Effects
+ *
+ * HARDCODED COLORS (Bucket 2 Exception):
+ * This component uses hardcoded hex colors for Three.js WebGL shader uniforms.
+ * CSS variables cannot be resolved in WebGL uniforms, so hardcoding is intentional.
+ * Colors are mapped to design tokens below.
+ *
+ * Color Mapping:
+ * - #1E1A16 → admin sidebar bg (dark panel)
+ * - #E3C064 → var(--contigo-primary) / var(--gold-400)
+ * - #D02E2E → custom accent red (for sphere)
+ * - #FAF6F0 → var(--neutral-50) (light particle dots)
+ * - #F5EDE0 → var(--neutral-100) (particle blend)
+ *
+ * See AUDIT_HARDCODED_COLORS.md (Bucket 2) for details.
+ */
+
 import { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -249,6 +267,8 @@ function BackgroundPlane({ colorA, colorB }: BackgroundPlaneProps) {
         fragmentShader={bgFragmentShader}
         uniforms={{
           uResolution: { value: new THREE.Vector2(size.width, size.height) },
+          // WebGL shader colors — hardcoded for THREE.Color compatibility
+          // #1E1A16 = admin sidebar bg | #E3C064 = var(--contigo-primary)
           uColorA: { value: new THREE.Color('#1E1A16') },
           uColorB: { value: new THREE.Color('#E3C064') },
         }}
@@ -279,6 +299,7 @@ function AccentSphere({ globalOpacity }: AccentSphereProps) {
   return (
     <mesh ref={meshRef} position={[1.5, 0.5, 0]}>
       <sphereGeometry args={[0.15, 16, 16]} />
+      {/* WebGL shader color — hardcoded for THREE.Color | #D02E2E = accent red */}
       <meshBasicMaterial color="#D02E2E" transparent />
     </mesh>
   );
@@ -300,6 +321,7 @@ function DotSurface({ globalOpacity }: { globalOpacity: React.MutableRefObject<n
 
   return (
     <MotionPath type="lemniscate" speed={14} zAngle={0.3} offset={2}>
+      {/* Particle color — #FAF6F0 = var(--neutral-50) */}
       <ParticlePoints
         coordinates={coordinates}
         color="#FAF6F0"
@@ -378,6 +400,8 @@ function MonogramParticles({ globalOpacity }: { globalOpacity: React.MutableRefO
 // ---- Main Scene ----
 function Scene() {
   const { camera } = useThree();
+  // WebGL shader colors — hardcoded for THREE.Color uniforms
+  // #1E1A16 = admin sidebar bg | #E3C064 = var(--contigo-primary)
   const colorA = useRef(new THREE.Color('#1E1A16'));
   const colorB = useRef(new THREE.Color('#E3C064'));
   const globalOpacity = useRef(0.8);
@@ -404,7 +428,8 @@ function Scene() {
     const targetZ = 5 - scrollProgress * 7;
     camera.position.z += (targetZ - camera.position.z) * 0.1;
 
-    // Color morph
+    // Color morph — WebGL shader animation colors
+    // #FAF6F0 = var(--neutral-50) | #F5EDE0 = var(--neutral-100)
     colorA.current.lerpColors(
       new THREE.Color('#1E1A16'),
       new THREE.Color('#FAF6F0'),

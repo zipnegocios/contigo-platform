@@ -1,3 +1,23 @@
+/**
+ * ResendEmailService — Transactional Email Templates
+ *
+ * HARDCODED COLORS (Bucket 3 Exception):
+ * This service contains inline CSS colors in HTML email templates.
+ * Email clients don't support CSS variables, so hardcoding hex values is necessary.
+ * Colors are mapped to design tokens below.
+ *
+ * Color Mapping:
+ * - #D4AF37 → var(--gold-600) (header gradient, buttons)
+ * - #C49A27 → gold-600 blend (header gradient end)
+ * - #e0e0e0 → neutral border
+ * - #fafaf8 → var(--neutral-50) (body background)
+ * - #2a2a2a → footer dark bg
+ * - #ccc → footer text (gray)
+ * - #1a1a1a → admin header dark
+ *
+ * See AUDIT_HARDCODED_COLORS.md (Bucket 3) for details.
+ */
+
 import { Resend } from 'resend'
 import { Quote } from '@/core/entities/Quote'
 import { IEmailService } from '@/core/services/IEmailService'
@@ -21,6 +41,8 @@ export class ResendEmailService implements IEmailService {
     const resend = getResend()
     const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
 
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -79,6 +101,8 @@ export class ResendEmailService implements IEmailService {
     const resend = getResend()
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@contigo-constructions.com.au'
 
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
     const htmlContent = `
       <!DOCTYPE html>
       <html>
