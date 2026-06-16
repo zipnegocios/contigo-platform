@@ -98,7 +98,7 @@
 
   /* Legacy admin names (DEPRECATED) */
   --admin-sidebar-bg: #1E1A16;
-  --admin-sidebar-text: var(--heritage-sand);
+  --admin-sidebar-text: var(--neutral-50);
   --admin-sidebar-muted: var(--neutral-400);
   --admin-sidebar-border: var(--gold-a12);
   --admin-sidebar-active-bg: var(--gold-a15);

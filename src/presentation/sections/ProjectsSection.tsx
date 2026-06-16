@@ -119,14 +119,13 @@ export default function ProjectsSection({ projects }: Props) {
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const cloneRef    = useRef<HTMLUListElement | null>(null) // active DOM clone
 
-  const [cardsPerPage, setCardsPerPage] = useState<number>(5)
+  const [cardsPerPage, setCardsPerPage] = useState<number>(() => getCardsPerPage())
   const [startIndex,   setStartIndex]   = useState(0)
   const [isPaused,     setIsPaused]     = useState(false)
   const animatingRef = useRef(false)
 
   /* ── responsive cardsPerPage ─────────────────────────────────────────── */
   useEffect(() => {
-    setCardsPerPage(getCardsPerPage())
     const handler = () => {
       // Kill animation and clean up any orphaned clone
       if (timelineRef.current) timelineRef.current.kill()
@@ -251,9 +250,9 @@ export default function ProjectsSection({ projects }: Props) {
   }, [])
 
   const arrowBtn: React.CSSProperties = {
-    backgroundColor: 'rgba(30,26,22,0.60)',
-    color: '#E2C063',
-    border: '1px solid rgba(226,192,99,0.45)',
+    backgroundColor: 'var(--neutral-800-60)',
+    color: 'var(--contigo-primary)',
+    border: '1px solid var(--gold-a30)',
   }
 
   return (
@@ -261,18 +260,18 @@ export default function ProjectsSection({ projects }: Props) {
       id="projects"
       ref={sectionRef}
       className="section-gap page-padding"
-      style={{ backgroundColor: 'var(--monolith-concrete)' }}
+      style={{ backgroundColor: 'var(--neutral-100)' }}
     >
       {/* Header */}
       <div ref={headerRef}>
-        <span className="label block mb-4" style={{ color: 'var(--monolith-slate)' }}>
+        <span className="label block mb-4" style={{ color: 'var(--neutral-600)' }}>
           PORTFOLIO
         </span>
-        <h2 style={{ color: 'var(--monolith-ink)' }}>Featured Projects</h2>
+        <h2 style={{ color: 'var(--neutral-800)' }}>Featured Projects</h2>
       </div>
 
       {projects.length === 0 ? (
-        <p className="mt-8 text-sm" style={{ color: 'var(--monolith-slate)' }}>
+        <p className="mt-8 text-sm" style={{ color: 'var(--neutral-600)' }}>
           No featured projects yet.
         </p>
       ) : (
@@ -351,7 +350,7 @@ export default function ProjectsSection({ projects }: Props) {
               aria-label={`Position ${i + 1}`}
               style={{
                 width: 8, height: 8, borderRadius: '50%',
-                backgroundColor: i === startIndex ? '#2D2924' : 'rgba(30,26,22,0.28)',
+                backgroundColor: i === startIndex ? 'var(--neutral-900)' : 'var(--neutral-800-28)',
                 transition: 'background-color 0.2s ease',
               }}
             />
@@ -363,7 +362,7 @@ export default function ProjectsSection({ projects }: Props) {
       <div
         ref={metaRef}
         className="flex items-center justify-between mt-8 text-sm"
-        style={{ color: 'var(--monolith-slate)' }}
+        style={{ color: 'var(--neutral-600)' }}
       >
         <span className="data-text flex items-center gap-1 flex-wrap">
           <span>Project count: {projects.length}</span>
@@ -379,7 +378,7 @@ export default function ProjectsSection({ projects }: Props) {
         <a
           href="/projects"
           className="text-sm font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--monolith-ink)' }}
+          style={{ color: 'var(--neutral-800)' }}
         >
           View all →
         </a>

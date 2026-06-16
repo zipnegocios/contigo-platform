@@ -52,6 +52,8 @@
   --neutral-600: #6B6560;
   --neutral-700: #4D4843;
   --neutral-800: #2D2924;
+  --neutral-800-60: rgba(45, 41, 36, 0.6);
+  --neutral-800-28: rgba(45, 41, 36, 0.28);
   --neutral-900: #1D1D1B; /* BRAND NEUTRAL */
   --neutral-950: #141312;
 
