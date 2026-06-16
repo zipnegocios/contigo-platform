@@ -60,7 +60,7 @@ export function FileUpload({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium" style={{ color: '#2D2924' }}>
+      <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
         {label}
       </label>
 
@@ -87,7 +87,7 @@ export function FileUpload({
           </div>
           <div
             className="flex items-center justify-between px-3 py-2"
-            style={{ backgroundColor: '#FAF6F0', borderTop: '1px solid #E5DDD0' }}
+            style={{ backgroundColor: 'var(--neutral-50)', borderTop: '1px solid #E5DDD0' }}
           >
             <p className="text-xs truncate max-w-[60%]" style={{ color: '#6B6560' }}>
               {value.split('/').pop()}
@@ -97,9 +97,9 @@ export function FileUpload({
                 type="button"
                 onClick={() => setPickerOpen(true)}
                 className="flex items-center gap-1 text-xs transition-colors"
-                style={{ color: '#A89E8C' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#E2C063' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = '#A89E8C' }}
+                style={{ color: 'var(--neutral-600)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--contigo-primary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--neutral-600)' }}
               >
                 <Images className="h-3.5 w-3.5" />
                 Change
@@ -108,9 +108,9 @@ export function FileUpload({
                 type="button"
                 onClick={handleClear}
                 className="flex items-center gap-1 text-xs transition-colors"
-                style={{ color: '#A89E8C' }}
+                style={{ color: 'var(--neutral-600)' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = '#dc2626' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = '#A89E8C' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--neutral-600)' }}
               >
                 <X className="h-3.5 w-3.5" />
                 Remove
@@ -122,16 +122,16 @@ export function FileUpload({
         /* Upload zone */
         <div
           className="w-full rounded-lg border-2 border-dashed overflow-hidden"
-          style={{ borderColor: state === 'error' ? '#dc2626' : '#E5DDD0', backgroundColor: '#FAF6F0' }}
+          style={{ borderColor: state === 'error' ? '#dc2626' : 'var(--neutral-200)', backgroundColor: 'var(--neutral-50)' }}
         >
           {state === 'uploading' ? (
             <div className="py-8 flex flex-col items-center gap-3">
-              <Loader2 className="h-6 w-6 animate-spin" style={{ color: '#E2C063' }} />
+              <Loader2 className="h-6 w-6 animate-spin" style={{ color: 'var(--contigo-primary)' }} />
               <span className="text-sm" style={{ color: '#6B6560' }}>Uploading… {progress}%</span>
-              <div className="w-48 h-1 rounded-full overflow-hidden" style={{ backgroundColor: '#E5DDD0' }}>
+              <div className="w-48 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--neutral-200)' }}>
                 <div
                   className="h-full rounded-full transition-all duration-150"
-                  style={{ width: `${progress}%`, backgroundColor: '#E2C063' }}
+                  style={{ width: `${progress}%`, backgroundColor: 'var(--contigo-primary)' }}
                 />
               </div>
             </div>
@@ -146,13 +146,13 @@ export function FileUpload({
               >
                 <Upload className="h-6 w-6" style={{ color: '#C5BDB5' }} />
                 <div className="text-center">
-                  <p className="text-sm font-medium" style={{ color: '#2D2924' }}>Upload file</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#A89E8C' }}>JPG, PNG, WebP, GIF</p>
+                  <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Upload file</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--neutral-600)' }}>JPG, PNG, WebP, GIF</p>
                 </div>
               </button>
 
               {/* Divider */}
-              <div style={{ width: 1, backgroundColor: '#E5DDD0' }} />
+              <div style={{ width: 1, backgroundColor: 'var(--neutral-200)' }} />
 
               {/* Browse library */}
               <button
@@ -163,8 +163,8 @@ export function FileUpload({
               >
                 <Images className="h-6 w-6" style={{ color: '#C5BDB5' }} />
                 <div className="text-center">
-                  <p className="text-sm font-medium" style={{ color: '#2D2924' }}>Browse library</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#A89E8C' }}>Select existing</p>
+                  <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Browse library</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--neutral-600)' }}>Select existing</p>
                 </div>
               </button>
             </div>

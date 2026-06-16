@@ -72,7 +72,7 @@ export function HierarchicalCategorySelect({
         required={required}
         disabled={loading}
         className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-        style={{ backgroundColor: '#F0EBE3', color: loading ? '#A89E8C' : '#2D2924', border: '1px solid #E5DDD0' }}
+        style={{ backgroundColor: '#F0EBE3', color: loading ? 'var(--neutral-600)' : 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
       >
         <option value="">{loading ? 'Loading…' : '— No category —'}</option>
         {options.map((opt) => (
@@ -82,7 +82,7 @@ export function HierarchicalCategorySelect({
         ))}
       </select>
       {selectedPath.length > 1 && (
-        <p className="text-[10px] mt-1" style={{ color: '#A89E8C' }}>
+        <p className="text-[10px] mt-1" style={{ color: 'var(--neutral-600)' }}>
           {selectedPath.map((c) => c.name).join(' › ')}
         </p>
       )}

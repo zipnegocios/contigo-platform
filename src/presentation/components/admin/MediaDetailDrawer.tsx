@@ -32,7 +32,7 @@ function MetaField({ label, value, gold }: { label: string; value: string; gold?
   return (
     <div>
       <p className="text-[9px] uppercase tracking-widest mb-0.5" style={{ color: '#6B6560' }}>{label}</p>
-      <p className="text-xs font-medium" style={{ color: gold ? '#E2C063' : '#E8DCC4' }}>{value}</p>
+      <p className="text-xs font-medium" style={{ color: gold ? 'var(--contigo-primary)' : 'var(--neutral-50)' }}>{value}</p>
     </div>
   )
 }
@@ -154,7 +154,7 @@ export function MediaDetailDrawer() {
         >
           <h3
             className="text-sm font-semibold truncate pr-2"
-            style={{ color: '#E8DCC4', fontFamily: 'var(--font-cormorant)', fontSize: 16 }}
+            style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)', fontSize: 16 }}
             title={filename}
           >
             {filename}
@@ -165,11 +165,11 @@ export function MediaDetailDrawer() {
               target="_blank"
               rel="noopener noreferrer"
               className="p-1.5 rounded-lg"
-              style={{ color: '#A89E8C' }}
+              style={{ color: 'var(--neutral-600)' }}
             >
               <ExternalLink size={14} />
             </a>
-            <button onClick={closeDetail} className="p-1.5 rounded-lg" style={{ color: '#A89E8C' }}>
+            <button onClick={closeDetail} className="p-1.5 rounded-lg" style={{ color: 'var(--neutral-600)' }}>
               <X size={14} />
             </button>
           </div>
@@ -183,7 +183,7 @@ export function MediaDetailDrawer() {
             ) : item.mediaType === 'video' ? (
               <video src={item.publicUrl} controls className="w-full h-full object-contain" />
             ) : (
-              <div className="flex flex-col items-center gap-2" style={{ color: '#A89E8C' }}>
+              <div className="flex flex-col items-center gap-2" style={{ color: 'var(--neutral-600)' }}>
                 <ImageIcon size={28} />
               </div>
             )}
@@ -217,7 +217,7 @@ export function MediaDetailDrawer() {
 
             {/* Organization */}
             <div className="space-y-3">
-              <p className="text-[10px] uppercase tracking-widest" style={{ color: '#A89E8C' }}>Organization</p>
+              <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--neutral-600)' }}>Organization</p>
 
               <div>
                 <label className="text-[10px] block mb-1" style={{ color: '#6B6560' }}>Folder</label>
@@ -225,11 +225,11 @@ export function MediaDetailDrawer() {
                   value={localFolderId}
                   onChange={(e) => handleFolderChange(e.target.value)}
                   className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none"
-                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
+                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
                 >
                   <option value="">No folder</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id} style={{ backgroundColor: '#1E1A16' }}>{f.name}</option>
+                    <option key={f.id} value={f.id} style={{ backgroundColor: 'var(--petrol-800)' }}>{f.name}</option>
                   ))}
                 </select>
               </div>
@@ -270,7 +270,7 @@ export function MediaDetailDrawer() {
                   rows={2}
                   placeholder="Internal notes…"
                   className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none resize-none"
-                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
+                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
                 />
               </div>
             </div>
@@ -288,7 +288,7 @@ export function MediaDetailDrawer() {
                 className="flex-shrink-0 p-1.5 rounded-lg transition-all"
                 style={{
                   backgroundColor: copied ? 'rgba(82,183,136,0.15)' : 'rgba(226,192,99,0.08)',
-                  color: copied ? '#52B788' : '#E2C063',
+                  color: copied ? '#52B788' : 'var(--contigo-primary)',
                 }}
               >
                 {copied ? <Check size={12} /> : <Copy size={12} />}
@@ -298,7 +298,7 @@ export function MediaDetailDrawer() {
             {/* Used In */}
             {item.usedIn.length > 0 && (
               <div>
-                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: '#A89E8C' }}>Used in</p>
+                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--neutral-600)' }}>Used in</p>
                 <div className="space-y-1">
                   {item.usedIn.map((a, i) => (
                     <div
@@ -306,10 +306,10 @@ export function MediaDetailDrawer() {
                       className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs"
                       style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.08)' }}
                     >
-                      <span className="truncate" style={{ color: '#E8DCC4' }}>{a.title}</span>
+                      <span className="truncate" style={{ color: 'var(--neutral-50)' }}>{a.title}</span>
                       <span
                         className="flex-shrink-0 text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-full ml-2"
-                        style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#E2C063' }}
+                        style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--contigo-primary)' }}
                       >
                         {FIELD_LABELS[a.field] ?? a.field}
                       </span>
@@ -340,7 +340,7 @@ export function MediaDetailDrawer() {
               type="button"
               onClick={() => handleQuickAssign('cover')}
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
-              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
               <ImageIcon size={13} />
               Use as Cover
@@ -349,7 +349,7 @@ export function MediaDetailDrawer() {
               type="button"
               onClick={() => handleQuickAssign('gallery')}
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
-              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
               <ImagePlus size={13} />
               Add to Gallery

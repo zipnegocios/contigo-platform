@@ -30,7 +30,7 @@ const stageConfig: Record<string, {
     label: 'Prospect',
     columnBg: 'rgba(226,192,99,0.05)',
     borderColor: 'rgba(226,192,99,0.25)',
-    headerColor: '#E2C063',
+    headerColor: 'var(--contigo-primary)',
     badgeBg: 'rgba(226,192,99,0.2)',
     badgeText: '#A08040',
   },
@@ -133,7 +133,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
     <div>
       <h1
         className="text-4xl font-semibold mb-6"
-        style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924', lineHeight: 1.2 }}
+        style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)', lineHeight: 1.2 }}
       >
         Lead Pipeline
       </h1>
@@ -180,7 +180,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                 {stagLeads.length === 0 ? (
                   <div
                     className="flex items-center justify-center h-28 text-xs"
-                    style={{ color: '#A89E8C' }}
+                    style={{ color: 'var(--neutral-600)' }}
                   >
                     Drop here
                   </div>
@@ -203,15 +203,15 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.boxShadow = '0 1px 4px rgba(45,41,36,0.06)'
-                        e.currentTarget.style.borderColor = '#E5DDD0'
+                        e.currentTarget.style.borderColor = 'var(--neutral-200)'
                       }}
                     >
                       <div className="space-y-2">
                         <div>
-                          <p className="font-semibold text-sm truncate" style={{ color: '#2D2924' }}>
+                          <p className="font-semibold text-sm truncate" style={{ color: 'var(--neutral-800)' }}>
                             {lead.quote?.name || 'Unknown'}
                           </p>
-                          <p className="text-xs truncate" style={{ color: '#A89E8C' }}>
+                          <p className="text-xs truncate" style={{ color: 'var(--neutral-600)' }}>
                             {lead.quote?.email ?? '—'}
                           </p>
                         </div>
@@ -230,7 +230,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                             className="flex items-center justify-between pt-2"
                             style={{ borderTop: '1px solid #F0E8DC' }}
                           >
-                            <span className="text-xs" style={{ color: '#A89E8C' }}>Est. Value</span>
+                            <span className="text-xs" style={{ color: 'var(--neutral-600)' }}>Est. Value</span>
                             <span
                               className="text-xs font-bold"
                               style={{ fontFamily: 'var(--font-space)', color: '#15803d' }}
@@ -243,7 +243,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                         {lead.adminNotes && (
                           <p
                             className="text-xs italic pl-2"
-                            style={{ color: '#A89E8C', borderLeft: '2px solid #E5DDD0' }}
+                            style={{ color: 'var(--neutral-600)', borderLeft: '2px solid #E5DDD0' }}
                           >
                             {lead.adminNotes}
                           </p>

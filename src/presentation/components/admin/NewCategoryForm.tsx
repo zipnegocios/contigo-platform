@@ -38,7 +38,7 @@ export function NewCategoryForm() {
       <button
         onClick={() => setOpen(true)}
         className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-        style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+        style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
       >
         <Plus size={16} />
         New Category
@@ -53,8 +53,8 @@ export function NewCategoryForm() {
         className="rounded-lg px-4 py-2.5 text-sm outline-none"
         style={{
           border: '1px solid #E2C063',
-          backgroundColor: '#FAF6F0',
-          color: '#2D2924',
+          backgroundColor: 'var(--neutral-50)',
+          color: 'var(--neutral-800)',
           minWidth: 200,
         }}
         placeholder="Category name..."
@@ -67,7 +67,7 @@ export function NewCategoryForm() {
         type="submit"
         disabled={loading || !name.trim()}
         className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-50"
-        style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+        style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
       >
         Create
       </button>

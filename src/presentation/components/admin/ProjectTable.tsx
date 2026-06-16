@@ -56,7 +56,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
     >
       <Table>
         <TableHeader>
-          <TableRow style={{ backgroundColor: '#FAF6F0', borderBottom: '1px solid #E5DDD0' }}>
+          <TableRow style={{ backgroundColor: 'var(--neutral-50)', borderBottom: '1px solid #E5DDD0' }}>
             <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Title</TableHead>
             <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Category</TableHead>
             <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
@@ -67,9 +67,9 @@ export function ProjectTable({ projects }: ProjectTableProps) {
         <TableBody>
           {projects.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-12 text-sm" style={{ color: '#A89E8C' }}>
+              <TableCell colSpan={5} className="text-center py-12 text-sm" style={{ color: 'var(--neutral-600)' }}>
                 No projects yet.{' '}
-                <Link href="/admin/projects/new" style={{ color: '#E2C063', textDecoration: 'underline' }}>
+                <Link href="/admin/projects/new" style={{ color: 'var(--contigo-primary)', textDecoration: 'underline' }}>
                   Create one
                 </Link>
               </TableCell>
@@ -79,10 +79,10 @@ export function ProjectTable({ projects }: ProjectTableProps) {
               <TableRow
                 key={project.id}
                 style={{ borderBottom: '1px solid #F0E8DC' }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FAF6F0' }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--neutral-50)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
-                <TableCell className="font-medium py-3.5" style={{ color: '#2D2924' }}>
+                <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>
                   {project.title}
                 </TableCell>
                 <TableCell className="py-3.5 text-sm" style={{ color: '#6B6560' }}>
@@ -109,7 +109,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                       Featured
                     </span>
                   ) : (
-                    <span style={{ color: '#E5DDD0' }}>—</span>
+                    <span style={{ color: 'var(--neutral-200)' }}>—</span>
                   )}
                 </TableCell>
                 <TableCell className="py-3.5">
@@ -119,13 +119,13 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                       size="sm"
                       variant="outline"
                       className="text-xs h-8 transition-all duration-150"
-                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                      style={{ borderColor: 'var(--neutral-200)', color: '#6B6560' }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = '#E2C063'
-                        e.currentTarget.style.color = '#E2C063'
+                        e.currentTarget.style.borderColor = 'var(--contigo-primary)'
+                        e.currentTarget.style.color = 'var(--contigo-primary)'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = '#E5DDD0'
+                        e.currentTarget.style.borderColor = 'var(--neutral-200)'
                         e.currentTarget.style.color = '#6B6560'
                       }}
                     >
@@ -138,7 +138,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                       size="sm"
                       variant="outline"
                       className="h-8 w-8 p-0 transition-all duration-150"
-                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                      style={{ borderColor: 'var(--neutral-200)', color: '#6B6560' }}
                       onClick={() => handleDelete(project.id)}
                       disabled={deleting === project.id}
                       onMouseEnter={(e) => {
@@ -146,7 +146,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                         e.currentTarget.style.color = '#dc2626'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = '#E5DDD0'
+                        e.currentTarget.style.borderColor = 'var(--neutral-200)'
                         e.currentTarget.style.color = '#6B6560'
                       }}
                     >

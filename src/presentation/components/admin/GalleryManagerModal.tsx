@@ -66,7 +66,7 @@ function SortableItem({
   return (
     <div
       ref={setNodeRef}
-      style={{ ...style, backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.12)' }}
+      style={{ ...style, backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.12)' }}
       className="flex gap-3 p-3 rounded-xl"
     >
       {/* Drag handle */}
@@ -88,7 +88,7 @@ function SortableItem({
       >
         {isVideo(item.url) ? (
           <div className="w-full h-full flex items-center justify-center">
-            <Film size={20} style={{ color: '#A89E8C' }} />
+            <Film size={20} style={{ color: 'var(--neutral-600)' }} />
           </div>
         ) : (
           <img src={item.url} alt="" className="w-full h-full object-cover" />
@@ -103,7 +103,7 @@ function SortableItem({
           onChange={(e) => onChangeTitle(e.target.value)}
           placeholder="Title (optional)"
           className="w-full text-xs px-2.5 py-1.5 rounded-lg outline-none"
-          style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
+          style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
         />
         <input
           type="text"
@@ -111,7 +111,7 @@ function SortableItem({
           onChange={(e) => onChangeDescription(e.target.value)}
           placeholder="Description (optional)"
           className="w-full text-xs px-2.5 py-1.5 rounded-lg outline-none"
-          style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
+          style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
         />
       </div>
 
@@ -122,7 +122,7 @@ function SortableItem({
           onClick={onMoveUp}
           disabled={index === 0}
           className="p-1 rounded transition-opacity disabled:opacity-20"
-          style={{ color: '#A89E8C' }}
+          style={{ color: 'var(--neutral-600)' }}
           title="Move up"
         >
           <ChevronUp size={14} />
@@ -132,7 +132,7 @@ function SortableItem({
           onClick={onMoveDown}
           disabled={index === total - 1}
           className="p-1 rounded transition-opacity disabled:opacity-20"
-          style={{ color: '#A89E8C' }}
+          style={{ color: 'var(--neutral-600)' }}
           title="Move down"
         >
           <ChevronDown size={14} />
@@ -246,10 +246,10 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
           className="flex items-center justify-between px-6 py-4 flex-shrink-0"
           style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}
         >
-          <h2 className="text-lg font-semibold" style={{ color: '#E8DCC4', fontFamily: 'var(--font-cormorant)' }}>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}>
             Gallery Manager
           </h2>
-          <button type="button" onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#A89E8C' }}>
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg" style={{ color: 'var(--neutral-600)' }}>
             <X size={18} />
           </button>
         </div>
@@ -264,7 +264,7 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
             {localItems.length === 0 ? (
               <div
                 className="flex flex-col items-center justify-center h-40 rounded-xl"
-                style={{ border: '1px dashed rgba(226,192,99,0.2)', color: '#A89E8C' }}
+                style={{ border: '1px dashed rgba(226,192,99,0.2)', color: 'var(--neutral-600)' }}
               >
                 <p className="text-sm">No gallery items yet</p>
                 <p className="text-xs mt-1">Add images from the library or upload new files</p>
@@ -300,13 +300,13 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
 
           {/* Right: Add media panel */}
           <div className="flex-shrink-0 p-5 space-y-4" style={{ width: 220 }}>
-            <p className="text-xs uppercase tracking-widest" style={{ color: '#A89E8C' }}>Add Media</p>
+            <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--neutral-600)' }}>Add Media</p>
 
             <button
               type="button"
               onClick={() => setPickerOpen(true)}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all"
-              style={{ border: '1px solid rgba(226,192,99,0.3)', color: '#E2C063', backgroundColor: 'rgba(226,192,99,0.06)' }}
+              style={{ border: '1px solid rgba(226,192,99,0.3)', color: 'var(--contigo-primary)', backgroundColor: 'rgba(226,192,99,0.06)' }}
             >
               <Plus size={15} />
               Browse Library
@@ -335,7 +335,7 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
           className="flex items-center justify-between px-6 py-4 flex-shrink-0"
           style={{ borderTop: '1px solid rgba(226,192,99,0.1)' }}
         >
-          <p className="text-sm" style={{ color: '#A89E8C' }}>
+          <p className="text-sm" style={{ color: 'var(--neutral-600)' }}>
             {localItems.length} item{localItems.length !== 1 ? 's' : ''}
           </p>
           <div className="flex gap-3">
@@ -343,7 +343,7 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
               type="button"
               onClick={onClose}
               className="px-5 py-2 rounded-lg text-sm font-medium"
-              style={{ border: '1px solid rgba(226,192,99,0.2)', color: '#A89E8C' }}
+              style={{ border: '1px solid rgba(226,192,99,0.2)', color: 'var(--neutral-600)' }}
             >
               Cancel
             </button>
@@ -351,7 +351,7 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
               type="button"
               onClick={handleSave}
               className="px-5 py-2 rounded-lg text-sm font-semibold"
-              style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+              style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
             >
               Save Gallery
             </button>

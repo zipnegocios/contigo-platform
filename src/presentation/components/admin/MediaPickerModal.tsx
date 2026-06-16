@@ -63,7 +63,7 @@ function PickerGrid({ items, multiSelect, selectedUrls, entityContext, onItemCli
             className="group relative rounded-xl overflow-hidden text-left transition-all duration-150"
             style={{
               aspectRatio: '4/3',
-              backgroundColor: '#1E1A16',
+              backgroundColor: 'var(--petrol-800)',
               border: isSelected ? '2px solid #E2C063' : '1px solid rgba(226,192,99,0.12)',
               outline: 'none',
             }}
@@ -87,7 +87,7 @@ function PickerGrid({ items, multiSelect, selectedUrls, entityContext, onItemCli
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                <Film size={24} style={{ color: '#A89E8C' }} />
+                <Film size={24} style={{ color: 'var(--neutral-600)' }} />
                 <span className="text-[8px] uppercase tracking-wider" style={{ color: '#6B6560' }}>File</span>
               </div>
             )}
@@ -95,7 +95,7 @@ function PickerGrid({ items, multiSelect, selectedUrls, entityContext, onItemCli
             {item.mediaType === 'video' && (
               <span
                 className="absolute bottom-7 right-1.5 text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-                style={{ backgroundColor: 'rgba(226,192,99,0.2)', color: '#E2C063' }}
+                style={{ backgroundColor: 'rgba(226,192,99,0.2)', color: 'var(--contigo-primary)' }}
               >
                 Video
               </span>
@@ -105,11 +105,11 @@ function PickerGrid({ items, multiSelect, selectedUrls, entityContext, onItemCli
               <div
                 className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-150"
                 style={{
-                  backgroundColor: isSelected ? '#E2C063' : 'rgba(30,26,22,0.6)',
+                  backgroundColor: isSelected ? 'var(--contigo-primary)' : 'rgba(30,26,22,0.6)',
                   border: isSelected ? 'none' : '1.5px solid rgba(226,192,99,0.5)',
                 }}
               >
-                {isSelected && <Check size={13} strokeWidth={3} style={{ color: '#1E1A16' }} />}
+                {isSelected && <Check size={13} strokeWidth={3} style={{ color: 'var(--petrol-800)' }} />}
               </div>
             )}
 
@@ -126,11 +126,11 @@ function PickerGrid({ items, multiSelect, selectedUrls, entityContext, onItemCli
                 className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full flex items-center gap-1"
                 style={{ backgroundColor: 'rgba(226,192,99,0.22)', border: '1px solid rgba(226,192,99,0.35)' }}
               >
-                <span className="text-[8px] truncate max-w-[90px]" style={{ color: '#E2C063' }}>
+                <span className="text-[8px] truncate max-w-[90px]" style={{ color: 'var(--contigo-primary)' }}>
                   {ASSOC_FIELDS[firstAssoc.field] ?? firstAssoc.field}
                 </span>
                 {(item.usedIn ?? []).length > 1 && (
-                  <span className="text-[8px]" style={{ color: '#E2C063' }}>
+                  <span className="text-[8px]" style={{ color: 'var(--contigo-primary)' }}>
                     +{(item.usedIn ?? []).length - 1}
                   </span>
                 )}
@@ -141,7 +141,7 @@ function PickerGrid({ items, multiSelect, selectedUrls, entityContext, onItemCli
               className="absolute bottom-0 left-0 right-0 px-2 py-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200"
               style={{ backgroundColor: 'rgba(30,26,22,0.88)' }}
             >
-              <p className="text-[10px] truncate" style={{ color: '#E8DCC4' }}>
+              <p className="text-[10px] truncate" style={{ color: 'var(--neutral-50)' }}>
                 {item.key.split('/').pop()}
               </p>
             </div>
@@ -193,7 +193,7 @@ function PickerShell({ onSelect, onMultiSelect, onClose, multiSelect, allowVideo
       >
         <h2
           className="text-xl font-semibold"
-          style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
+          style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
         >
           {multiSelect ? 'Select Media' : 'Media Library'}
         </h2>
@@ -201,7 +201,7 @@ function PickerShell({ onSelect, onMultiSelect, onClose, multiSelect, allowVideo
           type="button"
           onClick={onClose}
           className="p-1.5 rounded-lg transition-colors hover:bg-black/5"
-          style={{ color: '#A89E8C' }}
+          style={{ color: 'var(--neutral-600)' }}
         >
           <X size={18} />
         </button>
@@ -223,7 +223,7 @@ function PickerShell({ onSelect, onMultiSelect, onClose, multiSelect, allowVideo
               className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
               style={
                 tab === t.key
-                  ? { backgroundColor: '#E2C063', color: '#1E1A16' }
+                  ? { backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }
                   : { color: '#6B6560' }
               }
             >
@@ -243,11 +243,11 @@ function PickerShell({ onSelect, onMultiSelect, onClose, multiSelect, allowVideo
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 size={28} className="animate-spin" style={{ color: '#E2C063' }} />
+              <Loader2 size={28} className="animate-spin" style={{ color: 'var(--contigo-primary)' }} />
             </div>
           ) : visibleItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <p className="text-sm" style={{ color: '#A89E8C' }}>
+              <p className="text-sm" style={{ color: 'var(--neutral-600)' }}>
                 No media found in this section.
               </p>
             </div>
@@ -270,7 +270,7 @@ function PickerShell({ onSelect, onMultiSelect, onClose, multiSelect, allowVideo
       >
         {multiSelect ? (
           <>
-            <p className="text-xs" style={{ color: '#A89E8C' }}>
+            <p className="text-xs" style={{ color: 'var(--neutral-600)' }}>
               {selectedUrls.length > 0
                 ? `${selectedUrls.length} item${selectedUrls.length !== 1 ? 's' : ''} selected`
                 : 'Click images to select'}
@@ -289,14 +289,14 @@ function PickerShell({ onSelect, onMultiSelect, onClose, multiSelect, allowVideo
                 onClick={() => { if (onMultiSelect) onMultiSelect(selectedUrls); onClose() }}
                 disabled={selectedUrls.length === 0}
                 className="text-sm px-5 py-1.5 rounded-lg font-semibold disabled:opacity-40"
-                style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+                style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
               >
                 Add {selectedUrls.length > 0 ? `${selectedUrls.length} ` : ''}to gallery
               </button>
             </div>
           </>
         ) : (
-          <p className="text-xs" style={{ color: '#A89E8C' }}>
+          <p className="text-xs" style={{ color: 'var(--neutral-600)' }}>
             {visibleItems.length} file{visibleItems.length !== 1 ? 's' : ''} — click any to select
           </p>
         )}
@@ -335,7 +335,7 @@ export function MediaPickerModal({
         style={{
           maxWidth: 960,
           maxHeight: '88vh',
-          backgroundColor: '#FAF6F0',
+          backgroundColor: 'var(--neutral-50)',
           border: '1px solid rgba(226,192,99,0.2)',
           boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
         }}

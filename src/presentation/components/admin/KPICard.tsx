@@ -30,14 +30,14 @@ export function KPICard({ title, value, icon, trend }: KPICardProps) {
         >
           {title}
         </span>
-        <span style={{ color: '#E2C063' }}>{icon}</span>
+        <span style={{ color: 'var(--contigo-primary)' }}>{icon}</span>
       </div>
 
       <div
         className="text-2xl font-bold"
         style={{
           fontFamily: 'var(--font-space)',
-          color: '#2D2924',
+          color: 'var(--neutral-800)',
         }}
       >
         {value}

@@ -60,12 +60,12 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
       <div className="flex justify-between items-center">
         <h2
           className="text-2xl font-semibold"
-          style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
+          style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
         >
           Quote Inbox
         </h2>
         <Select value={filter} onValueChange={handleFilterChange}>
-          <SelectTrigger className="w-48 text-sm" style={{ borderColor: '#E5DDD0' }}>
+          <SelectTrigger className="w-48 text-sm" style={{ borderColor: 'var(--neutral-200)' }}>
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -85,7 +85,7 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
       >
         <Table>
           <TableHeader>
-            <TableRow style={{ backgroundColor: '#FAF6F0', borderBottom: '1px solid #E5DDD0' }}>
+            <TableRow style={{ backgroundColor: 'var(--neutral-50)', borderBottom: '1px solid #E5DDD0' }}>
               <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Name</TableHead>
               <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Email</TableHead>
               <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Service</TableHead>
@@ -97,7 +97,7 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
           <TableBody>
             {filteredQuotes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-sm" style={{ color: '#A89E8C' }}>
+                <TableCell colSpan={6} className="text-center py-12 text-sm" style={{ color: 'var(--neutral-600)' }}>
                   No quotes found
                 </TableCell>
               </TableRow>
@@ -107,10 +107,10 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
                   key={quote.id}
                   className="transition-colors"
                   style={{ borderBottom: '1px solid #F0E8DC' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FAF6F0' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--neutral-50)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
                 >
-                  <TableCell className="font-medium py-3.5" style={{ color: '#2D2924' }}>{quote.name}</TableCell>
+                  <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>{quote.name}</TableCell>
                   <TableCell className="py-3.5 text-sm" style={{ color: '#6B6560' }}>{quote.email.toString()}</TableCell>
                   <TableCell className="py-3.5 text-sm" style={{ color: '#6B6560' }}>{quote.service}</TableCell>
                   <TableCell className="py-3.5">
@@ -125,13 +125,13 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
                       size="sm"
                       variant="outline"
                       className="text-xs transition-all duration-150"
-                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                      style={{ borderColor: 'var(--neutral-200)', color: '#6B6560' }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = '#E2C063'
-                        e.currentTarget.style.color = '#E2C063'
+                        e.currentTarget.style.borderColor = 'var(--contigo-primary)'
+                        e.currentTarget.style.color = 'var(--contigo-primary)'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = '#E5DDD0'
+                        e.currentTarget.style.borderColor = 'var(--neutral-200)'
                         e.currentTarget.style.color = '#6B6560'
                       }}
                     >

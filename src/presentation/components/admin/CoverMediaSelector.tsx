@@ -63,7 +63,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-medium" style={{ color: '#2D2924' }}>Cover Media</p>
+      <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Cover Media</p>
 
       {/* Cover preview */}
       <div
@@ -71,7 +71,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
         style={{ aspectRatio: '16/9', backgroundColor: '#F5EFE8', border: '1px solid #E5DDD0' }}
       >
         {!coverUrl ? (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2" style={{ color: '#A89E8C' }}>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2" style={{ color: 'var(--neutral-600)' }}>
             <ImageIcon size={36} className="opacity-40" />
             <p className="text-sm">No cover selected</p>
           </div>
@@ -106,7 +106,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
           type="button"
           onClick={() => setPickerOpen(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          style={{ border: '1px solid rgba(226,192,99,0.4)', color: '#E2C063', backgroundColor: 'rgba(226,192,99,0.08)' }}
+          style={{ border: '1px solid rgba(226,192,99,0.4)', color: 'var(--contigo-primary)', backgroundColor: 'rgba(226,192,99,0.08)' }}
         >
           <Film size={14} />
           Browse Library
@@ -131,9 +131,9 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
           className="rounded-xl p-4 space-y-3"
           style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.12)' }}
         >
-          <p className="text-sm font-medium" style={{ color: '#2D2924' }}>
+          <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
             Poster Image
-            <span className="ml-2 text-xs font-normal" style={{ color: '#A89E8C' }}>(fallback for video)</span>
+            <span className="ml-2 text-xs font-normal" style={{ color: 'var(--neutral-600)' }}>(fallback for video)</span>
           </p>
 
           {posterUrl && (
@@ -155,7 +155,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
               type="button"
               onClick={() => setPosterPickerOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-              style={{ border: '1px solid rgba(226,192,99,0.4)', color: '#E2C063', backgroundColor: 'rgba(226,192,99,0.08)' }}
+              style={{ border: '1px solid rgba(226,192,99,0.4)', color: 'var(--contigo-primary)', backgroundColor: 'rgba(226,192,99,0.08)' }}
             >
               Browse Library
             </button>

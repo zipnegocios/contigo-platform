@@ -47,7 +47,7 @@ function BulkActionBar() {
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-3 flex-wrap"
         style={{ backgroundColor: 'rgba(226,192,99,0.1)', border: '1px solid rgba(226,192,99,0.25)' }}
       >
-        <span className="text-xs font-semibold" style={{ color: '#E2C063' }}>
+        <span className="text-xs font-semibold" style={{ color: 'var(--contigo-primary)' }}>
           {selectedKeys.length} selected
         </span>
 
@@ -55,7 +55,7 @@ function BulkActionBar() {
           type="button"
           onClick={selectAllFiltered}
           className="text-xs px-2.5 py-1 rounded-lg transition-colors"
-          style={{ color: '#A89E8C', border: '1px solid rgba(107,101,96,0.3)' }}
+          style={{ color: 'var(--neutral-600)', border: '1px solid rgba(107,101,96,0.3)' }}
         >
           Select all ({filteredItems.length})
         </button>
@@ -69,14 +69,14 @@ function BulkActionBar() {
               type="button"
               onClick={() => { setFolderMenuOpen((v) => !v); setAddTagMenuOpen(false); setRemoveTagMenuOpen(false) }}
               className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all"
-              style={{ backgroundColor: 'rgba(226,192,99,0.08)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+              style={{ backgroundColor: 'rgba(226,192,99,0.08)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
               Move to folder <ChevronDown size={12} />
             </button>
             {folderMenuOpen && (
               <div
                 className="absolute top-full mt-1 left-0 rounded-xl overflow-hidden py-1 min-w-[180px]"
-                style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+                style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
               >
                 <button
                   type="button"
@@ -92,7 +92,7 @@ function BulkActionBar() {
                     type="button"
                     onClick={() => { bulkMoveToFolder(f.id); closeAll() }}
                     className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/5"
-                    style={{ color: '#E8DCC4' }}
+                    style={{ color: 'var(--neutral-50)' }}
                   >
                     {f.name}
                   </button>
@@ -109,14 +109,14 @@ function BulkActionBar() {
               type="button"
               onClick={() => { setAddTagMenuOpen((v) => !v); setFolderMenuOpen(false); setRemoveTagMenuOpen(false) }}
               className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all"
-              style={{ backgroundColor: 'rgba(226,192,99,0.08)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+              style={{ backgroundColor: 'rgba(226,192,99,0.08)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
               Add tag <ChevronDown size={12} />
             </button>
             {addTagMenuOpen && (
               <div
                 className="absolute top-full mt-1 left-0 rounded-xl overflow-hidden py-1 min-w-[160px]"
-                style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+                style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
               >
                 {tags.map((t) => (
                   <button
@@ -124,7 +124,7 @@ function BulkActionBar() {
                     type="button"
                     onClick={() => { bulkAddTag(t.name); closeAll() }}
                     className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/5 flex items-center gap-2"
-                    style={{ color: '#E8DCC4' }}
+                    style={{ color: 'var(--neutral-50)' }}
                   >
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
                     {t.name}
@@ -142,14 +142,14 @@ function BulkActionBar() {
               type="button"
               onClick={() => { setRemoveTagMenuOpen((v) => !v); setFolderMenuOpen(false); setAddTagMenuOpen(false) }}
               className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all"
-              style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.15)', color: '#A89E8C' }}
+              style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.15)', color: 'var(--neutral-600)' }}
             >
               Remove tag <ChevronDown size={12} />
             </button>
             {removeTagMenuOpen && (
               <div
                 className="absolute top-full mt-1 left-0 rounded-xl overflow-hidden py-1 min-w-[160px]"
-                style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+                style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
               >
                 {tags.map((t) => (
                   <button
@@ -157,7 +157,7 @@ function BulkActionBar() {
                     type="button"
                     onClick={() => { bulkRemoveTag(t.name); closeAll() }}
                     className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/5 flex items-center gap-2"
-                    style={{ color: '#E8DCC4' }}
+                    style={{ color: 'var(--neutral-50)' }}
                   >
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
                     {t.name}
@@ -183,7 +183,7 @@ function BulkActionBar() {
           type="button"
           onClick={clearSelection}
           className="p-1 rounded-lg transition-colors"
-          style={{ color: '#A89E8C' }}
+          style={{ color: 'var(--neutral-600)' }}
           title="Clear selection"
         >
           <X size={14} />
@@ -212,7 +212,7 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
         className="fixed z-50 rounded-xl overflow-hidden py-1 min-w-[180px]"
         style={{
           top: state.y, left: state.x,
-          backgroundColor: '#1E1A16',
+          backgroundColor: 'var(--petrol-800)',
           border: '1px solid rgba(226,192,99,0.2)',
           boxShadow: '0 16px 40px rgba(0,0,0,0.5)',
         }}
@@ -230,7 +230,7 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
           {showFolderSub && (
             <div
               className="absolute left-full top-0 rounded-xl overflow-hidden py-1 min-w-[160px]"
-              style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+              style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
             >
               <MenuItem dimmed onClick={() => { moveToFolder(state.item.key, null); onClose() }}>
                 No folder
@@ -276,10 +276,10 @@ function MenuItem({
       type="button"
       onClick={onClick}
       className="w-full text-left px-4 py-2 text-sm flex items-center justify-between transition-colors hover:bg-white/5"
-      style={{ color: danger ? '#e87070' : dimmed ? '#6B6560' : '#E8DCC4' }}
+      style={{ color: danger ? '#e87070' : dimmed ? '#6B6560' : 'var(--neutral-50)' }}
     >
       <span>{children}</span>
-      {rightArrow && <span style={{ color: '#A89E8C', fontSize: 10 }}>▶</span>}
+      {rightArrow && <span style={{ color: 'var(--neutral-600)', fontSize: 10 }}>▶</span>}
     </button>
   )
 }
@@ -300,7 +300,7 @@ function DroppableFolderTarget({ folderId, label }: { folderId: string; label: s
         backgroundColor: isOver ? 'rgba(226,192,99,0.18)' : 'rgba(226,192,99,0.04)',
         border: isOver ? '1.5px solid #E2C063' : '1px solid rgba(226,192,99,0.12)',
         transform: isOver ? 'scale(1.03)' : 'scale(1)',
-        color: isOver ? '#E2C063' : '#A89E8C',
+        color: isOver ? 'var(--contigo-primary)' : 'var(--neutral-600)',
       }}
     >
       {isOver ? <FolderOpen size={14} /> : <Folder size={14} />}
@@ -323,7 +323,7 @@ function FloatingFolderTargets() {
         minWidth: 180,
       }}
     >
-      <p className="text-[9px] uppercase tracking-widest px-1 pb-1" style={{ color: '#A89E8C' }}>
+      <p className="text-[9px] uppercase tracking-widest px-1 pb-1" style={{ color: 'var(--neutral-600)' }}>
         Drop into folder
       </p>
       <DroppableFolderTarget folderId="unfiled" label="No folder" />
@@ -414,7 +414,7 @@ export function MediaGrid() {
         ) : isEmpty ? (
           <div
             className="flex flex-col items-center justify-center py-24 rounded-xl"
-            style={{ border: '1px dashed rgba(226,192,99,0.2)', color: '#A89E8C' }}
+            style={{ border: '1px dashed rgba(226,192,99,0.2)', color: 'var(--neutral-600)' }}
           >
             <LayoutGrid size={32} className="mb-3 opacity-40" />
             <p className="text-sm">No media matches the current filters.</p>
@@ -451,7 +451,7 @@ export function MediaGrid() {
                   style={{
                     backgroundColor: 'rgba(226,192,99,0.08)',
                     border: '1px solid rgba(226,192,99,0.25)',
-                    color: '#E2C063',
+                    color: 'var(--contigo-primary)',
                   }}
                 >
                   Load more ({filteredItems.length - displayLimit} remaining)

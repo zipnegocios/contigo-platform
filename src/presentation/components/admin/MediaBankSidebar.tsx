@@ -6,7 +6,7 @@ import { Folder, FolderOpen, Plus, X, Check, ChevronDown, ChevronRight, Tag } fr
 import { useMediaLibrary } from './MediaLibraryContext'
 
 const TAG_COLORS = [
-  '#E2C063', '#7EC8A4', '#7EB8E2', '#E27E7E', '#C27EE2',
+  'var(--contigo-primary)', '#7EC8A4', '#7EB8E2', '#E27E7E', '#C27EE2',
   '#E2A87E', '#7EE2D4', '#A8E27E',
 ]
 
@@ -59,7 +59,7 @@ function DroppableFolderRow({
         }}
         onClick={!editing ? onClick : undefined}
       >
-        <span className="flex-shrink-0" style={{ color: active || isOver ? '#E2C063' : '#A89E8C' }}>
+        <span className="flex-shrink-0" style={{ color: active || isOver ? 'var(--contigo-primary)' : 'var(--neutral-600)' }}>
           {active || isOver ? <FolderOpen size={13} /> : <Folder size={13} />}
         </span>
 
@@ -74,13 +74,13 @@ function DroppableFolderRow({
             }}
             onBlur={handleRename}
             className="flex-1 text-xs bg-transparent outline-none border-b min-w-0"
-            style={{ color: '#E8DCC4', borderColor: 'rgba(226,192,99,0.4)' }}
+            style={{ color: 'var(--neutral-50)', borderColor: 'rgba(226,192,99,0.4)' }}
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
           <span
             className="text-xs font-medium truncate flex-1"
-            style={{ color: active ? '#E2C063' : '#A89E8C' }}
+            style={{ color: active ? 'var(--contigo-primary)' : 'var(--neutral-600)' }}
             onDoubleClick={() => onRename && setEditing(true)}
           >
             {label}
@@ -91,7 +91,7 @@ function DroppableFolderRow({
           className="text-[10px] flex-shrink-0 px-1.5 py-0.5 rounded-full"
           style={{
             backgroundColor: active ? 'rgba(226,192,99,0.2)' : 'rgba(107,101,96,0.15)',
-            color: active ? '#E2C063' : '#A89E8C',
+            color: active ? 'var(--contigo-primary)' : 'var(--neutral-600)',
           }}
         >
           {count}
@@ -170,7 +170,7 @@ export function MediaBankSidebar() {
         type="button"
         onClick={() => setFoldersExpanded((v) => !v)}
         className="w-full flex items-center gap-1.5 px-2 py-1.5 text-[9px] uppercase tracking-widest"
-        style={{ color: '#A89E8C' }}
+        style={{ color: 'var(--neutral-600)' }}
       >
         {foldersExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
         Folders
@@ -223,14 +223,14 @@ export function MediaBankSidebar() {
                 className="flex-1 text-xs px-2 py-1 rounded outline-none min-w-0"
                 style={{
                   backgroundColor: 'rgba(226,192,99,0.1)',
-                  color: '#E8DCC4',
+                  color: 'var(--neutral-50)',
                   border: '1px solid rgba(226,192,99,0.25)',
                 }}
               />
-              <button onClick={submitFolder} className="p-1 rounded" style={{ color: '#E2C063' }}>
+              <button onClick={submitFolder} className="p-1 rounded" style={{ color: 'var(--contigo-primary)' }}>
                 <Check size={12} />
               </button>
-              <button onClick={() => setCreatingFolder(false)} className="p-1 rounded" style={{ color: '#A89E8C' }}>
+              <button onClick={() => setCreatingFolder(false)} className="p-1 rounded" style={{ color: 'var(--neutral-600)' }}>
                 <X size={12} />
               </button>
             </div>
@@ -254,7 +254,7 @@ export function MediaBankSidebar() {
         type="button"
         onClick={() => setTagsExpanded((v) => !v)}
         className="w-full flex items-center gap-1.5 px-2 py-1.5 text-[9px] uppercase tracking-widest"
-        style={{ color: '#A89E8C' }}
+        style={{ color: 'var(--neutral-600)' }}
       >
         {tagsExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
         Tags
@@ -275,7 +275,7 @@ export function MediaBankSidebar() {
                     style={{
                       backgroundColor: active ? `${t.color}22` : 'rgba(107,101,96,0.12)',
                       border: `1px solid ${active ? t.color : 'rgba(107,101,96,0.25)'}`,
-                      color: active ? t.color : '#A89E8C',
+                      color: active ? t.color : 'var(--neutral-600)',
                     }}
                   >
                     <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: t.color }} />
@@ -311,7 +311,7 @@ export function MediaBankSidebar() {
                 className="w-full text-xs px-2 py-1 rounded outline-none"
                 style={{
                   backgroundColor: 'rgba(226,192,99,0.1)',
-                  color: '#E8DCC4',
+                  color: 'var(--neutral-50)',
                   border: '1px solid rgba(226,192,99,0.25)',
                 }}
               />
@@ -334,14 +334,14 @@ export function MediaBankSidebar() {
                 <button
                   onClick={submitTag}
                   className="flex-1 text-xs py-1 rounded font-medium"
-                  style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+                  style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
                 >
                   Create
                 </button>
                 <button
                   onClick={() => setCreatingTag(false)}
                   className="flex-1 text-xs py-1 rounded"
-                  style={{ color: '#A89E8C', border: '1px solid rgba(107,101,96,0.2)' }}
+                  style={{ color: 'var(--neutral-600)', border: '1px solid rgba(107,101,96,0.2)' }}
                 >
                   Cancel
                 </button>

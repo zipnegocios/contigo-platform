@@ -22,7 +22,7 @@ interface Props {
 }
 
 function StatusIcon({ status }: { status: UploadStatus }) {
-  if (status === 'uploading') return <Loader2 size={14} className="animate-spin flex-shrink-0" style={{ color: '#E2C063' }} />
+  if (status === 'uploading') return <Loader2 size={14} className="animate-spin flex-shrink-0" style={{ color: 'var(--contigo-primary)' }} />
   if (status === 'done') return <CheckCircle2 size={14} className="flex-shrink-0" style={{ color: '#52B788' }} />
   if (status === 'error') return <XCircle size={14} className="flex-shrink-0" style={{ color: '#e87070' }} />
   if (status === 'duplicate') return <AlertTriangle size={14} className="flex-shrink-0" style={{ color: '#F4A261' }} />
@@ -35,8 +35,8 @@ function StatusIcon({ status }: { status: UploadStatus }) {
 
 function StatusLabel({ status }: { status: UploadStatus }) {
   const labels: Record<UploadStatus, { text: string; color: string }> = {
-    pending:   { text: 'Pending',   color: '#A89E8C' },
-    uploading: { text: 'Uploading', color: '#E2C063' },
+    pending:   { text: 'Pending',   color: 'var(--neutral-600)' },
+    uploading: { text: 'Uploading', color: 'var(--contigo-primary)' },
     done:      { text: 'Done',      color: '#52B788' },
     error:     { text: 'Failed',    color: '#e87070' },
     skipped:   { text: 'Skipped',   color: '#6B6560' },
@@ -73,7 +73,7 @@ function FileRow({
     ? '#e87070'
     : item.status === 'done'
     ? '#52B788'
-    : '#E2C063'
+    : 'var(--contigo-primary)'
 
   return (
     <div
@@ -98,7 +98,7 @@ function FileRow({
       <div className="flex-1 min-w-0 space-y-1.5">
         {/* Filename + status */}
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs truncate font-medium" style={{ color: '#E8DCC4', maxWidth: 200 }}>
+          <p className="text-xs truncate font-medium" style={{ color: 'var(--neutral-50)', maxWidth: 200 }}>
             {item.file.name}
           </p>
           <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -131,7 +131,7 @@ function FileRow({
                 type="button"
                 onClick={onForceUpload}
                 className="text-[10px] px-2 py-0.5 rounded font-medium transition-colors"
-                style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.25)' }}
+                style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--contigo-primary)', border: '1px solid rgba(226,192,99,0.25)' }}
               >
                 Upload anyway
               </button>
@@ -237,12 +237,12 @@ export function UploadQueuePanel({
         style={{ borderBottom: collapsed ? 'none' : '1px solid rgba(226,192,99,0.08)' }}
         onClick={() => setCollapsed((v) => !v)}
       >
-        <Upload size={14} style={{ color: '#E2C063', flexShrink: 0 }} />
+        <Upload size={14} style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
 
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold" style={{ color: '#E2C063' }}>Upload Queue</p>
+          <p className="text-xs font-semibold" style={{ color: 'var(--contigo-primary)' }}>Upload Queue</p>
           {statusText && (
-            <p className="text-[10px] truncate" style={{ color: '#A89E8C' }}>{statusText}</p>
+            <p className="text-[10px] truncate" style={{ color: 'var(--neutral-600)' }}>{statusText}</p>
           )}
         </div>
 
@@ -251,7 +251,7 @@ export function UploadQueuePanel({
           <div className="w-12 h-1 rounded-full overflow-hidden flex-shrink-0" style={{ backgroundColor: 'rgba(226,192,99,0.15)' }}>
             <div
               className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${overallPct}%`, backgroundColor: '#E2C063' }}
+              style={{ width: `${overallPct}%`, backgroundColor: 'var(--contigo-primary)' }}
             />
           </div>
         )}
@@ -271,7 +271,7 @@ export function UploadQueuePanel({
             type="button"
             onClick={() => setCollapsed((v) => !v)}
             className="p-1 rounded transition-colors hover:bg-white/5"
-            style={{ color: '#A89E8C' }}
+            style={{ color: 'var(--neutral-600)' }}
           >
             {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
@@ -314,7 +314,7 @@ export function UploadQueuePanel({
               type="button"
               onClick={handleAddMore}
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
-              style={{ color: '#E2C063', border: '1px solid rgba(226,192,99,0.25)', backgroundColor: 'rgba(226,192,99,0.06)' }}
+              style={{ color: 'var(--contigo-primary)', border: '1px solid rgba(226,192,99,0.25)', backgroundColor: 'rgba(226,192,99,0.06)' }}
             >
               <Upload size={12} />
               Add more

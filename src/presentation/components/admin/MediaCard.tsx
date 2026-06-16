@@ -54,7 +54,7 @@ export function MediaCard({
     return (
       <div
         className="rounded-xl overflow-hidden shadow-lg"
-        style={{ width: 120, aspectRatio: '4/3', backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.4)' }}
+        style={{ width: 120, aspectRatio: '4/3', backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.4)' }}
       >
         {item.mediaType === 'image' ? (
           <img src={item.publicUrl} alt="" className="w-full h-full object-cover" />
@@ -62,7 +62,7 @@ export function MediaCard({
           <video src={item.publicUrl} className="w-full h-full object-cover" muted preload="metadata" style={{ pointerEvents: 'none' }} />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Film size={24} style={{ color: '#A89E8C' }} />
+            <Film size={24} style={{ color: 'var(--neutral-600)' }} />
           </div>
         )}
       </div>
@@ -75,7 +75,7 @@ export function MediaCard({
       style={{
         ...style,
         opacity: isDragging ? 0.4 : 1,
-        backgroundColor: '#1E1A16',
+        backgroundColor: 'var(--petrol-800)',
         border: isSelected
           ? '2px solid #E2C063'
           : isDragging
@@ -116,7 +116,7 @@ export function MediaCard({
           <img src={item.publicUrl} alt={item.key} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Image size={28} style={{ color: '#A89E8C' }} />
+            <Image size={28} style={{ color: 'var(--neutral-600)' }} />
           </div>
         )}
 
@@ -124,7 +124,7 @@ export function MediaCard({
         {item.mediaType === 'video' && (
           <span
             className="absolute top-2 left-2 text-[8px] uppercase tracking-wider px-1.5 py-0.5 rounded z-20"
-            style={{ backgroundColor: 'rgba(226,192,99,0.2)', color: '#E2C063', pointerEvents: 'none' }}
+            style={{ backgroundColor: 'rgba(226,192,99,0.2)', color: 'var(--contigo-primary)', pointerEvents: 'none' }}
           >
             Video
           </span>
@@ -134,7 +134,7 @@ export function MediaCard({
         {item.mediaType === 'video' && item.metadata?.duration != null && (
           <span
             className="absolute bottom-8 right-1.5 text-[9px] px-1.5 py-0.5 rounded-full z-20"
-            style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: '#E8DCC4', pointerEvents: 'none' }}
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: 'var(--neutral-50)', pointerEvents: 'none' }}
           >
             {Math.floor(item.metadata.duration / 60)}:{String(item.metadata.duration % 60).padStart(2, '0')}
           </span>
@@ -148,12 +148,12 @@ export function MediaCard({
           <div
             className="w-5 h-5 rounded-full flex items-center justify-center transition-all"
             style={{
-              backgroundColor: isSelected ? '#E2C063' : 'rgba(22,18,14,0.75)',
+              backgroundColor: isSelected ? 'var(--contigo-primary)' : 'rgba(22,18,14,0.75)',
               border: isSelected ? 'none' : '1.5px solid rgba(226,192,99,0.7)',
               backdropFilter: 'blur(2px)',
             }}
           >
-            {isSelected && <Check size={11} strokeWidth={3} style={{ color: '#1E1A16' }} />}
+            {isSelected && <Check size={11} strokeWidth={3} style={{ color: 'var(--petrol-800)' }} />}
           </div>
         </div>
 
@@ -164,7 +164,7 @@ export function MediaCard({
               type="button"
               onClick={(e) => { e.stopPropagation(); onOpenDetail() }}
               className="p-1.5 rounded-full"
-              style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063' }}
+              style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: 'var(--contigo-primary)' }}
               title="Details"
             >
               <Info size={11} />
@@ -186,9 +186,9 @@ export function MediaCard({
           className="absolute inset-0 flex flex-col justify-end p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
           style={{ background: 'linear-gradient(to top, rgba(30,26,22,0.92) 0%, transparent 55%)', pointerEvents: 'none' }}
         >
-          <p className="text-[10px] truncate mb-0.5" style={{ color: '#E8DCC4' }}>{item.key.split('/').pop()}</p>
+          <p className="text-[10px] truncate mb-0.5" style={{ color: 'var(--neutral-50)' }}>{item.key.split('/').pop()}</p>
           <div className="flex items-center gap-1.5">
-            <p className="text-[10px]" style={{ color: '#A89E8C' }}>{formatBytes(item.size)}</p>
+            <p className="text-[10px]" style={{ color: 'var(--neutral-600)' }}>{formatBytes(item.size)}</p>
             {item.metadata?.width != null && (
               <p className="text-[10px]" style={{ color: '#6B6560' }}>
                 {item.metadata.width}×{item.metadata.height}
@@ -211,7 +211,7 @@ export function MediaCard({
             </span>
           ))}
           {itemTags.length > 3 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ color: '#A89E8C' }}>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ color: 'var(--neutral-600)' }}>
               +{itemTags.length - 3}
             </span>
           )}

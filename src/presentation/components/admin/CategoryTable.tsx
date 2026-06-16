@@ -70,9 +70,9 @@ export function CategoryTable({ categories }: { categories: CategoryRow[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr style={{ backgroundColor: 'rgba(226, 192, 99, 0.06)', borderBottom: '1px solid rgba(226, 192, 99, 0.12)' }}>
-            <th className="text-left px-5 py-3 font-semibold" style={{ color: '#A89E8C' }}>Name</th>
-            <th className="text-left px-5 py-3 font-semibold" style={{ color: '#A89E8C' }}>Slug</th>
-            <th className="text-left px-5 py-3 font-semibold" style={{ color: '#A89E8C' }}>Type</th>
+            <th className="text-left px-5 py-3 font-semibold" style={{ color: 'var(--neutral-600)' }}>Name</th>
+            <th className="text-left px-5 py-3 font-semibold" style={{ color: 'var(--neutral-600)' }}>Slug</th>
+            <th className="text-left px-5 py-3 font-semibold" style={{ color: 'var(--neutral-600)' }}>Type</th>
             <th className="px-5 py-3" />
           </tr>
         </thead>
@@ -85,14 +85,14 @@ export function CategoryTable({ categories }: { categories: CategoryRow[] }) {
                 borderBottom: '1px solid rgba(226, 192, 99, 0.08)',
               }}
             >
-              <td className="px-5 py-3" style={{ color: '#2D2924', fontWeight: 500 }}>
+              <td className="px-5 py-3" style={{ color: 'var(--neutral-800)', fontWeight: 500 }}>
                 {editingId === cat.id ? (
                   <input
                     className="rounded px-2 py-1 text-sm outline-none w-48"
                     style={{
                       border: '1px solid #E2C063',
-                      backgroundColor: '#FAF6F0',
-                      color: '#2D2924',
+                      backgroundColor: 'var(--neutral-50)',
+                      color: 'var(--neutral-800)',
                     }}
                     value={editName}
                     autoFocus
@@ -106,7 +106,7 @@ export function CategoryTable({ categories }: { categories: CategoryRow[] }) {
                   cat.name
                 )}
               </td>
-              <td className="px-5 py-3 font-mono text-xs" style={{ color: '#A89E8C' }}>
+              <td className="px-5 py-3 font-mono text-xs" style={{ color: 'var(--neutral-600)' }}>
                 {cat.slug}
               </td>
               <td className="px-5 py-3">
@@ -153,7 +153,7 @@ export function CategoryTable({ categories }: { categories: CategoryRow[] }) {
                       <button
                         onClick={() => startEdit(cat)}
                         className="p-1.5 rounded transition-colors hover:bg-black/5"
-                        style={{ color: '#A89E8C' }}
+                        style={{ color: 'var(--neutral-600)' }}
                         title="Rename"
                       >
                         <Pencil size={15} />
@@ -177,7 +177,7 @@ export function CategoryTable({ categories }: { categories: CategoryRow[] }) {
           ))}
           {categories.length === 0 && (
             <tr>
-              <td colSpan={4} className="px-5 py-8 text-center text-sm" style={{ color: '#A89E8C' }}>
+              <td colSpan={4} className="px-5 py-8 text-center text-sm" style={{ color: 'var(--neutral-600)' }}>
                 No categories found.
               </td>
             </tr>

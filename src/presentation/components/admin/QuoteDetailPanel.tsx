@@ -28,11 +28,11 @@ function SectionCard({ title, children }: { title: string; children: React.React
     >
       <div
         className="px-6 py-4"
-        style={{ borderBottom: '1px solid #F0E8DC', backgroundColor: '#FAF6F0' }}
+        style={{ borderBottom: '1px solid #F0E8DC', backgroundColor: 'var(--neutral-50)' }}
       >
         <h3
           className="text-lg font-semibold"
-          style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
+          style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
         >
           {title}
         </h3>
@@ -45,10 +45,10 @@ function SectionCard({ title, children }: { title: string; children: React.React
 function InfoField({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: '#A89E8C' }}>
+      <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--neutral-600)' }}>
         {label}
       </p>
-      <p className="text-sm" style={{ color: '#2D2924' }}>
+      <p className="text-sm" style={{ color: 'var(--neutral-800)' }}>
         {value}
       </p>
     </div>
@@ -108,7 +108,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
           <InfoField
             label="Tracking Token"
             value={
-              <code className="text-xs font-mono break-all" style={{ color: '#A89E8C' }}>
+              <code className="text-xs font-mono break-all" style={{ color: 'var(--neutral-600)' }}>
                 {quote.trackingToken}
               </code>
             }
@@ -123,13 +123,13 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
                 <div
                   key={i}
                   className="flex items-center gap-2 rounded px-3 py-2 text-xs font-mono"
-                  style={{ backgroundColor: '#FAF6F0', border: '1px solid #E5DDD0', color: '#6B6560', wordBreak: 'break-all' }}
+                  style={{ backgroundColor: 'var(--neutral-50)', border: '1px solid #E5DDD0', color: '#6B6560', wordBreak: 'break-all' }}
                 >
                   {key}
                 </div>
               ))}
             </div>
-            <p className="text-xs mt-3" style={{ color: '#A89E8C' }}>
+            <p className="text-xs mt-3" style={{ color: 'var(--neutral-600)' }}>
               These are stored in the private <code className="font-mono">contigo-quotes</code> bucket.
               Presigned view URLs will be added in a future update.
             </p>
@@ -145,11 +145,11 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
         >
           <div
             className="px-6 py-4"
-            style={{ borderBottom: '1px solid #F0E8DC', backgroundColor: '#FAF6F0' }}
+            style={{ borderBottom: '1px solid #F0E8DC', backgroundColor: 'var(--neutral-50)' }}
           >
             <h3
               className="text-lg font-semibold"
-              style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
+              style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
             >
               Manage
             </h3>
@@ -158,12 +158,12 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
             <div>
               <label
                 className="text-xs font-medium uppercase tracking-wider mb-2 block"
-                style={{ color: '#A89E8C' }}
+                style={{ color: 'var(--neutral-600)' }}
               >
                 Status
               </label>
               <Select value={status} onValueChange={(value) => setStatus(value as QuoteStatus)}>
-                <SelectTrigger style={{ borderColor: '#E5DDD0' }}>
+                <SelectTrigger style={{ borderColor: 'var(--neutral-200)' }}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,7 +179,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
             <div>
               <label
                 className="text-xs font-medium uppercase tracking-wider mb-2 block"
-                style={{ color: '#A89E8C' }}
+                style={{ color: 'var(--neutral-600)' }}
               >
                 Admin Notes
               </label>
@@ -188,13 +188,13 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add private notes about this quote…"
                 className="min-h-32 text-sm resize-none"
-                style={{ borderColor: '#E5DDD0' }}
+                style={{ borderColor: 'var(--neutral-200)' }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = '#E2C063'
+                  e.target.style.borderColor = 'var(--contigo-primary)'
                   e.target.style.boxShadow = '0 0 0 3px rgba(226,192,99,0.12)'
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = '#E5DDD0'
+                  e.target.style.borderColor = 'var(--neutral-200)'
                   e.target.style.boxShadow = 'none'
                 }}
               />
@@ -205,12 +205,12 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
               disabled={loading}
               className="w-full py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all duration-200"
               style={{
-                backgroundColor: loading ? '#C8A55C' : '#E2C063',
-                color: '#1E1A16',
+                backgroundColor: loading ? '#C8A55C' : 'var(--contigo-primary)',
+                color: 'var(--petrol-800)',
                 cursor: loading ? 'not-allowed' : 'pointer',
               }}
-              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = '#D4AF37' }}
-              onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = '#E2C063' }}
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--gold-600)' }}
+              onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--contigo-primary)' }}
             >
               {loading ? 'Saving…' : 'Save Changes'}
             </button>
