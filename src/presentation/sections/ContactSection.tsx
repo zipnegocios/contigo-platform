@@ -158,10 +158,15 @@ export default function ContactSection() {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
           {/* Left Column - Gooey Form */}
           <div ref={leftColRef} className="lg:w-1/2">
-            <div className="gooey-container">
-              <div className="gooey-blob blob-1" />
-              <div className="gooey-blob blob-2" />
-              <div className="gooey-blob blob-3" />
+            <div className="contact-form-wrapper">
+              {/* Blobs layer: SVG gooey filter ONLY applies here */}
+              <div className="gooey-blobs-layer" aria-hidden="true">
+                <div className="gooey-blob blob-1" />
+                <div className="gooey-blob blob-2" />
+                <div className="gooey-blob blob-3" />
+              </div>
+
+              {/* Form overlay: composites independently, no filter overhead */}
               <div className="form-overlay">
                 <form onSubmit={handleSubmit(onSubmit)} className="contact-form">
                   <div className="form-group">
@@ -195,7 +200,7 @@ export default function ContactSection() {
                     <div className="w-full space-y-1.5">
                       <select
                         {...register('service')}
-                        className={`flex h-10 w-full rounded-lg border bg-contigo-background px-3 py-2 text-sm placeholder:text-contigo-muted transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                        className={`contact-select flex h-10 w-full rounded-lg border bg-contigo-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                           errors.service
                             ? 'border-error-600 focus:ring-error-600'
                             : 'border-contigo-border focus:ring-contigo-primary'
@@ -246,26 +251,12 @@ export default function ContactSection() {
                       className="hidden"
                       aria-label="Attach project images"
                     />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="attach-file-list">
                       <button
                         type="button"
                         onClick={() => attachmentInputRef.current?.click()}
                         disabled={attachmentUploading || attachmentKeys.length >= 3}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '10px 16px',
-                          border: '1px dashed rgba(226,192,99,0.5)',
-                          borderRadius: '8px',
-                          backgroundColor: 'transparent',
-                          color: 'rgba(255,255,255,0.7)',
-                          fontSize: '13px',
-                          cursor: attachmentUploading || attachmentKeys.length >= 3 ? 'not-allowed' : 'pointer',
-                          width: '100%',
-                          justifyContent: 'center',
-                          opacity: attachmentKeys.length >= 3 ? 0.5 : 1,
-                        }}
+                        className="attach-btn"
                       >
                         {attachmentUploading ? (
                           <Loader size={14} className="animate-spin" />
@@ -275,44 +266,28 @@ export default function ContactSection() {
                         {attachmentUploading
                           ? 'Uploading…'
                           : attachmentKeys.length >= 3
-                            ? 'Max 3 images'
+                            ? 'Max 3 images reached'
                             : `Attach Images (${attachmentKeys.length}/3)`}
                       </button>
 
-                      {/* Attached file list */}
-                      {attachmentKeys.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          {attachmentKeys.map((key, i) => (
-                            <div
-                              key={i}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '6px 10px',
-                                borderRadius: '6px',
-                                backgroundColor: 'rgba(226,192,99,0.1)',
-                                fontSize: '12px',
-                                color: 'rgba(255,255,255,0.8)',
-                              }}
-                            >
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>
-                                {key.split('/').pop()}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeAttachment(i)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'rgba(255,255,255,0.5)', flexShrink: 0 }}
-                              >
-                                <X size={12} />
-                              </button>
-                            </div>
-                          ))}
+                      {attachmentKeys.map((key, i) => (
+                        <div key={i} className="attach-file-item">
+                          <span>{key.split('/').pop()}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(i)}
+                            className="attach-remove-btn"
+                            aria-label="Remove attachment"
+                          >
+                            <X size={13} />
+                          </button>
                         </div>
-                      )}
+                      ))}
 
                       {attachmentError && (
-                        <span style={{ fontSize: '12px', color: 'var(--error-600)' }}>{attachmentError}</span>
+                        <span className="text-xs" style={{ color: 'var(--error-600)' }}>
+                          {attachmentError}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -325,7 +300,7 @@ export default function ContactSection() {
                     className="w-full"
                   >
                     {isSubmitting && <Loader size={16} className="animate-spin" />}
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                    {isSubmitting ? 'Sending…' : 'Send Message'}
                   </Button>
                 </form>
               </div>
@@ -336,7 +311,7 @@ export default function ContactSection() {
           <div ref={rightColRef} className="lg:w-1/2 flex flex-col justify-center">
             <span
               className="label block mb-4"
-              style={{ color: 'var(--error-600)' }}
+              style={{ color: 'var(--contigo-primary)' }}
             >
               GET IN TOUCH
             </span>

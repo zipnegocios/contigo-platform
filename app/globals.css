@@ -411,28 +411,42 @@
     }
   }
 
-  /* Gooey form */
-  .gooey-container {
+  /* Gooey form — 2-layer architecture */
+
+  /* Wrapper: dimensiones pero SIN filter */
+  .contact-form-wrapper {
     position: relative;
     width: 100%;
     max-width: 560px;
     height: 640px;
     margin: 0 auto;
-    filter: url('#goo');
     overflow: visible;
-    background: transparent;
   }
 
+  /* Capa de blobs: SOLO aquí va el SVG filter — form queda fuera */
+  .gooey-blobs-layer {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    filter: url('#goo');
+  }
+
+  /* Mobile: remover el SVG gooey filter pero los blobs siguen animando */
   @media (max-width: 768px) {
-    .gooey-container {
+    .gooey-blobs-layer {
       filter: none;
     }
+    /* Reducir tamaño de blobs en mobile */
+    .blob-1 { width: 260px; height: 260px; opacity: 0.75; }
+    .blob-2 { width: 190px; height: 190px; opacity: 0.65; }
+    .blob-3 { width: 160px; height: 160px; opacity: 0.55; }
   }
 
   .gooey-blob {
     position: absolute;
     border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
     animation: blobRotate 20s linear infinite;
+    will-change: transform;
   }
 
   @keyframes blobRotate {
@@ -513,6 +527,92 @@
   .form-overlay input::placeholder,
   .form-overlay textarea::placeholder {
     color: var(--neutral-600);
+  }
+
+  /* Select field — custom arrow, consistent with inputs */
+  .contact-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6560' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    color: var(--neutral-800);
+  }
+  .contact-select:invalid,
+  .contact-select option[value=""] {
+    color: var(--neutral-600);
+  }
+  .contact-select option {
+    color: var(--neutral-800);
+    background: #ffffff;
+  }
+
+  /* Attach images button */
+  .attach-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-family: var(--font-sans, sans-serif);
+    color: var(--neutral-700);
+    background: transparent;
+    border: 1px dashed var(--contigo-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .attach-btn:hover:not(:disabled) {
+    background: rgba(226, 192, 99, 0.1);
+    border-style: solid;
+  }
+  .attach-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Attached file list */
+  .attach-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .attach-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(226, 192, 99, 0.12);
+    border: 1px solid rgba(226, 192, 99, 0.3);
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    color: var(--neutral-700);
+  }
+  .attach-file-item > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 85%;
+  }
+
+  .attach-remove-btn {
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    flex-shrink: 0;
+    color: var(--neutral-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .attach-remove-btn:hover {
+    color: #c0392b;
   }
 
   /* Custom cursor */
