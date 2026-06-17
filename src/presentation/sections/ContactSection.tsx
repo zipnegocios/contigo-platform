@@ -10,7 +10,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Phone, Mail, MapPin, Clock, Loader, Paperclip, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { uploadQuoteAttachment } from '@/presentation/lib/uploadToR2'
-import { FormField } from '@/presentation/design-system/components/molecules'
 import { Button } from '@/presentation/design-system/components/atoms'
 
 const ContactFormSchema = z.object({
@@ -138,28 +137,12 @@ export default function ContactSection() {
       className="section-gap page-padding relative"
       style={{ backgroundColor: 'var(--neutral-50)' }}
     >
-      {/* SVG Filter for Gooey Effect */}
-      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-        <defs>
-          <filter id="goo" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
-              result="goo"
-            />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-          </filter>
-        </defs>
-      </svg>
-
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
           {/* Left Column - Gooey Form */}
           <div ref={leftColRef} className="lg:w-1/2">
             <div className="contact-form-wrapper">
-              {/* Blobs layer: SVG gooey filter ONLY applies here */}
+              {/* Blobs layer: soft CSS-blurred gold orbs (GPU-composited, no SVG filter) */}
               <div className="gooey-blobs-layer" aria-hidden="true">
                 <div className="gooey-blob blob-1" />
                 <div className="gooey-blob blob-2" />
@@ -168,80 +151,86 @@ export default function ContactSection() {
 
               {/* Form overlay: composites independently, no filter overhead */}
               <div className="form-overlay">
-                <form onSubmit={handleSubmit(onSubmit)} className="contact-form">
-                  <div className="form-group">
-                    <FormField
-                      {...register('name')}
+                <form onSubmit={handleSubmit(onSubmit)} className="contact-form flex flex-col gap-5">
+                  <span className="form-overline">Request a Quote</span>
+
+                  <div className="ff-field">
+                    <input
+                      id="cf-name"
                       type="text"
-                      placeholder="Your Name"
-                      error={errors.name?.message}
+                      placeholder=" "
+                      aria-invalid={!!errors.name}
+                      {...register('name')}
                     />
+                    <label htmlFor="cf-name">Your Name</label>
+                    {errors.name && (
+                      <p className="text-xs text-error-600 mt-1">{errors.name.message}</p>
+                    )}
                   </div>
 
-                  <div className="form-group">
-                    <FormField
-                      {...register('email')}
+                  <div className="ff-field">
+                    <input
+                      id="cf-email"
                       type="email"
-                      placeholder="Email Address"
-                      error={errors.email?.message}
+                      placeholder=" "
+                      aria-invalid={!!errors.email}
+                      {...register('email')}
                     />
+                    <label htmlFor="cf-email">Email Address</label>
+                    {errors.email && (
+                      <p className="text-xs text-error-600 mt-1">{errors.email.message}</p>
+                    )}
                   </div>
 
-                  <div className="form-group">
-                    <FormField
-                      {...register('phone')}
+                  <div className="ff-field">
+                    <input
+                      id="cf-phone"
                       type="tel"
-                      placeholder="Phone Number (optional)"
-                      error={errors.phone?.message}
+                      placeholder=" "
+                      {...register('phone')}
                     />
+                    <label htmlFor="cf-phone">Phone Number (optional)</label>
                   </div>
 
-                  <div className="form-group">
-                    <div className="w-full space-y-1.5">
-                      <select
-                        {...register('service')}
-                        className={`contact-select flex h-10 w-full rounded-lg border bg-contigo-background px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                          errors.service
-                            ? 'border-error-600 focus:ring-error-600'
-                            : 'border-contigo-border focus:ring-contigo-primary'
-                        }`}
-                      >
-                        <option value="">Select a Service</option>
-                        <option value="New Home Building">New Home Building</option>
-                        <option value="Home Extensions">Home Extensions</option>
-                        <option value="Home Renovations">Home Renovations</option>
-                        <option value="Carpentry">Carpentry</option>
-                        <option value="Cladding">Cladding</option>
-                        <option value="Painting">Painting</option>
-                        <option value="Landscaping">Landscaping</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      {errors.service && (
-                        <p className="text-xs text-error-600">{errors.service.message}</p>
-                      )}
-                    </div>
+                  <div className="ff-field ff-field-static">
+                    <select
+                      id="cf-service"
+                      className="contact-select"
+                      aria-invalid={!!errors.service}
+                      {...register('service')}
+                    >
+                      <option value="">Select a Service</option>
+                      <option value="New Home Building">New Home Building</option>
+                      <option value="Home Extensions">Home Extensions</option>
+                      <option value="Home Renovations">Home Renovations</option>
+                      <option value="Carpentry">Carpentry</option>
+                      <option value="Cladding">Cladding</option>
+                      <option value="Painting">Painting</option>
+                      <option value="Landscaping">Landscaping</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <label htmlFor="cf-service">Service</label>
+                    {errors.service && (
+                      <p className="text-xs text-error-600 mt-1">{errors.service.message}</p>
+                    )}
                   </div>
 
-                  <div className="form-group">
-                    <div className="w-full space-y-1.5">
-                      <textarea
-                        {...register('message')}
-                        placeholder="Tell us about your project..."
-                        rows={4}
-                        className={`flex w-full rounded-lg border bg-contigo-background px-3 py-2 text-sm placeholder:text-contigo-muted transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                          errors.message
-                            ? 'border-error-600 focus:ring-error-600'
-                            : 'border-contigo-border focus:ring-contigo-primary'
-                        }`}
-                      />
-                      {errors.message && (
-                        <p className="text-xs text-error-600">{errors.message.message}</p>
-                      )}
-                    </div>
+                  <div className="ff-field">
+                    <textarea
+                      id="cf-message"
+                      placeholder=" "
+                      rows={4}
+                      aria-invalid={!!errors.message}
+                      {...register('message')}
+                    />
+                    <label htmlFor="cf-message">Tell us about your project</label>
+                    {errors.message && (
+                      <p className="text-xs text-error-600 mt-1">{errors.message.message}</p>
+                    )}
                   </div>
 
                   {/* Attachment upload (optional, up to 3 images) */}
-                  <div className="form-group">
+                  <div>
                     <input
                       ref={attachmentInputRef}
                       type="file"
@@ -297,7 +286,7 @@ export default function ContactSection() {
                     disabled={isSubmitting || attachmentUploading}
                     variant="primary"
                     size="lg"
-                    className="w-full"
+                    className="w-full contact-submit-btn"
                   >
                     {isSubmitting && <Loader size={16} className="animate-spin" />}
                     {isSubmitting ? 'Sending…' : 'Send Message'}
@@ -351,7 +340,7 @@ export default function ContactSection() {
                     className="text-sm mt-1"
                     style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
-                    (08) 8123 4567
+                    +61 406 274 096
                   </p>
                 </div>
               </div>
@@ -372,7 +361,7 @@ export default function ContactSection() {
                     className="text-sm mt-1"
                     style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
-                    info@contigoconstructions.com.au
+                    contact@contigoconstructions.com.au
                   </p>
                 </div>
               </div>
