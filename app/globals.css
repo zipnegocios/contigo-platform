@@ -301,7 +301,7 @@
     overflow: hidden;
     flex: 1;
     height: 500px;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: none;
     transition: flex 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
     will-change: flex;
@@ -320,12 +320,14 @@
     inset: 0;
     background-size: cover;
     background-position: center;
-    filter: brightness(0.85);
-    transition: filter 0.5s ease;
+    filter: brightness(0.82);
+    transform: scale(1.001);
+    transition: filter 0.6s ease, transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   .accordion-item:hover .accordion-img {
     filter: brightness(1);
+    transform: scale(1.06);
   }
 
   .accordion-link {
@@ -343,29 +345,51 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(13, 60, 76, 0.85) 100%);
+    background: linear-gradient(to bottom, transparent 35%, rgba(13, 60, 76, 0.92) 100%);
     z-index: -1;
   }
 
   .accordion-title {
-    font-family: var(--font-sans, sans-serif);
-    font-weight: 500;
-    font-size: 1.25rem;
+    position: relative;
+    font-family: var(--font-alegreya, serif);
+    font-weight: 600;
+    font-size: 1.4rem;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
     color: white;
     margin: 0;
+    padding-bottom: 0.6rem;
     transform: translateY(20px);
     transition: transform 0.4s ease;
+  }
+
+  .accordion-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: var(--contigo-primary);
+    transition: width 0.45s ease 0.12s;
   }
 
   .accordion-item:hover .accordion-title {
     transform: translateY(0);
   }
 
+  .accordion-item:hover .accordion-title::after {
+    width: 44px;
+  }
+
   .accordion-desc {
-    font-family: var(--font-sans, sans-serif);
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0.5rem 0 0;
+    font-family: var(--font-alegreya-sans, sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--contigo-primary);
+    margin: 0.4rem 0 0;
     transform: translateY(20px);
     opacity: 0;
     transition: all 0.4s ease 0.1s;
@@ -383,11 +407,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.85);
-    transition: filter 0.5s ease;
+    filter: brightness(0.82);
+    transform: scale(1.001);
+    transition: filter 0.6s ease, transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
   .accordion-item:hover .accordion-video {
     filter: brightness(1);
+    transform: scale(1.06);
   }
 
   /* ── accordion responsive heights ───────────────────────────────────────── */

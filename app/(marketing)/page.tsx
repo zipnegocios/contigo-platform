@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import { VoiceSearchNav } from '@/presentation/components/VoiceSearchNav'
 import HeroSection from '@/presentation/sections/HeroSection'
 import BrandBar from '@/presentation/sections/BrandBar'
@@ -8,12 +8,12 @@ import ProjectsSection from '@/presentation/sections/ProjectsSection'
 import Footer from '@/presentation/sections/Footer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 
-const ContactSection = dynamic(
+const ContactSection = nextDynamic(
   () => import('@/presentation/sections/ContactSection'),
   { loading: () => <div className="min-h-screen" /> }
 )
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   // Fetch featured projects server-side — always fresh, no client fetch needed
