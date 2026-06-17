@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -450,12 +451,15 @@ export default function ContactSection() {
       </div>
 
       {/* CC Monogram watermark */}
-      <img
-        src="/assets/isotipo.png"
-        alt=""
-        className="absolute bottom-8 right-8 pointer-events-none hidden lg:block"
-        style={{ width: '200px', opacity: 0.15 }}
-      />
+      <div className="absolute bottom-8 right-8 pointer-events-none hidden lg:block" style={{ opacity: 0.15 }}>
+        <Image
+          src="/assets/isotipo.png"
+          alt=""
+          width={200}
+          height={200}
+          style={{ width: '200px', height: 'auto' }}
+        />
+      </div>
     </section>
   )
 }

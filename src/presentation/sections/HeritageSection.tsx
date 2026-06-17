@@ -14,7 +14,7 @@ export default function HeritageSection() {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: '#heritage-section',
+          trigger: sectionRef.current,
           start: 'top center',
           end: '+=800',
           scrub: 1,

@@ -22,7 +22,17 @@ export default function HeroSection() {
       duration: 22,
       ease: 'sine.inOut',
     })
-    return () => { tl.kill() }
+
+    const onVisibilityChange = () => {
+      if (document.hidden) tl.pause()
+      else tl.resume()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      tl.kill()
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
   }, [])
 
   /* ── Text entrance ───────────────────────────────────────────────────── */

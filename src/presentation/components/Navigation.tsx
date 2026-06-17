@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { Mic, Menu, X } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 
@@ -42,11 +43,17 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
         <div className="flex items-center justify-between h-full page-padding">
           {/* Logo */}
           <button onClick={() => scrollTo('hero')} className="flex-shrink-0">
-            <img
+            <Image
               src="/assets/logo-secundario.png"
               alt="Contigo Constructions"
-              className="h-10 w-auto"
-              style={{ filter: scrolled ? 'none' : 'brightness(1.2)' }}
+              width={140}
+              height={40}
+              style={{
+                height: '2.5rem',
+                width: 'auto',
+                filter: scrolled ? 'none' : 'brightness(1.2)',
+              }}
+              priority
             />
           </button>
 

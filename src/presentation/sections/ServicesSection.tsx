@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -74,8 +75,16 @@ function ImageStrip({ images, names, index }: ImageStripProps) {
         <div
           key={`${index}-${i}`}
           className="parallax-work-img group relative"
-          style={{ backgroundImage: `url(${img})` }}
+          style={{ position: 'relative', overflow: 'hidden' }}
         >
+          <Image
+            src={img}
+            alt={names[i]}
+            fill
+            sizes="400px"
+            loading="lazy"
+            style={{ objectFit: 'cover' }}
+          />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-end p-4">
             <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
               {names[i]}

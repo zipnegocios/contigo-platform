@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Instagram, Facebook, Linkedin } from 'lucide-react';
@@ -47,11 +48,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           {/* Left - Logo */}
           <div className="flex justify-center md:justify-start">
-            <img
+            <Image
               src="/assets/isotipo.png"
               alt="Contigo Constructions"
-              className="h-12 w-auto"
-              style={{ filter: 'brightness(1)' }}
+              width={40}
+              height={40}
+              style={{ height: '3rem', width: 'auto', filter: 'brightness(1)' }}
             />
           </div>
 

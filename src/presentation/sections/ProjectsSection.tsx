@@ -124,26 +124,33 @@ export default function ProjectsSection({ projects }: Props) {
   const [isPaused,     setIsPaused]     = useState(false)
   const animatingRef = useRef(false)
 
-  /* ── responsive cardsPerPage ─────────────────────────────────────────── */
+  /* ── responsive cardsPerPage (debounced) ────────────────────────────── */
   useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout>
     const handler = () => {
-      // Kill animation and clean up any orphaned clone
-      if (timelineRef.current) timelineRef.current.kill()
-      if (cloneRef.current) {
-        cloneRef.current.remove()
-        cloneRef.current = null
-      }
-      if (trackRef.current) trackRef.current.style.position = ''
-      if (listRef.current) {
-        const lis = listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item')
-        gsap.set(Array.from(lis), { clearProps: 'all' })
-      }
-      animatingRef.current = false
-      setCardsPerPage(getCardsPerPage())
-      setStartIndex(0)
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        // Kill animation and clean up any orphaned clone
+        if (timelineRef.current) timelineRef.current.kill()
+        if (cloneRef.current) {
+          cloneRef.current.remove()
+          cloneRef.current = null
+        }
+        if (trackRef.current) trackRef.current.style.position = ''
+        if (listRef.current) {
+          const lis = listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item')
+          gsap.set(Array.from(lis), { clearProps: 'all' })
+        }
+        animatingRef.current = false
+        setCardsPerPage(getCardsPerPage())
+        setStartIndex(0)
+      }, 150)
     }
     window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
+    return () => {
+      window.removeEventListener('resize', handler)
+      clearTimeout(resizeTimer)
+    }
   }, [])
 
   const totalPositions = Math.max(1, projects.length - cardsPerPage + 1)
