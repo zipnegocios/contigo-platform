@@ -1,2 +1,0 @@
-# This folder is safe for storing .env templates without real credentials
-# All files in parent .env* patterns are gitignored

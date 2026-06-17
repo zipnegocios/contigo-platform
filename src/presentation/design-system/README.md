@@ -72,6 +72,23 @@ This system replaces the previous **theme-based approach** (Heritage, Atelier, M
 
 ---
 
+## Admin Panel Color Audit & Legacy Exceptions
+
+The admin components contain **263 hardcoded hex colors** (documented in audit as of June 2026). These have been classified and frozen:
+
+- **Categoría A (57 colors)**: Critical status colors (success, error, warning) — **preserved as-is** for functional integrity
+- **Categoría B (130 colors)**: Structural/layout colors — **documented for gradual refactoring** in future sprints
+
+**Status**: ✅ Audited, documented, and safely frozen. No current-sprint migration.
+
+For details, see **[Admin Audit & Exceptions Register](./ADMIN_AUDIT_EXCEPTIONS.md)** — includes:
+- Complete color classification with usage counts
+- Refactoring roadmap (Tier 1-3 prioritization)
+- Safety checklist for future migrations
+- Token definitions already in place (ready to use)
+
+---
+
 ## Composition Rules (Atomic Design Discipline)
 
 1. **Atoms** are pure, self-contained, zero dependencies on other components.
