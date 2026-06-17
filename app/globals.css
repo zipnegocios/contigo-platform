@@ -423,6 +423,12 @@
     background: transparent;
   }
 
+  @media (max-width: 768px) {
+    .gooey-container {
+      filter: none;
+    }
+  }
+
   .gooey-blob {
     position: absolute;
     border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;

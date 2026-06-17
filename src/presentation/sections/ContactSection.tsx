@@ -13,8 +13,6 @@ import { uploadQuoteAttachment } from '@/presentation/lib/uploadToR2'
 import { FormField } from '@/presentation/design-system/components/molecules'
 import { Button } from '@/presentation/design-system/components/atoms'
 
-gsap.registerPlugin(ScrollTrigger)
-
 const ContactFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),

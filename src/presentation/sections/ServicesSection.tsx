@@ -4,8 +4,6 @@ import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const serviceImages = [
   '/assets/service-new-home.jpg',
   '/assets/service-extension.jpg',

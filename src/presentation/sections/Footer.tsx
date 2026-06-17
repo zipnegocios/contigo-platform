@@ -5,8 +5,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Instagram, Facebook, Linkedin } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
 

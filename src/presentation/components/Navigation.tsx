@@ -17,7 +17,8 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 100)
+      const past100 = window.scrollY > 100
+      setScrolled(prev => prev === past100 ? prev : past100)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)

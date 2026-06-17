@@ -5,8 +5,6 @@ import { flushSync } from 'react-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger)
-
 export interface ProjectItem {
   id: string
   slug: string
