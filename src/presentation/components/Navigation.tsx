@@ -14,15 +14,32 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
   const logoRef = useRef<SVGSVGElement>(null)
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [logoColor, setLogoColor] = useState('var(--contigo-primary)') // gold by default
 
   useEffect(() => {
     const handleScroll = () => {
       const past100 = window.scrollY > 100
       setScrolled(prev => prev === past100 ? prev : past100)
+
+      // Detect background color dynamically
+      if (scrolled) {
+        // When fixed, use petrol (inverse/negative)
+        setLogoColor('var(--contigo-foreground)')
+      } else {
+        // When not fixed, detect what's below the navbar
+        const heroSection = document.getElementById('hero')
+        if (heroSection) {
+          const heroStyle = window.getComputedStyle(heroSection)
+          const bgColor = heroStyle.backgroundColor
+          // If dark background, use gold; if light, use petrol
+          setLogoColor('var(--contigo-primary)')
+        }
+      }
     }
+
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [scrolled])
 
   const scrollTo = (id: string) => {
     setMobileOpen(false)
@@ -38,14 +55,15 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
         ref={navRef}
         className="fixed top-0 left-0 w-full z-[100] transition-all duration-500"
         style={{
-          height: 72,
-          backgroundColor: scrolled ? 'var(--contigo-background)' : 'transparent',
-          borderBottom: scrolled ? '1px solid var(--contigo-border)' : 'none',
-          boxShadow: scrolled ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
+          height: scrolled ? 80 : 'auto',
+          backgroundColor: scrolled ? 'rgba(255, 255, 255, 0.8)' : 'transparent',
+          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+          borderBottom: scrolled ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
+          WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
         }}
       >
-        <div className="flex items-center justify-between h-full page-padding">
-          {/* Logo SVG Horizontal */}
+        <div className={`flex items-center justify-between ${scrolled ? 'h-full' : 'py-6'} page-padding transition-all duration-500`}>
+          {/* Logo SVG Horizontal - Extra Large */}
           <button
             onClick={() => scrollTo('hero')}
             className="flex-shrink-0 transition-all duration-500"
@@ -57,9 +75,9 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
               xmlns="http://www.w3.org/2000/svg"
               className="transition-all duration-500"
               style={{
-                height: scrolled ? '2rem' : '2.75rem',
+                height: scrolled ? 'clamp(2.5rem, 6vw, 3.5rem)' : 'clamp(3.5rem, 10vw, 5rem)',
                 width: 'auto',
-                color: scrolled ? 'var(--contigo-foreground)' : 'var(--contigo-primary)',
+                color: logoColor,
               }}
             >
               <g id="horizontal-logo-gold">
@@ -99,7 +117,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
           </button>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8 transition-all duration-500">
             {[
               { label: 'Services', id: 'services' },
               { label: 'Projects', id: 'projects' },
@@ -109,9 +127,11 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
-                className="relative text-sm font-medium transition-colors group"
+                className="relative text-sm font-medium transition-all duration-500 group"
                 style={{
-                  color: scrolled ? 'var(--contigo-foreground)' : 'var(--contigo-background)',
+                  color: scrolled ? '#0d3c4c' : 'var(--contigo-background)',
+                  opacity: scrolled ? 1 : 0.9,
+                  fontSize: scrolled ? '0.875rem' : '0.875rem',
                 }}
               >
                 {item.label}
@@ -124,12 +144,15 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
           </div>
 
           {/* Right actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 transition-all duration-500">
             <Button
               onClick={() => scrollTo('contact')}
               variant="primary"
               size="md"
-              className="hidden sm:inline-flex"
+              className="hidden sm:inline-flex transition-all duration-500"
+              style={{
+                opacity: scrolled ? 1 : 0.9,
+              }}
             >
               Get a Quote
             </Button>
@@ -137,14 +160,14 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             {/* Voice search button */}
             <button
               onClick={onVoiceSearch}
-              className="relative p-2 rounded-full transition-colors"
+              className="relative p-2 rounded-full transition-all duration-500"
               style={{
-                color: scrolled ? 'var(--contigo-foreground)' : 'var(--contigo-background)',
-                border: `1px solid ${scrolled ? 'var(--contigo-border)' : 'rgba(255,255,255,0.3)'}`,
+                color: scrolled ? '#0d3c4c' : 'rgba(255, 255, 255, 0.8)',
+                border: `1px solid ${scrolled ? 'rgba(13, 60, 76, 0.2)' : 'rgba(255,255,255,0.3)'}`,
               }}
               title="Voice search"
             >
-              <Mic size={18} />
+              <Mic size={scrolled ? 18 : 20} />
               {isListening && (
                 <span
                   className="absolute inset-0 rounded-full voice-pulse"
@@ -155,9 +178,9 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
 
             {/* Mobile hamburger */}
             <button
-              className="lg:hidden p-2"
+              className="lg:hidden p-2 transition-all duration-500"
               onClick={() => setMobileOpen(!mobileOpen)}
-              style={{ color: scrolled ? 'var(--contigo-foreground)' : 'var(--contigo-background)' }}
+              style={{ color: scrolled ? '#0d3c4c' : 'rgba(255, 255, 255, 0.8)' }}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -170,9 +193,13 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
         className={`fixed inset-y-0 right-0 z-[110] w-80 transition-transform duration-500 lg:hidden ${
           mobileOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
-        style={{ backgroundColor: 'var(--contigo-background)' }}
+        style={{
+          backgroundColor: 'var(--contigo-background)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+        }}
       >
-        <div className="flex flex-col pt-24 px-8 gap-6">
+        <div className="flex flex-col pt-32 px-8 gap-6 sm:pt-24">
           {[
             { label: 'Services', id: 'services' },
             { label: 'Projects', id: 'projects' },
@@ -182,7 +209,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             <button
               key={item.id}
               onClick={() => scrollTo(item.id)}
-              className="text-left text-lg font-medium"
+              className="text-left text-lg font-medium transition-colors hover:text-contigo-primary"
               style={{ color: 'var(--contigo-foreground)' }}
             >
               {item.label}
