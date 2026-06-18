@@ -17,7 +17,6 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
   const context = useLogoMorphContext()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [leftTrackWidth, setLeftTrackWidth] = useState('0px')
 
   // Register dock refs with context
   useEffect(() => {
@@ -29,20 +28,15 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
     }
   }, [context])
 
-  // Update scroll state and grid width
+  // Backdrop/blur threshold only. The grid's logo-dock column width is no
+  // longer React state — it's written straight to the
+  // `--nav-left-track-width` CSS variable by useScrollLogoMorph.ts, in the
+  // same GSAP tick that moves the logo itself, so the two never desync and
+  // this component doesn't re-render on every scroll event.
   useEffect(() => {
     const handleScroll = () => {
       const past100 = window.scrollY > 100
-      setScrolled(prev => prev === past100 ? prev : past100)
-
-      // Update grid column width from morph progress
-      const progress = (window as any).__logoMorphProgress ?? 0
-      const navDockEl = navDockDesktopRef.current || navDockMobileRef.current
-      if (navDockEl) {
-        const dockWidth = navDockEl.getBoundingClientRect().width
-        const interpolated = dockWidth * progress
-        setLeftTrackWidth(`${interpolated}px`)
-      }
+      setScrolled(prev => (prev === past100 ? prev : past100))
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -73,7 +67,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
         <div
           className="grid items-center page-padding transition-all duration-500"
           style={{
-            gridTemplateColumns: `${leftTrackWidth} 1fr auto`,
+            gridTemplateColumns: 'var(--nav-left-track-width, 0px) 1fr auto',
             height: scrolled ? '100%' : 'auto',
             paddingTop: scrolled ? 0 : '1.5rem',
             paddingBottom: scrolled ? 0 : '1.5rem',

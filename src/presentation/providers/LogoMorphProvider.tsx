@@ -1,9 +1,8 @@
 'use client'
 
-import { createContext, useContext, useRef, useState, useCallback, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useRef, useMemo, ReactNode } from 'react'
 
 interface LogoMorphContextType {
-  progress: number
   setHeroDockRef: (el: HTMLDivElement | null) => void
   setNavDockDesktopRef: (el: HTMLDivElement | null) => void
   setNavDockMobileRef: (el: HTMLDivElement | null) => void
@@ -15,41 +14,40 @@ interface LogoMorphContextType {
 const LogoMorphContext = createContext<LogoMorphContextType | undefined>(undefined)
 
 export function LogoMorphProvider({ children }: { children: ReactNode }) {
-  const [progress, setProgress] = useState(0)
   const heroDockRef = useRef<HTMLDivElement | null>(null)
   const navDockDesktopRef = useRef<HTMLDivElement | null>(null)
   const navDockMobileRef = useRef<HTMLDivElement | null>(null)
 
-  const setHeroDockRef = useCallback((el: HTMLDivElement | null) => {
-    heroDockRef.current = el
-  }, [])
-
-  const setNavDockDesktopRef = useCallback((el: HTMLDivElement | null) => {
-    navDockDesktopRef.current = el
-  }, [])
-
-  const setNavDockMobileRef = useCallback((el: HTMLDivElement | null) => {
-    navDockMobileRef.current = el
-  }, [])
-
-  const value: LogoMorphContextType = {
-    progress,
-    setHeroDockRef,
-    setNavDockDesktopRef,
-    setNavDockMobileRef,
-    heroDockRef,
-    navDockDesktopRef,
-    navDockMobileRef,
-  }
-
-  // Expose setProgress globally for the hook to update it
-  useEffect(() => {
-    ;(window as any).__setLogoMorphProgress = setProgress
-  }, [setProgress])
-
-  return (
-    <LogoMorphContext.Provider value={value}>{children}</LogoMorphContext.Provider>
+  // NOTE: live scroll progress (0→1) is intentionally NOT React state.
+  // It used to be (`progress` + `setProgress` published as
+  // `window.__setLogoMorphProgress`), which meant every single
+  // ScrollTrigger tick called setState and re-rendered this Provider
+  // plus every consumer (Navigation, HeroSection) — a re-render-per-frame
+  // storm during the whole scroll-morph range, and nothing even read the
+  // resulting `progress` value for rendering. Progress now lives on
+  // `window.__logoMorphProgress`, written directly (no setState) by
+  // useScrollLogoMorph.ts inside the same GSAP tick that moves the logo.
+  // This context only carries the dock refs, whose identity never
+  // changes, so consumers never re-render because of this provider.
+  const value = useMemo<LogoMorphContextType>(
+    () => ({
+      setHeroDockRef: (el) => {
+        heroDockRef.current = el
+      },
+      setNavDockDesktopRef: (el) => {
+        navDockDesktopRef.current = el
+      },
+      setNavDockMobileRef: (el) => {
+        navDockMobileRef.current = el
+      },
+      heroDockRef,
+      navDockDesktopRef,
+      navDockMobileRef,
+    }),
+    []
   )
+
+  return <LogoMorphContext.Provider value={value}>{children}</LogoMorphContext.Provider>
 }
 
 export function useLogoMorphContext() {
