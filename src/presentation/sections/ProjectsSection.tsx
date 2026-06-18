@@ -3,10 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 
 export interface ProjectItem {
   id: string

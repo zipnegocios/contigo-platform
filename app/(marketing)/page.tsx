@@ -7,6 +7,7 @@ import HeritageSection from '@/presentation/sections/HeritageSection'
 import ProjectsSection from '@/presentation/sections/ProjectsSection'
 import Footer from '@/presentation/sections/Footer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { MarketingPageClient } from './MarketingPageClient'
 
 const ContactSection = nextDynamic(
   () => import('@/presentation/sections/ContactSection'),
@@ -48,7 +49,7 @@ export default async function HomePage() {
   }
 
   return (
-    <>
+    <MarketingPageClient>
       <VoiceSearchNav />
 
       <main className="relative">
@@ -61,6 +62,6 @@ export default async function HomePage() {
       </main>
 
       <Footer />
-    </>
+    </MarketingPageClient>
   )
 }

@@ -2,14 +2,24 @@
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { gsap } from 'gsap'
+import { useLogoMorphContext } from '@/presentation/providers/LogoMorphProvider'
 
 export default function HeroSection() {
+  const context = useLogoMorphContext()
+  const heroDockRef = useRef<HTMLDivElement>(null)
   const imgWrapRef  = useRef<HTMLDivElement>(null)
   const overlayRef  = useRef<HTMLDivElement>(null)
   const overlineRef = useRef<HTMLSpanElement>(null)
   const headlineRef = useRef<HTMLHeadingElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const ctaRef      = useRef<HTMLDivElement>(null)
+
+  /* ── Register hero dock with morph context ──────────────────────────── */
+  useEffect(() => {
+    if (heroDockRef.current) {
+      context.setHeroDockRef(heroDockRef.current)
+    }
+  }, [context])
 
   /* ── Ken Burns — slow zoom + pan, loops forever ──────────────────────── */
   useEffect(() => {
@@ -63,6 +73,21 @@ export default function HeroSection() {
       className="relative w-full overflow-hidden"
       style={{ height: '100vh' }}
     >
+      {/* ── Logo morph dock placeholder (invisible, upper third) ── */}
+      <div
+        ref={heroDockRef}
+        style={{
+          position: 'absolute',
+          top: 'clamp(8vh, 14vh, 18vh)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'clamp(14rem, 28vw, 22rem)',
+          aspectRatio: '1024 / 354.041',
+          visibility: 'hidden',
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* ── Background image (Ken Burns wrapper) ── */}
       <div
         ref={imgWrapRef}
@@ -120,6 +145,8 @@ export default function HeroSection() {
             opacity: 0,
             transform: 'translateY(20px)',
             maxWidth: '800px',
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+            lineHeight: 1.05,
           }}
         >
           Building Dreams
