@@ -6,9 +6,9 @@ interface LogoMorphContextType {
   setHeroDockRef: (el: HTMLDivElement | null) => void
   setNavDockDesktopRef: (el: HTMLDivElement | null) => void
   setNavDockMobileRef: (el: HTMLDivElement | null) => void
-  heroDockRef: React.MutableRefObject<HTMLDivElement | null>
-  navDockDesktopRef: React.MutableRefObject<HTMLDivElement | null>
-  navDockMobileRef: React.MutableRefObject<HTMLDivElement | null>
+  heroDockRef: React.RefObject<HTMLDivElement | null>
+  navDockDesktopRef: React.RefObject<HTMLDivElement | null>
+  navDockMobileRef: React.RefObject<HTMLDivElement | null>
 }
 
 const LogoMorphContext = createContext<LogoMorphContextType | undefined>(undefined)

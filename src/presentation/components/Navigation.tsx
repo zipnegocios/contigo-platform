@@ -66,7 +66,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             ref={(el) => context.setNavDockDesktopRef(el)}
             className="hidden lg:block flex-shrink-0"
             style={{
-              width: 'clamp(3.25rem, 5vw, 4.5rem)',
+              width: 'clamp(5rem, 7vw, 7rem)',
               aspectRatio: '1024 / 354.041',
               visibility: 'hidden',
               pointerEvents: 'none',
@@ -79,7 +79,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             className="lg:hidden flex justify-center flex-shrink-0 absolute left-1/2"
             style={{
               transform: 'translateX(-50%)',
-              width: 'clamp(3rem, 8vw, 4rem)',
+              width: 'clamp(4.5rem, 10vw, 6rem)',
               aspectRatio: '1024 / 354.041',
               visibility: 'hidden',
               pointerEvents: 'none',

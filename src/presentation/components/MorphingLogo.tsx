@@ -89,7 +89,7 @@ export function MorphingLogo() {
         top: 0,
         left: 0,
         zIndex: 99,
-        width: 'clamp(14rem, 28vw, 22rem)',
+        width: 'clamp(22rem, 38vw, 32rem)',
         aspectRatio: '1024 / 354.041',
         pointerEvents: 'none',
       }}
@@ -113,10 +113,10 @@ export function MorphingLogo() {
               id="logoLightSweep"
               x="0"
               y="-40"
-              width="90"
+              width="200"
               height="434"
-              fill="rgba(255,255,255,0.9)"
-              style={{ filter: 'blur(14px)', mixBlendMode: 'screen' }}
+              fill="rgba(255,255,255,1)"
+              style={{ filter: 'blur(22px)', mixBlendMode: 'screen' }}
             />
           </g>
         </g>

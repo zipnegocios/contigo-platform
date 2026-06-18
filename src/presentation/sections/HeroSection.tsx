@@ -111,9 +111,9 @@ export default function HeroSection() {
         <div
           ref={(el) => context.setHeroDockRef(el)}
           style={{
-            width: 'clamp(14rem, 28vw, 22rem)',
+            width: 'clamp(22rem, 38vw, 32rem)',
             aspectRatio: '1024 / 354.041',
-            marginBottom: 'clamp(2rem, 4vh, 3rem)',
+            marginBottom: 'clamp(2rem, 5vh, 3.5rem)',
             visibility: 'hidden',
             pointerEvents: 'none',
           }}
