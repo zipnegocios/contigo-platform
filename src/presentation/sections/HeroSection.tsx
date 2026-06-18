@@ -6,20 +6,12 @@ import { useLogoMorphContext } from '@/presentation/providers/LogoMorphProvider'
 
 export default function HeroSection() {
   const context = useLogoMorphContext()
-  const heroDockRef = useRef<HTMLDivElement>(null)
   const imgWrapRef  = useRef<HTMLDivElement>(null)
   const overlayRef  = useRef<HTMLDivElement>(null)
   const overlineRef = useRef<HTMLSpanElement>(null)
   const headlineRef = useRef<HTMLHeadingElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
   const ctaRef      = useRef<HTMLDivElement>(null)
-
-  /* ── Register hero dock with morph context ──────────────────────────── */
-  useEffect(() => {
-    if (heroDockRef.current) {
-      context.setHeroDockRef(heroDockRef.current)
-    }
-  }, [context])
 
   /* ── Ken Burns — slow zoom + pan, loops forever ──────────────────────── */
   useEffect(() => {
@@ -73,21 +65,6 @@ export default function HeroSection() {
       className="relative w-full overflow-hidden"
       style={{ height: '100vh' }}
     >
-      {/* ── Logo morph dock placeholder (invisible, upper third) ── */}
-      <div
-        ref={heroDockRef}
-        style={{
-          position: 'absolute',
-          top: 'clamp(8vh, 14vh, 18vh)',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'clamp(14rem, 28vw, 22rem)',
-          aspectRatio: '1024 / 354.041',
-          visibility: 'hidden',
-          pointerEvents: 'none',
-        }}
-      />
-
       {/* ── Background image (Ken Burns wrapper) ── */}
       <div
         ref={imgWrapRef}
@@ -130,6 +107,18 @@ export default function HeroSection() {
         className="absolute bottom-0 left-0 w-full page-padding"
         style={{ zIndex: 3, paddingBottom: 'clamp(3rem, 8vh, 6rem)' }}
       >
+        {/* Logo morph dock placeholder — in normal flow before overline, invisible, shares page-padding */}
+        <div
+          ref={(el) => context.setHeroDockRef(el)}
+          style={{
+            width: 'clamp(14rem, 28vw, 22rem)',
+            aspectRatio: '1024 / 354.041',
+            marginBottom: 'clamp(2rem, 4vh, 3rem)',
+            visibility: 'hidden',
+            pointerEvents: 'none',
+          }}
+        />
+
         <span
           ref={overlineRef}
           className="label block mb-4"

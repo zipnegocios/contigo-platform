@@ -12,21 +12,9 @@ interface NavigationProps {
 
 export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
   const navRef = useRef<HTMLElement>(null)
-  const navDockDesktopRef = useRef<HTMLDivElement>(null)
-  const navDockMobileRef = useRef<HTMLDivElement>(null)
   const context = useLogoMorphContext()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  // Register dock refs with context
-  useEffect(() => {
-    if (navDockDesktopRef.current) {
-      context.setNavDockDesktopRef(navDockDesktopRef.current)
-    }
-    if (navDockMobileRef.current) {
-      context.setNavDockMobileRef(navDockMobileRef.current)
-    }
-  }, [context])
 
   // Backdrop/blur threshold only. The grid's logo-dock column width is no
   // longer React state — it's written straight to the
@@ -75,7 +63,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
         >
           {/* Logo dock — desktop */}
           <div
-            ref={navDockDesktopRef}
+            ref={(el) => context.setNavDockDesktopRef(el)}
             className="hidden lg:block flex-shrink-0"
             style={{
               width: 'clamp(3.25rem, 5vw, 4.5rem)',
@@ -87,7 +75,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
 
           {/* Logo dock — mobile (centered) */}
           <div
-            ref={navDockMobileRef}
+            ref={(el) => context.setNavDockMobileRef(el)}
             className="lg:hidden flex justify-center flex-shrink-0 absolute left-1/2"
             style={{
               transform: 'translateX(-50%)',

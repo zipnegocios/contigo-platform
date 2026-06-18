@@ -13,20 +13,12 @@ export function MorphingLogo() {
   // Drives position / scale / layer-opacity — see useScrollLogoMorph.ts
   useScrollLogoMorph(logoRef)
 
-  // Shimmer + light-sweep loops. Skipped entirely under reduced motion.
+  // Light-sweep loop only (gold layer is now solid fill). Skipped entirely under reduced motion.
   useEffect(() => {
     if (prefersReducedMotion()) return
 
-    const gradient = document.getElementById('shimmerGradient')
     const sweep = document.getElementById('logoLightSweep')
-    if (!gradient || !sweep) return
-
-    shimmerTweenRef.current = gsap.to(gradient, {
-      attr: { gradientTransform: 'translate(220%)' },
-      duration: 3.2,
-      ease: 'none',
-      repeat: -1,
-    })
+    if (!sweep) return
 
     // Pure transform sweep (no fill/color interpolation) — GPU-friendly.
     sweepTweenRef.current = gsap.fromTo(
@@ -39,9 +31,6 @@ export function MorphingLogo() {
     const syncWithMorphProgress = () => {
       const progress = (window as any).__logoMorphProgress ?? 0
       const shouldRun = progress < 0.9
-      if (shimmerTweenRef.current) {
-        shouldRun ? shimmerTweenRef.current.play() : shimmerTweenRef.current.pause()
-      }
       if (sweepTweenRef.current) {
         shouldRun ? sweepTweenRef.current.play() : sweepTweenRef.current.pause()
       }
@@ -51,7 +40,6 @@ export function MorphingLogo() {
 
     return () => {
       cancelAnimationFrame(frameId)
-      shimmerTweenRef.current?.kill()
       sweepTweenRef.current?.kill()
     }
   }, [])
@@ -112,22 +100,14 @@ export function MorphingLogo() {
         style={{ width: '100%', height: '100%', overflow: 'visible' }}
       >
         <defs>
-          <linearGradient id="shimmerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#C9A24B" />
-            <stop offset="42%" stopColor="#F5E6C8" />
-            <stop offset="50%" stopColor="#FFFBEF" />
-            <stop offset="58%" stopColor="#F5E6C8" />
-            <stop offset="100%" stopColor="#C9A24B" />
-          </linearGradient>
-
           <clipPath id="logoSilhouette">
             <g>{logoPaths}</g>
           </clipPath>
         </defs>
 
-        {/* Gold layer — shimmer fill + clipped light-sweep on top */}
-        <g style={{ opacity: 'var(--gold-layer-opacity, 1)' }}>
-          <g fill="url(#shimmerGradient)">{logoPaths}</g>
+        {/* Gold layer — solid fill + clipped light-sweep on top */}
+        <g style={{ opacity: 'var(--gold-layer-opacity, 1)', isolation: 'isolate' }}>
+          <g fill="#E2C063">{logoPaths}</g>
           <g clipPath="url(#logoSilhouette)">
             <rect
               id="logoLightSweep"
