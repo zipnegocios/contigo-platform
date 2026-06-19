@@ -64,9 +64,8 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
           {/* Logo dock — desktop */}
           <div
             ref={(el) => context.setNavDockDesktopRef(el)}
-            className="hidden lg:block flex-shrink-0"
+            className="hidden lg:block flex-shrink-0 w-logo-nav-desktop"
             style={{
-              width: 'clamp(5rem, 7vw, 7rem)',
               aspectRatio: '1024 / 354.041',
               visibility: 'hidden',
               pointerEvents: 'none',
@@ -76,10 +75,9 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
           {/* Logo dock — mobile (centered) */}
           <div
             ref={(el) => context.setNavDockMobileRef(el)}
-            className="lg:hidden flex justify-center flex-shrink-0 absolute left-1/2"
+            className="lg:hidden flex justify-center flex-shrink-0 absolute left-1/2 w-logo-nav-mobile"
             style={{
               transform: 'translateX(-50%)',
-              width: 'clamp(4.5rem, 10vw, 6rem)',
               aspectRatio: '1024 / 354.041',
               visibility: 'hidden',
               pointerEvents: 'none',
@@ -97,11 +95,10 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
-                className="relative text-sm font-medium transition-all duration-500 group"
+                className="relative text-fluid-sm font-medium transition-all duration-500 group"
                 style={{
                   color: scrolled ? '#0d3c4c' : 'var(--contigo-background)',
                   opacity: scrolled ? 1 : 0.9,
-                  fontSize: '0.95rem',
                 }}
               >
                 {item.label}
@@ -120,11 +117,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
               variant="primary"
               size="md"
               className="hidden sm:inline-flex transition-all duration-500"
-              style={{
-                opacity: scrolled ? 1 : 0.9,
-                fontSize: '1rem',
-                padding: '0.5rem 1.25rem',
-              }}
+              style={{ opacity: scrolled ? 1 : 0.9 }}
             >
               Get a Quote
             </Button>
@@ -132,14 +125,14 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             {/* Voice search button */}
             <button
               onClick={onVoiceSearch}
-              className="relative p-2.5 rounded-full transition-all duration-500"
+              className="relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-all duration-500"
               style={{
                 color: scrolled ? '#0d3c4c' : 'rgba(255, 255, 255, 0.8)',
                 border: `1px solid ${scrolled ? 'rgba(13, 60, 76, 0.2)' : 'rgba(255,255,255,0.3)'}`,
               }}
               title="Voice search"
             >
-              <Mic size={scrolled ? 20 : 22} />
+              <Mic className="w-[clamp(1.25rem,1.8vw,1.5rem)] h-[clamp(1.25rem,1.8vw,1.5rem)] transition-all duration-500" />
               {isListening && (
                 <span
                   className="absolute inset-0 rounded-full voice-pulse"
@@ -150,11 +143,15 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
 
             {/* Mobile hamburger */}
             <button
-              className="lg:hidden p-2 transition-all duration-500"
+              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center transition-all duration-500"
               onClick={() => setMobileOpen(!mobileOpen)}
               style={{ color: scrolled ? '#0d3c4c' : 'rgba(255, 255, 255, 0.8)' }}
             >
-              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileOpen ? (
+                <X className="w-[clamp(1.25rem,3vw,1.75rem)] h-[clamp(1.25rem,3vw,1.75rem)]" />
+              ) : (
+                <Menu className="w-[clamp(1.25rem,3vw,1.75rem)] h-[clamp(1.25rem,3vw,1.75rem)]" />
+              )}
             </button>
           </div>
         </div>
@@ -181,7 +178,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             <button
               key={item.id}
               onClick={() => scrollTo(item.id)}
-              className="text-left text-lg font-medium transition-colors hover:text-contigo-primary"
+              className="text-left min-h-[44px] flex items-center text-fluid-lg font-medium transition-colors hover:text-contigo-primary"
               style={{ color: 'var(--contigo-foreground)' }}
             >
               {item.label}

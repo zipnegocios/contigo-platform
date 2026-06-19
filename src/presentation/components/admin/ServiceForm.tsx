@@ -127,7 +127,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
                 type="button"
                 disabled={disabled}
                 onClick={() => !disabled && setActiveTab(tab.id)}
-                className="px-6 py-3 text-sm font-medium transition-all relative"
+                className="px-6 py-3 text-fluid-sm font-medium transition-all relative min-h-[44px]"
                 style={{
                   color:
                     activeTab === tab.id
@@ -140,7 +140,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
               >
                 {tab.label}
                 {disabled && (
-                  <span className="ml-1.5 text-[10px]" style={{ color: '#C5BDB4' }}>
+                  <span className="ml-1.5 text-fluid-xs" style={{ color: '#C5BDB4' }}>
                     (enter name first)
                   </span>
                 )}
@@ -165,7 +165,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
             {activeTab === 'info' && (
               <>
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Name</label>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Name</label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -177,22 +177,22 @@ export function ServiceForm({ service }: ServiceFormProps) {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
                     Slug
-                    <span className="ml-2 text-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
+                    <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
                       (auto-generated)
                     </span>
                   </label>
                   <Input
                     value={formData.slug}
                     readOnly
-                    className="mt-2 font-mono text-sm"
+                    className="mt-2 font-mono text-fluid-sm"
                     style={{ borderColor: 'var(--neutral-200)', backgroundColor: 'var(--neutral-50)', color: '#6B6560' }}
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Short Description</label>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Short Description</label>
                   <Textarea
                     value={formData.shortDescription}
                     onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
@@ -205,7 +205,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Full Description</label>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Full Description</label>
                   <Textarea
                     value={formData.fullDescription}
                     onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
@@ -229,7 +229,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
                       setFormData({ ...formData, published: checked as boolean })
                     }
                   />
-                  <span className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Published</span>
+                  <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Published</span>
                 </label>
               </>
             )}
@@ -251,16 +251,16 @@ export function ServiceForm({ service }: ServiceFormProps) {
                   style={{ borderTop: '1px solid #E5DDD0' }}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
+                    <p className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
                       Gallery
-                      <span className="ml-2 text-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
+                      <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
                         ({formData.galleryItems.length} items)
                       </span>
                     </p>
                     <button
                       type="button"
                       onClick={() => setGalleryModalOpen(true)}
-                      className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+                      className="px-4 py-1.5 rounded-lg text-fluid-sm font-medium transition-all min-h-[44px]"
                       style={{ border: '1px solid rgba(226,192,99,0.4)', color: 'var(--contigo-primary)', backgroundColor: 'rgba(226,192,99,0.08)' }}
                     >
                       Manage Gallery
@@ -296,7 +296,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
+                className="px-6 py-2.5 rounded-lg text-fluid-sm font-semibold transition-all duration-200 min-h-[44px]"
                 style={{
                   backgroundColor: loading ? '#C8A55C' : 'var(--contigo-primary)',
                   color: 'var(--petrol-800)',
@@ -310,7 +310,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
+                className="px-6 py-2.5 rounded-lg text-fluid-sm font-medium transition-all duration-200 min-h-[44px]"
                 style={{ border: '1px solid #E5DDD0', color: '#6B6560', backgroundColor: 'transparent' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--contigo-primary)'; e.currentTarget.style.color = 'var(--contigo-primary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--neutral-200)'; e.currentTarget.style.color = '#6B6560' }}

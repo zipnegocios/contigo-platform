@@ -84,12 +84,12 @@ export function MorphingLogo() {
   return (
     <div
       ref={logoRef}
+      className="w-logo-hero"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 99,
-        width: 'clamp(22rem, 38vw, 32rem)',
+        zIndex: 101,
         aspectRatio: '1024 / 354.041',
         pointerEvents: 'none',
       }}

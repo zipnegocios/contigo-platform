@@ -11,19 +11,19 @@ export default async function ServicesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className="text-4xl font-semibold"
+            className="text-fluid-4xl font-semibold"
             style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924', lineHeight: 1.2 }}
           >
             Services
           </h1>
-          <p className="text-sm mt-1" style={{ color: '#6B6560' }}>
+          <p className="text-fluid-sm mt-1" style={{ color: '#6B6560' }}>
             Manage services and their display order
           </p>
         </div>
 
         <Link
           href="/admin/services/new"
-          className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 inline-block bg-[#E2C063] hover:bg-[#D4AF37] text-[#1E1A16]"
+          className="px-5 py-2.5 min-h-[44px] rounded-lg text-fluid-sm font-semibold transition-all duration-200 inline-flex items-center bg-[#E2C063] hover:bg-[#D4AF37] text-[#1E1A16]"
         >
           + New Service
         </Link>

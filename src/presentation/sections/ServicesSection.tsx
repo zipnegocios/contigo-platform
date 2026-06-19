@@ -84,7 +84,7 @@ function ImageStrip({ images, names, index }: ImageStripProps) {
             style={{ objectFit: 'cover' }}
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-end p-4">
-            <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+            <span className="text-white text-fluid-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
               {names[i]}
             </span>
           </div>
@@ -193,7 +193,7 @@ export default function ServicesSection() {
             e.preventDefault();
             document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
           }}
-          className="inline-flex items-center gap-2 text-sm font-medium transition-colors group"
+          className="inline-flex items-center gap-2 text-fluid-sm font-medium transition-colors group"
           style={{ color: 'var(--neutral-800)' }}
         >
           View All Services

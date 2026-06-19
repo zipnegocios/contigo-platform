@@ -22,11 +22,11 @@ interface Props {
 }
 
 function StatusIcon({ status }: { status: UploadStatus }) {
-  if (status === 'uploading') return <Loader2 size={14} className="animate-spin flex-shrink-0" style={{ color: 'var(--contigo-primary)' }} />
-  if (status === 'done') return <CheckCircle2 size={14} className="flex-shrink-0" style={{ color: '#52B788' }} />
-  if (status === 'error') return <XCircle size={14} className="flex-shrink-0" style={{ color: '#e87070' }} />
-  if (status === 'duplicate') return <AlertTriangle size={14} className="flex-shrink-0" style={{ color: '#F4A261' }} />
-  if (status === 'skipped') return <X size={14} className="flex-shrink-0" style={{ color: '#6B6560' }} />
+  if (status === 'uploading') return <Loader2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)] animate-spin flex-shrink-0" style={{ color: 'var(--contigo-primary)' }} />
+  if (status === 'done') return <CheckCircle2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)] flex-shrink-0" style={{ color: '#52B788' }} />
+  if (status === 'error') return <XCircle className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)] flex-shrink-0" style={{ color: '#e87070' }} />
+  if (status === 'duplicate') return <AlertTriangle className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)] flex-shrink-0" style={{ color: '#F4A261' }} />
+  if (status === 'skipped') return <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)] flex-shrink-0" style={{ color: '#6B6560' }} />
   // pending
   return (
     <div className="w-3.5 h-3.5 rounded-full border-2 flex-shrink-0" style={{ borderColor: 'rgba(226,192,99,0.3)' }} />
@@ -88,9 +88,9 @@ function FileRow({
         {item.previewUrl ? (
           <img src={item.previewUrl} alt="" className="w-full h-full object-cover" />
         ) : isImage ? (
-          <ImageIcon size={18} style={{ color: '#6B6560' }} />
+          <ImageIcon className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: '#6B6560' }} />
         ) : (
-          <Film size={18} style={{ color: '#6B6560' }} />
+          <Film className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: '#6B6560' }} />
         )}
       </div>
 
@@ -98,7 +98,7 @@ function FileRow({
       <div className="flex-1 min-w-0 space-y-1.5">
         {/* Filename + status */}
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs truncate font-medium" style={{ color: 'var(--neutral-50)', maxWidth: 200 }}>
+          <p className="text-fluid-xs truncate font-medium" style={{ color: 'var(--neutral-50)', maxWidth: 200 }}>
             {item.file.name}
           </p>
           <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -163,7 +163,7 @@ function FileRow({
             style={{ color: '#6B6560' }}
             title="Cancel"
           >
-            <X size={13} />
+            <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
           </button>
         ) : isDone ? (
           <button
@@ -173,7 +173,7 @@ function FileRow({
             style={{ color: '#6B6560' }}
             title="Dismiss"
           >
-            <X size={13} />
+            <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
           </button>
         ) : null}
       </div>
@@ -237,10 +237,10 @@ export function UploadQueuePanel({
         style={{ borderBottom: collapsed ? 'none' : '1px solid rgba(226,192,99,0.08)' }}
         onClick={() => setCollapsed((v) => !v)}
       >
-        <Upload size={14} style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
+        <Upload className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
 
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold" style={{ color: 'var(--contigo-primary)' }}>Upload Queue</p>
+          <p className="text-fluid-xs font-semibold" style={{ color: 'var(--contigo-primary)' }}>Upload Queue</p>
           {statusText && (
             <p className="text-[10px] truncate" style={{ color: 'var(--neutral-600)' }}>{statusText}</p>
           )}
@@ -273,7 +273,7 @@ export function UploadQueuePanel({
             className="p-1 rounded transition-colors hover:bg-white/5"
             style={{ color: 'var(--neutral-600)' }}
           >
-            {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {collapsed ? <ChevronUp className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <ChevronDown className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
           </button>
           {canClose && (
             <button
@@ -283,7 +283,7 @@ export function UploadQueuePanel({
               style={{ color: '#6B6560' }}
               title="Close"
             >
-              <X size={14} />
+              <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
           )}
         </div>
@@ -313,10 +313,10 @@ export function UploadQueuePanel({
             <button
               type="button"
               onClick={handleAddMore}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 text-fluid-xs px-3 py-1.5 rounded-lg transition-all min-h-[44px]"
               style={{ color: 'var(--contigo-primary)', border: '1px solid rgba(226,192,99,0.25)', backgroundColor: 'rgba(226,192,99,0.06)' }}
             >
-              <Upload size={12} />
+              <Upload className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               Add more
             </button>
 
@@ -325,7 +325,7 @@ export function UploadQueuePanel({
                 <button
                   type="button"
                   onClick={onClearCompleted}
-                  className="text-xs px-3 py-1.5 rounded-lg transition-colors"
+                  className="text-fluid-xs px-3 py-1.5 rounded-lg transition-colors min-h-[44px]"
                   style={{ color: '#6B6560' }}
                 >
                   Clear done
@@ -335,7 +335,7 @@ export function UploadQueuePanel({
                 <button
                   type="button"
                   onClick={onCancelAll}
-                  className="text-xs px-3 py-1.5 rounded-lg transition-all"
+                  className="text-fluid-xs px-3 py-1.5 rounded-lg transition-all min-h-[44px]"
                   style={{ color: '#e87070', border: '1px solid rgba(232,112,112,0.2)', backgroundColor: 'rgba(232,112,112,0.06)' }}
                 >
                   Cancel all

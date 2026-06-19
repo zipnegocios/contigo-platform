@@ -132,7 +132,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
   return (
     <div>
       <h1
-        className="text-4xl font-semibold mb-6"
+        className="text-fluid-4xl font-semibold mb-6"
         style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)', lineHeight: 1.2 }}
       >
         Lead Pipeline
@@ -148,13 +148,13 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
               {/* Column header */}
               <div className="mb-3 flex items-center justify-between px-1">
                 <span
-                  className="text-xs font-semibold uppercase tracking-wider"
+                  className="text-fluid-xs font-semibold uppercase tracking-wider"
                   style={{ color: cfg.headerColor }}
                 >
                   {cfg.label}
                 </span>
                 <span
-                  className="text-xs font-bold rounded-full px-2 py-0.5"
+                  className="text-fluid-xs font-bold rounded-full px-2 py-0.5"
                   style={{ backgroundColor: cfg.badgeBg, color: cfg.badgeText }}
                 >
                   {stagLeads.length}
@@ -179,7 +179,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
               >
                 {stagLeads.length === 0 ? (
                   <div
-                    className="flex items-center justify-center h-28 text-xs"
+                    className="flex items-center justify-center h-28 text-fluid-xs"
                     style={{ color: 'var(--neutral-600)' }}
                   >
                     Drop here
@@ -208,17 +208,17 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                     >
                       <div className="space-y-2">
                         <div>
-                          <p className="font-semibold text-sm truncate" style={{ color: 'var(--neutral-800)' }}>
+                          <p className="font-semibold text-fluid-sm truncate" style={{ color: 'var(--neutral-800)' }}>
                             {lead.quote?.name || 'Unknown'}
                           </p>
-                          <p className="text-xs truncate" style={{ color: 'var(--neutral-600)' }}>
+                          <p className="text-fluid-xs truncate" style={{ color: 'var(--neutral-600)' }}>
                             {lead.quote?.email ?? '—'}
                           </p>
                         </div>
 
                         {lead.quote?.service && (
                           <span
-                            className="inline-block text-xs px-2 py-0.5 rounded"
+                            className="inline-block text-fluid-xs px-2 py-0.5 rounded"
                             style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#A08040' }}
                           >
                             {lead.quote.service}
@@ -230,9 +230,9 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                             className="flex items-center justify-between pt-2"
                             style={{ borderTop: '1px solid #F0E8DC' }}
                           >
-                            <span className="text-xs" style={{ color: 'var(--neutral-600)' }}>Est. Value</span>
+                            <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Est. Value</span>
                             <span
-                              className="text-xs font-bold"
+                              className="text-fluid-xs font-bold"
                               style={{ fontFamily: 'var(--font-space)', color: '#15803d' }}
                             >
                               ${(lead.estimatedValue / 100).toFixed(0)}
@@ -242,7 +242,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
 
                         {lead.adminNotes && (
                           <p
-                            className="text-xs italic pl-2"
+                            className="text-fluid-xs italic pl-2"
                             style={{ color: 'var(--neutral-600)', borderLeft: '2px solid #E5DDD0' }}
                           >
                             {lead.adminNotes}

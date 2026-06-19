@@ -110,8 +110,8 @@ export default function HeroSection() {
         {/* Logo morph dock placeholder — in normal flow before overline, invisible, shares page-padding */}
         <div
           ref={(el) => context.setHeroDockRef(el)}
+          className="w-logo-hero"
           style={{
-            width: 'clamp(22rem, 38vw, 32rem)',
             aspectRatio: '1024 / 354.041',
             marginBottom: 'clamp(2rem, 5vh, 3.5rem)',
             visibility: 'hidden',
@@ -145,7 +145,7 @@ export default function HeroSection() {
 
         <p
           ref={subtitleRef}
-          className="mt-6 text-base md:text-lg"
+          className="mt-6 text-fluid-base"
           style={{
             color: 'rgba(250,246,240,0.82)',
             maxWidth: '480px',

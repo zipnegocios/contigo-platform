@@ -113,7 +113,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 type="button"
                 disabled={disabled}
                 onClick={() => !disabled && setActiveTab(tab.id)}
-                className="px-6 py-3 text-sm font-medium transition-all relative"
+                className="px-6 py-3 text-fluid-sm font-medium transition-all relative min-h-[44px]"
                 style={{
                   color:
                     activeTab === tab.id
@@ -151,7 +151,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
             {activeTab === 'info' && (
               <>
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Title</label>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Title</label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -172,7 +172,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Description</label>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Description</label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -184,7 +184,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Location</label>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Location</label>
                   <Input
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -196,7 +196,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Completed Date</label>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Completed Date</label>
                   <Input
                     type="date"
                     value={formData.completedDate}
@@ -215,7 +215,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                         setFormData({ ...formData, featured: checked as boolean })
                       }
                     />
-                    <span className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Featured Project</span>
+                    <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Featured Project</span>
                   </label>
 
                   <label className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                         setFormData({ ...formData, published: checked as boolean })
                       }
                     />
-                    <span className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Published</span>
+                    <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Published</span>
                   </label>
                 </div>
               </>
@@ -248,16 +248,16 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   style={{ borderTop: '1px solid var(--neutral-200)' }}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
+                    <p className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
                       Gallery
-                      <span className="ml-2 text-xs font-normal" style={{ color: 'var(--neutral-400)' }}>
+                      <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-400)' }}>
                         ({formData.galleryItems.length} items)
                       </span>
                     </p>
                     <button
                       type="button"
                       onClick={() => setGalleryModalOpen(true)}
-                      className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+                      className="px-4 py-1.5 rounded-lg text-fluid-sm font-medium transition-all min-h-[44px]"
                       style={{ border: '1px solid var(--gold-a06)', color: 'var(--contigo-primary)', backgroundColor: 'var(--gold-a06)' }}
                     >
                       Manage Gallery
@@ -294,7 +294,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-60"
+                className="px-6 py-2.5 rounded-lg text-fluid-sm font-semibold transition-all duration-200 disabled:opacity-60 min-h-[44px]"
                 style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--neutral-900)', cursor: loading ? 'not-allowed' : 'pointer' }}
                 onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--gold-600)' }}
                 onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--contigo-primary)' }}
@@ -304,7 +304,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
+                className="px-6 py-2.5 rounded-lg text-fluid-sm font-medium transition-all duration-200 min-h-[44px]"
                 style={{ border: '1px solid var(--neutral-200)', color: 'var(--neutral-600)', backgroundColor: 'transparent' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--contigo-primary)'; e.currentTarget.style.color = 'var(--contigo-primary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--neutral-200)'; e.currentTarget.style.color = 'var(--neutral-600)' }}

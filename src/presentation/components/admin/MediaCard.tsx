@@ -54,7 +54,7 @@ export function MediaCard({
     return (
       <div
         className="rounded-xl overflow-hidden shadow-lg"
-        style={{ width: 120, aspectRatio: '4/3', backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.4)' }}
+        style={{ width: 'clamp(6rem,12vw,9rem)', aspectRatio: '4/3', backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.4)' }}
       >
         {item.mediaType === 'image' ? (
           <img src={item.publicUrl} alt="" className="w-full h-full object-cover" />
@@ -62,7 +62,7 @@ export function MediaCard({
           <video src={item.publicUrl} className="w-full h-full object-cover" muted preload="metadata" style={{ pointerEvents: 'none' }} />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Film size={24} style={{ color: 'var(--neutral-600)' }} />
+            <Film className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)]" style={{ color: 'var(--neutral-600)' }} />
           </div>
         )}
       </div>
@@ -116,7 +116,7 @@ export function MediaCard({
           <img src={item.publicUrl} alt={item.key} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Image size={28} style={{ color: 'var(--neutral-600)' }} />
+            <Image className="w-[clamp(1.5rem,3vw,1.75rem)] h-[clamp(1.5rem,3vw,1.75rem)]" style={{ color: 'var(--neutral-600)' }} />
           </div>
         )}
 
@@ -153,7 +153,7 @@ export function MediaCard({
               backdropFilter: 'blur(2px)',
             }}
           >
-            {isSelected && <Check size={11} strokeWidth={3} style={{ color: 'var(--petrol-800)' }} />}
+            {isSelected && <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" strokeWidth={3} style={{ color: 'var(--petrol-800)' }} />}
           </div>
         </div>
 
@@ -167,7 +167,7 @@ export function MediaCard({
               style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: 'var(--contigo-primary)' }}
               title="Details"
             >
-              <Info size={11} />
+              <Info className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
             <button
               type="button"
@@ -176,7 +176,7 @@ export function MediaCard({
               style={{ backgroundColor: 'rgba(232,112,112,0.18)', color: '#e87070' }}
               title="Delete"
             >
-              <Trash2 size={11} />
+              <Trash2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
           </div>
         )}

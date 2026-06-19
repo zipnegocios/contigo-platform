@@ -267,7 +267,7 @@ export default function ProjectsSection({ projects }: Props) {
       </div>
 
       {projects.length === 0 ? (
-        <p className="mt-8 text-sm" style={{ color: 'var(--neutral-600)' }}>
+        <p className="mt-8 text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
           No featured projects yet.
         </p>
       ) : (
@@ -277,7 +277,7 @@ export default function ProjectsSection({ projects }: Props) {
             <button
               onClick={prev}
               aria-label="Previous"
-              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
+              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
               style={arrowBtn}
             >‹</button>
           )}
@@ -329,7 +329,7 @@ export default function ProjectsSection({ projects }: Props) {
             <button
               onClick={next}
               aria-label="Next"
-              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
+              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
               style={arrowBtn}
             >›</button>
           )}
@@ -359,7 +359,7 @@ export default function ProjectsSection({ projects }: Props) {
       {/* Footer row */}
       <div
         ref={metaRef}
-        className="flex items-center justify-between mt-8 text-sm"
+        className="flex items-center justify-between mt-8 text-fluid-sm"
         style={{ color: 'var(--neutral-600)' }}
       >
         <span className="data-text flex items-center gap-1 flex-wrap">
@@ -375,7 +375,7 @@ export default function ProjectsSection({ projects }: Props) {
         </span>
         <a
           href="/projects"
-          className="text-sm font-medium transition-opacity hover:opacity-70"
+          className="text-fluid-sm font-medium transition-opacity hover:opacity-70"
           style={{ color: 'var(--neutral-800)' }}
         >
           View all →

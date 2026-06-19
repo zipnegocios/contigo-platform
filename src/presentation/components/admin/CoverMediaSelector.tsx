@@ -63,7 +63,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Cover Media</p>
+      <p className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Cover Media</p>
 
       {/* Cover preview */}
       <div
@@ -72,8 +72,8 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
       >
         {!coverUrl ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2" style={{ color: 'var(--neutral-600)' }}>
-            <ImageIcon size={36} className="opacity-40" />
-            <p className="text-sm">No cover selected</p>
+            <ImageIcon className="w-[clamp(1.75rem,3.5vw,2.25rem)] h-[clamp(1.75rem,3.5vw,2.25rem)] opacity-40" />
+            <p className="text-fluid-sm">No cover selected</p>
           </div>
         ) : coverIsVideo ? (
           <video
@@ -95,7 +95,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
             style={{ backgroundColor: 'rgba(232,112,112,0.18)', color: '#e87070' }}
             title="Remove cover"
           >
-            <X size={14} />
+            <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
           </button>
         )}
       </div>
@@ -105,10 +105,10 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
         <button
           type="button"
           onClick={() => setPickerOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-fluid-sm font-medium transition-all"
           style={{ border: '1px solid rgba(226,192,99,0.4)', color: 'var(--contigo-primary)', backgroundColor: 'rgba(226,192,99,0.08)' }}
         >
-          <Film size={14} />
+          <Film className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
           Browse Library
         </button>
 
@@ -117,10 +117,10 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
           type="button"
           disabled={uploadingCover}
           onClick={() => coverInputRef.current?.click()}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-60"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-fluid-sm font-medium transition-all disabled:opacity-60"
           style={{ border: '1px solid #E5DDD0', color: '#6B6560' }}
         >
-          <Upload size={14} />
+          <Upload className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
           {uploadingCover ? 'Uploading…' : 'Upload File'}
         </button>
       </div>
@@ -131,9 +131,9 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
           className="rounded-xl p-4 space-y-3"
           style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.12)' }}
         >
-          <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
+          <p className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
             Poster Image
-            <span className="ml-2 text-xs font-normal" style={{ color: 'var(--neutral-600)' }}>(fallback for video)</span>
+            <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-600)' }}>(fallback for video)</span>
           </p>
 
           {posterUrl && (
@@ -145,7 +145,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
                 className="absolute top-1 right-1 p-1 rounded-full"
                 style={{ backgroundColor: 'rgba(232,112,112,0.18)', color: '#e87070' }}
               >
-                <X size={12} />
+                <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               </button>
             </div>
           )}
@@ -154,7 +154,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
             <button
               type="button"
               onClick={() => setPosterPickerOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-fluid-xs font-medium transition-all"
               style={{ border: '1px solid rgba(226,192,99,0.4)', color: 'var(--contigo-primary)', backgroundColor: 'rgba(226,192,99,0.08)' }}
             >
               Browse Library
@@ -165,10 +165,10 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
               type="button"
               disabled={uploadingPoster}
               onClick={() => posterInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-60"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-fluid-xs font-medium transition-all disabled:opacity-60"
               style={{ border: '1px solid #E5DDD0', color: '#6B6560' }}
             >
-              <Upload size={12} />
+              <Upload className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               {uploadingPoster ? 'Uploading…' : 'Upload Image'}
             </button>
           </div>

@@ -47,7 +47,7 @@ export default function AdminSidebar() {
         />
         <div>
           <span
-            className="text-xl font-semibold tracking-wide"
+            className="text-fluid-xl font-semibold tracking-wide"
             style={{
               fontFamily: 'var(--contigo-font-display)',
               color: 'var(--neutral-50)',
@@ -99,10 +99,10 @@ export default function AdminSidebar() {
               }}
             >
               <Icon
-                size={18}
+                className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]"
                 style={{ color: isActive ? 'var(--gold-400)' : 'currentColor', flexShrink: 0 }}
               />
-              <span className="text-sm font-medium">{item.label}</span>
+              <span className="text-fluid-sm font-medium">{item.label}</span>
             </Link>
           )
         })}
@@ -112,7 +112,7 @@ export default function AdminSidebar() {
       <div className="p-4" style={{ borderTop: '1px solid var(--gold-a12)' }}>
         <Button
           variant="ghost"
-          className="w-full justify-start px-4 py-2.5 text-sm h-auto"
+          className="w-full justify-start px-4 py-2.5 text-fluid-sm h-auto"
           style={{ color: 'var(--neutral-600)' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.color = 'var(--gold-400)'
@@ -124,7 +124,7 @@ export default function AdminSidebar() {
           }}
           onClick={() => signOut({ callbackUrl: '/admin/login' })}
         >
-          <LogOut size={18} />
+          <LogOut className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           Sign Out
         </Button>
       </div>

@@ -25,7 +25,7 @@ export function KPICard({ title, value, icon, trend }: KPICardProps) {
     >
       <div className="flex items-center justify-between">
         <span
-          className="text-xs font-medium uppercase tracking-wider"
+          className="text-fluid-xs font-medium uppercase tracking-wider"
           style={{ color: '#6B6560' }}
         >
           {title}
@@ -34,7 +34,7 @@ export function KPICard({ title, value, icon, trend }: KPICardProps) {
       </div>
 
       <div
-        className="text-2xl font-bold"
+        className="text-fluid-2xl font-bold"
         style={{
           fontFamily: 'var(--font-space)',
           color: 'var(--neutral-800)',
@@ -44,7 +44,7 @@ export function KPICard({ title, value, icon, trend }: KPICardProps) {
       </div>
 
       {trend && (
-        <p className="text-xs" style={{ color: trend.isPositive ? '#15803d' : '#dc2626' }}>
+        <p className="text-fluid-xs" style={{ color: trend.isPositive ? '#15803d' : '#dc2626' }}>
           {trend.isPositive ? '↑' : '↓'} {trend.value}% {trend.label}
         </p>
       )}

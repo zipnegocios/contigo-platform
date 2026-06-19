@@ -111,16 +111,16 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
           <TableHeader>
             <TableRow style={{ backgroundColor: 'var(--neutral-50)', borderBottom: '1px solid #E5DDD0' }}>
               <TableHead className="w-8 py-3"></TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Name</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Description</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Actions</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Name</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Description</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {services.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-12 text-sm" style={{ color: 'var(--neutral-600)' }}>
+                <TableCell colSpan={5} className="text-center py-12 text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
                   No services yet
                 </TableCell>
               </TableRow>
@@ -141,17 +141,17 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
                 >
                   <TableCell className="py-3.5">
-                    <GripVertical className="h-4 w-4" style={{ color: '#C5BDB5' }} />
+                    <GripVertical className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" style={{ color: '#C5BDB5' }} />
                   </TableCell>
-                  <TableCell className="font-medium py-3.5 text-sm" style={{ color: 'var(--neutral-800)' }}>
+                  <TableCell className="font-medium py-3.5 text-fluid-sm" style={{ color: 'var(--neutral-800)' }}>
                     {service.name}
                   </TableCell>
-                  <TableCell className="text-sm py-3.5" style={{ color: '#6B6560' }}>
+                  <TableCell className="text-fluid-sm py-3.5" style={{ color: '#6B6560' }}>
                     {service.shortDescription}
                   </TableCell>
                   <TableCell className="py-3.5">
                     <span
-                      className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide"
+                      className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide"
                       style={
                         service.published
                           ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' }
@@ -167,7 +167,7 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
                         asChild
                         size="sm"
                         variant="outline"
-                        className="h-8 w-8 p-0 transition-all duration-150"
+                        className="min-h-[44px] min-w-[44px] p-0 transition-all duration-150"
                         style={{ borderColor: 'var(--neutral-200)', color: '#6B6560' }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.borderColor = 'var(--contigo-primary)'
@@ -179,13 +179,13 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
                         }}
                       >
                         <Link href={`/admin/services/${service.id}/edit`}>
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
                         </Link>
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 w-8 p-0 transition-all duration-150"
+                        className="min-h-[44px] min-w-[44px] p-0 transition-all duration-150"
                         style={{ borderColor: 'var(--neutral-200)', color: '#6B6560' }}
                         onClick={() => handleDelete(service.id)}
                         onMouseEnter={(e) => {
@@ -197,7 +197,7 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
                           e.currentTarget.style.color = '#6B6560'
                         }}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
                       </Button>
                     </div>
                   </TableCell>
@@ -212,7 +212,7 @@ export function ServiceTable({ services: initialServices }: ServiceTableProps) {
         <button
           onClick={handleSaveOrder}
           disabled={saving}
-          className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
+          className="px-6 py-2.5 rounded-lg text-fluid-sm font-semibold transition-all duration-200 min-h-[44px]"
           style={{
             backgroundColor: saving ? '#C8A55C' : 'var(--contigo-primary)',
             color: 'var(--petrol-800)',

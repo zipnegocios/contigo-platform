@@ -29,7 +29,7 @@ export function CategoryFilterPills({ categories, activeSlug, basePath }: Catego
       <button
         type="button"
         onClick={() => navigate(null)}
-        className="px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200"
+        className="px-[clamp(0.875rem,1.8vw,1.25rem)] py-[clamp(0.375rem,0.8vw,0.5rem)] min-h-[44px] rounded-full text-fluid-sm font-medium transition-all duration-200 flex items-center"
         style={
           !activeSlug
             ? { backgroundColor: '#E2C063', color: '#1E1A16' }
@@ -43,7 +43,7 @@ export function CategoryFilterPills({ categories, activeSlug, basePath }: Catego
           key={cat.slug}
           type="button"
           onClick={() => navigate(cat.slug)}
-          className="px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200"
+          className="px-[clamp(0.875rem,1.8vw,1.25rem)] py-[clamp(0.375rem,0.8vw,0.5rem)] min-h-[44px] rounded-full text-fluid-sm font-medium transition-all duration-200 flex items-center"
           style={
             activeSlug === cat.slug
               ? { backgroundColor: '#E2C063', color: '#1E1A16' }

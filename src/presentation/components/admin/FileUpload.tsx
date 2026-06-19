@@ -60,7 +60,7 @@ export function FileUpload({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
+      <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
         {label}
       </label>
 
@@ -82,37 +82,37 @@ export function FileUpload({
       {value ? (
         /* Preview */
         <div className="relative rounded-lg overflow-hidden" style={{ border: '1px solid #E5DDD0' }}>
-          <div className="relative w-full h-48 bg-[#FAF6F0]">
+          <div className="relative w-full bg-[#FAF6F0]" style={{ height: 'clamp(8rem,20vh,12rem)' }}>
             <img src={value} alt={label} className="w-full h-full object-cover" />
           </div>
           <div
             className="flex items-center justify-between px-3 py-2"
             style={{ backgroundColor: 'var(--neutral-50)', borderTop: '1px solid #E5DDD0' }}
           >
-            <p className="text-xs truncate max-w-[60%]" style={{ color: '#6B6560' }}>
+            <p className="text-fluid-xs truncate max-w-[60%]" style={{ color: '#6B6560' }}>
               {value.split('/').pop()}
             </p>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="flex items-center gap-1 text-xs transition-colors"
+                className="flex items-center gap-1 text-fluid-xs transition-colors"
                 style={{ color: 'var(--neutral-600)' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--contigo-primary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--neutral-600)' }}
               >
-                <Images className="h-3.5 w-3.5" />
+                <Images className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
                 Change
               </button>
               <button
                 type="button"
                 onClick={handleClear}
-                className="flex items-center gap-1 text-xs transition-colors"
+                className="flex items-center gap-1 text-fluid-xs transition-colors"
                 style={{ color: 'var(--neutral-600)' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = '#dc2626' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--neutral-600)' }}
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
                 Remove
               </button>
             </div>
@@ -126,8 +126,8 @@ export function FileUpload({
         >
           {state === 'uploading' ? (
             <div className="py-8 flex flex-col items-center gap-3">
-              <Loader2 className="h-6 w-6 animate-spin" style={{ color: 'var(--contigo-primary)' }} />
-              <span className="text-sm" style={{ color: '#6B6560' }}>Uploading… {progress}%</span>
+              <Loader2 className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)] animate-spin" style={{ color: 'var(--contigo-primary)' }} />
+              <span className="text-fluid-sm" style={{ color: '#6B6560' }}>Uploading… {progress}%</span>
               <div className="w-48 h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--neutral-200)' }}>
                 <div
                   className="h-full rounded-full transition-all duration-150"
@@ -144,10 +144,10 @@ export function FileUpload({
                 className="flex-1 py-8 flex flex-col items-center gap-3 transition-all hover:bg-[#F5F0E8]"
                 style={{ cursor: 'pointer' }}
               >
-                <Upload className="h-6 w-6" style={{ color: '#C5BDB5' }} />
+                <Upload className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)]" style={{ color: '#C5BDB5' }} />
                 <div className="text-center">
-                  <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Upload file</p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--neutral-600)' }}>JPG, PNG, WebP, GIF</p>
+                  <p className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Upload file</p>
+                  <p className="text-fluid-xs mt-0.5" style={{ color: 'var(--neutral-600)' }}>JPG, PNG, WebP, GIF</p>
                 </div>
               </button>
 
@@ -161,10 +161,10 @@ export function FileUpload({
                 className="flex-1 py-8 flex flex-col items-center gap-3 transition-all hover:bg-[#F5F0E8]"
                 style={{ cursor: 'pointer' }}
               >
-                <Images className="h-6 w-6" style={{ color: '#C5BDB5' }} />
+                <Images className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)]" style={{ color: '#C5BDB5' }} />
                 <div className="text-center">
-                  <p className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Browse library</p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--neutral-600)' }}>Select existing</p>
+                  <p className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Browse library</p>
+                  <p className="text-fluid-xs mt-0.5" style={{ color: 'var(--neutral-600)' }}>Select existing</p>
                 </div>
               </button>
             </div>
@@ -173,7 +173,7 @@ export function FileUpload({
       )}
 
       {state === 'error' && errorMsg && (
-        <p className="text-xs" style={{ color: '#dc2626' }}>{errorMsg}</p>
+        <p className="text-fluid-xs" style={{ color: '#dc2626' }}>{errorMsg}</p>
       )}
     </div>
   )

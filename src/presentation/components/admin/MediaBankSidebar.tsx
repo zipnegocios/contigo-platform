@@ -60,7 +60,7 @@ function DroppableFolderRow({
         onClick={!editing ? onClick : undefined}
       >
         <span className="flex-shrink-0" style={{ color: active || isOver ? 'var(--contigo-primary)' : 'var(--neutral-600)' }}>
-          {active || isOver ? <FolderOpen size={13} /> : <Folder size={13} />}
+          {active || isOver ? <FolderOpen className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <Folder className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
         </span>
 
         {editing ? (
@@ -73,13 +73,13 @@ function DroppableFolderRow({
               if (e.key === 'Escape') setEditing(false)
             }}
             onBlur={handleRename}
-            className="flex-1 text-xs bg-transparent outline-none border-b min-w-0"
+            className="flex-1 text-fluid-xs bg-transparent outline-none border-b min-w-0"
             style={{ color: 'var(--neutral-50)', borderColor: 'rgba(226,192,99,0.4)' }}
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
           <span
-            className="text-xs font-medium truncate flex-1"
+            className="text-fluid-xs font-medium truncate flex-1"
             style={{ color: active ? 'var(--contigo-primary)' : 'var(--neutral-600)' }}
             onDoubleClick={() => onRename && setEditing(true)}
           >
@@ -106,7 +106,7 @@ function DroppableFolderRow({
           style={{ color: '#e87070' }}
           title="Delete folder"
         >
-          <X size={11} />
+          <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
         </button>
       )}
     </div>
@@ -172,7 +172,7 @@ export function MediaBankSidebar() {
         className="w-full flex items-center gap-1.5 px-2 py-1.5 text-[9px] uppercase tracking-widest"
         style={{ color: 'var(--neutral-600)' }}
       >
-        {foldersExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+        {foldersExpanded ? <ChevronDown className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <ChevronRight className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
         Folders
       </button>
 
@@ -220,7 +220,7 @@ export function MediaBankSidebar() {
                   if (e.key === 'Escape') setCreatingFolder(false)
                 }}
                 placeholder="Folder name…"
-                className="flex-1 text-xs px-2 py-1 rounded outline-none min-w-0"
+                className="flex-1 text-fluid-xs px-2 py-1 rounded outline-none min-w-0"
                 style={{
                   backgroundColor: 'rgba(226,192,99,0.1)',
                   color: 'var(--neutral-50)',
@@ -228,20 +228,20 @@ export function MediaBankSidebar() {
                 }}
               />
               <button onClick={submitFolder} className="p-1 rounded" style={{ color: 'var(--contigo-primary)' }}>
-                <Check size={12} />
+                <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               </button>
               <button onClick={() => setCreatingFolder(false)} className="p-1 rounded" style={{ color: 'var(--neutral-600)' }}>
-                <X size={12} />
+                <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setCreatingFolder(true)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-fluid-xs"
               style={{ color: '#6B6560' }}
             >
-              <Plus size={12} /> New folder
+              <Plus className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> New folder
             </button>
           )}
         </>
@@ -256,7 +256,7 @@ export function MediaBankSidebar() {
         className="w-full flex items-center gap-1.5 px-2 py-1.5 text-[9px] uppercase tracking-widest"
         style={{ color: 'var(--neutral-600)' }}
       >
-        {tagsExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+        {tagsExpanded ? <ChevronDown className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <ChevronRight className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
         Tags
       </button>
 
@@ -289,7 +289,7 @@ export function MediaBankSidebar() {
                     className="opacity-0 group-hover/tag:opacity-100 p-0.5 rounded transition-opacity"
                     style={{ color: '#e87070' }}
                   >
-                    <X size={9} />
+                    <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
                   </button>
                 </div>
               )
@@ -308,7 +308,7 @@ export function MediaBankSidebar() {
                   if (e.key === 'Escape') setCreatingTag(false)
                 }}
                 placeholder="Tag name…"
-                className="w-full text-xs px-2 py-1 rounded outline-none"
+                className="w-full text-fluid-xs px-2 py-1 rounded outline-none"
                 style={{
                   backgroundColor: 'rgba(226,192,99,0.1)',
                   color: 'var(--neutral-50)',
@@ -333,14 +333,14 @@ export function MediaBankSidebar() {
               <div className="flex gap-1">
                 <button
                   onClick={submitTag}
-                  className="flex-1 text-xs py-1 rounded font-medium"
+                  className="flex-1 text-fluid-xs py-1 rounded font-medium"
                   style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
                 >
                   Create
                 </button>
                 <button
                   onClick={() => setCreatingTag(false)}
-                  className="flex-1 text-xs py-1 rounded"
+                  className="flex-1 text-fluid-xs py-1 rounded"
                   style={{ color: 'var(--neutral-600)', border: '1px solid rgba(107,101,96,0.2)' }}
                 >
                   Cancel
@@ -351,10 +351,10 @@ export function MediaBankSidebar() {
             <button
               type="button"
               onClick={() => setCreatingTag(true)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-fluid-xs"
               style={{ color: '#6B6560' }}
             >
-              <Tag size={12} /> New tag
+              <Tag className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> New tag
             </button>
           )}
         </>

@@ -19,12 +19,12 @@ export default async function EditServicePage({ params }: PageProps) {
     <div className="space-y-6">
       <div>
         <h1
-          className="text-3xl font-semibold"
+          className="text-fluid-3xl font-semibold"
           style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
         >
           Edit Service
         </h1>
-        <p className="text-sm mt-1" style={{ color: '#6B6560' }}>
+        <p className="text-fluid-sm mt-1" style={{ color: '#6B6560' }}>
           {service.name}
         </p>
       </div>

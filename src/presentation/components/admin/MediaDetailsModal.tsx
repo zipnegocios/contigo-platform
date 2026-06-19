@@ -119,11 +119,11 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
           className="flex items-center justify-between px-6 py-4"
           style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}
         >
-          <h2 className="text-base font-semibold truncate pr-4" style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}>
+          <h2 className="text-fluid-base font-semibold truncate pr-4" style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}>
             {filename}
           </h2>
-          <button onClick={onClose} className="flex-shrink-0 p-1.5 rounded-lg" style={{ color: 'var(--neutral-600)' }}>
-            <X size={18} />
+          <button onClick={onClose} className="flex-shrink-0 p-1.5 rounded-lg min-h-[44px] min-w-[44px]" style={{ color: 'var(--neutral-600)' }}>
+            <X className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           </button>
         </div>
 
@@ -139,8 +139,8 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
               <video src={item.publicUrl} controls className="w-full h-full object-contain" />
             ) : (
               <div className="flex flex-col items-center gap-2" style={{ color: 'var(--neutral-600)' }}>
-                <Image size={36} />
-                <span className="text-xs">No preview</span>
+                <Image className="w-[clamp(1.75rem,3.5vw,2.25rem)] h-[clamp(1.75rem,3.5vw,2.25rem)]" />
+                <span className="text-fluid-xs">No preview</span>
               </div>
             )}
           </div>
@@ -149,7 +149,7 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
         {/* File info */}
         <div className="px-6 py-4 space-y-4">
           {/* Basic info grid */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-2 gap-3 text-fluid-sm">
             <div>
               <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--neutral-600)' }}>Size</p>
               <p style={{ color: 'var(--neutral-50)' }}>{formatBytes(item.size)}</p>
@@ -176,13 +176,13 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
               style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
             >
-              <Maximize2 size={15} style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
+              <Maximize2 className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
               {measuring && !width ? (
-                <span className="text-xs" style={{ color: 'var(--neutral-600)' }}>Measuring…</span>
+                <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Measuring…</span>
               ) : width && height ? (
-                <div className="flex items-center gap-3 text-sm flex-wrap">
+                <div className="flex items-center gap-3 text-fluid-sm flex-wrap">
                   <span style={{ color: 'var(--neutral-50)' }}>{width} × {height}px</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--contigo-primary)' }}>
+                  <span className="text-fluid-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--contigo-primary)' }}>
                     {aspectRatio(width, height)}
                   </span>
                 </div>
@@ -196,8 +196,8 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
               style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
             >
-              <Film size={15} style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
-              <span className="text-sm" style={{ color: 'var(--neutral-50)' }}>Duration: {formatDuration(duration)}</span>
+              <Film className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
+              <span className="text-fluid-sm" style={{ color: 'var(--neutral-50)' }}>Duration: {formatDuration(duration)}</span>
             </div>
           )}
 
@@ -205,7 +205,7 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
           {dbMeta?.notes && (
             <div>
               <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--neutral-600)' }}>Notes</p>
-              <p className="text-sm" style={{ color: 'var(--neutral-50)' }}>{dbMeta.notes}</p>
+              <p className="text-fluid-sm" style={{ color: 'var(--neutral-50)' }}>{dbMeta.notes}</p>
             </div>
           )}
 
@@ -214,21 +214,21 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
             <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--neutral-600)' }}>Public URL</p>
             <div className="flex items-center gap-2">
               <p
-                className="text-xs flex-1 min-w-0 truncate font-mono px-3 py-2 rounded-lg"
+                className="text-fluid-xs flex-1 min-w-0 truncate font-mono px-3 py-2 rounded-lg"
                 style={{ backgroundColor: 'rgba(226,192,99,0.06)', color: 'var(--neutral-600)', border: '1px solid rgba(226,192,99,0.1)' }}
               >
                 {item.publicUrl}
               </p>
               <button
                 onClick={handleCopy}
-                className="flex-shrink-0 p-2 rounded-lg transition-all"
+                className="flex-shrink-0 p-2 rounded-lg transition-all min-h-[44px] min-w-[44px]"
                 style={{
                   backgroundColor: copied ? 'rgba(82,183,136,0.15)' : 'rgba(226,192,99,0.1)',
                   color: copied ? '#52B788' : 'var(--contigo-primary)',
                 }}
                 title="Copy URL"
               >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <Copy className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
               </button>
             </div>
           </div>
@@ -237,13 +237,13 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
           <div>
             <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--neutral-600)' }}>Used In</p>
             {item.usedIn.length === 0 ? (
-              <p className="text-sm" style={{ color: '#6B6560' }}>Unassigned</p>
+              <p className="text-fluid-sm" style={{ color: '#6B6560' }}>Unassigned</p>
             ) : (
               <div className="space-y-1.5">
                 {item.usedIn.map((a, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between px-3 py-2 rounded-lg text-sm"
+                    className="flex items-center justify-between px-3 py-2 rounded-lg text-fluid-sm"
                     style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.08)' }}
                   >
                     <span style={{ color: 'var(--neutral-50)' }}>{a.title}</span>

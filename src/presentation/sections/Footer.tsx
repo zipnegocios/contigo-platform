@@ -66,7 +66,7 @@ export default function Footer() {
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
-                className="text-sm transition-colors relative group"
+                className="text-fluid-sm transition-colors relative group"
                 style={{ color: 'var(--neutral-50)' }}
               >
                 {item.label}
@@ -89,7 +89,7 @@ export default function Footer() {
                 key={label}
                 href="#"
                 onClick={(e) => e.preventDefault()}
-                className="p-2 rounded-full transition-colors"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors"
                 style={{
                   color: 'var(--neutral-50)',
                   border: '1px solid transparent',
@@ -104,7 +104,10 @@ export default function Footer() {
                 }}
                 aria-label={label}
               >
-                <Icon size={18} strokeWidth={1.5} />
+                <Icon
+                  className="w-[clamp(1.125rem,2vw,1.375rem)] h-[clamp(1.125rem,2vw,1.375rem)]"
+                  strokeWidth={1.5}
+                />
               </a>
             ))}
           </div>
@@ -116,13 +119,13 @@ export default function Footer() {
           style={{ borderTop: '1px solid var(--neutral-700)' }}
         >
           <p
-            className="text-xs"
+            className="text-fluid-xs"
             style={{ color: 'var(--neutral-600)' }}
           >
             &copy; 2025 Contigo Constructions Pty Ltd. All rights reserved.
           </p>
           <p
-            className="text-xs"
+            className="text-fluid-xs"
             style={{ color: 'var(--neutral-600)' }}
           >
             ABN: 12 345 678 901

@@ -46,7 +46,7 @@ export function ProjectsGrid({ projects, allCategories, activeSlug }: ProjectsGr
 
       {/* Grid */}
       {projects.length === 0 ? (
-        <p className="py-16 text-center text-sm" style={{ color: '#A89E8C' }}>
+        <p className="py-16 text-center text-fluid-sm" style={{ color: '#A89E8C' }}>
           No projects in this category yet.
         </p>
       ) : (
@@ -90,7 +90,7 @@ export function ProjectsGrid({ projects, allCategories, activeSlug }: ProjectsGr
                   {project.featured && (
                     <div className="absolute top-4 left-4">
                       <span
-                        className="text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full font-semibold"
+                        className="text-[clamp(0.5625rem,1vw,0.6875rem)] uppercase tracking-widest px-2.5 py-1 rounded-full font-semibold"
                         style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
                       >
                         Featured
@@ -100,27 +100,27 @@ export function ProjectsGrid({ projects, allCategories, activeSlug }: ProjectsGr
 
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <p
-                      className="text-[10px] uppercase tracking-widest mb-1.5"
+                      className="text-[clamp(0.5625rem,1vw,0.6875rem)] uppercase tracking-widest mb-1.5"
                       style={{ color: '#E2C063' }}
                     >
                       {project.category} · {year}
                     </p>
                     <h3
-                      className="text-xl font-semibold leading-tight transition-colors duration-200"
+                      className="text-fluid-xl font-semibold leading-tight transition-colors duration-200"
                       style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
                     >
                       {project.title}
                     </h3>
-                    <p className="text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: 'rgba(250,246,240,0.65)' }}>
+                    <p className="text-fluid-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: 'rgba(250,246,240,0.65)' }}>
                       {project.location}
                     </p>
                   </div>
 
                   <div
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
+                    className="absolute top-4 right-4 w-[clamp(1.75rem,3vw,2rem)] h-[clamp(1.75rem,3vw,2rem)] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
                     style={{ backgroundColor: 'rgba(226,192,99,0.25)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
                   >
-                    <span className="text-sm">→</span>
+                    <span className="text-fluid-sm">→</span>
                   </div>
                 </div>
               </Link>

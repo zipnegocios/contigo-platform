@@ -21,7 +21,7 @@ export function CategoryManagerClient({ serviceFlat, projectFlat }: CategoryMana
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className="px-5 py-2.5 text-sm font-medium capitalize transition-all"
+            className="px-5 py-2.5 text-fluid-sm font-medium capitalize transition-all min-h-[44px]"
             style={
               activeTab === tab
                 ? { color: 'var(--contigo-primary)', borderBottom: '2px solid var(--contigo-primary)' }

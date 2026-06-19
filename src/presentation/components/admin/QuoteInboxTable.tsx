@@ -37,7 +37,7 @@ function StatusBadge({ status }: { status: string }) {
   const style = statusStyles[status] ?? { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
   return (
     <span
-      className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide"
+      className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide"
       style={style}
     >
       {status.replace('_', ' ')}
@@ -59,13 +59,13 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2
-          className="text-2xl font-semibold"
+          className="text-fluid-2xl font-semibold"
           style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
         >
           Quote Inbox
         </h2>
         <Select value={filter} onValueChange={handleFilterChange}>
-          <SelectTrigger className="w-48 text-sm" style={{ borderColor: 'var(--neutral-200)' }}>
+          <SelectTrigger className="w-48 text-fluid-sm" style={{ borderColor: 'var(--neutral-200)' }}>
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
@@ -86,18 +86,18 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
         <Table>
           <TableHeader>
             <TableRow style={{ backgroundColor: 'var(--neutral-50)', borderBottom: '1px solid #E5DDD0' }}>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Name</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Email</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Service</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Date</TableHead>
-              <TableHead className="text-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}></TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Name</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Email</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Service</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Status</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}>Date</TableHead>
+              <TableHead className="text-fluid-xs font-medium uppercase tracking-wider py-3" style={{ color: '#6B6560' }}></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredQuotes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-sm" style={{ color: 'var(--neutral-600)' }}>
+                <TableCell colSpan={6} className="text-center py-12 text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
                   No quotes found
                 </TableCell>
               </TableRow>
@@ -111,12 +111,12 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
                 >
                   <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>{quote.name}</TableCell>
-                  <TableCell className="py-3.5 text-sm" style={{ color: '#6B6560' }}>{quote.email.toString()}</TableCell>
-                  <TableCell className="py-3.5 text-sm" style={{ color: '#6B6560' }}>{quote.service}</TableCell>
+                  <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{quote.email.toString()}</TableCell>
+                  <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{quote.service}</TableCell>
                   <TableCell className="py-3.5">
                     <StatusBadge status={quote.status} />
                   </TableCell>
-                  <TableCell className="py-3.5 text-sm" style={{ color: '#6B6560' }}>
+                  <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>
                     {quote.createdAt.toLocaleDateString()}
                   </TableCell>
                   <TableCell className="py-3.5">
@@ -124,7 +124,7 @@ export function QuoteInboxTable({ quotes, onFilterChange }: QuoteInboxTableProps
                       asChild
                       size="sm"
                       variant="outline"
-                      className="text-xs transition-all duration-150"
+                      className="text-fluid-xs min-h-[44px] transition-all duration-150"
                       style={{ borderColor: 'var(--neutral-200)', color: '#6B6560' }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = 'var(--contigo-primary)'

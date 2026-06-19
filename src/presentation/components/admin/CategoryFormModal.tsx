@@ -126,23 +126,23 @@ export function CategoryFormModal({
         style={{ backgroundColor: 'var(--neutral-50)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
       >
         <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid #E5DDD0' }}>
-          <h2 className="text-xl font-semibold" style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}>
+          <h2 className="text-fluid-xl font-semibold" style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}>
             {mode === 'create' ? 'New Category' : 'Edit Category'}
           </h2>
-          <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-black/5" style={{ color: 'var(--neutral-600)' }}>
-            <X size={18} />
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-black/5 min-h-[44px] min-w-[44px]" style={{ color: 'var(--neutral-600)' }}>
+            <X className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: '#6B6560' }}>Name *</label>
+            <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>Name *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              className="w-full px-3 py-2 rounded-lg text-fluid-sm outline-none"
               style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
               placeholder="Category name"
               autoFocus
@@ -155,24 +155,24 @@ export function CategoryFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: '#6B6560' }}>
+            <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>
               Type
             </label>
             <input
               type="text"
               value={type}
               readOnly
-              className="w-full px-3 py-2 rounded-lg text-sm capitalize"
+              className="w-full px-3 py-2 rounded-lg text-fluid-sm capitalize"
               style={{ backgroundColor: 'var(--neutral-200)', color: '#6B6560', border: '1px solid #E5DDD0' }}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: '#6B6560' }}>Parent category</label>
+            <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>Parent category</label>
             <select
               value={parentId}
               onChange={(e) => setParentId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              className="w-full px-3 py-2 rounded-lg text-fluid-sm outline-none"
               style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
             >
               <option value="">— None (root category) —</option>
@@ -185,31 +185,31 @@ export function CategoryFormModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: '#6B6560' }}>Description</label>
+            <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2 rounded-lg text-sm resize-none outline-none"
+              className="w-full px-3 py-2 rounded-lg text-fluid-sm resize-none outline-none"
               style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
               placeholder="Optional description"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: '#6B6560' }}>Icon (Lucide name)</label>
+            <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>Icon (Lucide name)</label>
             <input
               type="text"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              className="w-full px-3 py-2 rounded-lg text-fluid-sm outline-none"
               style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
               placeholder="e.g. home, building, wrench"
             />
           </div>
 
           {error && (
-            <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: 'rgba(232,112,112,0.1)', color: '#e87070' }}>
+            <p className="text-fluid-xs px-3 py-2 rounded-lg" style={{ backgroundColor: 'rgba(232,112,112,0.1)', color: '#e87070' }}>
               {error}
             </p>
           )}
@@ -218,7 +218,7 @@ export function CategoryFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg"
+              className="px-4 py-2 text-fluid-sm rounded-lg min-h-[44px]"
               style={{ color: '#6B6560' }}
             >
               Cancel
@@ -226,10 +226,10 @@ export function CategoryFormModal({
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-fluid-sm font-semibold rounded-lg disabled:opacity-50 min-h-[44px]"
               style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
             >
-              {saving && <Loader2 size={14} className="animate-spin" />}
+              {saving && <Loader2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)] animate-spin" />}
               {mode === 'create' ? 'Create' : 'Save'}
             </button>
           </div>

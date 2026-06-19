@@ -108,6 +108,39 @@ export default {
         display: ["var(--font-display)", "Georgia", "serif"],
         data: ["var(--font-data)", "sans-serif"],
       },
+      fontSize: {
+        /* Fluid type scale — clamp(min, preferred, max). Mobile floor never
+           drops below 0.875rem (14px). fluid-5xl/6xl intentionally mirror
+           the literal clamp() values already shipped in globals.css (h1)
+           and HeroSection.tsx (H1), so there is one growth curve, not two. */
+        "fluid-xs": ["clamp(0.75rem, 0.6rem + 0.7vw, 0.8125rem)", { lineHeight: "1.5" }],
+        "fluid-sm": ["clamp(0.875rem, 0.78rem + 0.5vw, 0.9375rem)", { lineHeight: "1.5" }],
+        "fluid-base": ["clamp(0.875rem, 0.78rem + 0.6vw, 1rem)", { lineHeight: "1.6" }],
+        "fluid-lg": ["clamp(1rem, 0.85rem + 0.8vw, 1.125rem)", { lineHeight: "1.5" }],
+        "fluid-xl": ["clamp(1.125rem, 0.95rem + 1vw, 1.375rem)", { lineHeight: "1.4" }],
+        "fluid-2xl": ["clamp(1.375rem, 1.05rem + 1.5vw, 1.75rem)", { lineHeight: "1.3" }],
+        "fluid-3xl": ["clamp(1.75rem, 1.2rem + 2.2vw, 2.25rem)", { lineHeight: "1.2" }],
+        "fluid-4xl": ["clamp(2rem, 4vw, 3.5rem)", { lineHeight: "1.15" }],
+        "fluid-5xl": ["clamp(2.5rem, 6vw, 4.5rem)", { lineHeight: "1.05" }],
+        "fluid-6xl": ["clamp(3rem, 7vw, 6rem)", { lineHeight: "1.05" }],
+      },
+      spacing: {
+        /* Fluid spacing tokens for padding/gap. fluid-xl/2xl mirror the
+           existing .page-padding / .section-gap utilities in globals.css. */
+        "fluid-xs": "clamp(0.5rem, 0.6vw, 0.75rem)",
+        "fluid-sm": "clamp(0.75rem, 1vw, 1rem)",
+        "fluid-md": "clamp(1rem, 1.5vw, 1.5rem)",
+        "fluid-lg": "clamp(1.5rem, 3vw, 2.5rem)",
+        "fluid-xl": "clamp(2rem, 4vw, 4rem)",
+        "fluid-2xl": "clamp(4rem, 8vw, 8rem)",
+        /* Logo morph dock tokens — dedicated and exclusive. Do NOT reuse
+           the fluid-* tokens above here: useScrollLogoMorph.ts measures
+           these three rects live and depends on them staying in lockstep
+           with each other and with MorphingLogo.tsx's own width. */
+        "logo-hero": "clamp(22rem, 38vw, 32rem)",
+        "logo-nav-desktop": "clamp(5rem, 7vw, 7rem)",
+        "logo-nav-mobile": "clamp(4.5rem, 10vw, 6rem)",
+      },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",

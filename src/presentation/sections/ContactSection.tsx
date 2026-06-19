@@ -164,7 +164,7 @@ export default function ContactSection() {
                     />
                     <label htmlFor="cf-name">Your Name</label>
                     {errors.name && (
-                      <p className="text-xs text-error-600 mt-1">{errors.name.message}</p>
+                      <p className="text-fluid-xs text-error-600 mt-1">{errors.name.message}</p>
                     )}
                   </div>
 
@@ -178,7 +178,7 @@ export default function ContactSection() {
                     />
                     <label htmlFor="cf-email">Email Address</label>
                     {errors.email && (
-                      <p className="text-xs text-error-600 mt-1">{errors.email.message}</p>
+                      <p className="text-fluid-xs text-error-600 mt-1">{errors.email.message}</p>
                     )}
                   </div>
 
@@ -211,7 +211,7 @@ export default function ContactSection() {
                     </select>
                     <label htmlFor="cf-service">Service</label>
                     {errors.service && (
-                      <p className="text-xs text-error-600 mt-1">{errors.service.message}</p>
+                      <p className="text-fluid-xs text-error-600 mt-1">{errors.service.message}</p>
                     )}
                   </div>
 
@@ -225,7 +225,7 @@ export default function ContactSection() {
                     />
                     <label htmlFor="cf-message">Tell us about your project</label>
                     {errors.message && (
-                      <p className="text-xs text-error-600 mt-1">{errors.message.message}</p>
+                      <p className="text-fluid-xs text-error-600 mt-1">{errors.message.message}</p>
                     )}
                   </div>
 
@@ -248,9 +248,9 @@ export default function ContactSection() {
                         className="attach-btn"
                       >
                         {attachmentUploading ? (
-                          <Loader size={14} className="animate-spin" />
+                          <Loader className="w-[clamp(0.75rem,1.2vw,0.875rem)] h-[clamp(0.75rem,1.2vw,0.875rem)] animate-spin" />
                         ) : (
-                          <Paperclip size={14} />
+                          <Paperclip className="w-[clamp(0.75rem,1.2vw,0.875rem)] h-[clamp(0.75rem,1.2vw,0.875rem)]" />
                         )}
                         {attachmentUploading
                           ? 'Uploading…'
@@ -268,13 +268,13 @@ export default function ContactSection() {
                             className="attach-remove-btn"
                             aria-label="Remove attachment"
                           >
-                            <X size={13} />
+                            <X className="w-[clamp(0.6875rem,1vw,0.8125rem)] h-[clamp(0.6875rem,1vw,0.8125rem)]" />
                           </button>
                         </div>
                       ))}
 
                       {attachmentError && (
-                        <span className="text-xs" style={{ color: 'var(--error-600)' }}>
+                        <span className="text-fluid-xs" style={{ color: 'var(--error-600)' }}>
                           {attachmentError}
                         </span>
                       )}
@@ -288,7 +288,9 @@ export default function ContactSection() {
                     size="lg"
                     className="w-full contact-submit-btn"
                   >
-                    {isSubmitting && <Loader size={16} className="animate-spin" />}
+                    {isSubmitting && (
+                      <Loader className="w-[clamp(0.875rem,1.4vw,1rem)] h-[clamp(0.875rem,1.4vw,1rem)] animate-spin" />
+                    )}
                     {isSubmitting ? 'Sending…' : 'Send Message'}
                   </Button>
                 </form>
@@ -311,7 +313,7 @@ export default function ContactSection() {
               Start Your Project
             </h2>
             <p
-              className="mb-8 text-base"
+              className="mb-8 text-fluid-base"
               style={{
                 color: 'var(--contigo-foreground)',
                 opacity: 0.8,
@@ -326,18 +328,18 @@ export default function ContactSection() {
             <div className="space-y-5">
               <div className="flex items-start gap-4">
                 <Phone
-                  size={20}
+                  className="w-[clamp(1.125rem,1.6vw,1.375rem)] h-[clamp(1.125rem,1.6vw,1.375rem)]"
                   style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
-                    className="font-medium text-sm"
+                    className="font-medium text-fluid-sm"
                     style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Phone
                   </p>
                   <p
-                    className="text-sm mt-1"
+                    className="text-fluid-sm mt-1"
                     style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     +61 406 274 096
@@ -347,18 +349,18 @@ export default function ContactSection() {
 
               <div className="flex items-start gap-4">
                 <Mail
-                  size={20}
+                  className="w-[clamp(1.125rem,1.6vw,1.375rem)] h-[clamp(1.125rem,1.6vw,1.375rem)]"
                   style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
-                    className="font-medium text-sm"
+                    className="font-medium text-fluid-sm"
                     style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Email
                   </p>
                   <p
-                    className="text-sm mt-1"
+                    className="text-fluid-sm mt-1"
                     style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     contact@contigoconstructions.com.au
@@ -368,18 +370,18 @@ export default function ContactSection() {
 
               <div className="flex items-start gap-4">
                 <MapPin
-                  size={20}
+                  className="w-[clamp(1.125rem,1.6vw,1.375rem)] h-[clamp(1.125rem,1.6vw,1.375rem)]"
                   style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
-                    className="font-medium text-sm"
+                    className="font-medium text-fluid-sm"
                     style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Address
                   </p>
                   <p
-                    className="text-sm mt-1"
+                    className="text-fluid-sm mt-1"
                     style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     25 Green Avenue, Seaton SA 5023
@@ -389,18 +391,18 @@ export default function ContactSection() {
 
               <div className="flex items-start gap-4">
                 <Clock
-                  size={20}
+                  className="w-[clamp(1.125rem,1.6vw,1.375rem)] h-[clamp(1.125rem,1.6vw,1.375rem)]"
                   style={{ color: 'var(--contigo-primary)', flexShrink: 0, marginTop: 2 }}
                 />
                 <div>
                   <p
-                    className="font-medium text-sm"
+                    className="font-medium text-fluid-sm"
                     style={{ color: 'var(--contigo-foreground)' }}
                   >
                     Business Hours
                   </p>
                   <p
-                    className="text-sm mt-1"
+                    className="text-fluid-sm mt-1"
                     style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}
                   >
                     Mon - Fri: 7:00 AM - 5:00 PM

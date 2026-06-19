@@ -62,7 +62,7 @@ export function HierarchicalCategorySelect({
 
   return (
     <div>
-      <label className="block text-xs font-medium mb-1" style={{ color: '#6B6560' }}>
+      <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>
         {label}
         {required && ' *'}
       </label>
@@ -71,7 +71,7 @@ export function HierarchicalCategorySelect({
         onChange={(e) => onChange(e.target.value || null)}
         required={required}
         disabled={loading}
-        className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+        className="w-full px-3 py-2 rounded-lg text-fluid-sm outline-none"
         style={{ backgroundColor: '#F0EBE3', color: loading ? 'var(--neutral-600)' : 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
       >
         <option value="">{loading ? 'Loading…' : '— No category —'}</option>

@@ -31,7 +31,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
         style={{ borderBottom: '1px solid #F0E8DC', backgroundColor: 'var(--neutral-50)' }}
       >
         <h3
-          className="text-lg font-semibold"
+          className="text-fluid-lg font-semibold"
           style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
         >
           {title}
@@ -45,10 +45,10 @@ function SectionCard({ title, children }: { title: string; children: React.React
 function InfoField({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--neutral-600)' }}>
+      <p className="text-fluid-xs font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--neutral-600)' }}>
         {label}
       </p>
-      <p className="text-sm" style={{ color: 'var(--neutral-800)' }}>
+      <p className="text-fluid-sm" style={{ color: 'var(--neutral-800)' }}>
         {value}
       </p>
     </div>
@@ -90,17 +90,17 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
       {/* Details */}
       <div className="md:col-span-2 space-y-6">
         <SectionCard title="Contact Information">
-          <InfoField label="Name" value={<span className="text-base font-medium">{quote.name}</span>} />
+          <InfoField label="Name" value={<span className="text-fluid-base font-medium">{quote.name}</span>} />
           <InfoField label="Email" value={quote.email.toString()} />
           {quote.phone && <InfoField label="Phone" value={quote.phone.toString()} />}
         </SectionCard>
 
         <SectionCard title="Quote Details">
-          <InfoField label="Service Requested" value={<span className="text-base font-medium">{quote.service}</span>} />
+          <InfoField label="Service Requested" value={<span className="text-fluid-base font-medium">{quote.service}</span>} />
           <InfoField
             label="Message"
             value={
-              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#6B6560' }}>
+              <p className="text-fluid-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#6B6560' }}>
                 {quote.message}
               </p>
             }
@@ -108,7 +108,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
           <InfoField
             label="Tracking Token"
             value={
-              <code className="text-xs font-mono break-all" style={{ color: 'var(--neutral-600)' }}>
+              <code className="text-fluid-xs font-mono break-all" style={{ color: 'var(--neutral-600)' }}>
                 {quote.trackingToken}
               </code>
             }
@@ -122,14 +122,14 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
               {quote.attachmentUrls.map((key, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 rounded px-3 py-2 text-xs font-mono"
+                  className="flex items-center gap-2 rounded px-3 py-2 text-fluid-xs font-mono"
                   style={{ backgroundColor: 'var(--neutral-50)', border: '1px solid #E5DDD0', color: '#6B6560', wordBreak: 'break-all' }}
                 >
                   {key}
                 </div>
               ))}
             </div>
-            <p className="text-xs mt-3" style={{ color: 'var(--neutral-600)' }}>
+            <p className="text-fluid-xs mt-3" style={{ color: 'var(--neutral-600)' }}>
               These are stored in the private <code className="font-mono">contigo-quotes</code> bucket.
               Presigned view URLs will be added in a future update.
             </p>
@@ -148,7 +148,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
             style={{ borderBottom: '1px solid #F0E8DC', backgroundColor: 'var(--neutral-50)' }}
           >
             <h3
-              className="text-lg font-semibold"
+              className="text-fluid-lg font-semibold"
               style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
             >
               Manage
@@ -157,7 +157,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
           <div className="px-6 py-5 space-y-4">
             <div>
               <label
-                className="text-xs font-medium uppercase tracking-wider mb-2 block"
+                className="text-fluid-xs font-medium uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--neutral-600)' }}
               >
                 Status
@@ -178,7 +178,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
 
             <div>
               <label
-                className="text-xs font-medium uppercase tracking-wider mb-2 block"
+                className="text-fluid-xs font-medium uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--neutral-600)' }}
               >
                 Admin Notes
@@ -187,7 +187,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add private notes about this quote…"
-                className="min-h-32 text-sm resize-none"
+                className="min-h-32 text-fluid-sm resize-none"
                 style={{ borderColor: 'var(--neutral-200)' }}
                 onFocus={(e) => {
                   e.target.style.borderColor = 'var(--contigo-primary)'
@@ -203,7 +203,7 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
             <button
               onClick={handleSave}
               disabled={loading}
-              className="w-full py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all duration-200"
+              className="w-full py-2.5 rounded-lg text-fluid-sm font-semibold tracking-wide transition-all duration-200 min-h-[44px]"
               style={{
                 backgroundColor: loading ? '#C8A55C' : 'var(--contigo-primary)',
                 color: 'var(--petrol-800)',

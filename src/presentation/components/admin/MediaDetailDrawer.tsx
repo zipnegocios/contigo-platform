@@ -32,7 +32,7 @@ function MetaField({ label, value, gold }: { label: string; value: string; gold?
   return (
     <div>
       <p className="text-[9px] uppercase tracking-widest mb-0.5" style={{ color: '#6B6560' }}>{label}</p>
-      <p className="text-xs font-medium" style={{ color: gold ? 'var(--contigo-primary)' : 'var(--neutral-50)' }}>{value}</p>
+      <p className="text-fluid-xs font-medium" style={{ color: gold ? 'var(--contigo-primary)' : 'var(--neutral-50)' }}>{value}</p>
     </div>
   )
 }
@@ -153,8 +153,8 @@ export function MediaDetailDrawer() {
           style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}
         >
           <h3
-            className="text-sm font-semibold truncate pr-2"
-            style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)', fontSize: 16 }}
+            className="text-fluid-sm font-semibold truncate pr-2"
+            style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}
             title={filename}
           >
             {filename}
@@ -167,10 +167,10 @@ export function MediaDetailDrawer() {
               className="p-1.5 rounded-lg"
               style={{ color: 'var(--neutral-600)' }}
             >
-              <ExternalLink size={14} />
+              <ExternalLink className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </a>
             <button onClick={closeDetail} className="p-1.5 rounded-lg" style={{ color: 'var(--neutral-600)' }}>
-              <X size={14} />
+              <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
           </div>
         </div>
@@ -184,7 +184,7 @@ export function MediaDetailDrawer() {
               <video src={item.publicUrl} controls className="w-full h-full object-contain" />
             ) : (
               <div className="flex flex-col items-center gap-2" style={{ color: 'var(--neutral-600)' }}>
-                <ImageIcon size={28} />
+                <ImageIcon className="w-[clamp(1.5rem,3vw,1.75rem)] h-[clamp(1.5rem,3vw,1.75rem)]" />
               </div>
             )}
           </div>
@@ -224,7 +224,7 @@ export function MediaDetailDrawer() {
                 <select
                   value={localFolderId}
                   onChange={(e) => handleFolderChange(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none"
+                  className="w-full px-2.5 py-1.5 rounded-lg text-fluid-xs outline-none"
                   style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
                 >
                   <option value="">No folder</option>
@@ -252,7 +252,7 @@ export function MediaDetailDrawer() {
                             color: active ? t.color : '#6B6560',
                           }}
                         >
-                          {active && <Check size={9} strokeWidth={3} />}
+                          {active && <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" strokeWidth={3} />}
                           {t.name}
                         </button>
                       )
@@ -269,7 +269,7 @@ export function MediaDetailDrawer() {
                   onBlur={handleNotesBlur}
                   rows={2}
                   placeholder="Internal notes…"
-                  className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none resize-none"
+                  className="w-full px-2.5 py-1.5 rounded-lg text-fluid-xs outline-none resize-none"
                   style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
                 />
               </div>
@@ -291,7 +291,7 @@ export function MediaDetailDrawer() {
                   color: copied ? '#52B788' : 'var(--contigo-primary)',
                 }}
               >
-                {copied ? <Check size={12} /> : <Copy size={12} />}
+                {copied ? <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <Copy className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
               </button>
             </div>
 
@@ -303,7 +303,7 @@ export function MediaDetailDrawer() {
                   {item.usedIn.map((a, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs"
+                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-fluid-xs"
                       style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.08)' }}
                     >
                       <span className="truncate" style={{ color: 'var(--neutral-50)' }}>{a.title}</span>
@@ -328,7 +328,7 @@ export function MediaDetailDrawer() {
         >
           {assignConfirm && (
             <div
-              className="text-xs text-center py-1.5 rounded-lg"
+              className="text-fluid-xs text-center py-1.5 rounded-lg"
               style={{ backgroundColor: 'rgba(82,183,136,0.15)', color: '#52B788' }}
             >
               {assignConfirm}
@@ -339,19 +339,19 @@ export function MediaDetailDrawer() {
             <button
               type="button"
               onClick={() => handleQuickAssign('cover')}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-fluid-xs font-medium transition-all"
               style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
-              <ImageIcon size={13} />
+              <ImageIcon className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               Use as Cover
             </button>
             <button
               type="button"
               onClick={() => handleQuickAssign('gallery')}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-fluid-xs font-medium transition-all"
               style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
-              <ImagePlus size={13} />
+              <ImagePlus className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               Add to Gallery
             </button>
           </div>
@@ -359,10 +359,10 @@ export function MediaDetailDrawer() {
           <button
             type="button"
             onClick={handleDelete}
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-fluid-xs font-medium transition-all"
             style={{ backgroundColor: 'rgba(232,112,112,0.1)', border: '1px solid rgba(232,112,112,0.2)', color: '#e87070' }}
           >
-            <Trash2 size={13} />
+            <Trash2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             Delete file
           </button>
         </div>

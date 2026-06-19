@@ -63,17 +63,17 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
       {/* Close */}
       <button
         onClick={onClose}
-        className="absolute top-5 right-5 z-10 p-2 rounded-full transition-colors"
+        className="absolute top-5 right-5 z-10 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors"
         style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: '#E8DCC4' }}
         aria-label="Close"
       >
-        <X size={22} />
+        <X className="w-[clamp(1.25rem,2.2vw,1.5rem)] h-[clamp(1.25rem,2.2vw,1.5rem)]" />
       </button>
 
       {/* Counter */}
       {items.length > 1 && (
         <div
-          className="absolute top-5 left-5 text-sm"
+          className="absolute top-5 left-5 text-fluid-sm"
           style={{ color: 'rgba(232,220,196,0.6)' }}
         >
           {current + 1} / {items.length}
@@ -88,7 +88,7 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
           style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#E8DCC4' }}
           aria-label="Previous"
         >
-          <ChevronLeft size={28} />
+          <ChevronLeft className="w-[clamp(1.5rem,2.8vw,1.75rem)] h-[clamp(1.5rem,2.8vw,1.75rem)]" />
         </button>
       )}
 
@@ -121,14 +121,14 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
           <div className="text-center mt-4 px-6 max-w-xl">
             {item.title && (
               <p
-                className="text-lg font-semibold"
+                className="text-fluid-lg font-semibold"
                 style={{ fontFamily: 'var(--font-cormorant)', color: '#E2C063' }}
               >
                 {item.title}
               </p>
             )}
             {item.description && (
-              <p className="text-sm mt-1" style={{ color: 'rgba(232,220,196,0.7)' }}>
+              <p className="text-fluid-sm mt-1" style={{ color: 'rgba(232,220,196,0.7)' }}>
                 {item.description}
               </p>
             )}
@@ -144,7 +144,7 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
           style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#E8DCC4' }}
           aria-label="Next"
         >
-          <ChevronRight size={28} />
+          <ChevronRight className="w-[clamp(1.5rem,2.8vw,1.75rem)] h-[clamp(1.5rem,2.8vw,1.75rem)]" />
         </button>
       )}
 
@@ -171,8 +171,8 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
               onClick={() => setCurrent(i)}
               className="flex-shrink-0 overflow-hidden rounded transition-all"
               style={{
-                width: 44,
-                height: 33,
+                width: 'clamp(2.5rem, 6vw, 3.5rem)',
+                aspectRatio: '4/3',
                 outline: i === current ? '2px solid #E2C063' : '2px solid transparent',
               }}
             >

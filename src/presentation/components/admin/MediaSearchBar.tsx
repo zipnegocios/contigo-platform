@@ -28,18 +28,18 @@ export function MediaSearchBar() {
           className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl"
           style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)' }}
         >
-          <Search size={15} style={{ color: 'var(--neutral-600)', flexShrink: 0 }} />
+          <Search className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: 'var(--neutral-600)', flexShrink: 0 }} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, project, tag…"
-            className="flex-1 bg-transparent outline-none text-sm min-w-0"
+            className="flex-1 bg-transparent outline-none text-fluid-sm min-w-0"
             style={{ color: 'var(--neutral-50)' }}
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} style={{ color: 'var(--neutral-600)' }}>
-              <X size={14} />
+            <button onClick={() => setSearchQuery('')} className="min-h-[44px] min-w-[44px]" style={{ color: 'var(--neutral-600)' }}>
+              <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
           )}
         </div>
@@ -47,14 +47,14 @@ export function MediaSearchBar() {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="relative flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
+          className="relative flex items-center gap-2 px-3 py-2 rounded-xl text-fluid-sm font-medium transition-all min-h-[44px]"
           style={{
             backgroundColor: expanded || activeFilterCount > 0 ? 'rgba(226,192,99,0.12)' : 'transparent',
             border: `1px solid ${activeFilterCount > 0 ? 'var(--contigo-primary)' : 'rgba(226,192,99,0.2)'}`,
             color: activeFilterCount > 0 ? 'var(--contigo-primary)' : 'var(--neutral-600)',
           }}
         >
-          <SlidersHorizontal size={15} />
+          <SlidersHorizontal className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           <span className="hidden sm:inline">Filters</span>
           {activeFilterCount > 0 && (
             <span
@@ -70,7 +70,7 @@ export function MediaSearchBar() {
           <button
             type="button"
             onClick={clearFilters}
-            className="px-3 py-2 rounded-xl text-sm transition-colors"
+            className="px-3 py-2 rounded-xl text-fluid-sm transition-colors min-h-[44px]"
             style={{ color: 'var(--neutral-600)', border: '1px solid rgba(226,192,99,0.15)' }}
           >
             Clear
@@ -93,7 +93,7 @@ export function MediaSearchBar() {
                     key={type}
                     type="button"
                     onClick={() => setFilters({ mediaType: type })}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                    className="px-3 py-1.5 rounded-lg text-fluid-xs font-medium transition-all"
                     style={
                       filters.mediaType === type
                         ? { backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }
@@ -112,7 +112,7 @@ export function MediaSearchBar() {
               <select
                 value={filters.folderId ?? ''}
                 onChange={(e) => setFilters({ folderId: e.target.value || null })}
-                className="w-full px-3 py-1.5 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-1.5 rounded-lg text-fluid-xs outline-none"
                 style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)', color: 'var(--neutral-50)' }}
               >
                 <option value="">All folders</option>
@@ -137,7 +137,7 @@ export function MediaSearchBar() {
                   const [entityType, ...rest] = e.target.value.split('::')
                   setFilters({ associatedWith: { entityType: entityType as 'project' | 'service', title: rest.join('::') } })
                 }}
-                className="w-full px-3 py-1.5 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-1.5 rounded-lg text-fluid-xs outline-none"
                 style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)', color: 'var(--neutral-50)' }}
               >
                 <option value="">All</option>
@@ -177,7 +177,7 @@ export function MediaSearchBar() {
                             : [...filters.tagNames, t.name],
                         })
                       }}
-                      className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full text-fluid-xs font-medium transition-all"
                       style={{
                         backgroundColor: active ? `${t.color}22` : 'rgba(107,101,96,0.12)',
                         border: `1px solid ${active ? t.color : 'rgba(107,101,96,0.25)'}`,
@@ -203,7 +203,7 @@ export function MediaSearchBar() {
                 onChange={(e) =>
                   setFilters({ dateRange: { from: e.target.value, to: filters.dateRange?.to ?? '' } })
                 }
-                className="w-full px-3 py-1.5 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-1.5 rounded-lg text-fluid-xs outline-none"
                 style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)', color: 'var(--neutral-50)' }}
               />
             </div>
@@ -215,7 +215,7 @@ export function MediaSearchBar() {
                 onChange={(e) =>
                   setFilters({ dateRange: { from: filters.dateRange?.from ?? '', to: e.target.value } })
                 }
-                className="w-full px-3 py-1.5 rounded-lg text-xs outline-none"
+                className="w-full px-3 py-1.5 rounded-lg text-fluid-xs outline-none"
                 style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)', color: 'var(--neutral-50)' }}
               />
             </div>
@@ -225,7 +225,7 @@ export function MediaSearchBar() {
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              className="px-4 py-1.5 rounded-lg text-sm font-medium"
+              className="px-4 py-1.5 rounded-lg text-fluid-sm font-medium min-h-[44px]"
               style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
             >
               Apply

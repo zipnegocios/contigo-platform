@@ -62,9 +62,9 @@ export function GalleryUpload({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
+      <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
         Gallery
-        <span className="ml-2 text-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
+        <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
           ({value.length}/{maxImages})
         </span>
       </label>
@@ -99,7 +99,7 @@ export function GalleryUpload({
             >
               {isVideo ? (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-xs" style={{ color: 'var(--neutral-600)' }}>Video</span>
+                  <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Video</span>
                 </div>
               ) : (
                 <img
@@ -115,7 +115,7 @@ export function GalleryUpload({
                 style={{ backgroundColor: 'rgba(45,41,36,0.5)' }}
                 aria-label={`Remove item ${index + 1}`}
               >
-                <X className="h-5 w-5 text-white" />
+                <X className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)] text-white" />
               </button>
             </div>
           )
@@ -137,13 +137,13 @@ export function GalleryUpload({
           >
             {uploading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'var(--contigo-primary)' }} />
-                <span className="text-xs" style={{ color: '#6B6560' }}>{progress}%</span>
+                <Loader2 className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)] animate-spin" style={{ color: 'var(--contigo-primary)' }} />
+                <span className="text-fluid-xs" style={{ color: '#6B6560' }}>{progress}%</span>
               </>
             ) : (
               <>
-                <Plus className="h-5 w-5" style={{ color: '#C5BDB5' }} />
-                <span className="text-xs" style={{ color: 'var(--neutral-600)' }}>Upload</span>
+                <Plus className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)]" style={{ color: '#C5BDB5' }} />
+                <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Upload</span>
               </>
             )}
           </button>
@@ -162,13 +162,13 @@ export function GalleryUpload({
               cursor: 'pointer',
             }}
           >
-            <Images className="h-5 w-5" style={{ color: '#C5BDB5' }} />
-            <span className="text-xs" style={{ color: 'var(--neutral-600)' }}>Library</span>
+            <Images className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)]" style={{ color: '#C5BDB5' }} />
+            <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Library</span>
           </button>
         )}
       </div>
 
-      {error && <p className="text-xs" style={{ color: '#dc2626' }}>{error}</p>}
+      {error && <p className="text-fluid-xs" style={{ color: '#dc2626' }}>{error}</p>}
     </div>
   )
 }

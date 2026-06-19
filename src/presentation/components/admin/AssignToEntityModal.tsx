@@ -107,11 +107,11 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
         style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
       >
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}>
-          <h2 className="text-base font-semibold" style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}>
+          <h2 className="text-fluid-base font-semibold" style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}>
             Assign Media
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: 'var(--neutral-600)' }}>
-            <X size={16} />
+          <button onClick={onClose} className="p-1.5 rounded-lg min-h-[44px] min-w-[44px]" style={{ color: 'var(--neutral-600)' }}>
+            <X className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           </button>
         </div>
 
@@ -121,7 +121,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
             {item.mediaType === 'image' ? (
               <img src={item.publicUrl} alt="" className="h-full w-full object-contain" />
             ) : (
-              <Film size={28} style={{ color: 'var(--neutral-600)' }} />
+              <Film className="w-[clamp(1.5rem,3vw,1.75rem)] h-[clamp(1.5rem,3vw,1.75rem)]" style={{ color: 'var(--neutral-600)' }} />
             )}
           </div>
 
@@ -134,7 +134,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                   key={opt}
                   type="button"
                   onClick={() => setAssignAs(opt)}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-left transition-all"
+                  className="px-4 py-2.5 rounded-xl text-fluid-sm font-medium text-left transition-all min-h-[44px]"
                   style={
                     assignAs === opt
                       ? { backgroundColor: 'rgba(226,192,99,0.18)', border: '1.5px solid var(--contigo-primary)', color: 'var(--contigo-primary)' }
@@ -142,7 +142,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                   }
                 >
                   <div className="flex items-center gap-2">
-                    {assignAs === opt && <Check size={14} strokeWidth={3} />}
+                    {assignAs === opt && <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" strokeWidth={3} />}
                     {opt === 'cover' ? 'Cover / Hero' : 'Add to Gallery'}
                   </div>
                 </button>
@@ -157,19 +157,19 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
               className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2"
               style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)' }}
             >
-              <Search size={13} style={{ color: 'var(--neutral-600)' }} />
+              <Search className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" style={{ color: 'var(--neutral-600)' }} />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search…"
-                className="flex-1 bg-transparent outline-none text-sm"
+                className="flex-1 bg-transparent outline-none text-fluid-sm"
                 style={{ color: 'var(--neutral-50)' }}
               />
             </div>
 
             {loading ? (
-              <div className="py-6 text-center text-sm" style={{ color: 'var(--neutral-600)' }}>Loading…</div>
+              <div className="py-6 text-center text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>Loading…</div>
             ) : (
               <div className="space-y-3 max-h-48 overflow-y-auto">
                 {projects.length > 0 && (
@@ -189,7 +189,7 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                   </div>
                 )}
                 {filtered.length === 0 && (
-                  <p className="text-sm text-center py-4" style={{ color: '#6B6560' }}>No results</p>
+                  <p className="text-fluid-sm text-center py-4" style={{ color: '#6B6560' }}>No results</p>
                 )}
               </div>
             )}
@@ -197,11 +197,11 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
         </div>
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(226,192,99,0.1)' }}>
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm" style={{ color: 'var(--neutral-600)' }}>Cancel</button>
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-fluid-sm min-h-[44px]" style={{ color: 'var(--neutral-600)' }}>Cancel</button>
           <button
             onClick={handleAssign}
             disabled={!selectedId || saving}
-            className="px-5 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
+            className="px-5 py-2 rounded-lg text-fluid-sm font-semibold transition-all disabled:opacity-40 min-h-[44px]"
             style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
           >
             {saving ? 'Assigning…' : 'Assign'}

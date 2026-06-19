@@ -65,7 +65,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+        <h1 className="text-fluid-3xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-600 mt-2">Manage your admin account</p>
       </div>
 
@@ -76,7 +76,7 @@ export default function SettingsPage() {
         <CardContent>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Current Password</label>
+              <label className="text-fluid-sm font-medium text-gray-700">Current Password</label>
               <Input
                 type="password"
                 value={currentPassword}
@@ -88,7 +88,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">New Password</label>
+              <label className="text-fluid-sm font-medium text-gray-700">New Password</label>
               <Input
                 type="password"
                 value={newPassword}
@@ -100,7 +100,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Confirm Password</label>
+              <label className="text-fluid-sm font-medium text-gray-700">Confirm Password</label>
               <Input
                 type="password"
                 value={confirmPassword}

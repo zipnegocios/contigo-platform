@@ -86,7 +86,7 @@ export default async function ServiceDetailPage({
 
         <Link
           href="/services"
-          className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium tracking-wide transition-opacity duration-200 hover:opacity-70"
+          className="absolute top-8 left-8 flex items-center gap-2 text-fluid-sm font-medium tracking-wide transition-opacity duration-200 hover:opacity-70"
           style={{ color: '#E2C063' }}
         >
           ← All Services
@@ -94,13 +94,13 @@ export default async function ServiceDetailPage({
 
         <div className="absolute bottom-0 left-0 right-0 px-8 pb-12 md:px-16 md:pb-16">
           <h1
-            className="text-5xl md:text-7xl font-semibold leading-none"
+            className="text-fluid-5xl font-semibold leading-none"
             style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
           >
             {service.name}
           </h1>
           <p
-            className="mt-4 text-lg max-w-2xl"
+            className="mt-4 text-fluid-lg max-w-2xl"
             style={{ color: 'rgba(250,246,240,0.75)' }}
           >
             {service.shortDescription}
@@ -116,8 +116,8 @@ export default async function ServiceDetailPage({
           <div className="flex-1 min-w-0">
             {service.fullDescription && (
               <p
-                className="text-lg leading-relaxed mb-12"
-                style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)', fontSize: '1.2rem' }}
+                className="text-fluid-xl leading-relaxed mb-12"
+                style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)' }}
               >
                 {service.fullDescription}
               </p>
@@ -138,18 +138,18 @@ export default async function ServiceDetailPage({
               }}
             >
               <h3
-                className="text-xs uppercase tracking-widest mb-4"
+                className="text-fluid-xs uppercase tracking-widest mb-4"
                 style={{ color: '#E2C063' }}
               >
                 Interested?
               </h3>
-              <p className="text-sm mb-6" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
+              <p className="text-fluid-sm mb-6" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
                 Our team specialises in {service.name.toLowerCase()}. Tell us about your project and we&apos;ll be in touch.
               </p>
 
               <Link
                 href="/#contact"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold transition-all duration-200 mb-3"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-semibold transition-all duration-200 mb-3"
                 style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
               >
                 Request a Quote
@@ -157,7 +157,7 @@ export default async function ServiceDetailPage({
 
               <Link
                 href="/projects"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-medium transition-all duration-200"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-medium transition-all duration-200"
                 style={{ border: '1px solid rgba(226,192,99,0.3)', color: '#E2C063' }}
               >
                 View Our Projects
