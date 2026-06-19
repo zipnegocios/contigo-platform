@@ -3,7 +3,17 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-const LETTERS = 'HERITAGE'.split('');
+// Renders one line of the center brand lockup as individually
+// flip-animated letters, matching the original HERITAGE behaviour.
+// Spaces are rendered as non-breaking so they don't collapse as
+// inline-block spans.
+function renderFlipWord(word: string, keyPrefix: string) {
+  return word.split('').map((char, i) => (
+    <span key={`${keyPrefix}-${i}`} className="flip-letter">
+      {char === ' ' ? '\u00A0' : char}
+    </span>
+  ));
+}
 
 export default function HeritageSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -13,8 +23,11 @@ export default function HeritageSection() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
+          // The flip resolves fully (rotateX(0), straight, gold) exactly
+          // when the section is vertically centered in the viewport —
+          // not at an arbitrary scroll distance.
           start: 'top center',
-          end: '+=800',
+          end: 'center center',
           scrub: 1,
         },
       });
@@ -54,6 +67,19 @@ export default function HeritageSection() {
         },
         0
       );
+
+      // Separator line between "Contigo" and "Constructions Pty"
+      // reveals in sync with the letters, finishing fully drawn
+      // (scaleX: 1, perfectly straight) at the same point they do.
+      tl.to(
+        '.flip-separator',
+        {
+          scaleX: 1,
+          duration: 2,
+          ease: 'none',
+        },
+        0
+      );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -75,13 +101,17 @@ export default function HeritageSection() {
           </p>
         </div>
 
-        {/* Center flip word */}
-        <div className="flip-word" aria-label="HERITAGE">
-          {LETTERS.map((letter, i) => (
-            <span key={i} className="flip-letter">
-              {letter}
-            </span>
-          ))}
+        {/* Center flip word — brand lockup */}
+        <div className="flip-word" aria-label="Contigo Constructions Pty">
+          <div className="flip-line flip-line--primary">
+            {renderFlipWord('Contigo', 'primary')}
+          </div>
+
+          <span className="flip-separator" aria-hidden="true" />
+
+          <div className="flip-line flip-line--secondary">
+            {renderFlipWord('Constructions Pty', 'secondary')}
+          </div>
         </div>
 
         {/* Right text block */}
