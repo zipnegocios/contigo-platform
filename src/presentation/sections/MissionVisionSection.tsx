@@ -1,0 +1,78 @@
+'use client'
+
+import { useScrollReveal } from '@/presentation/hooks/useScrollReveal'
+
+export default function MissionVisionSection() {
+  const imageRef = useScrollReveal<HTMLDivElement>({ y: 32, duration: 0.9 })
+  const textRef = useScrollReveal<HTMLDivElement>({
+    y: 24,
+    duration: 0.8,
+    stagger: 0.18,
+    delay: 0.1,
+    childSelector: '.mv-block',
+  })
+
+  return (
+    <section
+      className="section-gap page-padding"
+      style={{ backgroundColor: 'var(--neutral-50)', fontFamily: 'var(--font-alegreya-sans)' }}
+    >
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div ref={imageRef} className="lg:col-span-5">
+          <div
+            className="relative overflow-hidden rounded-2xl"
+            style={{ aspectRatio: '4 / 5', boxShadow: '0 16px 48px rgba(45,41,36,0.18)' }}
+          >
+            <img
+              src="/assets/project-prospect.jpg"
+              alt="A Contigo Constructions build in Prospect, Adelaide"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to top, rgba(13,60,76,0.35) 0%, transparent 50%)',
+              }}
+            />
+            <div
+              className="absolute bottom-0 left-0 right-0 h-1"
+              style={{ backgroundColor: 'var(--gold-400)' }}
+            />
+          </div>
+        </div>
+
+        <div ref={textRef} className="lg:col-span-7 flex flex-col gap-10">
+          <div className="mv-block">
+            <h2 style={{ fontFamily: 'var(--font-alegreya)', color: 'var(--contigo-foreground)' }}>
+              Mission
+            </h2>
+            <p
+              className="text-fluid-lg mt-4 max-w-2xl"
+              style={{ color: 'var(--contigo-foreground)', opacity: 0.82, lineHeight: 1.7 }}
+            >
+              To design and deliver high-quality construction solutions that align with our
+              clients&apos; needs and vision, through efficient processes, strong technical
+              standards, and a firm commitment to excellence. At Contigo Constructions, we
+              create value through trust, precision, and long-term relationships.
+            </p>
+          </div>
+
+          <div className="mv-block">
+            <h2 style={{ fontFamily: 'var(--font-alegreya)', color: 'var(--contigo-foreground)' }}>
+              Vision
+            </h2>
+            <p
+              className="text-fluid-lg mt-4 max-w-2xl"
+              style={{ color: 'var(--contigo-foreground)', opacity: 0.82, lineHeight: 1.7 }}
+            >
+              To establish ourselves as a leading construction company in Australia, recognised
+              for the quality of our projects, reliability in execution, and sustainable growth.
+              We aim to be a strategic partner for our clients, delivering integrated solutions
+              that add value at every stage of the project.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

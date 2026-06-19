@@ -62,9 +62,9 @@ export function GalleryUpload({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium" style={{ color: '#2D2924' }}>
+      <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
         Gallery
-        <span className="ml-2 text-xs font-normal" style={{ color: '#A89E8C' }}>
+        <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
           ({value.length}/{maxImages})
         </span>
       </label>
@@ -95,11 +95,11 @@ export function GalleryUpload({
             <div
               key={`${url}-${index}`}
               className="relative rounded-lg overflow-hidden group"
-              style={{ border: '1px solid #E5DDD0', aspectRatio: '1', backgroundColor: '#1E1A16' }}
+              style={{ border: '1px solid #E5DDD0', aspectRatio: '1', backgroundColor: 'var(--petrol-800)' }}
             >
               {isVideo ? (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-xs" style={{ color: '#A89E8C' }}>Video</span>
+                  <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Video</span>
                 </div>
               ) : (
                 <img
@@ -115,7 +115,7 @@ export function GalleryUpload({
                 style={{ backgroundColor: 'rgba(45,41,36,0.5)' }}
                 aria-label={`Remove item ${index + 1}`}
               >
-                <X className="h-5 w-5 text-white" />
+                <X className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)] text-white" />
               </button>
             </div>
           )
@@ -127,23 +127,23 @@ export function GalleryUpload({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[#E2C063]"
+            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[var(--contigo-primary)]"
             style={{
-              borderColor: '#E5DDD0',
-              backgroundColor: '#FAF6F0',
+              borderColor: 'var(--neutral-200)',
+              backgroundColor: 'var(--neutral-50)',
               aspectRatio: '1',
               cursor: uploading ? 'not-allowed' : 'pointer',
             }}
           >
             {uploading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" style={{ color: '#E2C063' }} />
-                <span className="text-xs" style={{ color: '#6B6560' }}>{progress}%</span>
+                <Loader2 className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)] animate-spin" style={{ color: 'var(--contigo-primary)' }} />
+                <span className="text-fluid-xs" style={{ color: '#6B6560' }}>{progress}%</span>
               </>
             ) : (
               <>
-                <Plus className="h-5 w-5" style={{ color: '#C5BDB5' }} />
-                <span className="text-xs" style={{ color: '#A89E8C' }}>Upload</span>
+                <Plus className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)]" style={{ color: '#C5BDB5' }} />
+                <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Upload</span>
               </>
             )}
           </button>
@@ -154,21 +154,21 @@ export function GalleryUpload({
           <button
             type="button"
             onClick={() => setPickerOpen(true)}
-            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[#E2C063]"
+            className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all hover:border-[var(--contigo-primary)]"
             style={{
-              borderColor: '#E5DDD0',
-              backgroundColor: '#FAF6F0',
+              borderColor: 'var(--neutral-200)',
+              backgroundColor: 'var(--neutral-50)',
               aspectRatio: '1',
               cursor: 'pointer',
             }}
           >
-            <Images className="h-5 w-5" style={{ color: '#C5BDB5' }} />
-            <span className="text-xs" style={{ color: '#A89E8C' }}>Library</span>
+            <Images className="w-[clamp(1.25rem,2.5vw,1.5rem)] h-[clamp(1.25rem,2.5vw,1.5rem)]" style={{ color: '#C5BDB5' }} />
+            <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Library</span>
           </button>
         )}
       </div>
 
-      {error && <p className="text-xs" style={{ color: '#dc2626' }}>{error}</p>}
+      {error && <p className="text-fluid-xs" style={{ color: '#dc2626' }}>{error}</p>}
     </div>
   )
 }

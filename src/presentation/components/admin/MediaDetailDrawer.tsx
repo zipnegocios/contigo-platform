@@ -32,7 +32,7 @@ function MetaField({ label, value, gold }: { label: string; value: string; gold?
   return (
     <div>
       <p className="text-[9px] uppercase tracking-widest mb-0.5" style={{ color: '#6B6560' }}>{label}</p>
-      <p className="text-xs font-medium" style={{ color: gold ? '#E2C063' : '#E8DCC4' }}>{value}</p>
+      <p className="text-fluid-xs font-medium" style={{ color: gold ? 'var(--contigo-primary)' : 'var(--neutral-50)' }}>{value}</p>
     </div>
   )
 }
@@ -153,8 +153,8 @@ export function MediaDetailDrawer() {
           style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}
         >
           <h3
-            className="text-sm font-semibold truncate pr-2"
-            style={{ color: '#E8DCC4', fontFamily: 'var(--font-cormorant)', fontSize: 16 }}
+            className="text-fluid-sm font-semibold truncate pr-2"
+            style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}
             title={filename}
           >
             {filename}
@@ -165,12 +165,12 @@ export function MediaDetailDrawer() {
               target="_blank"
               rel="noopener noreferrer"
               className="p-1.5 rounded-lg"
-              style={{ color: '#A89E8C' }}
+              style={{ color: 'var(--neutral-600)' }}
             >
-              <ExternalLink size={14} />
+              <ExternalLink className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </a>
-            <button onClick={closeDetail} className="p-1.5 rounded-lg" style={{ color: '#A89E8C' }}>
-              <X size={14} />
+            <button onClick={closeDetail} className="p-1.5 rounded-lg" style={{ color: 'var(--neutral-600)' }}>
+              <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
           </div>
         </div>
@@ -183,8 +183,8 @@ export function MediaDetailDrawer() {
             ) : item.mediaType === 'video' ? (
               <video src={item.publicUrl} controls className="w-full h-full object-contain" />
             ) : (
-              <div className="flex flex-col items-center gap-2" style={{ color: '#A89E8C' }}>
-                <ImageIcon size={28} />
+              <div className="flex flex-col items-center gap-2" style={{ color: 'var(--neutral-600)' }}>
+                <ImageIcon className="w-[clamp(1.5rem,3vw,1.75rem)] h-[clamp(1.5rem,3vw,1.75rem)]" />
               </div>
             )}
           </div>
@@ -217,19 +217,19 @@ export function MediaDetailDrawer() {
 
             {/* Organization */}
             <div className="space-y-3">
-              <p className="text-[10px] uppercase tracking-widest" style={{ color: '#A89E8C' }}>Organization</p>
+              <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--neutral-600)' }}>Organization</p>
 
               <div>
                 <label className="text-[10px] block mb-1" style={{ color: '#6B6560' }}>Folder</label>
                 <select
                   value={localFolderId}
                   onChange={(e) => handleFolderChange(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none"
-                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-fluid-xs outline-none"
+                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
                 >
                   <option value="">No folder</option>
                   {folders.map((f) => (
-                    <option key={f.id} value={f.id} style={{ backgroundColor: '#1E1A16' }}>{f.name}</option>
+                    <option key={f.id} value={f.id} style={{ backgroundColor: 'var(--petrol-800)' }}>{f.name}</option>
                   ))}
                 </select>
               </div>
@@ -252,7 +252,7 @@ export function MediaDetailDrawer() {
                             color: active ? t.color : '#6B6560',
                           }}
                         >
-                          {active && <Check size={9} strokeWidth={3} />}
+                          {active && <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" strokeWidth={3} />}
                           {t.name}
                         </button>
                       )
@@ -269,8 +269,8 @@ export function MediaDetailDrawer() {
                   onBlur={handleNotesBlur}
                   rows={2}
                   placeholder="Internal notes…"
-                  className="w-full px-2.5 py-1.5 rounded-lg text-xs outline-none resize-none"
-                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: '#E8DCC4' }}
+                  className="w-full px-2.5 py-1.5 rounded-lg text-fluid-xs outline-none resize-none"
+                  style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.12)', color: 'var(--neutral-50)' }}
                 />
               </div>
             </div>
@@ -288,28 +288,28 @@ export function MediaDetailDrawer() {
                 className="flex-shrink-0 p-1.5 rounded-lg transition-all"
                 style={{
                   backgroundColor: copied ? 'rgba(82,183,136,0.15)' : 'rgba(226,192,99,0.08)',
-                  color: copied ? '#52B788' : '#E2C063',
+                  color: copied ? '#52B788' : 'var(--contigo-primary)',
                 }}
               >
-                {copied ? <Check size={12} /> : <Copy size={12} />}
+                {copied ? <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <Copy className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
               </button>
             </div>
 
             {/* Used In */}
             {item.usedIn.length > 0 && (
               <div>
-                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: '#A89E8C' }}>Used in</p>
+                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--neutral-600)' }}>Used in</p>
                 <div className="space-y-1">
                   {item.usedIn.map((a, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs"
+                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-fluid-xs"
                       style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.08)' }}
                     >
-                      <span className="truncate" style={{ color: '#E8DCC4' }}>{a.title}</span>
+                      <span className="truncate" style={{ color: 'var(--neutral-50)' }}>{a.title}</span>
                       <span
                         className="flex-shrink-0 text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-full ml-2"
-                        style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#E2C063' }}
+                        style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--contigo-primary)' }}
                       >
                         {FIELD_LABELS[a.field] ?? a.field}
                       </span>
@@ -328,7 +328,7 @@ export function MediaDetailDrawer() {
         >
           {assignConfirm && (
             <div
-              className="text-xs text-center py-1.5 rounded-lg"
+              className="text-fluid-xs text-center py-1.5 rounded-lg"
               style={{ backgroundColor: 'rgba(82,183,136,0.15)', color: '#52B788' }}
             >
               {assignConfirm}
@@ -339,19 +339,19 @@ export function MediaDetailDrawer() {
             <button
               type="button"
               onClick={() => handleQuickAssign('cover')}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
-              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-fluid-xs font-medium transition-all"
+              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
-              <ImageIcon size={13} />
+              <ImageIcon className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               Use as Cover
             </button>
             <button
               type="button"
               onClick={() => handleQuickAssign('gallery')}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
-              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: '#E2C063' }}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-fluid-xs font-medium transition-all"
+              style={{ backgroundColor: 'rgba(226,192,99,0.12)', border: '1px solid rgba(226,192,99,0.25)', color: 'var(--contigo-primary)' }}
             >
-              <ImagePlus size={13} />
+              <ImagePlus className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
               Add to Gallery
             </button>
           </div>
@@ -359,10 +359,10 @@ export function MediaDetailDrawer() {
           <button
             type="button"
             onClick={handleDelete}
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-fluid-xs font-medium transition-all"
             style={{ backgroundColor: 'rgba(232,112,112,0.1)', border: '1px solid rgba(232,112,112,0.2)', color: '#e87070' }}
           >
-            <Trash2 size={13} />
+            <Trash2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             Delete file
           </button>
         </div>

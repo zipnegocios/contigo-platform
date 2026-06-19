@@ -15,7 +15,7 @@ import {
   Tag,
   Images,
 } from 'lucide-react'
-import { Button } from '@/presentation/components/ui/button'
+import { Button } from '@/presentation/design-system/components/atoms'
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -32,11 +32,11 @@ export default function AdminSidebar() {
   const pathname = usePathname() || ''
 
   return (
-    <aside className="w-64 flex flex-col h-screen" style={{ backgroundColor: '#1E1A16' }}>
+    <aside className="w-64 flex flex-col h-screen" style={{ backgroundColor: 'var(--petrol-800)' }}>
       {/* Header / Logo */}
       <div
         className="p-6 flex items-center gap-3"
-        style={{ borderBottom: '1px solid rgba(226, 192, 99, 0.12)' }}
+        style={{ borderBottom: '1px solid var(--gold-a12)' }}
       >
         <Image
           src="/assets/isotipo.png"
@@ -47,16 +47,16 @@ export default function AdminSidebar() {
         />
         <div>
           <span
-            className="text-xl font-semibold tracking-wide"
+            className="text-fluid-xl font-semibold tracking-wide"
             style={{
-              fontFamily: 'var(--font-cormorant)',
-              color: '#E8DCC4',
+              fontFamily: 'var(--contigo-font-display)',
+              color: 'var(--neutral-50)',
               letterSpacing: '0.04em',
             }}
           >
             Contigo
           </span>
-          <p className="text-[10px] uppercase tracking-widest" style={{ color: '#A89E8C' }}>
+          <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--neutral-600)' }}>
             Admin Portal
           </p>
         </div>
@@ -76,55 +76,55 @@ export default function AdminSidebar() {
               style={
                 isActive
                   ? {
-                      backgroundColor: 'rgba(226, 192, 99, 0.15)',
-                      color: '#E2C063',
-                      borderLeft: '2px solid #E2C063',
+                      backgroundColor: 'var(--gold-a15)',
+                      color: 'var(--gold-400)',
+                      borderLeft: '2px solid var(--gold-400)',
                     }
                   : {
-                      color: '#E8DCC4',
+                      color: 'var(--neutral-50)',
                       borderLeft: '2px solid transparent',
                     }
               }
               onMouseEnter={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'
-                  e.currentTarget.style.color = '#E2C063'
+                  e.currentTarget.style.backgroundColor = 'var(--gold-a12)'
+                  e.currentTarget.style.color = 'var(--gold-400)'
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive) {
                   e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.color = '#E8DCC4'
+                  e.currentTarget.style.color = 'var(--neutral-50)'
                 }
               }}
             >
               <Icon
-                size={18}
-                style={{ color: isActive ? '#E2C063' : 'currentColor', flexShrink: 0 }}
+                className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]"
+                style={{ color: isActive ? 'var(--gold-400)' : 'currentColor', flexShrink: 0 }}
               />
-              <span className="text-sm font-medium">{item.label}</span>
+              <span className="text-fluid-sm font-medium">{item.label}</span>
             </Link>
           )
         })}
       </nav>
 
       {/* Sign Out */}
-      <div className="p-4" style={{ borderTop: '1px solid rgba(226, 192, 99, 0.12)' }}>
+      <div className="p-4" style={{ borderTop: '1px solid var(--gold-a12)' }}>
         <Button
           variant="ghost"
-          className="w-full flex items-center gap-2 text-sm justify-start px-4 py-2.5 rounded-lg transition-all duration-200 h-auto"
-          style={{ color: '#A89E8C' }}
+          className="w-full justify-start px-4 py-2.5 text-fluid-sm h-auto"
+          style={{ color: 'var(--neutral-600)' }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#E2C063'
-            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'
+            e.currentTarget.style.color = 'var(--gold-400)'
+            e.currentTarget.style.backgroundColor = 'var(--gold-a12)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#A89E8C'
+            e.currentTarget.style.color = 'var(--neutral-600)'
             e.currentTarget.style.backgroundColor = 'transparent'
           }}
           onClick={() => signOut({ callbackUrl: '/admin/login' })}
         >
-          <LogOut size={18} />
+          <LogOut className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           Sign Out
         </Button>
       </div>

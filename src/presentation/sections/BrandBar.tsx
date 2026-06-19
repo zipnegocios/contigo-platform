@@ -1,18 +1,16 @@
 'use client'
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export default function BrandBar() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const logoRef = useRef<HTMLImageElement>(null);
   const ruleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(logoRef.current, {
+      gsap.from('.brand-logo', {
         opacity: 0,
         y: 20,
         duration: 0.6,
@@ -43,17 +41,20 @@ export default function BrandBar() {
       ref={sectionRef}
       className="w-full flex flex-col items-center justify-center"
       style={{
-        backgroundColor: 'var(--atelier-ivory)',
+        backgroundColor: 'var(--neutral-50)',
         padding: '3rem 0',
       }}
     >
-      <img
-        ref={logoRef}
-        src="/assets/logo-principal.png"
-        alt="Contigo Constructions"
-        className="w-auto"
-        style={{ height: '80px' }}
-      />
+      <div className="brand-logo">
+        <Image
+          src="/assets/logo-principal.png"
+          alt="Contigo Constructions"
+          width={200}
+          height={60}
+          style={{ width: 'auto', height: '80px' }}
+          priority
+        />
+      </div>
       <div
         ref={ruleRef}
         className="gold-rule mt-4"

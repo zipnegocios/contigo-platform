@@ -74,11 +74,11 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTre
         <button
           type="button"
           className="cursor-grab p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ color: '#A89E8C', flexShrink: 0 }}
+          style={{ color: 'var(--neutral-600)', flexShrink: 0 }}
           {...attributes}
           {...listeners}
         >
-          <GripVertical size={14} />
+          <GripVertical className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
         </button>
 
         {/* Expand toggle */}
@@ -86,18 +86,18 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTre
           type="button"
           onClick={() => setExpanded((v) => !v)}
           className="p-0.5 rounded"
-          style={{ color: '#A89E8C', flexShrink: 0, visibility: node.children.length > 0 ? 'visible' : 'hidden' }}
+          style={{ color: 'var(--neutral-600)', flexShrink: 0, visibility: node.children.length > 0 ? 'visible' : 'hidden' }}
         >
-          {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          {expanded ? <ChevronDown className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <ChevronRight className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
         </button>
 
         {/* Name + meta */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium truncate" style={{ color: '#2D2924' }}>
+            <span className="text-fluid-sm font-medium truncate" style={{ color: 'var(--neutral-800)' }}>
               {node.name}
             </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#A89E8C' }}>
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--neutral-600)' }}>
               {node.slug}
             </span>
             {node.isSystem && (
@@ -107,7 +107,7 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTre
             )}
           </div>
           {node.description && (
-            <p className="text-[10px] truncate mt-0.5" style={{ color: '#A89E8C' }}>{node.description}</p>
+            <p className="text-[10px] truncate mt-0.5" style={{ color: 'var(--neutral-600)' }}>{node.description}</p>
           )}
         </div>
 
@@ -118,29 +118,29 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTre
             onClick={handleToggleActive}
             disabled={togglingActive}
             className="p-1 rounded hover:bg-black/5 transition-colors"
-            style={{ color: node.isActive ? '#52B788' : '#A89E8C' }}
+            style={{ color: node.isActive ? '#52B788' : 'var(--neutral-600)' }}
             title={node.isActive ? 'Deactivate' : 'Activate'}
           >
-            {node.isActive ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
+            {node.isActive ? <ToggleRight className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <ToggleLeft className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
           </button>
           <button
             type="button"
             onClick={() => setShowAddChildModal(true)}
             className="p-1 rounded hover:bg-black/5 transition-colors"
-            style={{ color: '#A89E8C' }}
+            style={{ color: 'var(--neutral-600)' }}
             title="Add subcategory"
           >
-            <Plus size={14} />
+            <Plus className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
           </button>
           {!node.isSystem && (
             <button
               type="button"
               onClick={() => setShowEditModal(true)}
               className="p-1 rounded hover:bg-black/5 transition-colors"
-              style={{ color: '#A89E8C' }}
+              style={{ color: 'var(--neutral-600)' }}
               title="Edit"
             >
-              <Edit2 size={13} />
+              <Edit2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
           )}
           {!node.isSystem && (
@@ -152,7 +152,7 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTre
               style={{ color: '#e87070' }}
               title="Delete"
             >
-              <Trash2 size={13} />
+              <Trash2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
             </button>
           )}
         </div>

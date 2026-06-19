@@ -1,10 +1,8 @@
 'use client'
 import { useEffect, useRef } from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const serviceImages = [
   '/assets/service-new-home.jpg',
@@ -75,10 +73,18 @@ function ImageStrip({ images, names, index }: ImageStripProps) {
         <div
           key={`${index}-${i}`}
           className="parallax-work-img group relative"
-          style={{ backgroundImage: `url(${img})` }}
+          style={{ position: 'relative', overflow: 'hidden' }}
         >
+          <Image
+            src={img}
+            alt={names[i]}
+            fill
+            sizes="400px"
+            loading="lazy"
+            style={{ objectFit: 'cover' }}
+          />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-end p-4">
-            <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+            <span className="text-white text-fluid-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
               {names[i]}
             </span>
           </div>
@@ -164,11 +170,11 @@ export default function ServicesSection() {
       <div ref={headerRef} className="text-center mb-12 page-padding">
         <span
           className="label block mb-4"
-          style={{ color: 'var(--brand-gold)' }}
+          style={{ color: 'var(--contigo-primary)' }}
         >
           WHAT WE DO
         </span>
-        <h2 style={{ color: 'var(--atelier-ink)' }}>Our Services</h2>
+        <h2 style={{ color: 'var(--neutral-800)' }}>Our Services</h2>
       </div>
 
       {/* Parallax Gallery */}
@@ -180,18 +186,22 @@ export default function ServicesSection() {
 
       {/* CTA */}
       <div className="text-center mt-12">
-        <Link
+        <a
           ref={ctaRef}
-          href="/services"
-          className="inline-flex items-center gap-2 text-sm font-medium transition-colors group"
-          style={{ color: 'var(--atelier-ink)' }}
+          href="#contact"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="inline-flex items-center gap-2 text-fluid-sm font-medium transition-colors group"
+          style={{ color: 'var(--neutral-800)' }}
         >
           View All Services
           <span
             className="block h-[1px] w-0 group-hover:w-12 transition-all duration-300"
-            style={{ backgroundColor: 'var(--brand-gold)' }}
+            style={{ backgroundColor: 'var(--contigo-primary)' }}
           />
-        </Link>
+        </a>
       </div>
     </section>
   );

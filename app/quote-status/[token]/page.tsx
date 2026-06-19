@@ -30,18 +30,33 @@ export default async function QuoteStatusPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-atelier-ivory to-heritage-sand page-padding">
-      <div className="max-w-2xl mx-auto pt-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-cormorant font-bold mb-4" style={{ color: 'var(--heritage-charcoal)' }}>
-            Your Quote Status
-          </h1>
-          <p className="text-lg" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
-            Tracking reference: {params.token}
-          </p>
-        </div>
+    <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
+      {/* Header band */}
+      <div
+        className="relative py-24 px-6 md:px-16"
+        style={{
+          backgroundColor: '#1E1A16',
+          borderBottom: '1px solid rgba(226,192,99,0.15)',
+        }}
+      >
+        <span
+          className="block text-fluid-xs uppercase tracking-widest mb-4"
+          style={{ color: '#E2C063' }}
+        >
+          Tracking
+        </span>
+        <h1
+          className="text-fluid-5xl font-semibold leading-none mb-4"
+          style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+        >
+          Your Quote Status
+        </h1>
+        <p className="text-fluid-base max-w-xl" style={{ color: 'rgba(250,246,240,0.6)' }}>
+          Tracking reference: {params.token}
+        </p>
+      </div>
 
+      <div className="page-padding max-w-2xl mx-auto pt-12">
         {/* Status Card */}
         <div
           className="rounded-lg shadow-lg p-8 mb-12 border-t-4"
@@ -52,11 +67,11 @@ export default async function QuoteStatusPage({
         >
           {/* Status Badge */}
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--heritage-charcoal)' }}>
+            <h2 className="text-fluid-2xl font-bold" style={{ color: 'var(--heritage-charcoal)' }}>
               {quote.name}
             </h2>
             <span
-              className="px-4 py-2 rounded-full text-white text-sm font-medium"
+              className="px-4 py-2 rounded-full text-white text-fluid-sm font-medium"
               style={{ background: statusColors[quote.status] }}
             >
               {statusLabels[quote.status]}
@@ -66,17 +81,17 @@ export default async function QuoteStatusPage({
           {/* Quote Details */}
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
+              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
                 Service Requested
               </label>
-              <p className="mt-2 text-lg font-semibold" style={{ color: 'var(--heritage-charcoal)' }}>
+              <p className="mt-2 text-fluid-lg font-semibold" style={{ color: 'var(--heritage-charcoal)' }}>
                 {quote.service}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
+                <label className="block text-fluid-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
                   Email
                 </label>
                 <p className="mt-2" style={{ color: 'var(--heritage-charcoal)' }}>
@@ -85,7 +100,7 @@ export default async function QuoteStatusPage({
               </div>
               {quote.phone && (
                 <div>
-                  <label className="block text-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
+                  <label className="block text-fluid-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
                     Phone
                   </label>
                   <p className="mt-2" style={{ color: 'var(--heritage-charcoal)' }}>
@@ -96,7 +111,7 @@ export default async function QuoteStatusPage({
             </div>
 
             <div>
-              <label className="block text-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
+              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
                 Your Message
               </label>
               <p className="mt-2 p-4 rounded bg-gray-50" style={{ color: 'var(--heritage-charcoal)' }}>
@@ -105,7 +120,7 @@ export default async function QuoteStatusPage({
             </div>
 
             <div className="pt-4 border-t" style={{ borderColor: 'var(--atelier-border)' }}>
-              <p className="text-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+              <p className="text-fluid-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
                 Submitted on {quote.createdAt.toLocaleDateString('en-AU', {
                   year: 'numeric',
                   month: 'long',
@@ -120,7 +135,7 @@ export default async function QuoteStatusPage({
 
         {/* Status Timeline */}
         <div className="mb-12">
-          <h3 className="text-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+          <h3 className="text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
             Progress Timeline
           </h3>
           <div className="space-y-4">
@@ -138,7 +153,7 @@ export default async function QuoteStatusPage({
                 />
                 <div className="ml-4 flex-1">
                   <p
-                    className="text-sm font-medium"
+                    className="text-fluid-sm font-medium"
                     style={{
                       color:
                         ['new', 'contacted', 'in_progress'].indexOf(quote.status) >= index

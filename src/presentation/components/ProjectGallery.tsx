@@ -19,7 +19,7 @@ export function ProjectGallery({ items }: { items: GalleryItem[] }) {
     <>
       <div>
         <h2
-          className="text-2xl font-semibold mb-6"
+          className="text-fluid-2xl font-semibold mb-6"
           style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}
         >
           Gallery

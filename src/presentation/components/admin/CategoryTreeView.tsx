@@ -97,23 +97,23 @@ export function CategoryTreeView({ initialFlat, type }: CategoryTreeViewProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm" style={{ color: '#A89E8C' }}>
+        <p className="text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
           {flat.length} {flat.length === 1 ? 'category' : 'categories'} · drag to reorder within same level
         </p>
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-          style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-fluid-sm font-semibold transition-all min-h-[44px]"
+          style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
         >
-          <Plus size={15} />
+          <Plus className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
           New root category
         </button>
       </div>
 
       {tree.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-sm" style={{ color: '#A89E8C' }}>No categories yet. Create one above.</p>
+          <p className="text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>No categories yet. Create one above.</p>
         </div>
       ) : (
         <DndContext

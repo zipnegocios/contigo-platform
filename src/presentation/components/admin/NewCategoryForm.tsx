@@ -37,10 +37,10 @@ export function NewCategoryForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-        style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-fluid-sm font-semibold transition-all duration-200 min-h-[44px]"
+        style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
       >
-        <Plus size={16} />
+        <Plus className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
         New Category
       </button>
     )
@@ -50,11 +50,11 @@ export function NewCategoryForm() {
     <form onSubmit={submit} className="flex items-center gap-2">
       <input
         autoFocus
-        className="rounded-lg px-4 py-2.5 text-sm outline-none"
+        className="rounded-lg px-4 py-2.5 text-fluid-sm outline-none"
         style={{
-          border: '1px solid #E2C063',
-          backgroundColor: '#FAF6F0',
-          color: '#2D2924',
+          border: '1px solid var(--contigo-primary)',
+          backgroundColor: 'var(--neutral-50)',
+          color: 'var(--neutral-800)',
           minWidth: 200,
         }}
         placeholder="Category name..."
@@ -66,15 +66,15 @@ export function NewCategoryForm() {
       <button
         type="submit"
         disabled={loading || !name.trim()}
-        className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-50"
-        style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+        className="px-5 py-2.5 rounded-lg text-fluid-sm font-semibold transition-all duration-200 disabled:opacity-50 min-h-[44px]"
+        style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
       >
         Create
       </button>
       <button
         type="button"
         onClick={() => { setOpen(false); setName('') }}
-        className="px-4 py-2.5 rounded-lg text-sm transition-all duration-200"
+        className="px-4 py-2.5 rounded-lg text-fluid-sm transition-all duration-200 min-h-[44px]"
         style={{ color: '#6B6560' }}
       >
         Cancel

@@ -1,4 +1,6 @@
 import { CustomCursor } from '@/presentation/components/CustomCursor'
+import { SimpleHeader } from '@/presentation/components/SimpleHeader'
+import Footer from '@/presentation/sections/Footer'
 
 export default function PortfolioLayout({
   children,
@@ -8,7 +10,9 @@ export default function PortfolioLayout({
   return (
     <>
       <CustomCursor />
+      <SimpleHeader />
       {children}
+      <Footer />
     </>
   )
 }

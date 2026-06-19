@@ -103,11 +103,11 @@ function MediaLibraryInner() {
             border: '2px dashed rgba(226,192,99,0.6)',
           }}
         >
-          <UploadCloud size={48} style={{ color: '#E2C063' }} className="mb-3 opacity-90" />
-          <p className="text-lg font-semibold" style={{ color: '#E2C063', fontFamily: 'var(--font-cormorant)' }}>
+          <UploadCloud className="w-[clamp(1.75rem,3.5vw,2.25rem)] h-[clamp(1.75rem,3.5vw,2.25rem)] mb-3 opacity-90" style={{ color: 'var(--contigo-primary)' }} />
+          <p className="text-fluid-lg font-semibold" style={{ color: 'var(--contigo-primary)', fontFamily: 'var(--font-cormorant)' }}>
             Drop files to upload
           </p>
-          <p className="text-sm mt-1" style={{ color: '#A89E8C' }}>Images and videos supported</p>
+          <p className="text-fluid-sm mt-1" style={{ color: 'var(--neutral-600)' }}>Images and videos supported</p>
         </div>
       )}
 
@@ -120,10 +120,10 @@ function MediaLibraryInner() {
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+              className="px-4 py-2 rounded-lg text-fluid-sm font-medium transition-all duration-200"
               style={
                 tab === t.key
-                  ? { backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063' }
+                  ? { backgroundColor: 'rgba(226,192,99,0.18)', color: 'var(--contigo-primary)' }
                   : { color: '#6B6560' }
               }
             >
@@ -138,11 +138,11 @@ function MediaLibraryInner() {
             <button
               type="button"
               onClick={() => setQueueVisible(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-fluid-xs font-medium transition-all"
               style={{
                 backgroundColor: isActive ? 'rgba(226,192,99,0.12)' : 'rgba(82,183,136,0.1)',
                 border: isActive ? '1px solid rgba(226,192,99,0.3)' : '1px solid rgba(82,183,136,0.3)',
-                color: isActive ? '#E2C063' : '#52B788',
+                color: isActive ? 'var(--contigo-primary)' : '#52B788',
               }}
             >
               {isActive ? (
@@ -163,10 +163,10 @@ function MediaLibraryInner() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
-            style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-fluid-sm font-semibold transition-all duration-200"
+            style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
           >
-            <Upload size={15} />
+            <Upload className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
             Upload files
           </button>
         </div>

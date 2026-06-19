@@ -11,10 +11,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
     // Setup GSAP + ScrollTrigger without Lenis
     // This allows native smooth scrolling or CSS scroll-behavior
 
-    // Update ScrollTrigger on every scroll frame
-    window.addEventListener('scroll', ScrollTrigger.update, { passive: true })
-
-    // Sync GSAP ticker with scroll
+    // Sync GSAP ticker with scroll (scroll event updates are redundant)
     gsap.ticker.add(() => {
       ScrollTrigger.update()
     })
@@ -22,7 +19,6 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
     gsap.ticker.lagSmoothing(0)
 
     return () => {
-      window.removeEventListener('scroll', ScrollTrigger.update)
       gsap.ticker.lagSmoothing(1)
     }
   }, [])

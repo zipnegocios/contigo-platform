@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from 'react'
-import { flushSync } from 'react-dom'
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
+import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 
 export interface ProjectItem {
   id: string
@@ -110,137 +108,124 @@ function getCardsPerPage(): number {
   return 1
 }
 
-/** Reactive cards-per-page from the viewport — SSR-safe, no setState-in-effect. */
-function useCardsPerPage(): number {
-  return useSyncExternalStore(
-    (onChange) => {
-      window.addEventListener('resize', onChange)
-      return () => window.removeEventListener('resize', onChange)
-    },
-    getCardsPerPage,
-    () => 5,
-  )
-}
-
 export default function ProjectsSection({ projects }: Props) {
   const sectionRef  = useRef<HTMLDivElement>(null)
   const headerRef   = useRef<HTMLDivElement>(null)
   const listRef     = useRef<HTMLUListElement>(null)
-  const trackRef    = useRef<HTMLDivElement>(null)       // overflow-hidden wrapper
   const metaRef     = useRef<HTMLDivElement>(null)
-  const timelineRef = useRef<gsap.core.Timeline | null>(null)
-  const cloneRef    = useRef<HTMLUListElement | null>(null) // active DOM clone
+  const timelineRef = useRef<gsap.core.Animation | null>(null)
+  const didMountRef = useRef(false)
 
-  const cardsPerPage = useCardsPerPage()
+  const [cardsPerPage, setCardsPerPage] = useState<number>(() => getCardsPerPage())
   const [startIndex,   setStartIndex]   = useState(0)
   const [isPaused,     setIsPaused]     = useState(false)
   const animatingRef = useRef(false)
 
-  /* ── On resize: reset carousel + clean up any in-flight animation ────── */
+  /* ── responsive cardsPerPage (debounced) ────────────────────────────── */
   useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout>
     const handler = () => {
-      // Kill animation and clean up any orphaned clone
-      if (timelineRef.current) timelineRef.current.kill()
-      if (cloneRef.current) {
-        cloneRef.current.remove()
-        cloneRef.current = null
-      }
-      if (trackRef.current) trackRef.current.style.position = ''
-      if (listRef.current) {
-        const lis = listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item')
-        gsap.set(Array.from(lis), { clearProps: 'all' })
-      }
-      animatingRef.current = false
-      setStartIndex(0)
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        if (timelineRef.current) timelineRef.current.kill()
+        if (listRef.current) {
+          const lis = listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item')
+          gsap.set(Array.from(lis), { clearProps: 'all' })
+        }
+        animatingRef.current = false
+        setCardsPerPage(getCardsPerPage())
+        setStartIndex(0)
+      }, 150)
     }
     window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
+    return () => {
+      window.removeEventListener('resize', handler)
+      clearTimeout(resizeTimer)
+    }
   }, [])
 
   const totalPositions = Math.max(1, projects.length - cardsPerPage + 1)
   const visibleProjects = projects.slice(startIndex, startIndex + cardsPerPage)
   const hasNav = totalPositions > 1
 
-  /* ── clone-based crossfade navigation ───────────────────────────────── */
-  const navigate = useCallback(
-    (newIndex: number, dir: 'next' | 'prev') => {
-      if (animatingRef.current || !listRef.current || !trackRef.current) return
-      animatingRef.current = true
-      setIsPaused(true)
+  /* ── dissolve navigation: fade + scale, no clones / no flushSync ─────── */
+  const navigate = useCallback((newIndex: number) => {
+    if (animatingRef.current || !listRef.current) return
+    animatingRef.current = true
+    setIsPaused(true)
 
-      const trackWidth = trackRef.current.offsetWidth
-      const outX = dir === 'next' ? -trackWidth :  trackWidth
-      const inX  = dir === 'next' ?  trackWidth : -trackWidth
+    // Reduced motion → instant swap
+    if (prefersReducedMotion()) {
+      setStartIndex(newIndex)
+      return
+    }
 
-      // ── A: Clone current <ul> absolutely over the track ──────────────
-      const clone = listRef.current.cloneNode(true) as HTMLUListElement
-      Object.assign(clone.style, {
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        margin: '0',
-        pointerEvents: 'none',
-        zIndex: '1',
-      })
-      trackRef.current.style.position = 'relative'
-      trackRef.current.appendChild(clone)
-      cloneRef.current = clone
+    const currentLis = Array.from(
+      listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item'),
+    )
 
-      // ── B: Swap DOM content synchronously (new cards behind clone) ───
-      flushSync(() => setStartIndex(newIndex))
+    // Phase 1: fade the current set OUT in place; on complete, swap React state.
+    // Phase 2 (entrance) runs in the useLayoutEffect keyed on startIndex.
+    timelineRef.current = gsap.to(currentLis, {
+      opacity: 0,
+      scale: 0.97,
+      filter: 'blur(4px)',
+      duration: 0.3,
+      stagger: 0.04,
+      ease: 'power2.in',
+      onComplete: () => setStartIndex(newIndex),
+    })
+  }, [])
 
-      // ── C: Immediately hide new cards before any browser paint ───────
-      const newLis = Array.from(
-        listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item'),
-      )
-      gsap.set(newLis, { x: inX, opacity: 0 })
+  /* ── entrance: fade the new set IN (runs after DOM commit, before paint) */
+  useLayoutEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true
+      return
+    }
+    if (!listRef.current) return
 
-      // ── D: Simultaneous exit (clones) + entrance (new cards) ─────────
-      const cloneLis = Array.from(
-        clone.querySelectorAll<HTMLLIElement>('.accordion-item'),
-      )
+    const newLis = Array.from(
+      listRef.current.querySelectorAll<HTMLLIElement>('.accordion-item'),
+    )
 
-      const tl = gsap.timeline({
-        onComplete() {
-          clone.remove()
-          cloneRef.current = null
-          if (trackRef.current) trackRef.current.style.position = ''
-          // clearProps restores natural CSS so accordion flex works again
-          gsap.set(newLis, { clearProps: 'all' })
-          animatingRef.current = false
-          setIsPaused(false)
-        },
-      })
+    const finish = () => {
+      // clearProps restores natural CSS so accordion hover-expand works again
+      gsap.set(newLis, { clearProps: 'all' })
+      animatingRef.current = false
+      setIsPaused(false)
+    }
 
-      // Clones exit with stagger
-      tl.to(
-        cloneLis,
-        { x: outX, opacity: 0, duration: 0.4, stagger: 0.07, ease: 'power2.in' },
-        0,
-      )
-      // New cards enter with stagger, 100ms after exit starts (push feel)
-      tl.to(
-        newLis,
-        { x: 0, opacity: 1, duration: 0.4, stagger: 0.07, ease: 'power2.out' },
-        0.1,
-      )
+    if (prefersReducedMotion() || newLis.length === 0) {
+      finish()
+      return
+    }
 
-      timelineRef.current = tl
-    },
-    [],
-  )
+    timelineRef.current = gsap.fromTo(
+      newLis,
+      { opacity: 0, scale: 1.03, filter: 'blur(4px)' },
+      {
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: 0.45,
+        stagger: 0.05,
+        ease: 'power3.out',
+        onComplete: finish,
+      },
+    )
+  }, [startIndex])
 
-  const prev = () => navigate((startIndex - 1 + totalPositions) % totalPositions, 'prev')
-  const next = () => navigate((startIndex + 1) % totalPositions, 'next')
-  const goTo = (i: number) => navigate(i, i > startIndex ? 'next' : 'prev')
+  const prev = () => navigate((startIndex - 1 + totalPositions) % totalPositions)
+  const next = () => navigate((startIndex + 1) % totalPositions)
+  const goTo = (i: number) => { if (i !== startIndex) navigate(i) }
 
-  /* ── autoplay: 4 s, pauses while isPaused ───────────────────────────── */
+  /* ── autoplay: 5 s, pauses while isPaused ───────────────────────────── */
   useEffect(() => {
     if (!hasNav || isPaused) return
     const timer = setInterval(
-      () => navigate((startIndex + 1) % totalPositions, 'next'),
-      4000,
+      () => navigate((startIndex + 1) % totalPositions),
+      5000,
     )
     return () => clearInterval(timer)
   }, [hasNav, isPaused, startIndex, totalPositions, navigate])
@@ -261,9 +246,9 @@ export default function ProjectsSection({ projects }: Props) {
   }, [])
 
   const arrowBtn: React.CSSProperties = {
-    backgroundColor: 'rgba(30,26,22,0.60)',
-    color: '#E2C063',
-    border: '1px solid rgba(226,192,99,0.45)',
+    backgroundColor: 'var(--neutral-800-60)',
+    color: 'var(--contigo-primary)',
+    border: '1px solid var(--gold-a30)',
   }
 
   return (
@@ -271,18 +256,18 @@ export default function ProjectsSection({ projects }: Props) {
       id="projects"
       ref={sectionRef}
       className="section-gap page-padding"
-      style={{ backgroundColor: 'var(--monolith-concrete)' }}
+      style={{ backgroundColor: 'var(--neutral-100)' }}
     >
       {/* Header */}
       <div ref={headerRef}>
-        <span className="label block mb-4" style={{ color: 'var(--monolith-slate)' }}>
+        <span className="label block mb-4" style={{ color: 'var(--neutral-600)' }}>
           PORTFOLIO
         </span>
-        <h2 style={{ color: 'var(--monolith-ink)' }}>Featured Projects</h2>
+        <h2 style={{ color: 'var(--neutral-800)' }}>Featured Projects</h2>
       </div>
 
       {projects.length === 0 ? (
-        <p className="mt-8 text-sm" style={{ color: 'var(--monolith-slate)' }}>
+        <p className="mt-8 text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
           No featured projects yet.
         </p>
       ) : (
@@ -292,13 +277,13 @@ export default function ProjectsSection({ projects }: Props) {
             <button
               onClick={prev}
               aria-label="Previous"
-              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
+              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
               style={arrowBtn}
             >‹</button>
           )}
 
-          {/* Track — clips sliding cards; ref needed for offsetWidth */}
-          <div ref={trackRef} className="flex-1 overflow-hidden">
+          {/* Track — clips card transitions */}
+          <div className="flex-1 overflow-hidden">
             <ul
               ref={listRef}
               className="accordion-list"
@@ -344,7 +329,7 @@ export default function ProjectsSection({ projects }: Props) {
             <button
               onClick={next}
               aria-label="Next"
-              className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-xl"
+              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
               style={arrowBtn}
             >›</button>
           )}
@@ -360,9 +345,11 @@ export default function ProjectsSection({ projects }: Props) {
               onClick={() => goTo(i)}
               aria-label={`Position ${i + 1}`}
               style={{
-                width: 8, height: 8, borderRadius: '50%',
-                backgroundColor: i === startIndex ? '#2D2924' : 'rgba(30,26,22,0.28)',
-                transition: 'background-color 0.2s ease',
+                width: i === startIndex ? 22 : 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: i === startIndex ? 'var(--contigo-primary)' : 'var(--neutral-800-28)',
+                transition: 'all 0.3s ease',
               }}
             />
           ))}
@@ -372,8 +359,8 @@ export default function ProjectsSection({ projects }: Props) {
       {/* Footer row */}
       <div
         ref={metaRef}
-        className="flex items-center justify-between mt-8 text-sm"
-        style={{ color: 'var(--monolith-slate)' }}
+        className="flex items-center justify-between mt-8 text-fluid-sm"
+        style={{ color: 'var(--neutral-600)' }}
       >
         <span className="data-text flex items-center gap-1 flex-wrap">
           <span>Project count: {projects.length}</span>
@@ -388,8 +375,8 @@ export default function ProjectsSection({ projects }: Props) {
         </span>
         <a
           href="/projects"
-          className="text-sm font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--monolith-ink)' }}
+          className="text-fluid-sm font-medium transition-opacity hover:opacity-70"
+          style={{ color: 'var(--neutral-800)' }}
         >
           View all →
         </a>

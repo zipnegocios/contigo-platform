@@ -2,8 +2,10 @@
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { gsap } from 'gsap'
+import { useLogoMorphContext } from '@/presentation/providers/LogoMorphProvider'
 
 export default function HeroSection() {
+  const context = useLogoMorphContext()
   const imgWrapRef  = useRef<HTMLDivElement>(null)
   const overlayRef  = useRef<HTMLDivElement>(null)
   const overlineRef = useRef<HTMLSpanElement>(null)
@@ -22,7 +24,17 @@ export default function HeroSection() {
       duration: 22,
       ease: 'sine.inOut',
     })
-    return () => { tl.kill() }
+
+    const onVisibilityChange = () => {
+      if (document.hidden) tl.pause()
+      else tl.resume()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      tl.kill()
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
   }, [])
 
   /* ── Text entrance ───────────────────────────────────────────────────── */
@@ -84,7 +96,7 @@ export default function HeroSection() {
         className="absolute bottom-0 left-0 w-full pointer-events-none"
         style={{
           height: '15%',
-          background: 'linear-gradient(to bottom, transparent, var(--atelier-ivory))',
+          background: 'linear-gradient(to bottom, transparent, var(--neutral-50))',
           zIndex: 2,
         }}
       />
@@ -95,6 +107,18 @@ export default function HeroSection() {
         className="absolute bottom-0 left-0 w-full page-padding"
         style={{ zIndex: 3, paddingBottom: 'clamp(3rem, 8vh, 6rem)' }}
       >
+        {/* Logo morph dock placeholder — in normal flow before overline, invisible, shares page-padding */}
+        <div
+          ref={(el) => context.setHeroDockRef(el)}
+          className="w-logo-hero"
+          style={{
+            aspectRatio: '1024 / 354.041',
+            marginBottom: 'clamp(2rem, 5vh, 3.5rem)',
+            visibility: 'hidden',
+            pointerEvents: 'none',
+          }}
+        />
+
         <span
           ref={overlineRef}
           className="label block mb-4"
@@ -110,6 +134,8 @@ export default function HeroSection() {
             opacity: 0,
             transform: 'translateY(20px)',
             maxWidth: '800px',
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+            lineHeight: 1.05,
           }}
         >
           Building Dreams
@@ -119,7 +145,7 @@ export default function HeroSection() {
 
         <p
           ref={subtitleRef}
-          className="mt-6 text-base md:text-lg"
+          className="mt-6 text-fluid-base"
           style={{
             color: 'rgba(250,246,240,0.82)',
             maxWidth: '480px',
@@ -142,7 +168,7 @@ export default function HeroSection() {
               document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
             }
             className="btn-secondary"
-            style={{ borderColor: 'var(--brand-gold)', color: 'var(--brand-gold)' }}
+            style={{ borderColor: 'var(--contigo-primary)', color: 'var(--contigo-primary)' }}
           >
             Our Services
           </button>

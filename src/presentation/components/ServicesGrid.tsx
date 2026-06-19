@@ -1,0 +1,117 @@
+'use client'
+
+import Link from 'next/link'
+import { CategoryFilterPills } from './CategoryFilterPills'
+
+function isVideo(url: string) {
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
+}
+
+interface ServiceItem {
+  id: string
+  slug: string
+  name: string
+  categoryName: string | null
+  imageUrl: string
+  posterUrl?: string | null
+}
+
+interface FilterCategory {
+  name: string
+  slug: string
+}
+
+interface ServicesGridProps {
+  services: ServiceItem[]
+  allCategories: FilterCategory[]
+  activeSlug: string | null
+}
+
+export function ServicesGrid({ services, allCategories, activeSlug }: ServicesGridProps) {
+  return (
+    <div>
+      {/* Category filter pills */}
+      {allCategories.length > 0 && (
+        <div className="mb-10">
+          <CategoryFilterPills
+            categories={allCategories}
+            activeSlug={activeSlug}
+            basePath="/services"
+          />
+        </div>
+      )}
+
+      {/* Grid */}
+      {services.length === 0 ? (
+        <p className="py-16 text-center text-fluid-sm" style={{ color: '#A89E8C' }}>
+          No services in this category yet.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.map((service) => {
+            const video = isVideo(service.imageUrl)
+            return (
+              <Link key={service.id} href={`/services/${service.slug}`} className="group block">
+                <div
+                  className="relative overflow-hidden rounded-2xl"
+                  style={{ aspectRatio: '4/3', backgroundColor: '#1E1A16' }}
+                >
+                  {video ? (
+                    <video
+                      src={service.imageUrl}
+                      poster={service.posterUrl ?? undefined}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <img
+                      src={service.imageUrl}
+                      alt={service.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  )}
+
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        'linear-gradient(to top, rgba(30,26,22,0.85) 0%, rgba(30,26,22,0.1) 55%, transparent 100%)',
+                    }}
+                  />
+
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    {service.categoryName && (
+                      <p
+                        className="text-[clamp(0.5625rem,1vw,0.6875rem)] uppercase tracking-widest mb-1.5"
+                        style={{ color: '#E2C063' }}
+                      >
+                        {service.categoryName}
+                      </p>
+                    )}
+                    <h3
+                      className="text-fluid-xl font-semibold leading-tight transition-colors duration-200"
+                      style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+                    >
+                      {service.name}
+                    </h3>
+                  </div>
+
+                  <div
+                    className="absolute top-4 right-4 w-[clamp(1.75rem,3vw,2rem)] h-[clamp(1.75rem,3vw,2rem)] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
+                    style={{ backgroundColor: 'rgba(226,192,99,0.25)', color: '#E2C063', border: '1px solid rgba(226,192,99,0.4)' }}
+                  >
+                    <span className="text-fluid-sm">→</span>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

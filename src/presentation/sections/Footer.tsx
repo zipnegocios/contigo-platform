@@ -1,10 +1,9 @@
 'use client'
 import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Instagram, Facebook, Linkedin } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
@@ -38,7 +37,7 @@ export default function Footer() {
       ref={footerRef}
       className="w-full page-padding"
       style={{
-        backgroundColor: 'var(--heritage-dark)',
+        backgroundColor: 'var(--petrol-800)',
         padding: '3rem clamp(1.5rem, 4vw, 4rem)',
       }}
     >
@@ -47,11 +46,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           {/* Left - Logo */}
           <div className="flex justify-center md:justify-start">
-            <img
+            <Image
               src="/assets/isotipo.png"
               alt="Contigo Constructions"
-              className="h-12 w-auto"
-              style={{ filter: 'brightness(1)' }}
+              width={40}
+              height={40}
+              style={{ height: '3rem', width: 'auto', filter: 'brightness(1)' }}
             />
           </div>
 
@@ -66,13 +66,13 @@ export default function Footer() {
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
-                className="text-sm transition-colors relative group"
-                style={{ color: 'var(--heritage-sand)' }}
+                className="text-fluid-sm transition-colors relative group"
+                style={{ color: 'var(--neutral-50)' }}
               >
                 {item.label}
                 <span
                   className="absolute -bottom-1 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full"
-                  style={{ backgroundColor: 'var(--brand-gold)' }}
+                  style={{ backgroundColor: 'var(--contigo-primary)' }}
                 />
               </button>
             ))}
@@ -89,22 +89,25 @@ export default function Footer() {
                 key={label}
                 href="#"
                 onClick={(e) => e.preventDefault()}
-                className="p-2 rounded-full transition-colors"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors"
                 style={{
-                  color: 'var(--heritage-sand)',
+                  color: 'var(--neutral-50)',
                   border: '1px solid transparent',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--brand-gold)';
-                  e.currentTarget.style.borderColor = 'var(--brand-gold)';
+                  e.currentTarget.style.color = 'var(--contigo-primary)';
+                  e.currentTarget.style.borderColor = 'var(--contigo-primary)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--heritage-sand)';
+                  e.currentTarget.style.color = 'var(--neutral-50)';
                   e.currentTarget.style.borderColor = 'transparent';
                 }}
                 aria-label={label}
               >
-                <Icon size={18} strokeWidth={1.5} />
+                <Icon
+                  className="w-[clamp(1.125rem,2vw,1.375rem)] h-[clamp(1.125rem,2vw,1.375rem)]"
+                  strokeWidth={1.5}
+                />
               </a>
             ))}
           </div>
@@ -113,17 +116,17 @@ export default function Footer() {
         {/* Bottom bar */}
         <div
           className="mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4"
-          style={{ borderTop: '1px solid var(--heritage-charcoal)' }}
+          style={{ borderTop: '1px solid var(--neutral-700)' }}
         >
           <p
-            className="text-xs"
-            style={{ color: 'var(--heritage-muted)' }}
+            className="text-fluid-xs"
+            style={{ color: 'var(--neutral-600)' }}
           >
             &copy; 2025 Contigo Constructions Pty Ltd. All rights reserved.
           </p>
           <p
-            className="text-xs"
-            style={{ color: 'var(--heritage-muted)' }}
+            className="text-fluid-xs"
+            style={{ color: 'var(--neutral-600)' }}
           >
             ABN: 12 345 678 901
           </p>

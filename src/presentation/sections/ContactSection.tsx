@@ -1,105 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Phone, Mail, MapPin, Clock, Loader, Paperclip, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { uploadQuoteAttachment } from '@/presentation/lib/uploadToR2'
-
-gsap.registerPlugin(ScrollTrigger)
-
-const ContactFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
-  service: z.string().min(1, 'Please select a service'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
-})
-
-type ContactFormInput = z.infer<typeof ContactFormSchema>
+import { QuoteForm } from '@/presentation/components/QuoteForm'
+import { ContactDetails } from '@/presentation/components/ContactDetails'
 
 export default function ContactSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const leftColRef = useRef<HTMLDivElement>(null)
   const rightColRef = useRef<HTMLDivElement>(null)
-  const attachmentInputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
-
-  // Attachment state managed outside react-hook-form (async upload side-effect)
-  const [attachmentKeys, setAttachmentKeys] = useState<string[]>([])
-  const [attachmentUploading, setAttachmentUploading] = useState(false)
-  const [attachmentError, setAttachmentError] = useState<string | null>(null)
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<ContactFormInput>({
-    resolver: zodResolver(ContactFormSchema),
-  })
-
-  const handleAttachmentChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    if (!files.length) return
-    if (attachmentKeys.length + files.length > 3) {
-      setAttachmentError('Maximum 3 images allowed')
-      return
-    }
-    setAttachmentUploading(true)
-    setAttachmentError(null)
-    try {
-      const uploadedKeys: string[] = []
-      for (const file of files) {
-        const key = await uploadQuoteAttachment(file)
-        uploadedKeys.push(key)
-      }
-      setAttachmentKeys((prev) => [...prev, ...uploadedKeys])
-    } catch {
-      setAttachmentError('Failed to upload image. Please try again.')
-    } finally {
-      setAttachmentUploading(false)
-      if (attachmentInputRef.current) attachmentInputRef.current.value = ''
-    }
-  }
-
-  const removeAttachment = (index: number) => {
-    setAttachmentKeys((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  const onSubmit = async (data: ContactFormInput) => {
-    try {
-      const response = await fetch('/api/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, attachmentUrls: attachmentKeys }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        if (result.errors) {
-          result.errors.forEach((err: any) => {
-            console.error(`${err.field}: ${err.message}`)
-          })
-        } else {
-          console.error(result.message)
-        }
-        return
-      }
-
-      // Success: redirect to tracking page
-      reset()
-      setAttachmentKeys([])
-      router.push(`/quote-status/${result.trackingToken}`)
-    } catch (error) {
-      console.error('Form submission error:', error)
-    }
-  }
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -135,219 +46,33 @@ export default function ContactSection() {
       id="contact"
       ref={sectionRef}
       className="section-gap page-padding relative"
-      style={{ backgroundColor: 'var(--heritage-sand)' }}
+      style={{ backgroundColor: 'var(--neutral-50)' }}
     >
-      {/* SVG Filter for Gooey Effect */}
-      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-        <defs>
-          <filter id="goo" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
-              result="goo"
-            />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-          </filter>
-        </defs>
-      </svg>
-
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
           {/* Left Column - Gooey Form */}
           <div ref={leftColRef} className="lg:w-1/2">
-            <div className="gooey-container">
-              <div className="gooey-blob blob-1" />
-              <div className="gooey-blob blob-2" />
-              <div className="gooey-blob blob-3" />
-              <div className="form-overlay">
-                <form onSubmit={handleSubmit(onSubmit)} className="contact-form">
-                  <div className="form-group">
-                    <input
-                      {...register('name')}
-                      type="text"
-                      placeholder="Your Name"
-                    />
-                    {errors.name && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
-                        {errors.name.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <input
-                      {...register('email')}
-                      type="email"
-                      placeholder="Email Address"
-                    />
-                    {errors.email && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
-                        {errors.email.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <input
-                      {...register('phone')}
-                      type="tel"
-                      placeholder="Phone Number (optional)"
-                    />
-                    {errors.phone && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
-                        {errors.phone.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <select {...register('service')}>
-                      <option value="">Select a Service</option>
-                      <option value="New Home Building">New Home Building</option>
-                      <option value="Home Extensions">Home Extensions</option>
-                      <option value="Home Renovations">Home Renovations</option>
-                      <option value="Carpentry">Carpentry</option>
-                      <option value="Cladding">Cladding</option>
-                      <option value="Painting">Painting</option>
-                      <option value="Landscaping">Landscaping</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    {errors.service && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
-                        {errors.service.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <textarea
-                      {...register('message')}
-                      placeholder="Tell us about your project..."
-                      rows={4}
-                    />
-                    {errors.message && (
-                      <span className="error-text" style={{ fontSize: '12px', color: '#e74c3c' }}>
-                        {errors.message.message}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Attachment upload (optional, up to 3 images) */}
-                  <div className="form-group">
-                    <input
-                      ref={attachmentInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      multiple
-                      onChange={handleAttachmentChange}
-                      className="hidden"
-                      aria-label="Attach project images"
-                    />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <button
-                        type="button"
-                        onClick={() => attachmentInputRef.current?.click()}
-                        disabled={attachmentUploading || attachmentKeys.length >= 3}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '10px 16px',
-                          border: '1px dashed rgba(226,192,99,0.5)',
-                          borderRadius: '8px',
-                          backgroundColor: 'transparent',
-                          color: 'rgba(255,255,255,0.7)',
-                          fontSize: '13px',
-                          cursor: attachmentUploading || attachmentKeys.length >= 3 ? 'not-allowed' : 'pointer',
-                          width: '100%',
-                          justifyContent: 'center',
-                          opacity: attachmentKeys.length >= 3 ? 0.5 : 1,
-                        }}
-                      >
-                        {attachmentUploading ? (
-                          <Loader size={14} className="animate-spin" />
-                        ) : (
-                          <Paperclip size={14} />
-                        )}
-                        {attachmentUploading
-                          ? 'Uploading…'
-                          : attachmentKeys.length >= 3
-                            ? 'Max 3 images'
-                            : `Attach Images (${attachmentKeys.length}/3)`}
-                      </button>
-
-                      {/* Attached file list */}
-                      {attachmentKeys.length > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          {attachmentKeys.map((key, i) => (
-                            <div
-                              key={i}
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '6px 10px',
-                                borderRadius: '6px',
-                                backgroundColor: 'rgba(226,192,99,0.1)',
-                                fontSize: '12px',
-                                color: 'rgba(255,255,255,0.8)',
-                              }}
-                            >
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85%' }}>
-                                {key.split('/').pop()}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeAttachment(i)}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'rgba(255,255,255,0.5)', flexShrink: 0 }}
-                              >
-                                <X size={12} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {attachmentError && (
-                        <span style={{ fontSize: '12px', color: '#e74c3c' }}>{attachmentError}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || attachmentUploading}
-                    className="btn-primary w-full"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                  >
-                    {isSubmitting && <Loader size={16} className="animate-spin" />}
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </button>
-                </form>
-              </div>
-            </div>
+            <QuoteForm />
           </div>
 
           {/* Right Column - Contact Info */}
           <div ref={rightColRef} className="lg:w-1/2 flex flex-col justify-center">
             <span
               className="label block mb-4"
-              style={{ color: 'var(--heritage-terracotta)' }}
+              style={{ color: 'var(--contigo-primary)' }}
             >
               GET IN TOUCH
             </span>
             <h2
               className="mb-6"
-              style={{ color: 'var(--heritage-charcoal)' }}
+              style={{ color: 'var(--contigo-foreground)' }}
             >
               Start Your Project
             </h2>
             <p
-              className="mb-8 text-base"
+              className="mb-8 text-fluid-base"
               style={{
-                color: 'var(--heritage-charcoal)',
+                color: 'var(--contigo-foreground)',
                 opacity: 0.8,
                 lineHeight: 1.7,
               }}
@@ -356,103 +81,21 @@ export default function ContactSection() {
               team is here to help bring your vision to life.
             </p>
 
-            {/* Contact Details */}
-            <div className="space-y-5">
-              <div className="flex items-start gap-4">
-                <Phone
-                  size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
-                />
-                <div>
-                  <p
-                    className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
-                  >
-                    Phone
-                  </p>
-                  <p
-                    className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
-                  >
-                    (08) 8123 4567
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <Mail
-                  size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
-                />
-                <div>
-                  <p
-                    className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
-                  >
-                    Email
-                  </p>
-                  <p
-                    className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
-                  >
-                    info@contigoconstructions.com.au
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <MapPin
-                  size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
-                />
-                <div>
-                  <p
-                    className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
-                  >
-                    Address
-                  </p>
-                  <p
-                    className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
-                  >
-                    25 Green Avenue, Seaton SA 5023
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <Clock
-                  size={20}
-                  style={{ color: 'var(--brand-gold)', flexShrink: 0, marginTop: 2 }}
-                />
-                <div>
-                  <p
-                    className="font-medium text-sm"
-                    style={{ color: 'var(--heritage-charcoal)' }}
-                  >
-                    Business Hours
-                  </p>
-                  <p
-                    className="text-sm mt-1"
-                    style={{ color: 'var(--heritage-charcoal)', opacity: 0.7 }}
-                  >
-                    Mon - Fri: 7:00 AM - 5:00 PM
-                  </p>
-                </div>
-              </div>
-            </div>
+            <ContactDetails />
           </div>
         </div>
       </div>
 
       {/* CC Monogram watermark */}
-      <img
-        src="/assets/isotipo.png"
-        alt=""
-        className="absolute bottom-8 right-8 pointer-events-none hidden lg:block"
-        style={{ width: '200px', opacity: 0.15 }}
-      />
+      <div className="absolute bottom-8 right-8 pointer-events-none hidden lg:block" style={{ opacity: 0.15 }}>
+        <Image
+          src="/assets/isotipo.png"
+          alt=""
+          width={200}
+          height={200}
+          style={{ width: '200px', height: 'auto' }}
+        />
+      </div>
     </section>
   )
 }

@@ -104,14 +104,14 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
     >
       <div
         className="relative rounded-2xl w-full max-w-md"
-        style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
+        style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
       >
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}>
-          <h2 className="text-base font-semibold" style={{ color: '#E8DCC4', fontFamily: 'var(--font-cormorant)' }}>
+          <h2 className="text-fluid-base font-semibold" style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}>
             Assign Media
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: '#A89E8C' }}>
-            <X size={16} />
+          <button onClick={onClose} className="p-1.5 rounded-lg min-h-[44px] min-w-[44px]" style={{ color: 'var(--neutral-600)' }}>
+            <X className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           </button>
         </div>
 
@@ -121,28 +121,28 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
             {item.mediaType === 'image' ? (
               <img src={item.publicUrl} alt="" className="h-full w-full object-contain" />
             ) : (
-              <Film size={28} style={{ color: '#A89E8C' }} />
+              <Film className="w-[clamp(1.5rem,3vw,1.75rem)] h-[clamp(1.5rem,3vw,1.75rem)]" style={{ color: 'var(--neutral-600)' }} />
             )}
           </div>
 
           {/* Assign as */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: '#A89E8C' }}>Assign as</label>
+            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: 'var(--neutral-600)' }}>Assign as</label>
             <div className="grid grid-cols-2 gap-2">
               {(['cover', 'gallery'] as const).map((opt) => (
                 <button
                   key={opt}
                   type="button"
                   onClick={() => setAssignAs(opt)}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-left transition-all"
+                  className="px-4 py-2.5 rounded-xl text-fluid-sm font-medium text-left transition-all min-h-[44px]"
                   style={
                     assignAs === opt
-                      ? { backgroundColor: 'rgba(226,192,99,0.18)', border: '1.5px solid #E2C063', color: '#E2C063' }
-                      : { backgroundColor: 'rgba(226,192,99,0.04)', border: '1px solid rgba(226,192,99,0.15)', color: '#A89E8C' }
+                      ? { backgroundColor: 'rgba(226,192,99,0.18)', border: '1.5px solid var(--contigo-primary)', color: 'var(--contigo-primary)' }
+                      : { backgroundColor: 'rgba(226,192,99,0.04)', border: '1px solid rgba(226,192,99,0.15)', color: 'var(--neutral-600)' }
                   }
                 >
                   <div className="flex items-center gap-2">
-                    {assignAs === opt && <Check size={14} strokeWidth={3} />}
+                    {assignAs === opt && <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" strokeWidth={3} />}
                     {opt === 'cover' ? 'Cover / Hero' : 'Add to Gallery'}
                   </div>
                 </button>
@@ -152,29 +152,29 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
 
           {/* Search */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: '#A89E8C' }}>Project / Service</label>
+            <label className="text-[10px] uppercase tracking-widest block mb-2" style={{ color: 'var(--neutral-600)' }}>Project / Service</label>
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2"
               style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)' }}
             >
-              <Search size={13} style={{ color: '#A89E8C' }} />
+              <Search className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" style={{ color: 'var(--neutral-600)' }} />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search…"
-                className="flex-1 bg-transparent outline-none text-sm"
-                style={{ color: '#E8DCC4' }}
+                className="flex-1 bg-transparent outline-none text-fluid-sm"
+                style={{ color: 'var(--neutral-50)' }}
               />
             </div>
 
             {loading ? (
-              <div className="py-6 text-center text-sm" style={{ color: '#A89E8C' }}>Loading…</div>
+              <div className="py-6 text-center text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>Loading…</div>
             ) : (
               <div className="space-y-3 max-h-48 overflow-y-auto">
                 {projects.length > 0 && (
                   <div>
-                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: '#A89E8C' }}>Projects</p>
+                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: 'var(--neutral-600)' }}>Projects</p>
                     {projects.map((e) => (
                       <EntityRow key={e.id} entity={e} selected={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
                     ))}
@@ -182,14 +182,14 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
                 )}
                 {services.length > 0 && (
                   <div>
-                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: '#A89E8C' }}>Services</p>
+                    <p className="text-[9px] uppercase tracking-widest mb-1.5 px-1" style={{ color: 'var(--neutral-600)' }}>Services</p>
                     {services.map((e) => (
                       <EntityRow key={e.id} entity={e} selected={selectedId === e.id} onSelect={() => setSelectedId(e.id)} />
                     ))}
                   </div>
                 )}
                 {filtered.length === 0 && (
-                  <p className="text-sm text-center py-4" style={{ color: '#6B6560' }}>No results</p>
+                  <p className="text-fluid-sm text-center py-4" style={{ color: '#6B6560' }}>No results</p>
                 )}
               </div>
             )}
@@ -197,12 +197,12 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
         </div>
 
         <div className="flex items-center justify-end gap-3 px-6 py-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(226,192,99,0.1)' }}>
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm" style={{ color: '#A89E8C' }}>Cancel</button>
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-fluid-sm min-h-[44px]" style={{ color: 'var(--neutral-600)' }}>Cancel</button>
           <button
             onClick={handleAssign}
             disabled={!selectedId || saving}
-            className="px-5 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
-            style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+            className="px-5 py-2 rounded-lg text-fluid-sm font-semibold transition-all disabled:opacity-40 min-h-[44px]"
+            style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
           >
             {saving ? 'Assigning…' : 'Assign'}
           </button>
@@ -220,8 +220,8 @@ function EntityRow({ entity, selected, onSelect }: { entity: Entity; selected: b
       className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-left transition-all"
       style={{
         backgroundColor: selected ? 'rgba(226,192,99,0.15)' : 'rgba(226,192,99,0.04)',
-        border: `1px solid ${selected ? '#E2C063' : 'rgba(226,192,99,0.08)'}`,
-        color: selected ? '#E2C063' : '#E8DCC4',
+        border: `1px solid ${selected ? 'var(--contigo-primary)' : 'rgba(226,192,99,0.08)'}`,
+        color: selected ? 'var(--contigo-primary)' : 'var(--neutral-50)',
       }}
     >
       <div
@@ -231,7 +231,7 @@ function EntityRow({ entity, selected, onSelect }: { entity: Entity; selected: b
         {entity.coverUrl ? (
           <img src={entity.coverUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <ImageIcon size={16} style={{ color: '#A89E8C' }} />
+          <ImageIcon size={16} style={{ color: 'var(--neutral-600)' }} />
         )}
       </div>
       <span className="flex-1 truncate font-medium">{entity.name}</span>

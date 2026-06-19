@@ -1,0 +1,117 @@
+/**
+ * contigo-design-system — Layer 2: Semantic Tokens
+ *
+ * Brand-specific semantic naming + shadcn HSL triplets.
+ * All deprecated --heritage-*, --atelier-*, --monolith-* aliases are
+ * maintained here for backwards compatibility only — they MUST NOT be used
+ * in new code. Migrate them opportunistically when touching a file.
+ */
+
+:root {
+  /* ============================================================
+     CONTIGO BRAND SEMANTICS — New professional naming
+     ============================================================ */
+
+  /* Primary (gold) */
+  --contigo-primary: var(--gold-400);
+  --contigo-primary-light: var(--gold-500);
+  --contigo-primary-hover: var(--gold-600);
+  --contigo-primary-dark: var(--gold-700);
+
+  /* Secondary (petrol) */
+  --contigo-secondary: var(--petrol-800);
+  --contigo-secondary-light: var(--petrol-600);
+  --contigo-secondary-pale: var(--petrol-100);
+
+  /* Neutral (ink/ivory) */
+  --contigo-foreground: var(--neutral-900);
+  --contigo-background: var(--neutral-50);
+  --contigo-muted: var(--neutral-600);
+  --contigo-border: var(--neutral-200);
+
+  /* ============================================================
+     SHADCN HSL MAPPINGS (for shadcn components)
+     Consumed as hsl(var(--x)) in tailwind.config.js
+     ============================================================ */
+  --background: 36 50% 96%;           /* neutral-50 */
+  --foreground: 60 4% 11%;            /* neutral-900 */
+  --card: 36 50% 96%;
+  --card-foreground: 60 4% 11%;
+  --popover: 36 50% 96%;
+  --popover-foreground: 60 4% 11%;
+  --primary: 44 69% 64%;              /* gold-400 */
+  --primary-foreground: 30 8% 15%;    /* neutral-800 */
+  --secondary: 195 71% 17%;           /* petrol-800 */
+  --secondary-foreground: 36 50% 96%; /* neutral-50 */
+  --muted: 40 20% 92%;
+  --muted-foreground: 30 5% 40%;
+  --accent: 40 25% 90%;
+  --accent-foreground: 30 8% 15%;
+  --destructive: 6 64% 47%;           /* error-600 */
+  --destructive-foreground: 0 0% 98%;
+  --border: 35 20% 85%;
+  --input: 35 20% 85%;
+  --ring: 44 69% 64%;                 /* gold-400 */
+  --radius: 0.5rem;
+
+  /* ============================================================
+     FONT FAMILIES (semantic layer)
+     ============================================================ */
+  --contigo-font-display: var(--font-alegreya);        /* Headings/display */
+  --contigo-font-sans: var(--font-alegreya-sans);      /* UI/body/labels */
+  --contigo-font-data: var(--font-space-grotesk);      /* Numerals/KPIs */
+
+  /* ============================================================
+     DEPRECATED ALIASES (backwards compatibility only)
+     DO NOT USE IN NEW CODE — these resolve to Layer 1 or contigo-semantics
+     ============================================================ */
+
+  /* Legacy Contigo brand names */
+  --brand-gold: var(--contigo-primary);
+  --brand-gold-hover: var(--contigo-primary-hover);
+  --brand-gold-light: var(--contigo-primary-light);
+  --brand-gold-antique: var(--contigo-primary-dark);
+
+  /* Legacy Atelier theme (warm ivory aesthetic) */
+  --atelier-ivory: var(--neutral-50);
+  --atelier-cream: var(--neutral-100);
+  --atelier-ink: var(--neutral-800);
+  --atelier-muted: var(--neutral-600);
+  --atelier-border: var(--neutral-200);
+
+  /* Legacy Heritage theme (dark earth — DEPRECATED)
+     Tonal photography companion, not brand token. Do not use in new components. */
+  --heritage-sand: #E8DCC4;
+  --heritage-dark: #1E1812;
+  --heritage-charcoal: #3A3028;
+  --heritage-terracotta: #B8704A;
+  --heritage-moss: #6B7B5E;
+  --heritage-muted: var(--neutral-400);
+
+  /* Legacy Monolith theme (cool slate — DEPRECATED, replaced by petrol) */
+  --monolith-concrete: var(--petrol-100);
+  --monolith-surface: var(--petrol-50);
+  --monolith-ink: var(--petrol-900);
+  --monolith-slate: var(--petrol-500);
+  --monolith-border: var(--petrol-200);
+  --monolith-gold: var(--gold-600);
+
+  /* Legacy admin names (DEPRECATED) */
+  --admin-sidebar-bg: #1E1A16;
+  --admin-sidebar-text: var(--neutral-50);
+  --admin-sidebar-muted: var(--neutral-400);
+  --admin-sidebar-border: var(--gold-a12);
+  --admin-sidebar-active-bg: var(--gold-a15);
+  --admin-sidebar-active-text: var(--gold-400);
+  --admin-gold: var(--gold-400);
+  --admin-gold-hover: var(--gold-600);
+  --admin-bg: var(--neutral-50);
+  --admin-card-border: var(--neutral-200);
+  --admin-ink: var(--neutral-800);
+  --admin-muted: var(--neutral-600);
+
+  /* Legacy font aliases (DEPRECATED) */
+  --font-cormorant: var(--contigo-font-display);
+  --font-inter: var(--contigo-font-sans);
+  --font-space: var(--contigo-font-data);
+}

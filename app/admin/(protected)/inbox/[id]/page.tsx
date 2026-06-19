@@ -19,7 +19,7 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Quote from {quote.name}</h1>
+        <h1 className="text-fluid-3xl font-bold">Quote from {quote.name}</h1>
         <p className="text-muted-foreground">Track and manage this quote</p>
       </div>
 

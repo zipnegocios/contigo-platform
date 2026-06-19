@@ -90,34 +90,25 @@ export default async function ProjectDetailPage({
           }}
         />
 
-        {/* Back link */}
-        <Link
-          href="/projects"
-          className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium tracking-wide transition-opacity duration-200 hover:opacity-70"
-          style={{ color: '#E2C063' }}
-        >
-          ← All Projects
-        </Link>
-
         {/* Title block */}
         <div className="absolute bottom-0 left-0 right-0 px-8 pb-12 md:px-16 md:pb-16">
           <p
-            className="text-xs uppercase tracking-widest mb-3"
+            className="text-fluid-xs uppercase tracking-widest mb-3"
             style={{ color: '#E2C063' }}
           >
             {project.category}
           </p>
           <h1
-            className="text-5xl md:text-7xl font-semibold leading-none"
+            className="text-fluid-5xl font-semibold leading-none"
             style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
           >
             {project.title}
           </h1>
           <div className="flex flex-wrap gap-6 mt-5">
-            <span className="text-sm" style={{ color: 'rgba(250,246,240,0.7)' }}>
+            <span className="text-fluid-sm" style={{ color: 'rgba(250,246,240,0.7)' }}>
               {project.location}
             </span>
-            <span className="text-sm" style={{ color: 'rgba(250,246,240,0.7)' }}>
+            <span className="text-fluid-sm" style={{ color: 'rgba(250,246,240,0.7)' }}>
               Completed {completedLabel}
             </span>
           </div>
@@ -131,8 +122,8 @@ export default async function ProjectDetailPage({
           {/* ── Left: Description + Gallery ─────────────────────────────────── */}
           <div className="flex-1 min-w-0">
             <p
-              className="text-lg md:text-xl leading-relaxed mb-12"
-              style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)', fontSize: '1.25rem' }}
+              className="text-fluid-xl leading-relaxed mb-12"
+              style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)' }}
             >
               {project.description}
             </p>
@@ -150,7 +141,7 @@ export default async function ProjectDetailPage({
               }}
             >
               <h3
-                className="text-xs uppercase tracking-widest mb-6"
+                className="text-fluid-xs uppercase tracking-widest mb-6"
                 style={{ color: '#E2C063' }}
               >
                 Project Details
@@ -158,37 +149,37 @@ export default async function ProjectDetailPage({
 
               <dl className="space-y-5">
                 <div>
-                  <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                  <dt className="text-fluid-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
                     Category
                   </dt>
-                  <dd className="text-base font-medium" style={{ color: '#E8DCC4' }}>
+                  <dd className="text-fluid-base font-medium" style={{ color: '#E8DCC4' }}>
                     {project.category}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                  <dt className="text-fluid-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
                     Location
                   </dt>
-                  <dd className="text-base font-medium" style={{ color: '#E8DCC4' }}>
+                  <dd className="text-fluid-base font-medium" style={{ color: '#E8DCC4' }}>
                     {project.location}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                  <dt className="text-fluid-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
                     Completed
                   </dt>
-                  <dd className="text-base font-medium" style={{ color: '#E8DCC4' }}>
+                  <dd className="text-fluid-base font-medium" style={{ color: '#E8DCC4' }}>
                     {completedLabel}
                   </dd>
                 </div>
                 {project.featured && (
                   <div>
-                    <dt className="text-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
+                    <dt className="text-fluid-xs uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>
                       Recognition
                     </dt>
                     <dd>
                       <span
-                        className="text-xs uppercase tracking-widest px-3 py-1 rounded-full"
+                        className="text-fluid-xs uppercase tracking-widest px-3 py-1 rounded-full"
                         style={{ backgroundColor: 'rgba(226,192,99,0.18)', color: '#E2C063' }}
                       >
                         Featured Project
@@ -203,13 +194,13 @@ export default async function ProjectDetailPage({
                 style={{ height: 1, backgroundColor: 'rgba(226,192,99,0.15)' }}
               />
 
-              <p className="text-sm mb-5" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
+              <p className="text-fluid-sm mb-5" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
                 Interested in a similar project? Our team would love to discuss how we can bring your vision to life.
               </p>
 
               <Link
                 href="/#contact"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold transition-all duration-200"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-semibold transition-all duration-200"
                 style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
               >
                 Request a Quote

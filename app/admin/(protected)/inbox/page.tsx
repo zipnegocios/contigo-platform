@@ -10,7 +10,7 @@ export default async function InboxPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Quotes</h1>
+        <h1 className="text-fluid-3xl font-bold">Quotes</h1>
         <p className="text-muted-foreground">Manage all incoming quotes and track their status.</p>
       </div>
 

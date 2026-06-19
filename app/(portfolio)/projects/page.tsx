@@ -80,27 +80,27 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <div
         className="relative py-24 px-6 md:px-16"
         style={{
-          backgroundColor: '#1E1A16',
+          backgroundColor: 'var(--petrol-800)',
           borderBottom: '1px solid rgba(226,192,99,0.15)',
         }}
       >
         <span
-          className="block text-xs uppercase tracking-widest mb-4"
+          className="block text-fluid-xs uppercase tracking-widest mb-4"
           style={{ color: '#E2C063' }}
         >
           Portfolio
         </span>
         <h1
-          className="text-5xl md:text-7xl font-semibold leading-none mb-4"
+          className="text-fluid-5xl font-semibold leading-none mb-4"
           style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
         >
           Our Projects
         </h1>
-        <p className="text-base max-w-xl" style={{ color: 'rgba(250,246,240,0.6)' }}>
+        <p className="text-fluid-base max-w-xl" style={{ color: 'rgba(250,246,240,0.6)' }}>
           From heritage restorations to contemporary new builds — explore the work that defines Contigo.
         </p>
         <p
-          className="absolute bottom-6 right-8 text-xs"
+          className="absolute bottom-6 right-8 text-fluid-xs"
           style={{ color: 'rgba(250,246,240,0.3)' }}
         >
           {filtered.length} project{filtered.length !== 1 ? 's' : ''}
@@ -111,7 +111,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         {allProjects.length === 0 ? (
           <div className="py-32 text-center">
-            <p className="text-sm" style={{ color: '#A89E8C' }}>
+            <p className="text-fluid-sm" style={{ color: '#A89E8C' }}>
               No projects published yet. Check back soon.
             </p>
           </div>

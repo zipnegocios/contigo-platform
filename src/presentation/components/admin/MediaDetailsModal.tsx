@@ -112,18 +112,18 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
     >
       <div
         className="relative rounded-2xl max-w-lg w-full overflow-hidden"
-        style={{ backgroundColor: '#1E1A16', border: '1px solid rgba(226,192,99,0.2)' }}
+        style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)' }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-6 py-4"
           style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}
         >
-          <h2 className="text-base font-semibold truncate pr-4" style={{ color: '#E8DCC4', fontFamily: 'var(--font-cormorant)' }}>
+          <h2 className="text-fluid-base font-semibold truncate pr-4" style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}>
             {filename}
           </h2>
-          <button onClick={onClose} className="flex-shrink-0 p-1.5 rounded-lg" style={{ color: '#A89E8C' }}>
-            <X size={18} />
+          <button onClick={onClose} className="flex-shrink-0 p-1.5 rounded-lg min-h-[44px] min-w-[44px]" style={{ color: 'var(--neutral-600)' }}>
+            <X className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
           </button>
         </div>
 
@@ -138,9 +138,9 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
             ) : item.mediaType === 'video' ? (
               <video src={item.publicUrl} controls className="w-full h-full object-contain" />
             ) : (
-              <div className="flex flex-col items-center gap-2" style={{ color: '#A89E8C' }}>
-                <Image size={36} />
-                <span className="text-xs">No preview</span>
+              <div className="flex flex-col items-center gap-2" style={{ color: 'var(--neutral-600)' }}>
+                <Image className="w-[clamp(1.75rem,3.5vw,2.25rem)] h-[clamp(1.75rem,3.5vw,2.25rem)]" />
+                <span className="text-fluid-xs">No preview</span>
               </div>
             )}
           </div>
@@ -149,24 +149,24 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
         {/* File info */}
         <div className="px-6 py-4 space-y-4">
           {/* Basic info grid */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-2 gap-3 text-fluid-sm">
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Size</p>
-              <p style={{ color: '#E8DCC4' }}>{formatBytes(item.size)}</p>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--neutral-600)' }}>Size</p>
+              <p style={{ color: 'var(--neutral-50)' }}>{formatBytes(item.size)}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Format</p>
-              <p style={{ color: '#E8DCC4' }}>{formatMime(format) || <span style={{ color: '#6B6560' }}>Unknown</span>}</p>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--neutral-600)' }}>Format</p>
+              <p style={{ color: 'var(--neutral-50)' }}>{formatMime(format) || <span style={{ color: '#6B6560' }}>Unknown</span>}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Last Modified</p>
-              <p style={{ color: '#E8DCC4' }}>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--neutral-600)' }}>Last Modified</p>
+              <p style={{ color: 'var(--neutral-50)' }}>
                 {new Date(item.lastModified).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })}
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Type</p>
-              <p style={{ color: '#E8DCC4' }} className="capitalize">{item.mediaType}</p>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--neutral-600)' }}>Type</p>
+              <p style={{ color: 'var(--neutral-50)' }} className="capitalize">{item.mediaType}</p>
             </div>
           </div>
 
@@ -176,13 +176,13 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
               style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
             >
-              <Maximize2 size={15} style={{ color: '#E2C063', flexShrink: 0 }} />
+              <Maximize2 className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
               {measuring && !width ? (
-                <span className="text-xs" style={{ color: '#A89E8C' }}>Measuring…</span>
+                <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>Measuring…</span>
               ) : width && height ? (
-                <div className="flex items-center gap-3 text-sm flex-wrap">
-                  <span style={{ color: '#E8DCC4' }}>{width} × {height}px</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: '#E2C063' }}>
+                <div className="flex items-center gap-3 text-fluid-sm flex-wrap">
+                  <span style={{ color: 'var(--neutral-50)' }}>{width} × {height}px</span>
+                  <span className="text-fluid-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--contigo-primary)' }}>
                     {aspectRatio(width, height)}
                   </span>
                 </div>
@@ -196,60 +196,60 @@ export function MediaDetailsModal({ item, onClose }: MediaDetailsModalProps) {
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
               style={{ backgroundColor: 'rgba(226,192,99,0.05)', border: '1px solid rgba(226,192,99,0.1)' }}
             >
-              <Film size={15} style={{ color: '#E2C063', flexShrink: 0 }} />
-              <span className="text-sm" style={{ color: '#E8DCC4' }}>Duration: {formatDuration(duration)}</span>
+              <Film className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: 'var(--contigo-primary)', flexShrink: 0 }} />
+              <span className="text-fluid-sm" style={{ color: 'var(--neutral-50)' }}>Duration: {formatDuration(duration)}</span>
             </div>
           )}
 
           {/* Notes */}
           {dbMeta?.notes && (
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#A89E8C' }}>Notes</p>
-              <p className="text-sm" style={{ color: '#E8DCC4' }}>{dbMeta.notes}</p>
+              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--neutral-600)' }}>Notes</p>
+              <p className="text-fluid-sm" style={{ color: 'var(--neutral-50)' }}>{dbMeta.notes}</p>
             </div>
           )}
 
           {/* URL + copy */}
           <div>
-            <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: '#A89E8C' }}>Public URL</p>
+            <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--neutral-600)' }}>Public URL</p>
             <div className="flex items-center gap-2">
               <p
-                className="text-xs flex-1 min-w-0 truncate font-mono px-3 py-2 rounded-lg"
-                style={{ backgroundColor: 'rgba(226,192,99,0.06)', color: '#A89E8C', border: '1px solid rgba(226,192,99,0.1)' }}
+                className="text-fluid-xs flex-1 min-w-0 truncate font-mono px-3 py-2 rounded-lg"
+                style={{ backgroundColor: 'rgba(226,192,99,0.06)', color: 'var(--neutral-600)', border: '1px solid rgba(226,192,99,0.1)' }}
               >
                 {item.publicUrl}
               </p>
               <button
                 onClick={handleCopy}
-                className="flex-shrink-0 p-2 rounded-lg transition-all"
+                className="flex-shrink-0 p-2 rounded-lg transition-all min-h-[44px] min-w-[44px]"
                 style={{
                   backgroundColor: copied ? 'rgba(82,183,136,0.15)' : 'rgba(226,192,99,0.1)',
-                  color: copied ? '#52B788' : '#E2C063',
+                  color: copied ? '#52B788' : 'var(--contigo-primary)',
                 }}
                 title="Copy URL"
               >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {copied ? <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <Copy className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
               </button>
             </div>
           </div>
 
           {/* Associations */}
           <div>
-            <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: '#A89E8C' }}>Used In</p>
+            <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--neutral-600)' }}>Used In</p>
             {item.usedIn.length === 0 ? (
-              <p className="text-sm" style={{ color: '#6B6560' }}>Unassigned</p>
+              <p className="text-fluid-sm" style={{ color: '#6B6560' }}>Unassigned</p>
             ) : (
               <div className="space-y-1.5">
                 {item.usedIn.map((a, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between px-3 py-2 rounded-lg text-sm"
+                    className="flex items-center justify-between px-3 py-2 rounded-lg text-fluid-sm"
                     style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.08)' }}
                   >
-                    <span style={{ color: '#E8DCC4' }}>{a.title}</span>
+                    <span style={{ color: 'var(--neutral-50)' }}>{a.title}</span>
                     <span
                       className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: 'rgba(226,192,99,0.15)', color: '#E2C063' }}
+                      style={{ backgroundColor: 'rgba(226,192,99,0.15)', color: 'var(--contigo-primary)' }}
                     >
                       {FIELD_LABELS[a.field]}
                     </span>

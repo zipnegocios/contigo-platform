@@ -25,11 +25,13 @@ export function CustomCursor() {
     let ringY = 0
     let dotX = 0
     let dotY = 0
+    let needsUpdate = false
     let rafId: number
 
     const onMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX
       mouseY = e.clientY
+      needsUpdate = true
     }
 
     const animateCursor = () => {
@@ -38,8 +40,11 @@ export function CustomCursor() {
       dotX += (mouseX - dotX) * 0.35
       dotY += (mouseY - dotY) * 0.35
 
-      ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px)`
-      dot.style.transform = `translate(${dotX - 3}px, ${dotY - 3}px)`
+      if (needsUpdate || Math.abs(mouseX - ringX) > 1 || Math.abs(mouseY - ringY) > 1) {
+        ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px)`
+        dot.style.transform = `translate(${dotX - 3}px, ${dotY - 3}px)`
+        needsUpdate = false
+      }
 
       rafId = requestAnimationFrame(animateCursor)
     }

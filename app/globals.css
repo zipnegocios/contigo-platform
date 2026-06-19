@@ -1,3 +1,6 @@
+@import '../src/presentation/design-system/tokens/contigo-primitives.css';
+@import '../src/presentation/design-system/tokens/contigo-semantic.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,78 +8,6 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-  }
-
-  :root {
-    /* Contigo Brand Colors */
-    --brand-gold: #E3C064;
-    --brand-gold-hover: #D4AF37;
-    --brand-gold-light: #C8A55C;
-    --brand-gold-antique: #A08040;
-
-    /* Atelier Gold Theme */
-    --atelier-ivory: #FAF6F0;
-    --atelier-cream: #F5EDE0;
-    --atelier-ink: #2D2924;
-    --atelier-muted: #6B6560;
-    --atelier-border: #E5DDD0;
-
-    /* Heritage Earth Theme */
-    --heritage-sand: #E8DCC4;
-    --heritage-dark: #1E1812;
-    --heritage-charcoal: #3A3028;
-    --heritage-terracotta: #B8704A;
-    --heritage-moss: #6B7B5E;
-    --heritage-muted: #A89E8C;
-
-    /* Monolith Theme */
-    --monolith-concrete: #E2E8F0;
-    --monolith-surface: #F8FAFC;
-    --monolith-ink: #1E293B;
-    --monolith-slate: #64748B;
-    --monolith-border: #CBD5E1;
-    --monolith-gold: #D4AF37;
-
-    /* ShadCN overrides */
-    --background: 40 33% 96%;
-    --foreground: 30 8% 15%;
-    --card: 40 33% 96%;
-    --card-foreground: 30 8% 15%;
-    --popover: 40 33% 96%;
-    --popover-foreground: 30 8% 15%;
-    --primary: 43 72% 64%;
-    --primary-foreground: 30 8% 15%;
-    --secondary: 40 25% 90%;
-    --secondary-foreground: 30 8% 15%;
-    --muted: 40 20% 92%;
-    --muted-foreground: 30 5% 40%;
-    --accent: 40 25% 90%;
-    --accent-foreground: 30 8% 15%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 35 20% 85%;
-    --input: 35 20% 85%;
-    --ring: 43 72% 64%;
-    --radius: 0.5rem;
-
-    /* Font families */
-    --font-cormorant: var(--font-cormorant-garamond);
-    --font-inter: var(--font-inter-regular);
-    --font-space: var(--font-space-grotesk);
-
-    /* Admin Portal Design Tokens */
-    --admin-sidebar-bg: #1E1A16;
-    --admin-sidebar-text: #E8DCC4;
-    --admin-sidebar-muted: #A89E8C;
-    --admin-sidebar-border: rgba(226, 192, 99, 0.12);
-    --admin-sidebar-active-bg: rgba(226, 192, 99, 0.15);
-    --admin-sidebar-active-text: #E2C063;
-    --admin-gold: #E2C063;
-    --admin-gold-hover: #D4AF37;
-    --admin-bg: #FAF6F0;
-    --admin-card-border: #E5DDD0;
-    --admin-ink: #2D2924;
-    --admin-muted: #6B6560;
   }
 }
 
@@ -90,9 +21,9 @@
   }
 
   body {
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    color: var(--atelier-ink);
-    background-color: var(--atelier-ivory);
+    font-family: var(--font-sans, sans-serif);
+    color: var(--neutral-800);
+    background-color: var(--neutral-50);
     overflow-x: hidden;
     cursor: none;
   }
@@ -119,39 +50,37 @@
 
   /* Typography */
   h1, h2, h3.display {
-    font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
+    font-family: var(--font-display, Georgia, serif);
   }
 
   h1 {
-    font-size: clamp(3rem, 7vw, 6rem);
+    @apply text-fluid-6xl;
     font-weight: 400;
-    line-height: 1.05;
   }
 
   h2 {
-    font-size: clamp(2rem, 4vw, 3.5rem);
+    @apply text-fluid-4xl;
     font-weight: 400;
-    line-height: 1.15;
   }
 
   h3 {
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    font-size: 1.25rem;
+    font-family: var(--font-sans, sans-serif);
+    @apply text-fluid-xl;
     font-weight: 500;
-    line-height: 1.3;
   }
 
   h4, .label {
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    font-size: 0.75rem;
+    font-family: var(--font-sans, sans-serif);
+    @apply text-fluid-xs;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
 
   .data-text {
-    font-family: var(--font-space, 'Space Grotesk', sans-serif);
+    font-family: var(--font-data, sans-serif);
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -182,11 +111,12 @@
     justify-content: center;
     gap: 0.5rem;
     background-color: var(--brand-gold);
-    color: var(--atelier-ink);
-    padding: 0.875rem 2rem;
+    color: var(--neutral-800);
+    padding: clamp(0.625rem, 1.5vw, 0.875rem) clamp(1.25rem, 3vw, 2rem);
+    min-height: 44px;
     border-radius: 8px;
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    font-size: 0.875rem;
+    font-family: var(--font-sans, sans-serif);
+    font-size: clamp(0.8125rem, 1vw, 0.875rem);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -197,7 +127,7 @@
   .btn-primary:hover {
     background-color: var(--brand-gold-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(227, 192, 100, 0.3);
+    box-shadow: 0 4px 12px var(--gold-a30);
   }
 
   .btn-secondary {
@@ -207,10 +137,11 @@
     gap: 0.5rem;
     background-color: transparent;
     color: var(--brand-gold);
-    padding: 0.875rem 2rem;
+    padding: clamp(0.625rem, 1.5vw, 0.875rem) clamp(1.25rem, 3vw, 2rem);
+    min-height: 44px;
     border-radius: 8px;
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    font-size: 0.875rem;
+    font-family: var(--font-sans, sans-serif);
+    font-size: clamp(0.8125rem, 1vw, 0.875rem);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -219,7 +150,7 @@
   }
 
   .btn-secondary:hover {
-    background-color: rgba(227, 192, 100, 0.1);
+    background-color: var(--gold-a12);
     transform: translateY(-2px);
   }
 
@@ -230,15 +161,16 @@
     justify-content: center;
     gap: 0.5rem;
     background-color: transparent;
-    color: var(--atelier-ink);
-    padding: 0.875rem 2rem;
+    color: var(--neutral-800);
+    padding: clamp(0.625rem, 1.5vw, 0.875rem) clamp(1.25rem, 3vw, 2rem);
+    min-height: 44px;
     border-radius: 8px;
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    font-size: 0.875rem;
+    font-family: var(--font-sans, sans-serif);
+    font-size: clamp(0.8125rem, 1vw, 0.875rem);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border: 1px solid var(--atelier-border);
+    border: 1px solid var(--neutral-200);
     transition: all 0.3s ease;
   }
 
@@ -258,7 +190,7 @@
     width: 100%;
     overflow-x: hidden;
     padding: 10vh 0;
-    background: var(--atelier-ivory);
+    background: var(--neutral-50);
   }
 
   .parallax-work-wrapper {
@@ -275,7 +207,7 @@
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 40%, var(--atelier-ivory) 90%);
+    background: radial-gradient(ellipse at center, transparent 40%, var(--neutral-50) 90%);
   }
 
   .parallax-work-item {
@@ -302,10 +234,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--heritage-dark);
-    color: var(--heritage-sand);
+    background: var(--petrol-800);
+    color: var(--neutral-50);
     padding: 10vh 4vw;
-    perspective: 1000px;
   }
 
   .flip-container {
@@ -323,35 +254,55 @@
   }
 
   .flip-text-block h2 {
-    font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
+    font-family: var(--font-display, Georgia, serif);
     font-size: clamp(2rem, 4vw, 3.5rem);
-    color: var(--heritage-sand);
+    color: var(--neutral-50);
   }
 
   .flip-text-block p {
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-sans, sans-serif);
     font-size: 1rem;
     line-height: 1.6;
-    color: var(--heritage-muted);
+    color: var(--neutral-200);
   }
 
   .flip-word {
     display: flex;
+    align-items: center;
     justify-content: center;
-    perspective: 1000px;
   }
 
-  .flip-letter {
-    display: inline-block;
-    font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
-    font-weight: 600;
-    font-size: clamp(5rem, 12vw, 10rem);
+  /* The center brand lockup is the logo's own vector artwork (one shared
+     viewBox for "Contigo", the separator rule, and "Constructions Pty"),
+     so relative scale/kerning/the rule's gap match the source file exactly. */
+  .flip-word svg {
+    width: clamp(17rem, 42vw, 32rem);
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Letters materialize in place — opacity + lift + blur, no transform-box
+     tricks (GSAP mishandles fill-box origins on grouped SVG shapes, which
+     was throwing the separator rule off-position). Plain pixel translateY
+     needs no box reference, so it's reliable on every letter shape. */
+  .flip-letter-shape {
     color: #3A3028;
-    transform: translate(-20%, 100%) rotateX(-80deg);
-    transform-origin: center bottom;
-    transform-style: preserve-3d;
-    will-change: transform, opacity;
-    line-height: 1;
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+    filter: blur(8px);
+    will-change: transform, opacity, filter;
+  }
+
+  /* The two gold bars from the logo, each clipped at the edge nearest the
+     center gap — GSAP animates the clip-path inset directly (no transform
+     origin involved), so they stay pinned to their exact logo position and
+     simply draw outward from the gap, like a tape measure extending out. */
+  .flip-separator-bar {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  .flip-separator-bar--right {
+    clip-path: inset(0 100% 0 0);
   }
 
   /* Accordion section */
@@ -369,7 +320,7 @@
     overflow: hidden;
     flex: 1;
     height: 500px;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: none;
     transition: flex 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
     will-change: flex;
@@ -388,12 +339,14 @@
     inset: 0;
     background-size: cover;
     background-position: center;
-    filter: brightness(0.85);
-    transition: filter 0.5s ease;
+    filter: brightness(0.82);
+    transform: scale(1.001);
+    transition: filter 0.6s ease, transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   .accordion-item:hover .accordion-img {
     filter: brightness(1);
+    transform: scale(1.06);
   }
 
   .accordion-link {
@@ -411,29 +364,51 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(30, 41, 59, 0.85) 100%);
+    background: linear-gradient(to bottom, transparent 35%, rgba(13, 60, 76, 0.92) 100%);
     z-index: -1;
   }
 
   .accordion-title {
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    font-weight: 500;
-    font-size: 1.25rem;
+    position: relative;
+    font-family: var(--font-alegreya, serif);
+    font-weight: 600;
+    font-size: 1.4rem;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
     color: white;
     margin: 0;
+    padding-bottom: 0.6rem;
     transform: translateY(20px);
     transition: transform 0.4s ease;
+  }
+
+  .accordion-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: var(--contigo-primary);
+    transition: width 0.45s ease 0.12s;
   }
 
   .accordion-item:hover .accordion-title {
     transform: translateY(0);
   }
 
+  .accordion-item:hover .accordion-title::after {
+    width: 44px;
+  }
+
   .accordion-desc {
-    font-family: var(--font-inter, 'Inter', sans-serif);
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0.5rem 0 0;
+    font-family: var(--font-alegreya-sans, sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--contigo-primary);
+    margin: 0.4rem 0 0;
     transform: translateY(20px);
     opacity: 0;
     transition: all 0.4s ease 0.1s;
@@ -451,11 +426,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.85);
-    transition: filter 0.5s ease;
+    filter: brightness(0.82);
+    transform: scale(1.001);
+    transition: filter 0.6s ease, transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
   .accordion-item:hover .accordion-video {
     filter: brightness(1);
+    transform: scale(1.06);
   }
 
   /* ── accordion responsive heights ───────────────────────────────────────── */
@@ -479,22 +456,49 @@
     }
   }
 
-  /* Gooey form */
-  .gooey-container {
+  /* Gooey form — 2-layer architecture */
+
+  /* Wrapper: dimensiones pero SIN filter */
+  .contact-form-wrapper {
     position: relative;
     width: 100%;
     max-width: 560px;
     height: 640px;
     margin: 0 auto;
-    filter: url('#goo');
     overflow: visible;
-    background: transparent;
   }
 
+  /* Capa de blobs: sin filtro SVG — los blobs usan CSS blur (GPU) */
+  .gooey-blobs-layer {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  /* Mobile: blobs más pequeños y sutiles (CSS blur es barato en GPU) */
+  @media (max-width: 768px) {
+    .blob-1 { width: 260px; height: 260px; opacity: 0.75; }
+    .blob-2 { width: 190px; height: 190px; opacity: 0.65; }
+    .blob-3 { width: 160px; height: 160px; opacity: 0.55; }
+  }
+
+  /*
+   * CSS blur orbs: el blur se computa una sola vez por blob.
+   * La rotación es solo transform = compositing GPU puro (sin re-blur por frame).
+   * Esto elimina el lag del cursor que causaba el antiguo filter: url('#goo').
+   */
   .gooey-blob {
     position: absolute;
     border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    filter: blur(45px);
     animation: blobRotate 20s linear infinite;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gooey-blob {
+      animation: none;
+    }
   }
 
   @keyframes blobRotate {
@@ -511,7 +515,7 @@
   .blob-1 {
     width: 400px;
     height: 400px;
-    background: #E3C064;
+    background: var(--gold-400);
     top: -40px;
     left: -40px;
     animation-duration: 20s;
@@ -520,7 +524,7 @@
   .blob-2 {
     width: 300px;
     height: 300px;
-    background: #C8A55C;
+    background: var(--gold-500);
     top: 20%;
     right: -30px;
     animation-duration: 25s;
@@ -529,7 +533,7 @@
   .blob-3 {
     width: 250px;
     height: 250px;
-    background: #A08040;
+    background: var(--gold-700);
     bottom: 10%;
     left: 10%;
     animation-duration: 22s;
@@ -538,43 +542,200 @@
   .form-overlay {
     position: relative;
     z-index: 2;
-    padding: 3rem;
+    padding: 2.75rem;
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    backdrop-filter: blur(8px);
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    gap: 1.25rem;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 60px rgba(29, 29, 27, 0.12);
+    /* Aislar compositing del backdrop-filter en su propia capa GPU */
+    transform: translateZ(0);
   }
 
-  .form-overlay input,
-  .form-overlay select,
-  .form-overlay textarea {
+  /* Overline técnico dentro del panel */
+  .form-overline {
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--contigo-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  /* Floating-label field */
+  .ff-field {
+    position: relative;
+  }
+
+  .ff-field input,
+  .ff-field textarea,
+  .form-overlay select {
     width: 100%;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--atelier-border);
-    border-radius: 8px;
+    padding: 1.25rem 1rem 0.5rem;
+    border: 1px solid rgba(29, 29, 27, 0.1);
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.7);
-    font-family: var(--font-inter, 'Inter', sans-serif);
+    font-family: var(--font-alegreya-sans), sans-serif;
     font-size: 1rem;
-    color: var(--atelier-ink);
-    transition: all 0.3s ease;
+    color: var(--neutral-800);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .form-overlay input:focus,
-  .form-overlay select:focus,
-  .form-overlay textarea:focus {
+  .ff-field textarea {
+    resize: vertical;
+    min-height: 120px;
+    padding-top: 1.5rem;
+  }
+
+  .ff-field input:focus,
+  .ff-field textarea:focus,
+  .form-overlay select:focus {
     outline: none;
-    border-color: var(--brand-gold);
-    box-shadow: 0 0 0 3px rgba(227, 192, 100, 0.3);
+    border-color: var(--contigo-primary);
+    box-shadow: 0 0 0 3px var(--gold-a30);
   }
 
-  .form-overlay input::placeholder,
-  .form-overlay textarea::placeholder {
-    color: var(--atelier-muted);
+  /* Placeholder transparente para que el floating label funcione */
+  .ff-field input::placeholder,
+  .ff-field textarea::placeholder {
+    color: transparent;
+  }
+
+  .ff-field label {
+    position: absolute;
+    left: 1rem;
+    top: 0.95rem;
+    font-family: var(--font-alegreya-sans), sans-serif;
+    font-size: 1rem;
+    color: var(--neutral-600);
+    pointer-events: none;
+    transition: all 0.18s ease;
+  }
+
+  .ff-field input:focus + label,
+  .ff-field input:not(:placeholder-shown) + label,
+  .ff-field textarea:focus + label,
+  .ff-field textarea:not(:placeholder-shown) + label {
+    top: 0.4rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--contigo-primary);
+  }
+
+  /* Label fijo (no flotante) para el select */
+  .ff-field-static label {
+    position: absolute;
+    left: 1rem;
+    top: 0.4rem;
+    font-family: var(--font-alegreya-sans), sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--contigo-primary);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Select field — custom arrow, consistent with floating-label inputs */
+  .contact-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6560' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding: 1.25rem 2.5rem 0.5rem 1rem;
+    cursor: pointer;
+    color: var(--neutral-800);
+  }
+  .contact-select option {
+    color: var(--neutral-800);
+    background: #ffffff;
+  }
+  .contact-select option[value=""] {
+    color: var(--neutral-600);
+  }
+
+  /* Attach images button */
+  .attach-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-family: var(--font-alegreya-sans), sans-serif;
+    color: var(--neutral-700);
+    background: transparent;
+    border: 1px dashed var(--contigo-primary);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .attach-btn:hover:not(:disabled) {
+    background: rgba(226, 192, 99, 0.12);
+    border-style: solid;
+    color: var(--neutral-800);
+  }
+  .attach-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Submit button hover micro-interaction */
+  .contact-submit-btn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+  .contact-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(226, 192, 99, 0.35);
+  }
+
+  /* Attached file list */
+  .attach-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .attach-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(226, 192, 99, 0.12);
+    border: 1px solid rgba(226, 192, 99, 0.3);
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    color: var(--neutral-700);
+  }
+  .attach-file-item > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 85%;
+  }
+
+  .attach-remove-btn {
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    flex-shrink: 0;
+    color: var(--neutral-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .attach-remove-btn:hover {
+    color: #c0392b;
   }
 
   /* Custom cursor */
