@@ -9,7 +9,7 @@ export default function AboutClosingCTA() {
   return (
     <div
       className="relative py-24 px-6 md:px-16 text-center overflow-hidden"
-      style={{ backgroundColor: 'var(--neutral-900)', fontFamily: 'var(--font-alegreya-sans)' }}
+      style={{ backgroundColor: '#547682', fontFamily: 'var(--font-alegreya-sans)' }}
     >
       <div ref={contentRef} className="max-w-2xl mx-auto">
         <h2
@@ -20,7 +20,7 @@ export default function AboutClosingCTA() {
         </h2>
         <p
           className="text-fluid-base mb-10"
-          style={{ color: 'rgba(250,246,240,0.6)', lineHeight: 1.7 }}
+          style={{ color: '#FAF6F0', lineHeight: 1.7 }}
         >
           Whatever stage your project is at, our team is ready to bring trust, precision, and
           craftsmanship to it.
@@ -33,7 +33,7 @@ export default function AboutClosingCTA() {
           <Link
             href="/projects"
             className="btn-secondary"
-            style={{ borderColor: 'var(--gold-400)', color: 'var(--gold-400)' }}
+            style={{ borderColor: 'var(--neutral-50)', color: 'var(--neutral-50)' }}
           >
             View Our Projects
           </Link>

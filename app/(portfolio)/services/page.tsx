@@ -75,7 +75,7 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
       <div
         className="relative py-24 px-6 md:px-16"
         style={{
-          backgroundColor: '#1E1A16',
+          backgroundColor: 'var(--petrol-800)',
           borderBottom: '1px solid rgba(226,192,99,0.15)',
         }}
       >

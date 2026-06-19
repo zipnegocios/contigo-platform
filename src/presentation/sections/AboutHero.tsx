@@ -24,7 +24,7 @@ export default function AboutHero() {
     <div
       className="relative py-24 px-6 md:px-16 overflow-hidden"
       style={{
-        backgroundColor: 'var(--neutral-900)',
+        backgroundColor: 'var(--petrol-800)',
         borderBottom: '1px solid var(--gold-a15)',
         fontFamily: 'var(--font-alegreya-sans)',
       }}
