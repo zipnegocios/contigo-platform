@@ -84,8 +84,14 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             }}
           />
 
-          {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center justify-center gap-8 transition-all duration-500">
+          {/* Desktop Nav Links — hidden until the sticky nav activates on scroll */}
+          <div
+            className="hidden lg:flex items-center justify-center gap-8 transition-all duration-500"
+            style={{
+              opacity: scrolled ? 1 : 0,
+              pointerEvents: scrolled ? 'auto' : 'none',
+            }}
+          >
             {[
               { label: 'Services', id: 'services' },
               { label: 'Projects', id: 'projects' },
@@ -97,8 +103,7 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
                 onClick={() => scrollTo(item.id)}
                 className="relative text-fluid-sm font-medium transition-all duration-500 group"
                 style={{
-                  color: scrolled ? '#0d3c4c' : 'var(--contigo-background)',
-                  opacity: scrolled ? 1 : 0.9,
+                  color: '#0d3c4c',
                 }}
               >
                 {item.label}
