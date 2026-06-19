@@ -4,20 +4,28 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BRAND_LOCKUP_VIEWBOX, brandLetterGlyphs, brandSeparatorRects } from '@/presentation/components/brand-lockup-paths';
 
-const HIDDEN_TRANSFORM = 'translate(-20%, 100%) rotateX(-80deg)';
-const REVEALED_TRANSFORM = 'translate(0, 0) rotateX(0)';
-const HIDDEN_COLOR = '#3A3028';
 const REVEALED_COLOR = '#E3C064';
+const HIDDEN_COLOR = '#3A3028';
+const OPEN_CLIP = 'inset(0 0 0 0)';
 
 export default function HeritageSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduceMotion) {
+      gsap.set('.flip-letter-shape', { opacity: 1, transform: 'none', filter: 'none', color: REVEALED_COLOR });
+      gsap.set('.flip-separator-bar', { clipPath: OPEN_CLIP });
+      gsap.set(['.flip-text-block.left', '.flip-text-block.right'], { opacity: 1, x: 0 });
+      return;
+    }
+
     const ctx = gsap.context(() => {
       // Symmetric in/out: the trigger spans exactly one section-height of
       // scroll (top-at-center -> bottom-at-center), so the section is fully
-      // revealed exactly when it's vertically centered (the timeline
-      // midpoint), then unwinds in mirror as it continues toward exit.
+      // assembled exactly when it's vertically centered (the timeline
+      // midpoint), then disassembles in mirror as it continues toward exit.
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -28,44 +36,56 @@ export default function HeritageSection() {
       });
 
       const HALF = 2;
-      // Letter stagger + each letter's own tween must fully resolve *within*
-      // HALF, otherwise the reveal is still mid-flight when the exit phase
-      // (scheduled to start at HALF) kicks in, and the two fight each other.
-      const LETTER_DURATION = 1.2;
-      const LETTER_STAGGER_SPREAD = 0.7; // total spread across all letters
       const letters = '.flip-letter-shape';
-      const separator = '.flip-separator-group';
+      const leftBar = '.flip-separator-bar:not(.flip-separator-bar--right)';
+      const rightBar = '.flip-separator-bar--right';
 
-      // ── Enter (0 -> HALF): section approaches center, brand lockup assembles ──
-      tl.from('.flip-text-block.left', { x: -50, opacity: 0, duration: HALF }, 0);
-      tl.from('.flip-text-block.right', { x: 50, opacity: 0, duration: HALF }, 0);
+      // ── Enter: the rule draws outward first (the foundation), then the
+      // letterforms materialize on top of it (the structure) — a small
+      // construction narrative, not just a generic reveal. Letters lift +
+      // sharpen into focus rather than flip, with each one's own stagger
+      // window fitted inside HALF so it fully resolves before exit begins. ──
+      tl.from('.flip-text-block.left', { x: -50, opacity: 0, filter: 'blur(6px)', duration: HALF, ease: 'power3.out' }, 0);
+      tl.from('.flip-text-block.right', { x: 50, opacity: 0, filter: 'blur(6px)', duration: HALF, ease: 'power3.out' }, 0);
+
+      tl.to(leftBar, { clipPath: OPEN_CLIP, duration: 1, ease: 'power2.out' }, 0);
+      tl.to(rightBar, { clipPath: OPEN_CLIP, duration: 1, ease: 'power2.out' }, 0);
+
       tl.to(
         letters,
         {
+          opacity: 1,
           color: REVEALED_COLOR,
-          transform: REVEALED_TRANSFORM,
-          duration: LETTER_DURATION,
-          stagger: { from: 'end', amount: LETTER_STAGGER_SPREAD },
+          transform: 'translateY(0) scale(1)',
+          filter: 'blur(0px)',
+          duration: 0.9,
+          ease: 'power3.out',
+          stagger: { from: 'start', amount: 0.55 },
         },
-        0
+        0.3
       );
-      tl.to(separator, { scaleX: 1, duration: HALF, ease: 'none' }, 0);
 
-      // ── Exit (HALF -> 2*HALF): mirror image of the entrance, unwinding as
-      // the section leaves center heading toward the bottom of the viewport ──
-      tl.to('.flip-text-block.left', { x: -50, opacity: 0, duration: HALF }, HALF);
-      tl.to('.flip-text-block.right', { x: 50, opacity: 0, duration: HALF }, HALF);
+      // ── Exit: deliberately subtler than the entrance — smaller lift,
+      // lighter blur, faster — the section is leaving, not re-arriving. ──
+      tl.to('.flip-text-block.left', { x: -20, opacity: 0, filter: 'blur(4px)', duration: 1.2, ease: 'power2.in' }, HALF);
+      tl.to('.flip-text-block.right', { x: 20, opacity: 0, filter: 'blur(4px)', duration: 1.2, ease: 'power2.in' }, HALF);
+
       tl.to(
         letters,
         {
+          opacity: 0,
           color: HIDDEN_COLOR,
-          transform: HIDDEN_TRANSFORM,
-          duration: LETTER_DURATION,
-          stagger: { from: 'start', amount: LETTER_STAGGER_SPREAD },
+          transform: 'translateY(-8px) scale(0.98)',
+          filter: 'blur(4px)',
+          duration: 0.6,
+          ease: 'power2.in',
+          stagger: { from: 'end', amount: 0.35 },
         },
         HALF
       );
-      tl.to(separator, { scaleX: 0, duration: HALF, ease: 'none' }, HALF);
+
+      tl.to(leftBar, { clipPath: 'inset(0 0 0 100%)', duration: 0.8, ease: 'power2.in' }, HALF + 0.5);
+      tl.to(rightBar, { clipPath: 'inset(0 100% 0 0)', duration: 0.8, ease: 'power2.in' }, HALF + 0.5);
     }, sectionRef);
 
     return () => ctx.revert();
@@ -97,11 +117,17 @@ export default function HeritageSection() {
                 <polygon key={i} className="flip-letter-shape" fill="currentColor" points={glyph.points} />
               )
             )}
-            <g className="flip-separator-group">
-              {brandSeparatorRects.map((r, i) => (
-                <rect key={i} fill="var(--brand-gold)" x={r.x} y={r.y} width={r.width} height={r.height} />
-              ))}
-            </g>
+            {brandSeparatorRects.map((r, i) => (
+              <rect
+                key={i}
+                className={i === 0 ? 'flip-separator-bar' : 'flip-separator-bar flip-separator-bar--right'}
+                fill="var(--brand-gold)"
+                x={r.x}
+                y={r.y}
+                width={r.width}
+                height={r.height}
+              />
+            ))}
           </svg>
         </div>
 
