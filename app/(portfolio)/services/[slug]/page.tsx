@@ -84,14 +84,6 @@ export default async function ServiceDetailPage({
           }}
         />
 
-        <Link
-          href="/services"
-          className="absolute top-8 left-8 flex items-center gap-2 text-fluid-sm font-medium tracking-wide transition-opacity duration-200 hover:opacity-70"
-          style={{ color: '#E2C063' }}
-        >
-          ← All Services
-        </Link>
-
         <div className="absolute bottom-0 left-0 right-0 px-8 pb-12 md:px-16 md:pb-16">
           <h1
             className="text-fluid-5xl font-semibold leading-none"

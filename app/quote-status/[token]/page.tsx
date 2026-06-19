@@ -30,18 +30,33 @@ export default async function QuoteStatusPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-atelier-ivory to-heritage-sand page-padding">
-      <div className="max-w-2xl mx-auto pt-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-fluid-4xl font-cormorant font-bold mb-4" style={{ color: 'var(--heritage-charcoal)' }}>
-            Your Quote Status
-          </h1>
-          <p className="text-fluid-lg" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
-            Tracking reference: {params.token}
-          </p>
-        </div>
+    <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
+      {/* Header band */}
+      <div
+        className="relative py-24 px-6 md:px-16"
+        style={{
+          backgroundColor: '#1E1A16',
+          borderBottom: '1px solid rgba(226,192,99,0.15)',
+        }}
+      >
+        <span
+          className="block text-fluid-xs uppercase tracking-widest mb-4"
+          style={{ color: '#E2C063' }}
+        >
+          Tracking
+        </span>
+        <h1
+          className="text-fluid-5xl font-semibold leading-none mb-4"
+          style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+        >
+          Your Quote Status
+        </h1>
+        <p className="text-fluid-base max-w-xl" style={{ color: 'rgba(250,246,240,0.6)' }}>
+          Tracking reference: {params.token}
+        </p>
+      </div>
 
+      <div className="page-padding max-w-2xl mx-auto pt-12">
         {/* Status Card */}
         <div
           className="rounded-lg shadow-lg p-8 mb-12 border-t-4"

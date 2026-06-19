@@ -90,15 +90,6 @@ export default async function ProjectDetailPage({
           }}
         />
 
-        {/* Back link */}
-        <Link
-          href="/projects"
-          className="absolute top-8 left-8 flex items-center gap-2 text-fluid-sm font-medium tracking-wide transition-opacity duration-200 hover:opacity-70"
-          style={{ color: '#E2C063' }}
-        >
-          ← All Projects
-        </Link>
-
         {/* Title block */}
         <div className="absolute bottom-0 left-0 right-0 px-8 pb-12 md:px-16 md:pb-16">
           <p
