@@ -270,53 +270,36 @@
 
   .flip-word {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1.25rem;
     perspective: 1000px;
   }
 
-  .flip-line {
-    display: flex;
-    justify-content: center;
-    white-space: nowrap;
+  /* The center brand lockup is the logo's own vector artwork (one shared
+     viewBox for "Contigo", the separator rule, and "Constructions Pty"),
+     so relative scale/kerning/the rule's gap match the source file exactly. */
+  .flip-word svg {
+    width: clamp(17rem, 42vw, 32rem);
+    height: auto;
+    overflow: visible;
+    transform-style: preserve-3d;
   }
 
-  /* "Contigo" — primary line of the brand lockup */
-  .flip-line--primary .flip-letter {
-    font-size: clamp(2.5rem, 6.5vw, 4.75rem);
-  }
-
-  /* "Constructions Pty" — secondary line, smaller than the brand name */
-  .flip-line--secondary .flip-letter {
-    font-size: clamp(1.05rem, 2.6vw, 1.85rem);
-    letter-spacing: 0.02em;
-  }
-
-  .flip-letter {
-    display: inline-block;
-    font-family: var(--font-alegreya-sans), sans-serif;
-    font-weight: 700;
+  .flip-letter-shape {
     color: #3A3028;
-    transform: translate(-20%, 100%) rotateX(-80deg);
+    transform-box: fill-box;
     transform-origin: center bottom;
+    transform: translate(-20%, 100%) rotateX(-80deg);
     transform-style: preserve-3d;
     will-change: transform, opacity;
-    line-height: 1;
   }
 
-  /* Line separator between "Contigo" and "Constructions Pty",
-     same idea as the rules flanking the text in the brand logo SVG.
-     Starts collapsed and draws out in sync with the letter flip,
-     ending perfectly straight/full-width. */
-  .flip-separator {
-    display: block;
-    width: min(60%, 280px);
-    height: 3px;
-    background-color: var(--brand-gold);
-    transform: scaleX(0);
+  /* The two gold bars from the logo (kept as two shapes with the same gap
+     the source file has), revealed together as one unit from the center. */
+  .flip-separator-group {
+    transform-box: fill-box;
     transform-origin: center;
+    transform: scaleX(0);
     will-change: transform;
   }
 
