@@ -39,6 +39,21 @@ export const leadStageEnum = pgEnum('lead_stage', [
 
 export const adminRoleEnum = pgEnum('admin_role', ['owner', 'staff'])
 
+export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
+  'stage_change',
+  'note',
+  'call_scheduled',
+  'call_completed',
+  'call_cancelled',
+  'visit_scheduled',
+  'visit_completed',
+  'visit_cancelled',
+  'document_uploaded',
+  'document_sent',
+  'email_sent',
+  'quote_status_changed',
+])
+
 // ============ CATEGORIES TABLE ============
 // Must be declared before projects and services due to FK references
 export const categories = pgTable(
@@ -161,6 +176,26 @@ export const leads = pgTable(
   (table) => [
     index('idx_leads_stage').on(table.stage),
     index('idx_leads_quote_id').on(table.quoteId),
+  ],
+)
+
+// ============ LEAD ACTIVITIES TABLE (timeline / auditoría) ============
+export const leadActivities = pgTable(
+  'lead_activities',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    leadId: uuid('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    type: leadActivityTypeEnum('type').notNull(),
+    payload: jsonb('payload').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    createdBy: uuid('created_by').references(() => adminUsers.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_lead_activities_lead_id').on(table.leadId),
+    index('idx_lead_activities_created_at').on(table.createdAt),
+    index('idx_lead_activities_type').on(table.type),
   ],
 )
 

@@ -2,8 +2,9 @@ import { eq, desc } from 'drizzle-orm'
 import { db } from '../db/client'
 import { leads } from '../db/schema'
 import { Lead } from '@/core/entities/Lead'
+import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 
-export class DrizzleLeadRepository {
+export class DrizzleLeadRepository implements ILeadRepository {
   async save(lead: Lead): Promise<void> {
     await db
       .insert(leads)

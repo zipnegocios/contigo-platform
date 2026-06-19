@@ -2,12 +2,14 @@ import { Quote, CreateQuoteInput } from '@/core/entities/Quote'
 import { IQuoteRepository } from '@/core/repositories/IQuoteRepository'
 import { IEmailService } from '@/core/services/IEmailService'
 import { IEmbeddingService } from '@/core/services/IEmbeddingService'
+import { CreateLeadForQuoteUseCase } from './leads/CreateLeadForQuoteUseCase'
 
 export class CreateQuoteUseCase {
   constructor(
     private quoteRepository: IQuoteRepository,
     private emailService: IEmailService,
     private embeddingService: IEmbeddingService,
+    private createLeadForQuote: CreateLeadForQuoteUseCase,
   ) {}
 
   async execute(input: CreateQuoteInput): Promise<string> {
@@ -16,6 +18,9 @@ export class CreateQuoteUseCase {
 
     // Save to database immediately (don't wait for embedding)
     await this.quoteRepository.save(quote)
+
+    // The lead is born here, not later when an admin "touches" the quote
+    await this.createLeadForQuote.execute(quote.id)
 
     // Send emails synchronously (user gets feedback quickly)
     await Promise.all([
