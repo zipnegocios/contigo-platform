@@ -33,6 +33,11 @@ export function useScrollReveal<T extends HTMLElement>(options: ScrollRevealOpti
 
     const targets = childSelector ? el.querySelectorAll(childSelector) : el;
 
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.set(targets, { opacity: 1, y: 0, x: 0 });
+      return;
+    }
+
     gsap.set(targets, { opacity: 0, y, x });
 
     const tween = gsap.to(targets, {

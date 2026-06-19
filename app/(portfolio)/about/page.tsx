@@ -1,45 +1,30 @@
 import { Metadata } from 'next'
+import AboutHero from '@/presentation/sections/AboutHero'
+import MissionVisionSection from '@/presentation/sections/MissionVisionSection'
+import ValuePropositionBand from '@/presentation/sections/ValuePropositionBand'
+import CoreValuesSection from '@/presentation/sections/CoreValuesSection'
 import HeritageSection from '@/presentation/sections/HeritageSection'
+import AboutClosingCTA from '@/presentation/sections/AboutClosingCTA'
 
 export const metadata: Metadata = {
   title: 'About | Contigo Constructions',
-  description: 'Learn about Contigo Constructions — Adelaide builders honoring heritage craftsmanship with modern precision.',
+  description: 'Contigo Constructions Pty Ltd — mission, vision, and the values that shape every project we build with our clients across Adelaide.',
   openGraph: {
     title: 'About Contigo Constructions',
-    description: 'Learn about Contigo Constructions — Adelaide builders honoring heritage craftsmanship with modern precision.',
+    description: 'Contigo Constructions Pty Ltd — mission, vision, and the values that shape every project we build with our clients across Adelaide.',
     type: 'website',
   },
 }
 
 export default function AboutPage() {
   return (
-    <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
-      {/* Header */}
-      <div
-        className="relative py-24 px-6 md:px-16"
-        style={{
-          backgroundColor: '#1E1A16',
-          borderBottom: '1px solid rgba(226,192,99,0.15)',
-        }}
-      >
-        <span
-          className="block text-fluid-xs uppercase tracking-widest mb-4"
-          style={{ color: '#E2C063' }}
-        >
-          Our Story
-        </span>
-        <h1
-          className="text-fluid-5xl font-semibold leading-none mb-4"
-          style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
-        >
-          About Contigo
-        </h1>
-        <p className="text-fluid-base max-w-xl" style={{ color: 'rgba(250,246,240,0.6)' }}>
-          Heritage craftsmanship, modern precision — the values that shape every project we build.
-        </p>
-      </div>
-
+    <div style={{ backgroundColor: 'var(--neutral-50)', minHeight: '100vh' }}>
+      <AboutHero />
+      <MissionVisionSection />
+      <ValuePropositionBand />
+      <CoreValuesSection />
       <HeritageSection />
+      <AboutClosingCTA />
     </div>
   )
 }
