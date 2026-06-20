@@ -39,6 +39,29 @@ export const leadStageEnum = pgEnum('lead_stage', [
 
 export const adminRoleEnum = pgEnum('admin_role', ['owner', 'staff'])
 
+export const leadEventTypeEnum = pgEnum('lead_event_type', ['call', 'site_visit', 'meeting'])
+
+export const leadEventStatusEnum = pgEnum('lead_event_status', [
+  'scheduled',
+  'completed',
+  'cancelled',
+  'no_show',
+])
+
+export const leadDocumentDirectionEnum = pgEnum('lead_document_direction', [
+  'client_upload',
+  'admin_sent',
+  'internal',
+])
+
+export const leadDocumentCategoryEnum = pgEnum('lead_document_category', [
+  'reference_photo',
+  'site_photo',
+  'quote_pdf',
+  'contract',
+  'other',
+])
+
 export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
   'stage_change',
   'note',
@@ -176,6 +199,54 @@ export const leads = pgTable(
   (table) => [
     index('idx_leads_stage').on(table.stage),
     index('idx_leads_quote_id').on(table.quoteId),
+  ],
+)
+
+// ============ LEAD EVENTS TABLE (llamadas, visitas, reuniones) ============
+export const leadEvents = pgTable(
+  'lead_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    leadId: uuid('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    type: leadEventTypeEnum('type').notNull(),
+    scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
+    durationMinutes: integer('duration_minutes').notNull().default(30),
+    status: leadEventStatusEnum('status').notNull().default('scheduled'),
+    location: text('location'), // dirección para visitas, link/teléfono para llamadas
+    notes: text('notes'),
+    createdBy: uuid('created_by').references(() => adminUsers.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_lead_events_lead_id').on(table.leadId),
+    index('idx_lead_events_scheduled_at').on(table.scheduledAt),
+    index('idx_lead_events_status').on(table.status),
+  ],
+)
+
+// ============ LEAD DOCUMENTS TABLE (fotos y documentos) ============
+export const leadDocuments = pgTable(
+  'lead_documents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    leadId: uuid('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    fileKey: text('file_key').notNull(), // key en R2 (contigo-quotes) o key de media library reusado
+    fileName: varchar('file_name', { length: 255 }).notNull(),
+    mimeType: varchar('mime_type', { length: 100 }),
+    direction: leadDocumentDirectionEnum('direction').notNull(),
+    category: leadDocumentCategoryEnum('category').notNull().default('other'),
+    sourceMediaId: uuid('source_media_id'), // si se reusó una imagen del Media Library/Portfolio
+    uploadedBy: uuid('uploaded_by').references(() => adminUsers.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_lead_documents_lead_id').on(table.leadId),
+    index('idx_lead_documents_direction').on(table.direction),
   ],
 )
 

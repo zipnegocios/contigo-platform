@@ -68,3 +68,6 @@ graphify-out
 # Temporary build & git artifacts
 .worktrees
 graphify-out
+
+# Superpowers subagent-driven-development scratch (briefs, reports, diffs)
+.superpowers/

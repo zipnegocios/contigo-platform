@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1781905822987,
+      "tag": "0000_baseline_pre_lead_crm",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781918907811,
+      "tag": "20260620012827_foamy_violations",
+      "breakpoints": true
+    }
+  ]
+}
