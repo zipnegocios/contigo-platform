@@ -106,7 +106,12 @@ export function LeadDocumentsPanel({
           folder: leadId,
         }),
       })
-      if (!presignRes.ok) throw new Error()
+      if (!presignRes.ok) {
+        const errorBody = await presignRes.json().catch(() => null)
+        const detail =
+          errorBody?.details?.[0]?.message ?? errorBody?.error ?? undefined
+        throw new Error(detail)
+      }
       const { presignedUrl, key } = await presignRes.json()
 
       // 2. PUT the file directly to R2 via the presigned URL.
@@ -128,8 +133,11 @@ export function LeadDocumentsPanel({
 
       toast.success('Archivo subido')
       router.refresh()
-    } catch {
-      toast.error('No se pudo subir el archivo')
+    } catch (error) {
+      const message = error instanceof Error && error.message ? error.message : null
+      toast.error(
+        message ? `No se pudo subir el archivo: ${message}` : 'No se pudo subir el archivo'
+      )
     } finally {
       setUploading(false)
     }
@@ -151,6 +159,7 @@ export function LeadDocumentsPanel({
         <input
           ref={fileInputRef}
           type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,application/pdf"
           className="hidden"
           onChange={handleFileChange}
         />

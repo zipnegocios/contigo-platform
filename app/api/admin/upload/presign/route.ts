@@ -6,6 +6,7 @@ const ALLOWED_PREFIXES = ['projects/cover', 'projects/gallery', 'projects/video'
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
   'video/mp4', 'video/webm', 'video/quicktime', 'video/ogg',
+  'application/pdf',
 ] as const
 
 const PresignSchema = z.object({
