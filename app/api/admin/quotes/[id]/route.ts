@@ -1,7 +1,9 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
+import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
 import { Lead } from '@/core/entities/Lead'
+import { ChangeLeadStageUseCase } from '@/application/use-cases/leads/ChangeLeadStageUseCase'
 
 export async function PATCH(
   request: Request,
@@ -41,12 +43,21 @@ export async function PATCH(
       await leadRepo.save(lead)
     }
 
-    // Update lead status based on quote status
-    let updatedLead = lead.withStage(mapQuoteStatusToLeadStage(status))
+    // Update lead status based on quote status (logs to lead_activities timeline)
+    const changeLeadStageUseCase = new ChangeLeadStageUseCase(
+      leadRepo,
+      new DrizzleLeadActivityRepository(),
+    )
+    let updatedLead = await changeLeadStageUseCase.execute(
+      lead.id,
+      mapQuoteStatusToLeadStage(status),
+      (session.user as any)?.id,
+    )
+
     if (notes) {
       updatedLead = updatedLead.withNotes(notes)
+      await leadRepo.update(updatedLead)
     }
-    await leadRepo.update(updatedLead)
 
     return Response.json({ success: true })
   } catch (error) {

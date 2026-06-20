@@ -1,5 +1,7 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
+import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
+import { ChangeLeadStageUseCase } from '@/application/use-cases/leads/ChangeLeadStageUseCase'
 
 export async function PATCH(
   request: Request,
@@ -28,15 +30,22 @@ export async function PATCH(
     }
 
     const leadRepo = new DrizzleLeadRepository()
-    const lead = await leadRepo.findById(params.id)
+    const existingLead = await leadRepo.findById(params.id)
 
-    if (!lead) {
+    if (!existingLead) {
       return Response.json({ error: 'Lead not found' }, { status: 404 })
     }
 
-    // Update lead with new stage
-    const updatedLead = lead.withStage(stage as 'prospect' | 'contacted' | 'quoted' | 'won' | 'lost')
-    await leadRepo.update(updatedLead)
+    const changeLeadStageUseCase = new ChangeLeadStageUseCase(
+      leadRepo,
+      new DrizzleLeadActivityRepository(),
+    )
+
+    const updatedLead = await changeLeadStageUseCase.execute(
+      params.id,
+      stage as 'prospect' | 'contacted' | 'quoted' | 'won' | 'lost',
+      (session.user as any)?.id,
+    )
 
     return Response.json({ success: true, lead: updatedLead })
   } catch (error) {
