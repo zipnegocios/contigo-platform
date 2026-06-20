@@ -9,9 +9,9 @@ import { CalendarIcon, X } from 'lucide-react'
 import type { DateRange } from 'react-day-picker'
 
 const presets = [
-  { label: 'Hoy', getRange: () => ({ from: new Date(), to: new Date() }) },
-  { label: 'Últimos 7 días', getRange: () => ({ from: new Date(Date.now() - 6 * 86400000), to: new Date() }) },
-  { label: 'Este mes', getRange: () => ({ from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), to: new Date() }) },
+  { label: 'Today', getRange: () => ({ from: new Date(), to: new Date() }) },
+  { label: 'Last 7 days', getRange: () => ({ from: new Date(Date.now() - 6 * 86400000), to: new Date() }) },
+  { label: 'This month', getRange: () => ({ from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), to: new Date() }) },
 ]
 
 export function LeadsFilterBar() {
@@ -45,7 +45,7 @@ export function LeadsFilterBar() {
             <CalendarIcon className="h-4 w-4" />
             {range?.from
               ? `${range.from.toLocaleDateString()}${range.to ? ' – ' + range.to.toLocaleDateString() : ''}`
-              : 'Rango de fechas'}
+              : 'Date range'}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -55,7 +55,7 @@ export function LeadsFilterBar() {
 
       {(searchParams?.get('from') || searchParams?.get('to')) && (
         <Button variant="ghost" size="sm" onClick={clear} className="gap-1">
-          <X className="h-3 w-3" /> Limpiar
+          <X className="h-3 w-3" /> Clear
         </Button>
       )}
     </div>

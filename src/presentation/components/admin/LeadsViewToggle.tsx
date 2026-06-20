@@ -21,7 +21,7 @@ export function LeadsViewToggle() {
         <LayoutGrid className="h-4 w-4 mr-1" /> Kanban
       </Button>
       <Button variant={current === 'table' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('table')}>
-        <List className="h-4 w-4 mr-1" /> Tabla
+        <List className="h-4 w-4 mr-1" /> Table
       </Button>
     </div>
   )
