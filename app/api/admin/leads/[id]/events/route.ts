@@ -13,10 +13,14 @@ export async function POST(
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { type, scheduledAt, durationMinutes, location, notes } = body
+    const { type, scheduledAt, durationMinutes, location, notes, metadata } = body
 
     if (!type || !scheduledAt) {
       return Response.json({ error: 'type y scheduledAt son requeridos' }, { status: 400 })
+    }
+
+    if (!metadata) {
+      return Response.json({ error: 'metadata es requerido' }, { status: 400 })
     }
 
     const useCase = new ScheduleLeadEventUseCase(
@@ -32,6 +36,7 @@ export async function POST(
       location,
       notes,
       createdBy: (session.user as any)?.id,
+      metadata,
     })
 
     return Response.json({ success: true, event }, { status: 201 })

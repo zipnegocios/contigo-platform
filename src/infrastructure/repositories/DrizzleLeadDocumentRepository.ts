@@ -19,6 +19,26 @@ export class DrizzleLeadDocumentRepository implements ILeadDocumentRepository {
     })
   }
 
+  async findById(id: string): Promise<LeadDocument | null> {
+    const rows = await db.select().from(leadDocuments).where(eq(leadDocuments.id, id)).limit(1)
+    const row = rows[0]
+    if (!row) return null
+
+    return LeadDocument.reconstruct({
+      id: row.id,
+      leadId: row.leadId,
+      fileKey: row.fileKey,
+      fileName: row.fileName,
+      mimeType: row.mimeType,
+      direction: row.direction,
+      category: row.category,
+      sourceMediaId: row.sourceMediaId,
+      uploadedBy: row.uploadedBy,
+      createdAt: row.createdAt,
+      archivedAt: row.archivedAt,
+    })
+  }
+
   async findByLeadId(leadId: string): Promise<LeadDocument[]> {
     const rows = await db
       .select()
