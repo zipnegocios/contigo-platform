@@ -1,20 +1,37 @@
 import { Lead } from '@/core/entities/Lead'
 import { LeadActivity } from '@/core/entities/LeadActivity'
+import { LeadContact } from '@/core/entities/LeadContact'
+import { Quote } from '@/core/entities/Quote'
 import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 import { ILeadActivityRepository } from '@/core/repositories/ILeadActivityRepository'
+import { ILeadContactRepository } from '@/core/repositories/ILeadContactRepository'
 
 export class CreateLeadForQuoteUseCase {
   constructor(
     private leadRepository: ILeadRepository,
     private leadActivityRepository: ILeadActivityRepository,
+    private leadContactRepository: ILeadContactRepository,
   ) {}
 
-  async execute(quoteId: string): Promise<Lead> {
-    const existing = await this.leadRepository.findByQuoteId(quoteId)
+  async execute(quote: Quote): Promise<Lead> {
+    const existing = await this.leadRepository.findByQuoteId(quote.id)
     if (existing) return existing
 
-    const lead = Lead.create({ quoteId })
+    const lead = Lead.create({ quoteId: quote.id })
     await this.leadRepository.save(lead)
+
+    // Seed the primary contact so it has an id and can be selected later
+    // (e.g. by event scheduling). phone falls back to '' because the public
+    // quote form makes phone optional, but lead_contacts.phone is NOT NULL —
+    // a deliberate, documented trade-off.
+    const contact = LeadContact.create({
+      leadId: lead.id,
+      name: quote.name,
+      phone: quote.phone?.toString() ?? '',
+      email: quote.email.toString(),
+      isPrimary: true,
+    })
+    await this.leadContactRepository.save(contact)
 
     const activity = LeadActivity.create({
       leadId: lead.id,

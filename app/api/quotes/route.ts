@@ -5,6 +5,7 @@ import { ResendEmailService } from '@/infrastructure/services/ResendEmailService
 import { OpenAIEmbeddingService } from '@/infrastructure/services/OpenAIEmbeddingService'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
+import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/DrizzleLeadContactRepository'
 import { CreateLeadForQuoteUseCase } from '@/application/use-cases/leads/CreateLeadForQuoteUseCase'
 
 const CreateQuoteSchema = z.object({
@@ -31,7 +32,8 @@ export async function POST(request: Request) {
     const embeddingService = new OpenAIEmbeddingService()
     const leadRepository = new DrizzleLeadRepository()
     const leadActivityRepository = new DrizzleLeadActivityRepository()
-    const createLeadForQuote = new CreateLeadForQuoteUseCase(leadRepository, leadActivityRepository)
+    const leadContactRepository = new DrizzleLeadContactRepository()
+    const createLeadForQuote = new CreateLeadForQuoteUseCase(leadRepository, leadActivityRepository, leadContactRepository)
 
     // Create and execute use case
     const useCase = new CreateQuoteUseCase(

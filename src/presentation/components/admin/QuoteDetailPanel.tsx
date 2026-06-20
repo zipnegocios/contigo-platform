@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type Dispatch, type SetStateAction } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -19,7 +19,9 @@ import {
 import { LeadStage } from '@/core/entities/Lead'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
+import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
 import { LeadNotesPanel } from './LeadNotesPanel'
+import { LeadContactsPanel } from './LeadContactsPanel'
 import { QuoteAttachmentsGrid } from './QuoteAttachmentsGrid'
 
 interface QuoteDetailPanelProps {
@@ -27,6 +29,8 @@ interface QuoteDetailPanelProps {
   quote: QuoteDTO
   initialStage: LeadStage
   notes: LeadNoteDTO[]
+  contacts: LeadContactDTO[]
+  onContactsChange: Dispatch<SetStateAction<LeadContactDTO[]>>
   onStageChange?: (newStage: string) => void
   onMutated?: () => void
 }
@@ -44,7 +48,7 @@ function InfoField({ label, value }: { label: string; value: React.ReactNode }) 
   )
 }
 
-export function QuoteDetailPanel({ leadId, quote, initialStage, notes, onStageChange, onMutated }: QuoteDetailPanelProps) {
+export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, onContactsChange, onStageChange, onMutated }: QuoteDetailPanelProps) {
   const router = useRouter()
   const [stage, setStage] = useState<LeadStage>(initialStage)
   const [stageSaving, setStageSaving] = useState(false)
@@ -102,6 +106,7 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, onStageCh
           <InfoField label="Name" value={<span className="text-fluid-base font-medium">{quote.name}</span>} />
           <InfoField label="Email" value={quote.email.toString()} />
           {quote.phone && <InfoField label="Phone" value={quote.phone.toString()} />}
+          <LeadContactsPanel leadId={leadId} contacts={contacts} onContactsChange={onContactsChange} />
         </AccordionContent>
       </AccordionItem>
 

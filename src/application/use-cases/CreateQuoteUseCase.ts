@@ -20,7 +20,7 @@ export class CreateQuoteUseCase {
     await this.quoteRepository.save(quote)
 
     // The lead is born here, not later when an admin "touches" the quote
-    await this.createLeadForQuote.execute(quote.id)
+    await this.createLeadForQuote.execute(quote)
 
     // Send emails synchronously (user gets feedback quickly)
     await Promise.all([

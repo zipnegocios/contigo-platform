@@ -54,6 +54,8 @@ export function LeadDetailTabs({
           quote={quote}
           initialStage={lead.stage}
           notes={notes}
+          contacts={contacts}
+          onContactsChange={setContacts}
           onStageChange={onStageChange}
           onMutated={onMutated}
         />
