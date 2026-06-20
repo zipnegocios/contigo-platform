@@ -32,6 +32,18 @@ export function LeadDetailModal({ onStageChange }: LeadDetailModalProps) {
     return () => { cancelled = true }
   }, [leadId])
 
+  const refetch = () => {
+    if (!leadId) return
+    fetch(`/api/admin/leads/${leadId}`)
+      .then((res) => res.json())
+      .then((json) => setData(json))
+  }
+
+  const handleStageChange = (newStage: string) => {
+    if (leadId) onStageChange?.(leadId, newStage)
+    setData((prev: any) => (prev ? { ...prev, lead: { ...prev.lead, stage: newStage } } : prev))
+  }
+
   const close = () => {
     const params = new URLSearchParams(searchParams?.toString())
     params.delete('leadId')
@@ -127,6 +139,8 @@ export function LeadDetailModal({ onStageChange }: LeadDetailModalProps) {
               activities={mapped.activities}
               notes={mapped.notes}
               contacts={mapped.contacts}
+              onStageChange={handleStageChange}
+              onMutated={refetch}
             />
           </div>
         )}

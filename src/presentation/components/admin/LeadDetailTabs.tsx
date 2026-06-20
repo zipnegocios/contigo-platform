@@ -22,6 +22,8 @@ interface LeadDetailTabsProps {
   activities: LeadActivityDTO[]
   notes: LeadNoteDTO[]
   contacts: LeadContactDTO[]
+  onStageChange?: (newStage: string) => void
+  onMutated?: () => void
 }
 
 export function LeadDetailTabs({
@@ -32,6 +34,8 @@ export function LeadDetailTabs({
   activities,
   notes,
   contacts: initialContacts,
+  onStageChange,
+  onMutated,
 }: LeadDetailTabsProps) {
   const [contacts, setContacts] = useState(initialContacts)
 
@@ -45,7 +49,14 @@ export function LeadDetailTabs({
       </TabsList>
 
       <TabsContent value="summary">
-        <QuoteDetailPanel quote={quote} initialNotes={lead.adminNotes ?? undefined} />
+        <QuoteDetailPanel
+          leadId={lead.id}
+          quote={quote}
+          initialStage={lead.stage}
+          notes={notes}
+          onStageChange={onStageChange}
+          onMutated={onMutated}
+        />
       </TabsContent>
 
       <TabsContent value="activity">

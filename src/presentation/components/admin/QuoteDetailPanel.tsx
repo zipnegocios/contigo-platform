@@ -3,8 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Button } from '@/presentation/components/ui/button'
-import { Textarea } from '@/presentation/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -18,12 +16,18 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/presentation/components/ui/accordion'
-import { QuoteStatus } from '@/core/entities/Quote'
+import { LeadStage } from '@/core/entities/Lead'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
+import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
+import { LeadNotesPanel } from './LeadNotesPanel'
 
 interface QuoteDetailPanelProps {
+  leadId: string
   quote: QuoteDTO
-  initialNotes?: string
+  initialStage: LeadStage
+  notes: LeadNoteDTO[]
+  onStageChange?: (newStage: string) => void
+  onMutated?: () => void
 }
 
 function InfoField({ label, value }: { label: string; value: React.ReactNode }) {
@@ -39,33 +43,35 @@ function InfoField({ label, value }: { label: string; value: React.ReactNode }) 
   )
 }
 
-export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps) {
+export function QuoteDetailPanel({ leadId, quote, initialStage, notes, onStageChange, onMutated }: QuoteDetailPanelProps) {
   const router = useRouter()
-  const [status, setStatus] = useState<QuoteStatus>(quote.status)
-  const [notes, setNotes] = useState(initialNotes || '')
-  const [loading, setLoading] = useState(false)
+  const [stage, setStage] = useState<LeadStage>(initialStage)
+  const [stageSaving, setStageSaving] = useState(false)
 
-  const handleSave = async () => {
-    setLoading(true)
+  const handleStageSelect = async (newStage: LeadStage) => {
+    setStageSaving(true)
     try {
-      const response = await fetch(`/api/admin/quotes/${quote.id}`, {
+      const response = await fetch(`/api/admin/leads/${leadId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, notes }),
+        body: JSON.stringify({ stage: newStage }),
       })
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to update quote')
+        throw new Error(error.error || 'Failed to update stage')
       }
 
-      toast.success('Quote updated successfully')
+      setStage(newStage)
+      toast.success('Stage updated')
+      onStageChange?.(newStage)
       router.refresh()
+      onMutated?.()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to update quote')
+      toast.error(error instanceof Error ? error.message : 'Failed to update stage')
       console.error(error)
     } finally {
-      setLoading(false)
+      setStageSaving(false)
     }
   }
 
@@ -133,6 +139,14 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
             }
           />
           <InfoField label="Submitted" value={quote.createdAt.toLocaleString()} />
+          <InfoField
+            label="Quote Status"
+            value={
+              <span className="inline-block px-2 py-0.5 rounded text-fluid-xs uppercase tracking-wide" style={{ backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }}>
+                {quote.status.replace('_', ' ')}
+              </span>
+            }
+          />
         </AccordionContent>
       </AccordionItem>
 
@@ -195,60 +209,23 @@ export function QuoteDetailPanel({ quote, initialNotes }: QuoteDetailPanelProps)
               className="text-fluid-xs font-medium uppercase tracking-wider mb-2 block"
               style={{ color: 'var(--neutral-600)' }}
             >
-              Status
+              Stage
             </label>
-            <Select value={status} onValueChange={(value) => setStatus(value as QuoteStatus)}>
+            <Select value={stage} onValueChange={(value) => handleStageSelect(value as LeadStage)} disabled={stageSaving}>
               <SelectTrigger style={{ borderColor: 'var(--neutral-200)' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="prospect">Prospect</SelectItem>
                 <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="converted">Converted</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="quoted">Quoted</SelectItem>
+                <SelectItem value="won">Won</SelectItem>
+                <SelectItem value="lost">Lost</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div>
-            <label
-              className="text-fluid-xs font-medium uppercase tracking-wider mb-2 block"
-              style={{ color: 'var(--neutral-600)' }}
-            >
-              Admin Notes
-            </label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add private notes about this quote…"
-              className="min-h-32 text-fluid-sm resize-none"
-              style={{ borderColor: 'var(--neutral-200)' }}
-              onFocus={(e) => {
-                e.target.style.borderColor = 'var(--contigo-primary)'
-                e.target.style.boxShadow = '0 0 0 3px rgba(226,192,99,0.12)'
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = 'var(--neutral-200)'
-                e.target.style.boxShadow = 'none'
-              }}
-            />
-          </div>
-
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg text-fluid-sm font-semibold tracking-wide transition-all duration-200 min-h-[44px]"
-            style={{
-              backgroundColor: loading ? '#C8A55C' : 'var(--contigo-primary)',
-              color: 'var(--petrol-800)',
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
-            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--gold-600)' }}
-            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = 'var(--contigo-primary)' }}
-          >
-            {loading ? 'Saving…' : 'Save Changes'}
-          </button>
+          <LeadNotesPanel leadId={leadId} notes={notes} onMutated={onMutated} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>
