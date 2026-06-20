@@ -1,5 +1,4 @@
-import { LeadsKanban } from '@/presentation/components/admin/LeadsKanban'
-import { LeadsTable } from '@/presentation/components/admin/LeadsTable'
+import { LeadsBoard } from '@/presentation/components/admin/LeadsBoard'
 import { LeadsFilterBar } from '@/presentation/components/admin/LeadsFilterBar'
 import { LeadsViewToggle } from '@/presentation/components/admin/LeadsViewToggle'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
@@ -47,7 +46,7 @@ export default async function LeadsPage({
 
       <LeadsFilterBar />
 
-      {view === 'table' ? <LeadsTable leads={leads} /> : <LeadsKanban leads={leads} />}
+      <LeadsBoard view={view} leads={leads} />
     </div>
   )
 }

@@ -2,18 +2,22 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 
+type LeadRow = {
+  id: string
+  quoteId: string
+  stage: string
+  estimatedValue: number | null
+  updatedAt: Date
+  quote: QuoteDTO | null
+}
+
 interface LeadsKanbanProps {
-  leads: Array<{
-    id: string
-    quoteId: string
-    stage: string
-    estimatedValue: number | null
-    updatedAt: Date
-    quote: QuoteDTO | null
-  }>
+  leads: LeadRow[]
+  onLeadsChange: (updater: (prev: LeadRow[]) => LeadRow[]) => void
 }
 
 const stages = ['prospect', 'contacted', 'quoted', 'won', 'lost']
@@ -68,17 +72,23 @@ const stageConfig: Record<string, {
   },
 }
 
-export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
-  const [leads, setLeads] = useState(initialLeads)
+export function LeadsKanban({ leads, onLeadsChange }: LeadsKanbanProps) {
+  const searchParams = useSearchParams()
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  const buildHref = (leadId: string) => {
+    const params = new URLSearchParams(searchParams?.toString())
+    params.set('leadId', leadId)
+    return `/admin/leads?${params.toString()}`
+  }
 
   const groupedByStage = stages.reduce(
     (acc, stage) => {
       acc[stage] = leads.filter((l) => l.stage === stage)
       return acc
     },
-    {} as Record<string, typeof initialLeads>,
+    {} as Record<string, LeadRow[]>,
   )
 
   const handleDragStart = (e: React.DragEvent, leadId: string) => {
@@ -103,10 +113,11 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
     }
 
     const originalLeads = leads
-    const newLeads = leads.map((l) =>
-      l.id === draggedId ? { ...l, stage: targetStage, updatedAt: new Date() } : l,
+    onLeadsChange((prev) =>
+      prev.map((l) =>
+        l.id === draggedId ? { ...l, stage: targetStage, updatedAt: new Date() } : l,
+      ),
     )
-    setLeads(newLeads)
     setDraggedId(null)
     setIsLoading(true)
 
@@ -121,7 +132,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
 
       toast.success(`Lead moved to ${stageConfig[targetStage].label}`)
     } catch (error) {
-      setLeads(originalLeads)
+      onLeadsChange(() => originalLeads)
       toast.error(error instanceof Error ? error.message : 'Failed to move lead')
       console.error(error)
     } finally {
@@ -206,7 +217,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                         e.currentTarget.style.borderColor = 'var(--neutral-200)'
                       }}
                     >
-                      <Link href={`/admin/leads/${lead.id}`} className="block space-y-2">
+                      <Link href={buildHref(lead.id)} className="block space-y-2">
                         <div>
                           <p className="font-semibold text-fluid-sm truncate" style={{ color: 'var(--neutral-800)' }}>
                             {lead.quote?.name || 'Unknown'}

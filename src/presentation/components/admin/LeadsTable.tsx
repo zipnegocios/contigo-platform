@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/presentation/components/ui/button'
 import {
   Table,
@@ -45,6 +46,14 @@ function StageBadge({ stage }: { stage: string }) {
 }
 
 export function LeadsTable({ leads }: LeadsTableProps) {
+  const searchParams = useSearchParams()
+
+  const buildHref = (leadId: string) => {
+    const params = new URLSearchParams(searchParams?.toString())
+    params.set('leadId', leadId)
+    return `/admin/leads?${params.toString()}`
+  }
+
   return (
     <div
       className="rounded-lg overflow-hidden bg-white"
@@ -102,7 +111,7 @@ export function LeadsTable({ leads }: LeadsTableProps) {
                       e.currentTarget.style.color = '#6B6560'
                     }}
                   >
-                    <Link href={`/admin/leads/${lead.id}`}>View</Link>
+                    <Link href={buildHref(lead.id)}>View</Link>
                   </Button>
                 </TableCell>
               </TableRow>
