@@ -24,14 +24,22 @@ export class CreateLeadForQuoteUseCase {
     // (e.g. by event scheduling). phone falls back to '' because the public
     // quote form makes phone optional, but lead_contacts.phone is NOT NULL —
     // a deliberate, documented trade-off.
-    const contact = LeadContact.create({
-      leadId: lead.id,
-      name: quote.name,
-      phone: quote.phone?.toString() ?? '',
-      email: quote.email.toString(),
-      isPrimary: true,
-    })
-    await this.leadContactRepository.save(contact)
+    //
+    // Non-fatal: this runs inside the public quote-submission path, so a
+    // failure here must not fail the whole request — the Lead itself is
+    // already saved and must be returned regardless.
+    try {
+      const contact = LeadContact.create({
+        leadId: lead.id,
+        name: quote.name,
+        phone: quote.phone?.toString() ?? '',
+        email: quote.email.toString(),
+        isPrimary: true,
+      })
+      await this.leadContactRepository.save(contact)
+    } catch (error) {
+      console.error(`Failed to seed primary contact for lead ${lead.id}:`, error)
+    }
 
     const activity = LeadActivity.create({
       leadId: lead.id,
