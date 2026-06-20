@@ -8,7 +8,6 @@ export class Lead {
   readonly id: string
   readonly quoteId: string
   readonly stage: LeadStage
-  readonly adminNotes: string | null
   readonly estimatedValue: number | null
   readonly updatedAt: Date
   readonly archivedAt: Date | null
@@ -17,7 +16,6 @@ export class Lead {
     id: string
     quoteId: string
     stage: LeadStage
-    adminNotes: string | null
     estimatedValue: number | null
     updatedAt: Date
     archivedAt: Date | null
@@ -25,7 +23,6 @@ export class Lead {
     this.id = props.id
     this.quoteId = props.quoteId
     this.stage = props.stage
-    this.adminNotes = props.adminNotes
     this.estimatedValue = props.estimatedValue
     this.updatedAt = props.updatedAt
     this.archivedAt = props.archivedAt
@@ -38,7 +35,6 @@ export class Lead {
       id,
       quoteId: input.quoteId,
       stage: 'prospect',
-      adminNotes: null,
       estimatedValue: null,
       updatedAt: new Date(),
       archivedAt: null,
@@ -50,19 +46,6 @@ export class Lead {
       id: this.id,
       quoteId: this.quoteId,
       stage,
-      adminNotes: this.adminNotes,
-      estimatedValue: this.estimatedValue,
-      updatedAt: new Date(),
-      archivedAt: this.archivedAt,
-    })
-  }
-
-  withNotes(notes: string): Lead {
-    return new Lead({
-      id: this.id,
-      quoteId: this.quoteId,
-      stage: this.stage,
-      adminNotes: notes || null,
       estimatedValue: this.estimatedValue,
       updatedAt: new Date(),
       archivedAt: this.archivedAt,
@@ -74,7 +57,6 @@ export class Lead {
       id: this.id,
       quoteId: this.quoteId,
       stage: this.stage,
-      adminNotes: this.adminNotes,
       estimatedValue: value,
       updatedAt: new Date(),
       archivedAt: this.archivedAt,
@@ -93,7 +75,6 @@ export class Lead {
     id: string
     quoteId: string
     stage: LeadStage
-    adminNotes: string | null
     estimatedValue: number | null
     updatedAt: Date
     archivedAt: Date | null

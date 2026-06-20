@@ -199,7 +199,6 @@ export const leads = pgTable(
       .notNull()
       .references(() => quotes.id, { onDelete: 'cascade' }),
     stage: leadStageEnum('stage').notNull().default('prospect'),
-    adminNotes: text('admin_notes'),
     estimatedValue: integer('estimated_value'), // cents
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     archivedAt: timestamp('archived_at', { withTimezone: true }),

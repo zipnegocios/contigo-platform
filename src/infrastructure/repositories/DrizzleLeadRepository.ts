@@ -12,7 +12,6 @@ export class DrizzleLeadRepository implements ILeadRepository {
         id: lead.id,
         quoteId: lead.quoteId,
         stage: lead.stage,
-        adminNotes: lead.adminNotes,
         estimatedValue: lead.estimatedValue,
       })
       .onConflictDoNothing()
@@ -104,7 +103,6 @@ export class DrizzleLeadRepository implements ILeadRepository {
       .update(leads)
       .set({
         stage: lead.stage,
-        adminNotes: lead.adminNotes,
         estimatedValue: lead.estimatedValue,
         updatedAt: lead.updatedAt,
         archivedAt: lead.archivedAt,
@@ -117,7 +115,6 @@ export class DrizzleLeadRepository implements ILeadRepository {
       id: row.id,
       quoteId: row.quoteId,
       stage: row.stage,
-      adminNotes: row.adminNotes,
       estimatedValue: row.estimatedValue,
       updatedAt: row.updatedAt,
       archivedAt: row.archivedAt,
