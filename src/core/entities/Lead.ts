@@ -11,6 +11,7 @@ export class Lead {
   readonly adminNotes: string | null
   readonly estimatedValue: number | null
   readonly updatedAt: Date
+  readonly archivedAt: Date | null
 
   private constructor(props: {
     id: string
@@ -19,6 +20,7 @@ export class Lead {
     adminNotes: string | null
     estimatedValue: number | null
     updatedAt: Date
+    archivedAt: Date | null
   }) {
     this.id = props.id
     this.quoteId = props.quoteId
@@ -26,6 +28,7 @@ export class Lead {
     this.adminNotes = props.adminNotes
     this.estimatedValue = props.estimatedValue
     this.updatedAt = props.updatedAt
+    this.archivedAt = props.archivedAt
   }
 
   static create(input: CreateLeadInput): Lead {
@@ -38,6 +41,7 @@ export class Lead {
       adminNotes: null,
       estimatedValue: null,
       updatedAt: new Date(),
+      archivedAt: null,
     })
   }
 
@@ -49,6 +53,7 @@ export class Lead {
       adminNotes: this.adminNotes,
       estimatedValue: this.estimatedValue,
       updatedAt: new Date(),
+      archivedAt: this.archivedAt,
     })
   }
 
@@ -60,6 +65,7 @@ export class Lead {
       adminNotes: notes || null,
       estimatedValue: this.estimatedValue,
       updatedAt: new Date(),
+      archivedAt: this.archivedAt,
     })
   }
 
@@ -71,7 +77,16 @@ export class Lead {
       adminNotes: this.adminNotes,
       estimatedValue: value,
       updatedAt: new Date(),
+      archivedAt: this.archivedAt,
     })
+  }
+
+  archive(): Lead {
+    return new Lead({ ...this, archivedAt: new Date() })
+  }
+
+  restore(): Lead {
+    return new Lead({ ...this, archivedAt: null })
   }
 
   static reconstruct(props: {
@@ -81,6 +96,7 @@ export class Lead {
     adminNotes: string | null
     estimatedValue: number | null
     updatedAt: Date
+    archivedAt: Date | null
   }): Lead {
     return new Lead(props)
   }

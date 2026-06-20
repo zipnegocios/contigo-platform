@@ -23,6 +23,7 @@ export class LeadDocument {
   readonly sourceMediaId: string | null
   readonly uploadedBy: string | null
   readonly createdAt: Date
+  readonly archivedAt: Date | null
 
   private constructor(props: {
     id: string
@@ -35,6 +36,7 @@ export class LeadDocument {
     sourceMediaId: string | null
     uploadedBy: string | null
     createdAt: Date
+    archivedAt: Date | null
   }) {
     this.id = props.id
     this.leadId = props.leadId
@@ -46,6 +48,7 @@ export class LeadDocument {
     this.sourceMediaId = props.sourceMediaId
     this.uploadedBy = props.uploadedBy
     this.createdAt = props.createdAt
+    this.archivedAt = props.archivedAt
   }
 
   static create(input: CreateLeadDocumentInput): LeadDocument {
@@ -60,7 +63,16 @@ export class LeadDocument {
       sourceMediaId: input.sourceMediaId ?? null,
       uploadedBy: input.uploadedBy ?? null,
       createdAt: new Date(),
+      archivedAt: null,
     })
+  }
+
+  archive(): LeadDocument {
+    return new LeadDocument({ ...this, archivedAt: new Date() })
+  }
+
+  restore(): LeadDocument {
+    return new LeadDocument({ ...this, archivedAt: null })
   }
 
   static reconstruct(props: {
@@ -74,6 +86,7 @@ export class LeadDocument {
     sourceMediaId: string | null
     uploadedBy: string | null
     createdAt: Date
+    archivedAt: Date | null
   }): LeadDocument {
     return new LeadDocument(props)
   }
