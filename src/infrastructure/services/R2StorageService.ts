@@ -4,6 +4,7 @@ import {
   ListObjectsV2Command,
   DeleteObjectCommand,
   CopyObjectCommand,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -67,6 +68,25 @@ export async function generatePresignedPutUrl(
     Bucket: bucket,
     Key: key,
   })
+  return getSignedUrl(client, command, { expiresIn })
+}
+
+/**
+ * Generates a presigned GET URL for reading a private object directly from
+ * the browser (e.g. previewing/downloading a quote attachment stored in a
+ * private bucket).
+ *
+ * @param bucket - R2 bucket name
+ * @param key - Object key (path within bucket)
+ * @param expiresIn - URL validity in seconds (default: 5 minutes)
+ */
+export async function generatePresignedGetUrl(
+  bucket: string,
+  key: string,
+  expiresIn = 300,
+): Promise<string> {
+  const client = getR2Client()
+  const command = new GetObjectCommand({ Bucket: bucket, Key: key })
   return getSignedUrl(client, command, { expiresIn })
 }
 
