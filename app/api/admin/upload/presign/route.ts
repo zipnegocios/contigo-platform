@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { generatePresignedPutUrl, buildKey } from '@/infrastructure/services/R2StorageService'
 
-const ALLOWED_PREFIXES = ['projects/cover', 'projects/gallery', 'projects/video', 'services', 'services/gallery', 'bank'] as const
+const ALLOWED_PREFIXES = ['projects/cover', 'projects/gallery', 'projects/video', 'services', 'services/gallery', 'bank', 'leads'] as const
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
   'video/mp4', 'video/webm', 'video/quicktime', 'video/ogg',
