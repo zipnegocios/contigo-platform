@@ -66,7 +66,13 @@ export function LeadDetailTabs({
       </TabsContent>
 
       <TabsContent value="calls-visits">
-        <LeadEventsPanel leadId={lead.id} events={events} />
+        <LeadEventsPanel
+          leadId={lead.id}
+          events={events}
+          contacts={contacts}
+          onContactsChange={setContacts}
+          onMutated={onMutated}
+        />
       </TabsContent>
 
       <TabsContent value="documents">
