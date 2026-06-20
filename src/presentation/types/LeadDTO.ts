@@ -7,6 +7,7 @@ export interface LeadDTO {
   adminNotes: string | null
   estimatedValue: number | null
   updatedAt: Date
+  archivedAt: Date | null
 }
 
 export function toLeadDTO(lead: Lead): LeadDTO {
@@ -17,5 +18,6 @@ export function toLeadDTO(lead: Lead): LeadDTO {
     adminNotes: lead.adminNotes,
     estimatedValue: lead.estimatedValue,
     updatedAt: lead.updatedAt,
+    archivedAt: lead.archivedAt,
   }
 }

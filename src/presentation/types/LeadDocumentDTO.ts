@@ -11,6 +11,7 @@ export interface LeadDocumentDTO {
   sourceMediaId: string | null
   uploadedBy: string | null
   createdAt: Date
+  archivedAt: Date | null
 }
 
 export function toLeadDocumentDTO(document: LeadDocument): LeadDocumentDTO {
@@ -25,5 +26,6 @@ export function toLeadDocumentDTO(document: LeadDocument): LeadDocumentDTO {
     sourceMediaId: document.sourceMediaId,
     uploadedBy: document.uploadedBy,
     createdAt: document.createdAt,
+    archivedAt: document.archivedAt,
   }
 }

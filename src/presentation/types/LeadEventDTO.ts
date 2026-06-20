@@ -1,4 +1,4 @@
-import { LeadEvent, LeadEventType, LeadEventStatus } from '@/core/entities/LeadEvent'
+import { LeadEvent, LeadEventType, LeadEventStatus, LeadEventMetadata } from '@/core/entities/LeadEvent'
 
 export interface LeadEventDTO {
   id: string
@@ -12,6 +12,8 @@ export interface LeadEventDTO {
   createdBy: string | null
   createdAt: Date
   updatedAt: Date
+  metadata: LeadEventMetadata
+  archivedAt: Date | null
 }
 
 export function toLeadEventDTO(event: LeadEvent): LeadEventDTO {
@@ -27,5 +29,7 @@ export function toLeadEventDTO(event: LeadEvent): LeadEventDTO {
     createdBy: event.createdBy,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
+    metadata: event.metadata,
+    archivedAt: event.archivedAt,
   }
 }
