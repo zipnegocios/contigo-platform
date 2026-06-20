@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '@/presentation/components/ui/button'
 import { Badge } from '@/presentation/components/ui/badge'
 import { MediaPickerModal } from './MediaPickerModal'
+import { QuoteAttachmentsGrid } from './QuoteAttachmentsGrid'
 import type {
   LeadDocumentCategory,
   LeadDocumentDirection,
@@ -19,40 +20,49 @@ interface LeadDocumentItem {
   direction: LeadDocumentDirection
   category: LeadDocumentCategory
   createdAt: Date
+  archivedAt: Date | null
 }
 
 interface LeadDocumentsPanelProps {
   leadId: string
   documents: LeadDocumentItem[]
   clientAttachmentKeys: string[]
+  onMutated?: () => void
 }
 
 const ASSETS_BASE_URL =
   process.env.NEXT_PUBLIC_ASSETS_URL || 'https://assets.contigoconstructions.com.au'
 
 const DIRECTION_LABELS: Record<LeadDocumentDirection, string> = {
-  client_upload: 'Recibido del cliente',
-  admin_sent: 'Enviado al cliente',
-  internal: 'Interno',
+  client_upload: 'Received from client',
+  admin_sent: 'Sent to client',
+  internal: 'Internal',
 }
 
 const CATEGORY_LABELS: Record<LeadDocumentCategory, string> = {
-  reference_photo: 'Foto de referencia',
-  site_photo: 'Foto de obra',
-  quote_pdf: 'PDF de cotización',
-  contract: 'Contrato',
-  other: 'Otro',
+  reference_photo: 'Reference photo',
+  site_photo: 'Site photo',
+  quote_pdf: 'Quote PDF',
+  contract: 'Contract',
+  other: 'Other',
 }
 
 export function LeadDocumentsPanel({
   leadId,
   documents,
   clientAttachmentKeys,
+  onMutated,
 }: LeadDocumentsPanelProps) {
   const router = useRouter()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [showArchived, setShowArchived] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const afterMutation = () => {
+    router.refresh()
+    onMutated?.()
+  }
 
   const attachDocument = async (payload: {
     fileKey: string
@@ -80,10 +90,10 @@ export function LeadDocumentsPanel({
         direction: 'admin_sent',
         category: 'other',
       })
-      toast.success('Documento adjuntado')
-      router.refresh()
+      toast.success('Document attached')
+      afterMutation()
     } catch {
-      toast.error('No se pudo adjuntar el documento')
+      toast.error('Could not attach document')
     }
   }
 
@@ -131,30 +141,58 @@ export function LeadDocumentsPanel({
         category: 'other',
       })
 
-      toast.success('Archivo subido')
-      router.refresh()
+      toast.success('File uploaded')
+      afterMutation()
     } catch (error) {
       const message = error instanceof Error && error.message ? error.message : null
       toast.error(
-        message ? `No se pudo subir el archivo: ${message}` : 'No se pudo subir el archivo'
+        message ? `Could not upload file: ${message}` : 'Could not upload file'
       )
     } finally {
       setUploading(false)
     }
   }
 
+  const archiveDocument = async (documentId: string) => {
+    try {
+      const res = await fetch(`/api/admin/leads/${leadId}/documents/${documentId}/archive`, { method: 'POST' })
+      if (!res.ok) throw new Error()
+      toast.success('Document deleted')
+      afterMutation()
+    } catch {
+      toast.error('Could not delete document')
+    }
+  }
+
+  const restoreDocument = async (documentId: string) => {
+    try {
+      const res = await fetch(`/api/admin/leads/${leadId}/documents/${documentId}/restore`, { method: 'POST' })
+      if (!res.ok) throw new Error()
+      toast.success('Document restored')
+      afterMutation()
+    } catch {
+      toast.error('Could not restore document')
+    }
+  }
+
+  const visibleDocuments = documents.filter((d) =>
+    showArchived ? d.archivedAt !== null : d.archivedAt === null
+  )
+
+  const hasArchived = documents.some((d) => d.archivedAt !== null)
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" onClick={() => setPickerOpen(true)}>
-          Adjuntar desde Media Library
+          Attach from Media Library
         </Button>
         <Button
           variant="outline"
           disabled={uploading}
           onClick={() => fileInputRef.current?.click()}
         >
-          {uploading ? 'Subiendo…' : 'Subir nuevo archivo'}
+          {uploading ? 'Uploading…' : 'Upload new file'}
         </Button>
         <input
           ref={fileInputRef}
@@ -166,12 +204,12 @@ export function LeadDocumentsPanel({
       </div>
 
       <div className="space-y-2">
-        {documents.length === 0 ? (
+        {visibleDocuments.length === 0 ? (
           <p className="text-sm text-muted-foreground py-8 text-center">
-            Sin documentos todavía.
+            No documents yet.
           </p>
         ) : (
-          documents.map((doc) => {
+          visibleDocuments.map((doc) => {
             const href = `${ASSETS_BASE_URL}/${doc.fileKey}`
             return (
               <div
@@ -198,6 +236,15 @@ export function LeadDocumentsPanel({
                 <div className="flex flex-shrink-0 items-center gap-2">
                   <Badge variant="secondary">{CATEGORY_LABELS[doc.category]}</Badge>
                   <Badge variant="outline">{DIRECTION_LABELS[doc.direction]}</Badge>
+                  {doc.archivedAt ? (
+                    <Button size="sm" variant="outline" onClick={() => restoreDocument(doc.id)}>
+                      Restore
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="ghost" onClick={() => archiveDocument(doc.id)}>
+                      Delete
+                    </Button>
+                  )}
                 </div>
               </div>
             )
@@ -205,28 +252,21 @@ export function LeadDocumentsPanel({
         )}
       </div>
 
+      {hasArchived && (
+        <button
+          type="button"
+          onClick={() => setShowArchived((v) => !v)}
+          className="text-fluid-xs underline"
+          style={{ color: 'var(--neutral-600)' }}
+        >
+          {showArchived ? 'Hide deleted documents' : 'Show deleted documents'}
+        </button>
+      )}
+
       {clientAttachmentKeys.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">Adjuntos originales del cliente</h3>
-          <div className="space-y-2">
-            {clientAttachmentKeys.map((key, i) => (
-              <div
-                key={i}
-                className="rounded px-3 py-2 text-xs font-mono break-all"
-                style={{
-                  backgroundColor: 'var(--neutral-50)',
-                  border: '1px solid #E5DDD0',
-                  color: '#6B6560',
-                }}
-              >
-                {key}
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            These are stored in the private <code className="font-mono">contigo-quotes</code>{' '}
-            bucket. Presigned view URLs will be added in a future update.
-          </p>
+          <h3 className="text-sm font-semibold">Client&apos;s original attachments</h3>
+          <QuoteAttachmentsGrid leadId={leadId} fileKeys={clientAttachmentKeys} />
         </div>
       )}
 

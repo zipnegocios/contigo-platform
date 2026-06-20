@@ -80,6 +80,7 @@ export function LeadDetailTabs({
           leadId={lead.id}
           documents={documents}
           clientAttachmentKeys={quote.attachmentUrls}
+          onMutated={onMutated}
         />
       </TabsContent>
     </Tabs>
