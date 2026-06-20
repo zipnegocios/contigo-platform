@@ -1,3 +1,8 @@
+-- NOTA: este archivo es una foto (snapshot) de una base de datos que YA EXISTIA al
+-- momento de introspectarla; no es un script de instalacion. "npm run db:migrate" NO
+-- puede usarse para crear una base de datos nueva/vacia desde cero con esto.
+-- Para un entorno nuevo, usa "npm run db:push" (o "npm run db:setup", que ya lo encadena).
+--
 -- Current sql file was generated after introspecting the database
 -- If you want to run this migration please uncomment this code before executing migrations
 /*

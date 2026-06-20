@@ -65,6 +65,14 @@ export class DrizzleLeadRepository implements ILeadRepository {
     const conditions = []
     if (filters.stage) conditions.push(eq(leads.stage, filters.stage as any))
 
+    // createdTo llega como el inicio del dia (medianoche UTC) cuando se parsea desde
+    // un string tipo '2026-06-20'. Se extiende al final de ese mismo dia (+ ~24h - 1ms)
+    // usando aritmetica de milisegundos para evitar ambiguedad UTC/local, de forma que
+    // la comparacion lte incluya todo el dia y no solo su primer instante.
+    const createdToEndOfDay = filters.createdTo
+      ? new Date(filters.createdTo.getTime() + 24 * 60 * 60 * 1000 - 1)
+      : undefined
+
     // El filtro de fecha se aplica sobre quotes.createdAt (fecha real de la solicitud)
     // requiere join porque leads.updatedAt cambia con cada movimiento de stage
     const rows = await db
@@ -75,7 +83,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
         and(
           ...conditions,
           filters.createdFrom ? gte(quotes.createdAt, filters.createdFrom) : undefined,
-          filters.createdTo ? lte(quotes.createdAt, filters.createdTo) : undefined,
+          createdToEndOfDay ? lte(quotes.createdAt, createdToEndOfDay) : undefined,
         ),
       )
       .orderBy(desc(leads.updatedAt))
