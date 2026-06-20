@@ -71,3 +71,6 @@ graphify-out
 
 # Superpowers subagent-driven-development scratch (briefs, reports, diffs)
 .superpowers/
+
+# TypeScript incremental build cache (machine-generated, balloons diffs)
+tsconfig.tsbuildinfo
