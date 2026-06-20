@@ -62,6 +62,13 @@ export const leadDocumentCategoryEnum = pgEnum('lead_document_category', [
   'other',
 ])
 
+export const leadContactRoleEnum = pgEnum('lead_contact_role', [
+  'owner',
+  'site_manager',
+  'spouse',
+  'other',
+])
+
 export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
   'stage_change',
   'note',
@@ -195,10 +202,12 @@ export const leads = pgTable(
     adminNotes: text('admin_notes'),
     estimatedValue: integer('estimated_value'), // cents
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_leads_stage').on(table.stage),
     index('idx_leads_quote_id').on(table.quoteId),
+    index('idx_leads_archived_at').on(table.archivedAt),
   ],
 )
 
@@ -219,11 +228,14 @@ export const leadEvents = pgTable(
     createdBy: uuid('created_by').references(() => adminUsers.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_lead_events_lead_id').on(table.leadId),
     index('idx_lead_events_scheduled_at').on(table.scheduledAt),
     index('idx_lead_events_status').on(table.status),
+    index('idx_lead_events_archived_at').on(table.archivedAt),
   ],
 )
 
@@ -243,10 +255,55 @@ export const leadDocuments = pgTable(
     sourceMediaId: uuid('source_media_id'), // si se reusó una imagen del Media Library/Portfolio
     uploadedBy: uuid('uploaded_by').references(() => adminUsers.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_lead_documents_lead_id').on(table.leadId),
     index('idx_lead_documents_direction').on(table.direction),
+    index('idx_lead_documents_archived_at').on(table.archivedAt),
+  ],
+)
+
+// ============ LEAD NOTES TABLE ============
+export const leadNotes = pgTable(
+  'lead_notes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    leadId: uuid('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    body: text('body').notNull(),
+    createdBy: uuid('created_by').references(() => adminUsers.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+  },
+  (table) => [
+    index('idx_lead_notes_lead_id').on(table.leadId),
+    index('idx_lead_notes_archived_at').on(table.archivedAt),
+  ],
+)
+
+// ============ LEAD CONTACTS TABLE ============
+export const leadContacts = pgTable(
+  'lead_contacts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    leadId: uuid('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 255 }).notNull(),
+    phone: varchar('phone', { length: 20 }).notNull(),
+    email: varchar('email', { length: 255 }),
+    role: leadContactRoleEnum('role'),
+    isPrimary: boolean('is_primary').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+  },
+  (table) => [
+    index('idx_lead_contacts_lead_id').on(table.leadId),
+    index('idx_lead_contacts_archived_at').on(table.archivedAt),
   ],
 )
 
