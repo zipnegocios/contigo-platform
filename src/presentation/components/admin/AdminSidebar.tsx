@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard,
-  Inbox,
   FolderOpen,
   Briefcase,
   Trello,
@@ -19,7 +18,6 @@ import { Button } from '@/presentation/design-system/components/atoms'
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { label: 'Inbox', href: '/admin/inbox', icon: Inbox },
   { label: 'Projects', href: '/admin/projects', icon: FolderOpen },
   { label: 'Services', href: '/admin/services', icon: Briefcase },
   { label: 'Categories', href: '/admin/categories', icon: Tag },
