@@ -1,7 +1,24 @@
+import { z } from 'zod'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
 import { ScheduleLeadEventUseCase } from '@/application/use-cases/leads/ScheduleLeadEventUseCase'
+
+export const LeadEventMetadataSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('call'), contactId: z.string().uuid().nullable() }),
+  z.object({
+    kind: z.literal('site_visit'),
+    contactId: z.string().uuid().nullable(),
+    mapsLink: z.string().nullable(),
+    address: z.string().nullable(),
+    referencePoint: z.string().nullable(),
+  }),
+  z.object({
+    kind: z.literal('meeting'),
+    channel: z.enum(['google_meet', 'zoom', 'teams', 'whatsapp', 'other']),
+    link: z.string().nullable(),
+  }),
+])
 
 export async function POST(
   request: Request,
@@ -19,9 +36,7 @@ export async function POST(
       return Response.json({ error: 'type y scheduledAt son requeridos' }, { status: 400 })
     }
 
-    if (!metadata) {
-      return Response.json({ error: 'metadata es requerido' }, { status: 400 })
-    }
+    const parsedMetadata = LeadEventMetadataSchema.parse(metadata)
 
     const useCase = new ScheduleLeadEventUseCase(
       new DrizzleLeadEventRepository(),
@@ -36,11 +51,14 @@ export async function POST(
       location,
       notes,
       createdBy: (session.user as any)?.id,
-      metadata,
+      metadata: parsedMetadata,
     })
 
     return Response.json({ success: true, event }, { status: 201 })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return Response.json({ error: 'Invalid input', details: error.issues }, { status: 400 })
+    }
     console.error('Error scheduling lead event:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
