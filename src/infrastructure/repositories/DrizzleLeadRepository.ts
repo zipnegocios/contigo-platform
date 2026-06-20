@@ -1,6 +1,6 @@
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, gte, lte } from 'drizzle-orm'
 import { db } from '../db/client'
-import { leads } from '../db/schema'
+import { leads, quotes } from '../db/schema'
 import { Lead } from '@/core/entities/Lead'
 import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 
@@ -55,6 +55,32 @@ export class DrizzleLeadRepository implements ILeadRepository {
       .offset(offset)
 
     return rows.map((row) => this.mapRowToLead(row))
+  }
+
+  async findAllFiltered(filters: {
+    stage?: string
+    createdFrom?: Date
+    createdTo?: Date
+  }): Promise<Lead[]> {
+    const conditions = []
+    if (filters.stage) conditions.push(eq(leads.stage, filters.stage as any))
+
+    // El filtro de fecha se aplica sobre quotes.createdAt (fecha real de la solicitud)
+    // requiere join porque leads.updatedAt cambia con cada movimiento de stage
+    const rows = await db
+      .select({ lead: leads, quote: quotes })
+      .from(leads)
+      .innerJoin(quotes, eq(leads.quoteId, quotes.id))
+      .where(
+        and(
+          ...conditions,
+          filters.createdFrom ? gte(quotes.createdAt, filters.createdFrom) : undefined,
+          filters.createdTo ? lte(quotes.createdAt, filters.createdTo) : undefined,
+        ),
+      )
+      .orderBy(desc(leads.updatedAt))
+
+    return rows.map((r) => this.mapRowToLead(r.lead))
   }
 
   async update(lead: Lead): Promise<void> {
