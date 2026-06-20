@@ -5,6 +5,10 @@ import { DrizzleLeadDocumentRepository } from '@/infrastructure/repositories/Dri
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
 import { LeadDetailTabs } from '@/presentation/components/admin/LeadDetailTabs'
 import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
+import { toLeadDTO } from '@/presentation/types/LeadDTO'
+import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
+import { toLeadDocumentDTO } from '@/presentation/types/LeadDocumentDTO'
+import { toLeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
 import { notFound } from 'next/navigation'
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -32,11 +36,11 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <LeadDetailTabs
-        lead={lead}
+        lead={toLeadDTO(lead)}
         quote={quoteDto}
-        events={events}
-        documents={documents}
-        activities={activities}
+        events={events.map(toLeadEventDTO)}
+        documents={documents.map(toLeadDocumentDTO)}
+        activities={activities.map(toLeadActivityDTO)}
       />
     </div>
   )

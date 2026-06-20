@@ -1,7 +1,7 @@
 'use client'
 
 import { Phone, MapPin, FileText, ArrowRight, Mail, StickyNote, type LucideIcon } from 'lucide-react'
-import type { LeadActivity } from '@/core/entities/LeadActivity'
+import type { LeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
 
 const ICONS: Record<string, LucideIcon> = {
   stage_change: ArrowRight,
@@ -30,7 +30,7 @@ const LABELS: Record<string, (payload: Record<string, unknown>) => string> = {
   note: (p) => (p.text as string) ?? 'Nota agregada',
 }
 
-export function LeadActivityTimeline({ activities }: { activities: LeadActivity[] }) {
+export function LeadActivityTimeline({ activities }: { activities: LeadActivityDTO[] }) {
   if (!activities.length) {
     return <p className="text-sm text-muted-foreground py-8 text-center">Sin actividad registrada todavía.</p>
   }

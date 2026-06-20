@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/presentation/components/ui/button'
 import { Badge } from '@/presentation/components/ui/badge'
-import type { LeadEvent } from '@/core/entities/LeadEvent'
+import type { LeadEventDTO } from '@/presentation/types/LeadEventDTO'
 
-export function LeadEventsPanel({ leadId, events }: { leadId: string; events: LeadEvent[] }) {
+export function LeadEventsPanel({ leadId, events }: { leadId: string; events: LeadEventDTO[] }) {
   const router = useRouter()
   const [type, setType] = useState<'call' | 'site_visit' | 'meeting'>('call')
   const [scheduledAt, setScheduledAt] = useState('')

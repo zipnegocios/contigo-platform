@@ -1,10 +1,10 @@
 'use client'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/presentation/components/ui/tabs'
-import type { Lead } from '@/core/entities/Lead'
-import type { LeadEvent } from '@/core/entities/LeadEvent'
-import type { LeadDocument } from '@/core/entities/LeadDocument'
-import type { LeadActivity } from '@/core/entities/LeadActivity'
+import type { LeadDTO } from '@/presentation/types/LeadDTO'
+import type { LeadEventDTO } from '@/presentation/types/LeadEventDTO'
+import type { LeadDocumentDTO } from '@/presentation/types/LeadDocumentDTO'
+import type { LeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
 import type { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import { QuoteDetailPanel } from './QuoteDetailPanel'
 import { LeadActivityTimeline } from './LeadActivityTimeline'
@@ -12,11 +12,11 @@ import { LeadEventsPanel } from './LeadEventsPanel'
 import { LeadDocumentsPanel } from './LeadDocumentsPanel'
 
 interface LeadDetailTabsProps {
-  lead: Lead
+  lead: LeadDTO
   quote: QuoteDTO
-  events: LeadEvent[]
-  documents: LeadDocument[]
-  activities: LeadActivity[]
+  events: LeadEventDTO[]
+  documents: LeadDocumentDTO[]
+  activities: LeadActivityDTO[]
 }
 
 export function LeadDetailTabs({ lead, quote, events, documents, activities }: LeadDetailTabsProps) {
