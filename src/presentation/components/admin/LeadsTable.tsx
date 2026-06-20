@@ -17,7 +17,6 @@ interface LeadsTableProps {
     id: string
     quoteId: string
     stage: string
-    adminNotes: string | null
     estimatedValue: number | null
     updatedAt: Date
     quote: QuoteDTO | null

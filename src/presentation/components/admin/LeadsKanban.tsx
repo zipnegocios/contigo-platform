@@ -10,7 +10,6 @@ interface LeadsKanbanProps {
     id: string
     quoteId: string
     stage: string
-    adminNotes: string | null
     estimatedValue: number | null
     updatedAt: Date
     quote: QuoteDTO | null
@@ -239,15 +238,6 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                               ${(lead.estimatedValue / 100).toFixed(0)}
                             </span>
                           </div>
-                        )}
-
-                        {lead.adminNotes && (
-                          <p
-                            className="text-fluid-xs italic pl-2"
-                            style={{ color: 'var(--neutral-600)', borderLeft: '2px solid #E5DDD0' }}
-                          >
-                            {lead.adminNotes}
-                          </p>
                         )}
                       </Link>
                     </div>
