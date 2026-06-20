@@ -29,6 +29,10 @@ export function LeadsBoard({ view, leads: initialLeads }: LeadsBoardProps) {
     )
   }
 
+  const handleLeadArchived = (leadId: string) => {
+    setLeads((prev) => prev.filter((l) => l.id !== leadId))
+  }
+
   return (
     <>
       {view === 'table' ? (
@@ -36,7 +40,7 @@ export function LeadsBoard({ view, leads: initialLeads }: LeadsBoardProps) {
       ) : (
         <LeadsKanban leads={leads} onLeadsChange={setLeads} />
       )}
-      <LeadDetailModal onStageChange={handleStageChange} />
+      <LeadDetailModal onStageChange={handleStageChange} onLeadArchived={handleLeadArchived} />
     </>
   )
 }

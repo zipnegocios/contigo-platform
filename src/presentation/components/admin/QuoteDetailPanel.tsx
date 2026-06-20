@@ -16,6 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/presentation/components/ui/accordion'
+import { Button } from '@/presentation/components/ui/button'
 import { LeadStage } from '@/core/entities/Lead'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
@@ -33,6 +34,7 @@ interface QuoteDetailPanelProps {
   onContactsChange: Dispatch<SetStateAction<LeadContactDTO[]>>
   onStageChange?: (newStage: string) => void
   onMutated?: () => void
+  onArchived?: () => void
 }
 
 function InfoField({ label, value }: { label: string; value: React.ReactNode }) {
@@ -48,10 +50,26 @@ function InfoField({ label, value }: { label: string; value: React.ReactNode }) 
   )
 }
 
-export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, onContactsChange, onStageChange, onMutated }: QuoteDetailPanelProps) {
+export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, onContactsChange, onStageChange, onMutated, onArchived }: QuoteDetailPanelProps) {
   const router = useRouter()
   const [stage, setStage] = useState<LeadStage>(initialStage)
   const [stageSaving, setStageSaving] = useState(false)
+  const [archiving, setArchiving] = useState(false)
+
+  const handleMoveToTrash = async () => {
+    setArchiving(true)
+    try {
+      const response = await fetch(`/api/admin/leads/${leadId}/archive`, { method: 'POST' })
+      if (!response.ok) throw new Error('Failed to move lead to trash')
+      toast.success('Lead moved to trash')
+      onArchived?.()
+      router.refresh()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to move lead to trash')
+    } finally {
+      setArchiving(false)
+    }
+  }
 
   const handleStageSelect = async (newStage: LeadStage) => {
     setStageSaving(true)
@@ -218,6 +236,12 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
           </div>
 
           <LeadNotesPanel leadId={leadId} notes={notes} onMutated={onMutated} />
+
+          <div className="pt-3" style={{ borderTop: '1px solid #F0E8DC' }}>
+            <Button variant="ghost" size="sm" onClick={handleMoveToTrash} disabled={archiving} style={{ color: '#B91C1C' }}>
+              Move to Trash
+            </Button>
+          </div>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

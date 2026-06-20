@@ -8,9 +8,10 @@ import { LeadDetailTabs } from './LeadDetailTabs'
 
 interface LeadDetailModalProps {
   onStageChange?: (leadId: string, newStage: string) => void
+  onLeadArchived?: (leadId: string) => void
 }
 
-export function LeadDetailModal({ onStageChange }: LeadDetailModalProps) {
+export function LeadDetailModal({ onStageChange, onLeadArchived }: LeadDetailModalProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const leadId = searchParams?.get('leadId') ?? null
@@ -49,6 +50,11 @@ export function LeadDetailModal({ onStageChange }: LeadDetailModalProps) {
     params.delete('leadId')
     const query = params.toString()
     router.push(`/admin/leads${query ? `?${query}` : ''}`, { scroll: false })
+  }
+
+  const handleArchived = () => {
+    if (leadId) onLeadArchived?.(leadId)
+    close()
   }
 
   useEffect(() => {
@@ -141,6 +147,7 @@ export function LeadDetailModal({ onStageChange }: LeadDetailModalProps) {
               contacts={mapped.contacts}
               onStageChange={handleStageChange}
               onMutated={refetch}
+              onArchived={handleArchived}
             />
           </div>
         )}
