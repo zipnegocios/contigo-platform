@@ -16,7 +16,7 @@ export async function GET(
     const key = searchParams.get('key')
 
     if (!key) {
-      return Response.json({ error: 'key es requerido' }, { status: 400 })
+      return Response.json({ error: 'key is required' }, { status: 400 })
     }
 
     const lead = await new DrizzleLeadRepository().findById(id)

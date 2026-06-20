@@ -16,7 +16,7 @@ export async function POST(
     const { fileKey, fileName, mimeType, direction, category, sourceMediaId } = body
 
     if (!fileKey || !fileName || !direction) {
-      return Response.json({ error: 'fileKey, fileName y direction son requeridos' }, { status: 400 })
+      return Response.json({ error: 'fileKey, fileName, and direction are required' }, { status: 400 })
     }
 
     const useCase = new AttachLeadDocumentUseCase(

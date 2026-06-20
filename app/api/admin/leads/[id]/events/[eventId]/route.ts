@@ -21,7 +21,7 @@ export async function PATCH(
       const { status } = body
       const validStatuses = ['scheduled', 'completed', 'cancelled', 'no_show']
       if (!validStatuses.includes(status)) {
-        return Response.json({ error: 'status inválido' }, { status: 400 })
+        return Response.json({ error: 'invalid status' }, { status: 400 })
       }
 
       const useCase = new UpdateLeadEventStatusUseCase(

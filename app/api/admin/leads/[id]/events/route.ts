@@ -33,7 +33,7 @@ export async function POST(
     const { type, scheduledAt, durationMinutes, location, notes, metadata } = body
 
     if (!type || !scheduledAt) {
-      return Response.json({ error: 'type y scheduledAt son requeridos' }, { status: 400 })
+      return Response.json({ error: 'type and scheduledAt are required' }, { status: 400 })
     }
 
     const parsedMetadata = LeadEventMetadataSchema.parse(metadata)

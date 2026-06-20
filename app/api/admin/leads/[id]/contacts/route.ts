@@ -35,7 +35,7 @@ export async function POST(
     const { name, phone, email, role, isPrimary } = body
 
     if (!name || !phone) {
-      return Response.json({ error: 'name y phone son requeridos' }, { status: 400 })
+      return Response.json({ error: 'name and phone are required' }, { status: 400 })
     }
 
     const useCase = new CreateLeadContactUseCase(new DrizzleLeadContactRepository())
