@@ -125,6 +125,8 @@ export function LeadDetailModal({ onStageChange }: LeadDetailModalProps) {
               events={mapped.events}
               documents={mapped.documents}
               activities={mapped.activities}
+              notes={mapped.notes}
+              contacts={mapped.contacts}
             />
           </div>
         )}

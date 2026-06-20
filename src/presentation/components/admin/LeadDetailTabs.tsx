@@ -1,10 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/presentation/components/ui/tabs'
 import type { LeadDTO } from '@/presentation/types/LeadDTO'
 import type { LeadEventDTO } from '@/presentation/types/LeadEventDTO'
 import type { LeadDocumentDTO } from '@/presentation/types/LeadDocumentDTO'
 import type { LeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
+import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
+import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
 import type { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import { QuoteDetailPanel } from './QuoteDetailPanel'
 import { LeadActivityTimeline } from './LeadActivityTimeline'
@@ -17,31 +20,43 @@ interface LeadDetailTabsProps {
   events: LeadEventDTO[]
   documents: LeadDocumentDTO[]
   activities: LeadActivityDTO[]
+  notes: LeadNoteDTO[]
+  contacts: LeadContactDTO[]
 }
 
-export function LeadDetailTabs({ lead, quote, events, documents, activities }: LeadDetailTabsProps) {
+export function LeadDetailTabs({
+  lead,
+  quote,
+  events,
+  documents,
+  activities,
+  notes,
+  contacts: initialContacts,
+}: LeadDetailTabsProps) {
+  const [contacts, setContacts] = useState(initialContacts)
+
   return (
-    <Tabs defaultValue="resumen">
+    <Tabs defaultValue="summary">
       <TabsList>
-        <TabsTrigger value="resumen">Resumen</TabsTrigger>
-        <TabsTrigger value="actividad">Actividad ({activities.length})</TabsTrigger>
-        <TabsTrigger value="agenda">Llamadas & Visitas ({events.length})</TabsTrigger>
-        <TabsTrigger value="documentos">Documentos ({documents.length})</TabsTrigger>
+        <TabsTrigger value="summary">Summary</TabsTrigger>
+        <TabsTrigger value="activity">Activity ({activities.length})</TabsTrigger>
+        <TabsTrigger value="calls-visits">Calls & Visits ({events.length})</TabsTrigger>
+        <TabsTrigger value="documents">Documents ({documents.length})</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="resumen">
+      <TabsContent value="summary">
         <QuoteDetailPanel quote={quote} initialNotes={lead.adminNotes ?? undefined} />
       </TabsContent>
 
-      <TabsContent value="actividad">
+      <TabsContent value="activity">
         <LeadActivityTimeline activities={activities} />
       </TabsContent>
 
-      <TabsContent value="agenda">
+      <TabsContent value="calls-visits">
         <LeadEventsPanel leadId={lead.id} events={events} />
       </TabsContent>
 
-      <TabsContent value="documentos">
+      <TabsContent value="documents">
         <LeadDocumentsPanel
           leadId={lead.id}
           documents={documents}
