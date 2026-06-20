@@ -6,6 +6,12 @@ export interface ILeadRepository {
   findByQuoteId(quoteId: string): Promise<Lead | null>
   findAll(limit?: number, offset?: number): Promise<Lead[]>
   findByStage(stage: string, limit?: number, offset?: number): Promise<Lead[]>
-  findAllFiltered(filters: { stage?: string; createdFrom?: Date; createdTo?: Date }): Promise<Lead[]>
+  findAllFiltered(filters: {
+    stage?: string
+    createdFrom?: Date
+    createdTo?: Date
+    includeArchived?: boolean
+    onlyArchived?: boolean
+  }): Promise<Lead[]>
   update(lead: Lead): Promise<void>
 }

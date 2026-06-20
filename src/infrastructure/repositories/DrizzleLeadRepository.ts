@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte } from 'drizzle-orm'
+import { eq, desc, and, gte, lte, isNull, isNotNull } from 'drizzle-orm'
 import { db } from '../db/client'
 import { leads, quotes } from '../db/schema'
 import { Lead } from '@/core/entities/Lead'
@@ -61,9 +61,17 @@ export class DrizzleLeadRepository implements ILeadRepository {
     stage?: string
     createdFrom?: Date
     createdTo?: Date
+    includeArchived?: boolean
+    onlyArchived?: boolean
   }): Promise<Lead[]> {
     const conditions = []
     if (filters.stage) conditions.push(eq(leads.stage, filters.stage as any))
+
+    if (filters.onlyArchived) {
+      conditions.push(isNotNull(leads.archivedAt))
+    } else if (!filters.includeArchived) {
+      conditions.push(isNull(leads.archivedAt))
+    }
 
     // createdTo llega como el inicio del dia (medianoche UTC) cuando se parsea desde
     // un string tipo '2026-06-20'. Se extiende al final de ese mismo dia (+ ~24h - 1ms)
@@ -99,6 +107,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
         adminNotes: lead.adminNotes,
         estimatedValue: lead.estimatedValue,
         updatedAt: lead.updatedAt,
+        archivedAt: lead.archivedAt,
       })
       .where(eq(leads.id, lead.id))
   }
@@ -111,6 +120,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
       adminNotes: row.adminNotes,
       estimatedValue: row.estimatedValue,
       updatedAt: row.updatedAt,
+      archivedAt: row.archivedAt,
     })
   }
 }

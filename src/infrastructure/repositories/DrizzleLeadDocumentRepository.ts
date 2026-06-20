@@ -38,7 +38,15 @@ export class DrizzleLeadDocumentRepository implements ILeadDocumentRepository {
         sourceMediaId: row.sourceMediaId,
         uploadedBy: row.uploadedBy,
         createdAt: row.createdAt,
+        archivedAt: row.archivedAt,
       }),
     )
+  }
+
+  async update(document: LeadDocument): Promise<void> {
+    await db
+      .update(leadDocuments)
+      .set({ archivedAt: document.archivedAt })
+      .where(eq(leadDocuments.id, document.id))
   }
 }

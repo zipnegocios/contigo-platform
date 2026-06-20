@@ -16,6 +16,7 @@ export class DrizzleLeadEventRepository implements ILeadEventRepository {
       location: event.location,
       notes: event.notes,
       createdBy: event.createdBy,
+      metadata: event.metadata,
     })
   }
 
@@ -52,6 +53,8 @@ export class DrizzleLeadEventRepository implements ILeadEventRepository {
         scheduledAt: event.scheduledAt,
         durationMinutes: event.durationMinutes,
         updatedAt: event.updatedAt,
+        metadata: event.metadata,
+        archivedAt: event.archivedAt,
       })
       .where(eq(leadEvents.id, event.id))
   }
@@ -69,6 +72,8 @@ export class DrizzleLeadEventRepository implements ILeadEventRepository {
       createdBy: row.createdBy,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      metadata: row.metadata,
+      archivedAt: row.archivedAt,
     })
   }
 }
