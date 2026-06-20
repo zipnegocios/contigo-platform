@@ -4,6 +4,8 @@ import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuo
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadDocumentRepository } from '@/infrastructure/repositories/DrizzleLeadDocumentRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
+import { DrizzleLeadNoteRepository } from '@/infrastructure/repositories/DrizzleLeadNoteRepository'
+import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/DrizzleLeadContactRepository'
 import { ChangeLeadStageUseCase } from '@/application/use-cases/leads/ChangeLeadStageUseCase'
 
 export async function GET(
@@ -20,14 +22,16 @@ export async function GET(
     const lead = await leadRepo.findById(params.id)
     if (!lead) return Response.json({ error: 'Lead not found' }, { status: 404 })
 
-    const [quote, events, documents, activities] = await Promise.all([
+    const [quote, events, documents, activities, notes, contacts] = await Promise.all([
       new DrizzleQuoteRepository().findById(lead.quoteId),
       new DrizzleLeadEventRepository().findByLeadId(lead.id),
       new DrizzleLeadDocumentRepository().findByLeadId(lead.id),
       new DrizzleLeadActivityRepository().findByLeadId(lead.id),
+      new DrizzleLeadNoteRepository().findByLeadId(lead.id),
+      new DrizzleLeadContactRepository().findByLeadId(lead.id),
     ])
 
-    return Response.json({ lead, quote, events, documents, activities })
+    return Response.json({ lead, quote, events, documents, activities, notes, contacts })
   } catch (error) {
     console.error('Error fetching lead detail:', error)
     return Response.json(
