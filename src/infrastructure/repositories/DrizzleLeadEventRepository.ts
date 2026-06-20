@@ -1,7 +1,7 @@
 import { eq, asc, and, gte, lte } from 'drizzle-orm'
 import { db } from '../db/client'
 import { leadEvents } from '../db/schema'
-import { LeadEvent } from '@/core/entities/LeadEvent'
+import { LeadEvent, LeadEventType, LeadEventMetadata } from '@/core/entities/LeadEvent'
 import { ILeadEventRepository } from '@/core/repositories/ILeadEventRepository'
 
 export class DrizzleLeadEventRepository implements ILeadEventRepository {
@@ -72,8 +72,27 @@ export class DrizzleLeadEventRepository implements ILeadEventRepository {
       createdBy: row.createdBy,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-      metadata: row.metadata,
+      metadata: this.normalizeMetadata(row.type, row.metadata),
       archivedAt: row.archivedAt,
     })
+  }
+
+  /**
+   * Legacy rows predating the metadata migration have `metadata: {}` (the
+   * additive default), which has no `kind` and therefore isn't a valid
+   * LeadEventMetadata union member. Synthesize a minimal valid default for
+   * the row's own `type` in that case; pass already-valid metadata through
+   * unchanged.
+   */
+  private normalizeMetadata(type: LeadEventType, raw: unknown): LeadEventMetadata {
+    const meta = raw as Partial<LeadEventMetadata> | null | undefined
+    if (meta && typeof meta === 'object' && 'kind' in meta && meta.kind === type) {
+      return meta as LeadEventMetadata
+    }
+    if (type === 'call') return { kind: 'call', contactId: null }
+    if (type === 'site_visit') {
+      return { kind: 'site_visit', contactId: null, mapsLink: null, address: null, referencePoint: null }
+    }
+    return { kind: 'meeting', channel: 'other', link: null }
   }
 }

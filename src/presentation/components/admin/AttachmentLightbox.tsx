@@ -1,7 +1,7 @@
 'use client'
 
 import { X, Download, File } from 'lucide-react'
-import type { InferredMediaType } from '@/presentation/lib/inferMediaType'
+import type { InferredMediaType } from '@/core/lib/inferMediaType'
 
 interface AttachmentLightboxProps {
   fileName: string

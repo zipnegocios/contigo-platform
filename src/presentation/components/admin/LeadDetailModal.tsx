@@ -138,6 +138,7 @@ export function LeadDetailModal({ onStageChange, onLeadArchived }: LeadDetailMod
               <p className="text-muted-foreground">{mapped.quote.service}</p>
             </div>
             <LeadDetailTabs
+              key={mapped.lead.id}
               lead={mapped.lead}
               quote={mapped.quote}
               events={mapped.events}

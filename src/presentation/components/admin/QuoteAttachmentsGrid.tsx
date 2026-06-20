@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Download, File, Loader2 } from 'lucide-react'
 import { AttachmentLightbox } from './AttachmentLightbox'
-import { inferMediaType } from '@/presentation/lib/inferMediaType'
+import { inferMediaType } from '@/core/lib/inferMediaType'
 
 interface QuoteAttachmentsGridProps {
   leadId: string
