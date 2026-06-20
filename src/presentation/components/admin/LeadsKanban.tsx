@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 
@@ -206,7 +207,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                         e.currentTarget.style.borderColor = 'var(--neutral-200)'
                       }}
                     >
-                      <div className="space-y-2">
+                      <Link href={`/admin/leads/${lead.id}`} className="block space-y-2">
                         <div>
                           <p className="font-semibold text-fluid-sm truncate" style={{ color: 'var(--neutral-800)' }}>
                             {lead.quote?.name || 'Unknown'}
@@ -248,7 +249,7 @@ export function LeadsKanban({ leads: initialLeads }: LeadsKanbanProps) {
                             {lead.adminNotes}
                           </p>
                         )}
-                      </div>
+                      </Link>
                     </div>
                   ))
                 )}
