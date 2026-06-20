@@ -13,11 +13,17 @@ export async function GET(request: Request) {
     const stage = searchParams.get('stage') ?? undefined
     const from = searchParams.get('from') ? new Date(searchParams.get('from')!) : undefined
     const to = searchParams.get('to') ? new Date(searchParams.get('to')!) : undefined
+    const archived = searchParams.get('archived') === 'true'
 
     const leadRepo = new DrizzleLeadRepository()
     const quoteRepo = new DrizzleQuoteRepository()
 
-    const leads = await leadRepo.findAllFiltered({ stage, createdFrom: from, createdTo: to })
+    const leads = await leadRepo.findAllFiltered({
+      stage,
+      createdFrom: from,
+      createdTo: to,
+      onlyArchived: archived,
+    })
     const enriched = await Promise.all(
       leads.map(async (lead) => ({ ...lead, quote: await quoteRepo.findById(lead.quoteId) })),
     )
