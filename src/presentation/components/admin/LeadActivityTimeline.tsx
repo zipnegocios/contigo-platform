@@ -18,21 +18,21 @@ const ICONS: Record<string, LucideIcon> = {
 }
 
 const LABELS: Record<string, (payload: Record<string, unknown>) => string> = {
-  stage_change: (p) => `Etapa cambiada de "${p.from ?? '—'}" a "${p.to}"`,
-  call_scheduled: (p) => `Llamada agendada para ${new Date(p.scheduledAt as string).toLocaleString()}`,
-  call_completed: () => 'Llamada completada',
-  call_cancelled: () => 'Llamada cancelada',
-  visit_scheduled: (p) => `Visita agendada para ${new Date(p.scheduledAt as string).toLocaleString()}`,
-  visit_completed: () => 'Visita completada',
-  visit_cancelled: () => 'Visita cancelada',
-  document_uploaded: (p) => `Documento recibido: ${p.fileName}`,
-  document_sent: (p) => `Documento enviado al cliente: ${p.fileName}`,
-  note: (p) => (p.text as string) ?? 'Nota agregada',
+  stage_change: (p) => `Stage changed from "${p.from ?? '—'}" to "${p.to}"`,
+  call_scheduled: (p) => `Call scheduled for ${new Date(p.scheduledAt as string).toLocaleString()}`,
+  call_completed: () => 'Call completed',
+  call_cancelled: () => 'Call cancelled',
+  visit_scheduled: (p) => `Visit scheduled for ${new Date(p.scheduledAt as string).toLocaleString()}`,
+  visit_completed: () => 'Visit completed',
+  visit_cancelled: () => 'Visit cancelled',
+  document_uploaded: (p) => `Document received: ${p.fileName}`,
+  document_sent: (p) => `Document sent to client: ${p.fileName}`,
+  note: (p) => (p.text as string) ?? 'Note added',
 }
 
 export function LeadActivityTimeline({ activities }: { activities: LeadActivityDTO[] }) {
   if (!activities.length) {
-    return <p className="text-sm text-muted-foreground py-8 text-center">Sin actividad registrada todavía.</p>
+    return <p className="text-sm text-muted-foreground py-8 text-center">No activity recorded yet.</p>
   }
 
   return (
