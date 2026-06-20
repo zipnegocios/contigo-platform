@@ -20,6 +20,7 @@ import { LeadStage } from '@/core/entities/Lead'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
 import { LeadNotesPanel } from './LeadNotesPanel'
+import { QuoteAttachmentsGrid } from './QuoteAttachmentsGrid'
 
 interface QuoteDetailPanelProps {
   leadId: string
@@ -168,21 +169,7 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, onStageCh
             </h3>
           </AccordionTrigger>
           <AccordionContent className="px-6 py-5 space-y-4">
-            <div className="space-y-2">
-              {quote.attachmentUrls.map((key, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 rounded px-3 py-2 text-fluid-xs font-mono"
-                  style={{ backgroundColor: 'var(--neutral-50)', border: '1px solid #E5DDD0', color: '#6B6560', wordBreak: 'break-all' }}
-                >
-                  {key}
-                </div>
-              ))}
-            </div>
-            <p className="text-fluid-xs mt-3" style={{ color: 'var(--neutral-600)' }}>
-              These are stored in the private <code className="font-mono">contigo-quotes</code> bucket.
-              Presigned view URLs will be added in a future update.
-            </p>
+            <QuoteAttachmentsGrid leadId={leadId} fileKeys={quote.attachmentUrls} />
           </AccordionContent>
         </AccordionItem>
       )}

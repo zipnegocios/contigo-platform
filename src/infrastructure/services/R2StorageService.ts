@@ -7,6 +7,7 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { inferMediaType } from '@/presentation/lib/inferMediaType'
 
 export interface R2MediaObject {
   key: string
@@ -114,12 +115,7 @@ export async function listObjects(
     .filter((obj) => obj.Key && obj.Size !== undefined)
     .map((obj) => {
       const key = obj.Key!
-      const ext = key.split('.').pop()?.toLowerCase() ?? ''
-      const mediaType: R2MediaObject['mediaType'] = ['mp4', 'webm', 'ogg', 'mov'].includes(ext)
-        ? 'video'
-        : ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext)
-          ? 'image'
-          : 'other'
+      const mediaType = inferMediaType(key)
 
       return {
         key,
