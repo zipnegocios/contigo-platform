@@ -25,27 +25,6 @@
     color: var(--neutral-800);
     background-color: var(--neutral-50);
     overflow-x: hidden;
-    cursor: none;
-  }
-
-  /* Force cursor: none on every element — catches shadcn/Radix roles,
-     Tailwind cursor-pointer classes, and any inline cursor styles. */
-  body * {
-    cursor: none !important;
-  }
-
-  /* Text inputs and textareas keep the caret cursor for usability. */
-  body input:not([type="submit"]):not([type="button"]):not([type="reset"]),
-  body textarea,
-  body [contenteditable="true"] {
-    cursor: text !important;
-  }
-
-  @media (hover: none) {
-    body,
-    body * {
-      cursor: auto !important;
-    }
   }
 
   /* Typography */
@@ -321,7 +300,6 @@
     flex: 1;
     height: 500px;
     border-radius: 10px;
-    cursor: none;
     transition: flex 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
     will-change: flex;
   }
@@ -736,44 +714,6 @@
   }
   .attach-remove-btn:hover {
     color: #c0392b;
-  }
-
-  /* Custom cursor */
-  .cursor-ring {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 40px;
-    height: 40px;
-    border: 1.5px solid var(--brand-gold);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease, background 0.3s ease;
-    mix-blend-mode: difference;
-    will-change: transform;
-  }
-
-  .cursor-dot {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 6px;
-    height: 6px;
-    background: var(--brand-gold);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    will-change: transform;
-  }
-
-  @media (hover: none) {
-    .cursor-ring,
-    .cursor-dot {
-      display: none;
-    }
   }
 
   /* Navigation */
