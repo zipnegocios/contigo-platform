@@ -13,6 +13,7 @@ import {
   LogOut,
   Tag,
   Images,
+  Globe,
 } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 
@@ -74,14 +75,14 @@ export default function AdminSidebar() {
               style={
                 isActive
                   ? {
-                      backgroundColor: 'var(--gold-a15)',
-                      color: 'var(--gold-400)',
-                      borderLeft: '2px solid var(--gold-400)',
-                    }
+                    backgroundColor: 'var(--gold-a15)',
+                    color: 'var(--gold-400)',
+                    borderLeft: '2px solid var(--gold-400)',
+                  }
                   : {
-                      color: 'var(--neutral-50)',
-                      borderLeft: '2px solid transparent',
-                    }
+                    color: 'var(--neutral-50)',
+                    borderLeft: '2px solid transparent',
+                  }
               }
               onMouseEnter={(e) => {
                 if (!isActive) {
@@ -106,8 +107,24 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      {/* Sign Out */}
-      <div className="p-4" style={{ borderTop: '1px solid var(--gold-a12)' }}>
+      {/* Go to Web / Sign Out */}
+      <div className="p-4 space-y-1" style={{ borderTop: '1px solid var(--gold-a12)' }}>
+        <Link
+          href="/"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-fluid-sm font-medium"
+          style={{ color: 'var(--neutral-600)', borderLeft: '2px solid transparent' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--gold-400)'
+            e.currentTarget.style.backgroundColor = 'var(--gold-a12)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--neutral-600)'
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
+        >
+          <Globe className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" />
+          Go to Web
+        </Link>
         <Button
           variant="ghost"
           className="w-full justify-start px-4 py-2.5 text-fluid-sm h-auto"
