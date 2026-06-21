@@ -32,7 +32,7 @@ export class DrizzleLeadEventRepository implements ILeadEventRepository {
       .from(leadEvents)
       .where(eq(leadEvents.leadId, leadId))
       .orderBy(asc(leadEvents.scheduledAt))
-    return rows.map(this.mapRow)
+    return rows.map((row) => this.mapRow(row))
   }
 
   async findUpcoming(from: Date, to: Date): Promise<LeadEvent[]> {
@@ -41,7 +41,7 @@ export class DrizzleLeadEventRepository implements ILeadEventRepository {
       .from(leadEvents)
       .where(and(gte(leadEvents.scheduledAt, from), lte(leadEvents.scheduledAt, to)))
       .orderBy(asc(leadEvents.scheduledAt))
-    return rows.map(this.mapRow)
+    return rows.map((row) => this.mapRow(row))
   }
 
   async update(event: LeadEvent): Promise<void> {
