@@ -1,7 +1,9 @@
 'use client'
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { MoveRight } from 'lucide-react';
 import { BRAND_LOCKUP_VIEWBOX, brandLetterGlyphs, brandSeparatorRects } from '@/presentation/components/brand-lockup-paths';
 
 const REVEALED_COLOR = '#E3C064';
@@ -100,43 +102,69 @@ export default function HeritageSection() {
       <div className="flip-container flex-wrap lg:flex-nowrap">
         {/* Left text block */}
         <div className="flip-text-block left w-full lg:w-auto text-center lg:text-left mb-8 lg:mb-0">
-          <h2 className="mb-4">Built on Tradition</h2>
+          <h2 className="mb-4">Built With You</h2>
           <p>
-            Our craftsmanship honors the time-tested methods of Australian
-            building heritage while embracing modern precision.
+            At Contigo Constructions, we&apos;re with you every step of the way.
+            We believe in clear communication, personalized service, and
+            quality results that reflect the needs and vision of every
+            client. Our commitment is to create functional, long-lasting
+            spaces that families can enjoy for years to come.
           </p>
         </div>
 
         {/* Center brand lockup — exact vector letterforms from the logo file */}
-        <div className="flip-word">
-          <svg viewBox={BRAND_LOCKUP_VIEWBOX} aria-label="Contigo Constructions Pty">
-            {brandLetterGlyphs.map((glyph, i) =>
-              glyph.type === 'path' ? (
-                <path key={i} className="flip-letter-shape" fill="currentColor" d={glyph.d} />
-              ) : (
-                <polygon key={i} className="flip-letter-shape" fill="currentColor" points={glyph.points} />
-              )
-            )}
-            {brandSeparatorRects.map((r, i) => (
-              <rect
-                key={i}
-                className={i === 0 ? 'flip-separator-bar' : 'flip-separator-bar flip-separator-bar--right'}
-                fill="var(--brand-gold)"
-                x={r.x}
-                y={r.y}
-                width={r.width}
-                height={r.height}
+        <div className="flex flex-col items-center gap-6">
+          <div className="flip-word">
+            <svg viewBox={BRAND_LOCKUP_VIEWBOX} aria-label="Contigo Constructions Pty">
+              {brandLetterGlyphs.map((glyph, i) =>
+                glyph.type === 'path' ? (
+                  <path key={i} className="flip-letter-shape" fill="currentColor" d={glyph.d} />
+                ) : (
+                  <polygon key={i} className="flip-letter-shape" fill="currentColor" points={glyph.points} />
+                )
+              )}
+              {brandSeparatorRects.map((r, i) => (
+                <rect
+                  key={i}
+                  className={i === 0 ? 'flip-separator-bar' : 'flip-separator-bar flip-separator-bar--right'}
+                  fill="var(--brand-gold)"
+                  x={r.x}
+                  y={r.y}
+                  width={r.width}
+                  height={r.height}
+                />
+              ))}
+            </svg>
+          </div>
+
+          <Link
+            href="/about"
+            className="group inline-flex items-center gap-2 text-fluid-sm relative"
+            style={{ color: 'var(--brand-gold)' }}
+          >
+            <span className="relative">
+              Get to Know Us
+              <span
+                className="absolute -bottom-1 left-0 w-full h-[1px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                style={{ backgroundColor: 'var(--brand-gold)' }}
               />
-            ))}
-          </svg>
+            </span>
+            <MoveRight
+              className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+              strokeWidth={1.5}
+            />
+          </Link>
         </div>
 
         {/* Right text block */}
         <div className="flip-text-block right w-full lg:w-auto text-center lg:text-right mt-8 lg:mt-0">
-          <h2 className="mb-4">Future-Ready</h2>
+          <h2 className="mb-4">Built to Last</h2>
           <p>
-            Every project we undertake is engineered for longevity,
-            sustainability, and the demands of tomorrow.
+            Quality, trust, and attention to detail are at the heart of
+            everything we do. We strive to deliver lasting results and a
+            positive experience for our clients, because building is about
+            more than completing a project — it&apos;s about creating spaces
+            designed for everyday living and for the future.
           </p>
         </div>
       </div>

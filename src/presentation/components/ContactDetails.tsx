@@ -43,7 +43,7 @@ export function ContactDetails() {
             Address
           </p>
           <p className="text-fluid-sm mt-1" style={{ color: 'var(--contigo-foreground)', opacity: 0.7 }}>
-            25 Green Avenue, Seaton SA 5023
+            76 Coorara Avenue, Payneham South SA 5070
           </p>
         </div>
       </div>

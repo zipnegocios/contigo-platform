@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { IconLogo } from '@/presentation/components/IconLogo'
 
 export default function AboutHero() {
   const overlineRef = useRef<HTMLSpanElement>(null)
@@ -29,19 +30,17 @@ export default function AboutHero() {
         fontFamily: 'var(--font-alegreya-sans)',
       }}
     >
-      {/* Decorative monogram watermark, echoes ContactSection's corner mark */}
-      <span
-        aria-hidden="true"
-        className="absolute -right-6 -bottom-10 select-none pointer-events-none"
+      {/* Decorative icon-mark watermark, echoes ContactSection's corner mark */}
+      <IconLogo
+        className="absolute pointer-events-none select-none"
         style={{
-          fontFamily: 'var(--font-alegreya)',
-          fontSize: 'clamp(8rem, 22vw, 16rem)',
+          right: 'clamp(0.5rem, 3vw, 2rem)',
+          bottom: 'clamp(0.5rem, 3vw, 2rem)',
+          width: 'clamp(6rem, 20vw, 14rem)',
+          height: 'auto',
           color: 'var(--gold-a06)',
-          lineHeight: 1,
         }}
-      >
-        C
-      </span>
+      />
 
       <span
         ref={overlineRef}
@@ -60,14 +59,14 @@ export default function AboutHero() {
           className="block overflow-hidden"
           style={{ opacity: 0, transform: 'translateY(28px)', color: 'var(--neutral-50)' }}
         >
-          We don&apos;t build for you,
+          We don&apos;t just build for you,
         </span>
         <span
           ref={line2Ref}
           className="block overflow-hidden italic"
           style={{ opacity: 0, transform: 'translateY(28px)', color: 'var(--gold-400)' }}
         >
-          we build with you.
+          we build together.
         </span>
       </h1>
 

@@ -8,31 +8,31 @@ const VALUES = [
   {
     icon: HeartHandshake,
     name: 'Commitment',
-    nameEs: 'Compromiso',
+    keyword: 'Accountability',
     description: 'We honour our agreements and deliver with accountability and professionalism.',
   },
   {
     icon: Gem,
     name: 'Quality',
-    nameEs: 'Calidad',
+    keyword: 'Excellence',
     description: 'We apply high technical and execution standards in every detail.',
   },
   {
     icon: ShieldCheck,
     name: 'Trust',
-    nameEs: 'Confianza',
+    keyword: 'Transparency',
     description: 'We build transparent and long-lasting relationships with clients, suppliers, and our team.',
   },
   {
     icon: Target,
     name: 'Responsibility',
-    nameEs: 'Responsabilidad',
+    keyword: 'Reliability',
     description: 'We manage each project with a professional approach, meeting scope, timelines, and budgets.',
   },
   {
     icon: Users,
     name: 'Teamwork',
-    nameEs: 'Trabajo en equipo',
+    keyword: 'Collaboration',
     description: 'We foster collaboration as the foundation for strong and sustainable results.',
   },
 ]
@@ -89,7 +89,7 @@ export default function CoreValuesSection() {
                     className="block whitespace-normal text-fluid-xs mt-1"
                     style={{ color: 'var(--petrol-600)', fontFamily: 'var(--font-alegreya-sans)', fontWeight: 400 }}
                   >
-                    {value.nameEs}
+                    {value.keyword}
                   </span>
                 </h3>
                 <p
