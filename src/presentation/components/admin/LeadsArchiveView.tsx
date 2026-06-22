@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/presentation/components/ui/table'
 import type { QuoteDTO } from '@/presentation/types/QuoteDTO'
+import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 
 interface LeadsArchiveViewProps {
   leads: Array<{
@@ -23,9 +24,10 @@ interface LeadsArchiveViewProps {
     updatedAt: Date
     quote: QuoteDTO | null
   }>
+  pipelineStages: PipelineStageDTO[]
 }
 
-export function LeadsArchiveView({ leads }: LeadsArchiveViewProps) {
+export function LeadsArchiveView({ leads, pipelineStages }: LeadsArchiveViewProps) {
   const router = useRouter()
   const [restoringId, setRestoringId] = useState<string | null>(null)
 
@@ -71,7 +73,9 @@ export function LeadsArchiveView({ leads }: LeadsArchiveViewProps) {
                 <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>{lead.quote?.name || 'Unknown'}</TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.email ?? '—'}</TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.service ?? '—'}</TableCell>
-                <TableCell className="py-3.5 text-fluid-sm capitalize" style={{ color: '#6B6560' }}>{lead.stageId}</TableCell>
+                <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>
+                  {pipelineStages.find((s) => s.id === lead.stageId)?.label ?? '—'}
+                </TableCell>
                 <TableCell className="py-3.5">
                   <Button size="sm" variant="outline" disabled={restoringId === lead.id} onClick={() => restoreLead(lead.id)}>
                     Restore

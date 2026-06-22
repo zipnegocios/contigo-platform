@@ -12,6 +12,7 @@ import {
   TableRow,
 } from '@/presentation/components/ui/table'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
+import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 
 interface LeadsTableProps {
   leads: Array<{
@@ -22,30 +23,48 @@ interface LeadsTableProps {
     updatedAt: Date
     quote: QuoteDTO | null
   }>
+  pipelineStages: PipelineStageDTO[]
 }
 
-// Mismos colores que stageConfig en LeadsKanban.tsx, para consistencia visual entre vistas
-const stageBadgeStyles: Record<string, { label: string; backgroundColor: string; color: string }> = {
-  prospect: { label: 'Prospect', backgroundColor: 'rgba(226,192,99,0.2)', color: '#A08040' },
-  contacted: { label: 'Contacted', backgroundColor: 'rgba(228,193,92,0.2)', color: '#7A5C00' },
-  quoted: { label: 'Quoted', backgroundColor: 'rgba(13,60,76,0.12)', color: '#0D3C4C' },
-  won: { label: 'Won', backgroundColor: 'rgba(34,197,94,0.15)', color: '#15803d' },
-  lost: { label: 'Lost', backgroundColor: 'rgba(107,101,96,0.12)', color: '#6B6560' },
+/** Derives a readable text color + soft background tint from the stage's stored hex color. */
+function stageBadgeColors(hexColor: string): { backgroundColor: string; color: string } {
+  const hex = hexColor.replace('#', '')
+  if (hex.length !== 6) {
+    return { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
+  }
+  const r = parseInt(hex.slice(0, 2), 16)
+  const g = parseInt(hex.slice(2, 4), 16)
+  const b = parseInt(hex.slice(4, 6), 16)
+  return {
+    backgroundColor: `rgba(${r},${g},${b},0.15)`,
+    color: hexColor,
+  }
 }
 
-function StageBadge({ stage }: { stage: string }) {
-  const style = stageBadgeStyles[stage] ?? { label: stage, backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
+function StageBadge({ stage }: { stage: PipelineStageDTO | undefined }) {
+  if (!stage) {
+    return (
+      <span
+        className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide"
+        style={{ backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }}
+      >
+        Unknown
+      </span>
+    )
+  }
+
+  const { backgroundColor, color } = stageBadgeColors(stage.color)
   return (
     <span
       className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide"
-      style={{ backgroundColor: style.backgroundColor, color: style.color }}
+      style={{ backgroundColor, color }}
     >
-      {style.label}
+      {stage.label}
     </span>
   )
 }
 
-export function LeadsTable({ leads }: LeadsTableProps) {
+export function LeadsTable({ leads, pipelineStages }: LeadsTableProps) {
   const searchParams = useSearchParams()
 
   const buildHref = (leadId: string) => {
@@ -90,7 +109,7 @@ export function LeadsTable({ leads }: LeadsTableProps) {
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.email ?? '—'}</TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.service ?? '—'}</TableCell>
                 <TableCell className="py-3.5">
-                  <StageBadge stage={lead.stageId} />
+                  <StageBadge stage={pipelineStages.find((s) => s.id === lead.stageId)} />
                 </TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>
                   {lead.updatedAt.toLocaleDateString()}

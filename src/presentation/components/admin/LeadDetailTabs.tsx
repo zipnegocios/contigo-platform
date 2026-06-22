@@ -9,6 +9,7 @@ import type { LeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
 import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
 import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
 import type { QuoteDTO } from '@/presentation/types/QuoteDTO'
+import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 import { QuoteDetailPanel } from './QuoteDetailPanel'
 import { LeadActivityTimeline } from './LeadActivityTimeline'
 import { LeadEventsPanel } from './LeadEventsPanel'
@@ -22,6 +23,7 @@ interface LeadDetailTabsProps {
   activities: LeadActivityDTO[]
   notes: LeadNoteDTO[]
   contacts: LeadContactDTO[]
+  pipelineStages: PipelineStageDTO[]
   onStageChange?: (newStage: string) => void
   onMutated?: () => void
   onArchived?: () => void
@@ -36,6 +38,7 @@ export function LeadDetailTabs({
   activities,
   notes,
   contacts: initialContacts,
+  pipelineStages,
   onStageChange,
   onMutated,
   onArchived,
@@ -59,6 +62,7 @@ export function LeadDetailTabs({
           initialStage={lead.stageId}
           notes={notes}
           contacts={contacts}
+          pipelineStages={pipelineStages}
           onContactsChange={setContacts}
           onStageChange={onStageChange}
           onMutated={onMutated}

@@ -5,6 +5,7 @@ import { LeadsKanban } from './LeadsKanban'
 import { LeadsTable } from './LeadsTable'
 import { LeadDetailModal } from './LeadDetailModal'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
+import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 
 interface LeadRow {
   id: string
@@ -18,9 +19,10 @@ interface LeadRow {
 interface LeadsBoardProps {
   view: string
   leads: LeadRow[]
+  pipelineStages: PipelineStageDTO[]
 }
 
-export function LeadsBoard({ view, leads: initialLeads }: LeadsBoardProps) {
+export function LeadsBoard({ view, leads: initialLeads, pipelineStages }: LeadsBoardProps) {
   const [leads, setLeads] = useState<LeadRow[]>(initialLeads)
 
   const handleStageChange = (leadId: string, newStageId: string) => {
@@ -36,11 +38,15 @@ export function LeadsBoard({ view, leads: initialLeads }: LeadsBoardProps) {
   return (
     <>
       {view === 'table' ? (
-        <LeadsTable leads={leads} />
+        <LeadsTable leads={leads} pipelineStages={pipelineStages} />
       ) : (
-        <LeadsKanban leads={leads} onLeadsChange={setLeads} />
+        <LeadsKanban leads={leads} onLeadsChange={setLeads} pipelineStages={pipelineStages} />
       )}
-      <LeadDetailModal onStageChange={handleStageChange} onLeadArchived={handleLeadArchived} />
+      <LeadDetailModal
+        pipelineStages={pipelineStages}
+        onStageChange={handleStageChange}
+        onLeadArchived={handleLeadArchived}
+      />
     </>
   )
 }

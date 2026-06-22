@@ -23,6 +23,7 @@ import { Email } from '@/core/value-objects/Email'
 import { Phone } from '@/core/value-objects/Phone'
 import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
 import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
+import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 import { LeadNotesPanel } from './LeadNotesPanel'
 import { LeadContactsPanel } from './LeadContactsPanel'
 import { QuoteAttachmentsGrid } from './QuoteAttachmentsGrid'
@@ -33,6 +34,7 @@ interface QuoteDetailPanelProps {
   initialStage: string
   notes: LeadNoteDTO[]
   contacts: LeadContactDTO[]
+  pipelineStages: PipelineStageDTO[]
   onContactsChange: Dispatch<SetStateAction<LeadContactDTO[]>>
   onStageChange?: (newStage: string) => void
   onMutated?: () => void
@@ -53,7 +55,7 @@ function InfoField({ label, value }: { label: string; value: React.ReactNode }) 
   )
 }
 
-export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, onContactsChange, onStageChange, onMutated, onArchived, onTrashed }: QuoteDetailPanelProps) {
+export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, pipelineStages, onContactsChange, onStageChange, onMutated, onArchived, onTrashed }: QuoteDetailPanelProps) {
   const router = useRouter()
   const [stage, setStage] = useState<string>(initialStage)
   const [stageSaving, setStageSaving] = useState(false)
@@ -339,25 +341,16 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
             >
               Stage
             </label>
-            {/*
-              TODO(Task 2.3/2.4): this selector still lists the old 5
-              hardcoded stage keys as option values, but the backend now
-              expects a real pipeline_stages.id (UUID) in `stageId`. It will
-              not function correctly until Task 2.4 wires it up to
-              IPipelineStageRepository.findAll() and uses stage.id as the
-              option value. Left as-is per Task 2.2 scope (domain/repository
-              layer only) — not redesigning UI behavior here.
-            */}
             <Select value={stage} onValueChange={(value) => handleStageSelect(value)} disabled={stageSaving}>
               <SelectTrigger style={{ borderColor: 'var(--neutral-200)' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="prospect">Prospect</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="quoted">Quoted</SelectItem>
-                <SelectItem value="won">Won</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
+                {pipelineStages.map((pipelineStage) => (
+                  <SelectItem key={pipelineStage.id} value={pipelineStage.id}>
+                    {pipelineStage.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

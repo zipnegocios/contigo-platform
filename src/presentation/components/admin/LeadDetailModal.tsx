@@ -5,13 +5,15 @@ import { createPortal } from 'react-dom'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
 import { LeadDetailTabs } from './LeadDetailTabs'
+import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 
 interface LeadDetailModalProps {
+  pipelineStages: PipelineStageDTO[]
   onStageChange?: (leadId: string, newStage: string) => void
   onLeadArchived?: (leadId: string) => void
 }
 
-export function LeadDetailModal({ onStageChange, onLeadArchived }: LeadDetailModalProps) {
+export function LeadDetailModal({ pipelineStages, onStageChange, onLeadArchived }: LeadDetailModalProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const leadId = searchParams?.get('leadId') ?? null
@@ -151,6 +153,7 @@ export function LeadDetailModal({ onStageChange, onLeadArchived }: LeadDetailMod
               activities={mapped.activities}
               notes={mapped.notes}
               contacts={mapped.contacts}
+              pipelineStages={pipelineStages}
               onStageChange={handleStageChange}
               onMutated={refetch}
               onArchived={handleArchived}

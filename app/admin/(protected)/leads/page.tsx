@@ -5,7 +5,9 @@ import { LeadsFilterBar } from '@/presentation/components/admin/LeadsFilterBar'
 import { LeadsViewToggle } from '@/presentation/components/admin/LeadsViewToggle'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
+import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
+import { toPipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 
 export default async function LeadsPage({
   searchParams,
@@ -18,6 +20,9 @@ export default async function LeadsPage({
 
   const leadRepo = new DrizzleLeadRepository()
   const quoteRepo = new DrizzleQuoteRepository()
+  const pipelineStageRepo = new DrizzlePipelineStageRepository()
+
+  const pipelineStages = (await pipelineStageRepo.findAll()).map(toPipelineStageDTO)
 
   const allLeads = isTrash
     ? await leadRepo.findAllFiltered({ onlyTrashed: true })
@@ -62,11 +67,11 @@ export default async function LeadsPage({
       {!isTrash && !isArchived && <LeadsFilterBar />}
 
       {isTrash ? (
-        <LeadsTrashView leads={leads} />
+        <LeadsTrashView leads={leads} pipelineStages={pipelineStages} />
       ) : isArchived ? (
-        <LeadsArchiveView leads={leads} />
+        <LeadsArchiveView leads={leads} pipelineStages={pipelineStages} />
       ) : (
-        <LeadsBoard view={view} leads={leads} />
+        <LeadsBoard view={view} leads={leads} pipelineStages={pipelineStages} />
       )}
     </div>
   )
