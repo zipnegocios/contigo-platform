@@ -7,6 +7,13 @@ import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/Dri
 import { DrizzleLeadNoteRepository } from '@/infrastructure/repositories/DrizzleLeadNoteRepository'
 import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/DrizzleLeadContactRepository'
 import { ChangeLeadStageUseCase } from '@/application/use-cases/leads/ChangeLeadStageUseCase'
+import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
+import { toLeadDTO } from '@/presentation/types/LeadDTO'
+import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
+import { toLeadDocumentDTO } from '@/presentation/types/LeadDocumentDTO'
+import { toLeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
+import { toLeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
+import { toLeadContactDTO } from '@/presentation/types/LeadContactDTO'
 
 export async function GET(
   _request: Request,
@@ -31,7 +38,17 @@ export async function GET(
       new DrizzleLeadContactRepository().findByLeadId(lead.id),
     ])
 
-    return Response.json({ lead, quote, events, documents, activities, notes, contacts })
+    if (!quote) return Response.json({ error: 'Quote not found' }, { status: 404 })
+
+    return Response.json({
+      lead: toLeadDTO(lead),
+      quote: toQuoteDTO(quote),
+      events: events.map(toLeadEventDTO),
+      documents: documents.map(toLeadDocumentDTO),
+      activities: activities.map(toLeadActivityDTO),
+      notes: notes.map(toLeadNoteDTO),
+      contacts: contacts.map(toLeadContactDTO),
+    })
   } catch (error) {
     console.error('Error fetching lead detail:', error)
     return Response.json(
