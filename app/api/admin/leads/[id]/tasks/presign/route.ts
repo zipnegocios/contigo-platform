@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { generatePresignedPutUrl, buildKey } from '@/infrastructure/services/R2StorageService'
 
 const ALLOWED_TYPES = [
@@ -32,6 +33,11 @@ export async function POST(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'tasks.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     await params
 

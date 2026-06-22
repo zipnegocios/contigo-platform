@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { ReorderPipelineStagesUseCase } from '@/application/use-cases/pipeline/ReorderPipelineStagesUseCase'
 
@@ -6,6 +7,11 @@ export async function POST(request: Request) {
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'pipeline.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const body = await request.json()
     const { orderedIds } = body

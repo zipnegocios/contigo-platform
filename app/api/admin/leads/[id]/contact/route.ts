@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
 import { UpdateQuoteContactUseCase } from '@/application/use-cases/leads/UpdateQuoteContactUseCase'
@@ -12,6 +13,11 @@ export async function PATCH(
     const session = await auth()
     if (!session) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'leads.edit'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const body = await request.json()

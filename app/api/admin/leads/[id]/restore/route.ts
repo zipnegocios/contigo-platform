@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { RestoreLeadUseCase } from '@/application/use-cases/leads/RestoreLeadUseCase'
 import { toLeadDTO } from '@/presentation/types/LeadDTO'
@@ -10,6 +11,11 @@ export async function POST(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'leads.archive'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { id } = await params
     const useCase = new RestoreLeadUseCase(new DrizzleLeadRepository())

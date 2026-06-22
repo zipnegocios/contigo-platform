@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleAdminUserRepository } from '@/infrastructure/repositories/DrizzleAdminUserRepository'
 import { CreateStaffUserUseCase } from '@/application/use-cases/staff/CreateStaffUserUseCase'
 import { AdminUser } from '@/core/entities/AdminUser'
@@ -40,6 +41,11 @@ export async function POST(request: Request) {
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'users.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const body = await request.json()
     const { name, email, password, title, phone } = body

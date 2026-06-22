@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleTaskAttachmentRepository } from '@/infrastructure/repositories/DrizzleTaskAttachmentRepository'
 import { AddTaskAttachmentUseCase } from '@/application/use-cases/tasks/AddTaskAttachmentUseCase'
 import { toTaskAttachmentDTO } from '@/presentation/types/TaskAttachmentDTO'
@@ -34,6 +35,11 @@ export async function POST(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'tasks.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { taskId } = await params
     const body = await request.json()

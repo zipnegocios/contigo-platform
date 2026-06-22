@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleTaskCommentRepository } from '@/infrastructure/repositories/DrizzleTaskCommentRepository'
 import { EditTaskCommentUseCase } from '@/application/use-cases/tasks/EditTaskCommentUseCase'
 import { DeleteTaskCommentUseCase } from '@/application/use-cases/tasks/DeleteTaskCommentUseCase'
@@ -11,6 +12,11 @@ export async function PATCH(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'tasks.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { commentId } = await params
     const { body: commentBody } = await request.json()
@@ -39,6 +45,11 @@ export async function DELETE(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'tasks.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { commentId } = await params
     const useCase = new DeleteTaskCommentUseCase(new DrizzleTaskCommentRepository())

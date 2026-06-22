@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleTaskChecklistItemRepository } from '@/infrastructure/repositories/DrizzleTaskChecklistItemRepository'
 import { ToggleChecklistItemUseCase } from '@/application/use-cases/tasks/ToggleChecklistItemUseCase'
 import { RemoveChecklistItemUseCase } from '@/application/use-cases/tasks/RemoveChecklistItemUseCase'
@@ -11,6 +12,11 @@ export async function PATCH(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'tasks.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { itemId } = await params
     const body = await request.json()
@@ -40,6 +46,11 @@ export async function DELETE(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'tasks.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { itemId } = await params
     const useCase = new RemoveChecklistItemUseCase(new DrizzleTaskChecklistItemRepository())

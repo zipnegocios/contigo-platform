@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleAdminUserRepository } from '@/infrastructure/repositories/DrizzleAdminUserRepository'
 import { UpdateStaffUserUseCase } from '@/application/use-cases/staff/UpdateStaffUserUseCase'
 import { DeactivateStaffUserUseCase } from '@/application/use-cases/staff/DeactivateStaffUserUseCase'
@@ -26,6 +27,11 @@ export async function PATCH(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'users.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { id } = await params
     const body = await request.json()
