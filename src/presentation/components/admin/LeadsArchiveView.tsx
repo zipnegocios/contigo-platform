@@ -14,7 +14,7 @@ import {
 } from '@/presentation/components/ui/table'
 import type { QuoteDTO } from '@/presentation/types/QuoteDTO'
 
-interface LeadsTrashViewProps {
+interface LeadsArchiveViewProps {
   leads: Array<{
     id: string
     quoteId: string
@@ -25,14 +25,14 @@ interface LeadsTrashViewProps {
   }>
 }
 
-export function LeadsTrashView({ leads }: LeadsTrashViewProps) {
+export function LeadsArchiveView({ leads }: LeadsArchiveViewProps) {
   const router = useRouter()
   const [restoringId, setRestoringId] = useState<string | null>(null)
 
   const restoreLead = async (leadId: string) => {
     setRestoringId(leadId)
     try {
-      const res = await fetch(`/api/admin/leads/${leadId}/restore-trash`, { method: 'POST' })
+      const res = await fetch(`/api/admin/leads/${leadId}/restore`, { method: 'POST' })
       if (!res.ok) throw new Error('Failed to restore lead')
       toast.success('Lead restored')
       router.refresh()
@@ -62,7 +62,7 @@ export function LeadsTrashView({ leads }: LeadsTrashViewProps) {
           {leads.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="text-center py-12 text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
-                Trash is empty
+                Archive is empty
               </TableCell>
             </TableRow>
           ) : (

@@ -7,6 +7,7 @@ export interface LeadDTO {
   estimatedValue: number | null
   updatedAt: Date
   archivedAt: Date | null
+  trashedAt: Date | null
 }
 
 export function toLeadDTO(lead: Lead): LeadDTO {
@@ -17,5 +18,6 @@ export function toLeadDTO(lead: Lead): LeadDTO {
     estimatedValue: lead.estimatedValue,
     updatedAt: lead.updatedAt,
     archivedAt: lead.archivedAt,
+    trashedAt: lead.trashedAt,
   }
 }

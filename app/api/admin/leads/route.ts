@@ -1,6 +1,8 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
+import { toLeadDTO } from '@/presentation/types/LeadDTO'
+import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 
 export async function GET(request: Request) {
   try {
@@ -14,6 +16,7 @@ export async function GET(request: Request) {
     const from = searchParams.get('from') ? new Date(searchParams.get('from')!) : undefined
     const to = searchParams.get('to') ? new Date(searchParams.get('to')!) : undefined
     const archived = searchParams.get('archived') === 'true'
+    const trashed = searchParams.get('trashed') === 'true'
 
     const leadRepo = new DrizzleLeadRepository()
     const quoteRepo = new DrizzleQuoteRepository()
@@ -23,9 +26,13 @@ export async function GET(request: Request) {
       createdFrom: from,
       createdTo: to,
       onlyArchived: archived,
+      onlyTrashed: trashed,
     })
     const enriched = await Promise.all(
-      leads.map(async (lead) => ({ ...lead, quote: await quoteRepo.findById(lead.quoteId) })),
+      leads.map(async (lead) => {
+        const quote = await quoteRepo.findById(lead.quoteId)
+        return { ...toLeadDTO(lead), quote: quote ? toQuoteDTO(quote) : null }
+      }),
     )
 
     return Response.json({ leads: enriched })

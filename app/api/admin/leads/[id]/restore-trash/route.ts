@@ -1,6 +1,6 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
-import { ArchiveLeadUseCase } from '@/application/use-cases/leads/ArchiveLeadUseCase'
+import { RestoreLeadFromTrashUseCase } from '@/application/use-cases/leads/RestoreLeadFromTrashUseCase'
 import { toLeadDTO } from '@/presentation/types/LeadDTO'
 
 export async function POST(
@@ -12,12 +12,12 @@ export async function POST(
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { id } = await params
-    const useCase = new ArchiveLeadUseCase(new DrizzleLeadRepository())
+    const useCase = new RestoreLeadFromTrashUseCase(new DrizzleLeadRepository())
     const lead = await useCase.execute(id)
 
     return Response.json({ success: true, lead: toLeadDTO(lead) })
   } catch (error) {
-    console.error('Error archiving lead:', error)
+    console.error('Error restoring lead from trash:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 },

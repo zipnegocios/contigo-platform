@@ -62,6 +62,8 @@ export class DrizzleLeadRepository implements ILeadRepository {
     createdTo?: Date
     includeArchived?: boolean
     onlyArchived?: boolean
+    includeTrashed?: boolean
+    onlyTrashed?: boolean
   }): Promise<Lead[]> {
     const conditions = []
     if (filters.stage) conditions.push(eq(leads.stage, filters.stage as any))
@@ -70,6 +72,12 @@ export class DrizzleLeadRepository implements ILeadRepository {
       conditions.push(isNotNull(leads.archivedAt))
     } else if (!filters.includeArchived) {
       conditions.push(isNull(leads.archivedAt))
+    }
+
+    if (filters.onlyTrashed) {
+      conditions.push(isNotNull(leads.trashedAt))
+    } else if (!filters.includeTrashed) {
+      conditions.push(isNull(leads.trashedAt))
     }
 
     // createdTo llega como el inicio del dia (medianoche UTC) cuando se parsea desde
@@ -106,6 +114,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
         estimatedValue: lead.estimatedValue,
         updatedAt: lead.updatedAt,
         archivedAt: lead.archivedAt,
+        trashedAt: lead.trashedAt,
       })
       .where(eq(leads.id, lead.id))
   }
@@ -118,6 +127,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
       estimatedValue: row.estimatedValue,
       updatedAt: row.updatedAt,
       archivedAt: row.archivedAt,
+      trashedAt: row.trashedAt,
     })
   }
 }

@@ -1,5 +1,6 @@
 import { LeadsBoard } from '@/presentation/components/admin/LeadsBoard'
 import { LeadsTrashView } from '@/presentation/components/admin/LeadsTrashView'
+import { LeadsArchiveView } from '@/presentation/components/admin/LeadsArchiveView'
 import { LeadsFilterBar } from '@/presentation/components/admin/LeadsFilterBar'
 import { LeadsViewToggle } from '@/presentation/components/admin/LeadsViewToggle'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
@@ -9,20 +10,23 @@ import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; from?: string; to?: string; trash?: string }>
+  searchParams: Promise<{ view?: string; from?: string; to?: string; trash?: string; archived?: string }>
 }) {
-  const { view = 'kanban', from, to, trash } = await searchParams
+  const { view = 'kanban', from, to, trash, archived } = await searchParams
   const isTrash = trash === '1'
+  const isArchived = !isTrash && archived === '1'
 
   const leadRepo = new DrizzleLeadRepository()
   const quoteRepo = new DrizzleQuoteRepository()
 
   const allLeads = isTrash
-    ? await leadRepo.findAllFiltered({ onlyArchived: true })
-    : await leadRepo.findAllFiltered({
-        createdFrom: from ? new Date(from) : undefined,
-        createdTo: to ? new Date(to) : undefined,
-      })
+    ? await leadRepo.findAllFiltered({ onlyTrashed: true })
+    : isArchived
+      ? await leadRepo.findAllFiltered({ onlyArchived: true })
+      : await leadRepo.findAllFiltered({
+          createdFrom: from ? new Date(from) : undefined,
+          createdTo: to ? new Date(to) : undefined,
+        })
 
   const leads = await Promise.all(
     allLeads.map(async (lead) => {
@@ -38,23 +42,32 @@ export default async function LeadsPage({
     }),
   )
 
+  const title = isTrash ? 'Trash' : isArchived ? 'Archive' : 'Leads Pipeline'
+  const subtitle = isTrash
+    ? 'Trashed leads — restore them to bring them back to the pipeline.'
+    : isArchived
+      ? 'Archived leads — restore them to bring them back to the pipeline.'
+      : 'Drag leads across stages to update their status'
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-fluid-3xl font-bold text-gray-900">
-            {isTrash ? 'Trash' : 'Leads Pipeline'}
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {isTrash ? 'Archived leads — restore them to bring them back to the pipeline.' : 'Drag leads across stages to update their status'}
-          </p>
+          <h1 className="text-fluid-3xl font-bold text-gray-900">{title}</h1>
+          <p className="text-gray-600 mt-2">{subtitle}</p>
         </div>
         <LeadsViewToggle />
       </div>
 
-      {!isTrash && <LeadsFilterBar />}
+      {!isTrash && !isArchived && <LeadsFilterBar />}
 
-      {isTrash ? <LeadsTrashView leads={leads} /> : <LeadsBoard view={view} leads={leads} />}
+      {isTrash ? (
+        <LeadsTrashView leads={leads} />
+      ) : isArchived ? (
+        <LeadsArchiveView leads={leads} />
+      ) : (
+        <LeadsBoard view={view} leads={leads} />
+      )}
     </div>
   )
 }

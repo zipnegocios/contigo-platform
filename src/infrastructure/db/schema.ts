@@ -214,11 +214,13 @@ export const leads = pgTable(
     estimatedValue: integer('estimated_value'), // cents
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
+    trashedAt: timestamp('trashed_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_leads_stage').on(table.stage),
     index('idx_leads_quote_id').on(table.quoteId),
     index('idx_leads_archived_at').on(table.archivedAt),
+    index('idx_leads_trashed_at').on(table.trashedAt),
   ],
 )
 

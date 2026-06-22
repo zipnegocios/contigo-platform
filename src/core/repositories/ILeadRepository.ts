@@ -12,6 +12,8 @@ export interface ILeadRepository {
     createdTo?: Date
     includeArchived?: boolean
     onlyArchived?: boolean
+    includeTrashed?: boolean
+    onlyTrashed?: boolean
   }): Promise<Lead[]>
   update(lead: Lead): Promise<void>
 }

@@ -71,7 +71,12 @@ export function LeadDetailModal({ onStageChange, onLeadArchived }: LeadDetailMod
   // every date arrives as an ISO string from fetch().json(), not a Date instance).
   const mapped = data
     ? {
-        lead: { ...data.lead, updatedAt: new Date(data.lead.updatedAt) },
+        lead: {
+          ...data.lead,
+          updatedAt: new Date(data.lead.updatedAt),
+          archivedAt: data.lead.archivedAt ? new Date(data.lead.archivedAt) : null,
+          trashedAt: data.lead.trashedAt ? new Date(data.lead.trashedAt) : null,
+        },
         quote: {
           ...data.quote,
           createdAt: new Date(data.quote.createdAt),
@@ -149,6 +154,7 @@ export function LeadDetailModal({ onStageChange, onLeadArchived }: LeadDetailMod
               onStageChange={handleStageChange}
               onMutated={refetch}
               onArchived={handleArchived}
+              onTrashed={handleArchived}
             />
           </div>
         )}

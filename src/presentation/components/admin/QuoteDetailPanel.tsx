@@ -38,6 +38,7 @@ interface QuoteDetailPanelProps {
   onStageChange?: (newStage: string) => void
   onMutated?: () => void
   onArchived?: () => void
+  onTrashed?: () => void
 }
 
 function InfoField({ label, value }: { label: string; value: React.ReactNode }) {
@@ -53,10 +54,11 @@ function InfoField({ label, value }: { label: string; value: React.ReactNode }) 
   )
 }
 
-export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, onContactsChange, onStageChange, onMutated, onArchived }: QuoteDetailPanelProps) {
+export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, onContactsChange, onStageChange, onMutated, onArchived, onTrashed }: QuoteDetailPanelProps) {
   const router = useRouter()
   const [stage, setStage] = useState<LeadStage>(initialStage)
   const [stageSaving, setStageSaving] = useState(false)
+  const [trashing, setTrashing] = useState(false)
   const [archiving, setArchiving] = useState(false)
 
   const [contactName, setContactName] = useState(quote.name)
@@ -113,15 +115,30 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
   }
 
   const handleMoveToTrash = async () => {
-    setArchiving(true)
+    setTrashing(true)
     try {
-      const response = await fetch(`/api/admin/leads/${leadId}/archive`, { method: 'POST' })
+      const response = await fetch(`/api/admin/leads/${leadId}/trash`, { method: 'POST' })
       if (!response.ok) throw new Error('Failed to move lead to trash')
       toast.success('Lead moved to trash')
-      onArchived?.()
+      onTrashed?.()
       router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to move lead to trash')
+    } finally {
+      setTrashing(false)
+    }
+  }
+
+  const handleArchive = async () => {
+    setArchiving(true)
+    try {
+      const response = await fetch(`/api/admin/leads/${leadId}/archive`, { method: 'POST' })
+      if (!response.ok) throw new Error('Failed to archive lead')
+      toast.success('Lead archived')
+      onArchived?.()
+      router.refresh()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to archive lead')
     } finally {
       setArchiving(false)
     }
@@ -339,8 +356,11 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
 
           <LeadNotesPanel leadId={leadId} notes={notes} onMutated={onMutated} />
 
-          <div className="pt-3" style={{ borderTop: '1px solid #F0E8DC' }}>
-            <Button variant="ghost" size="sm" onClick={handleMoveToTrash} disabled={archiving} style={{ color: '#B91C1C' }}>
+          <div className="pt-3 flex gap-2" style={{ borderTop: '1px solid #F0E8DC' }}>
+            <Button variant="ghost" size="sm" onClick={handleArchive} disabled={archiving} style={{ color: '#6B6560' }}>
+              Archive
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleMoveToTrash} disabled={trashing} style={{ color: '#B91C1C' }}>
               Move to Trash
             </Button>
           </div>

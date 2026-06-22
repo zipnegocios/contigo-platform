@@ -25,6 +25,7 @@ interface LeadDetailTabsProps {
   onStageChange?: (newStage: string) => void
   onMutated?: () => void
   onArchived?: () => void
+  onTrashed?: () => void
 }
 
 export function LeadDetailTabs({
@@ -38,6 +39,7 @@ export function LeadDetailTabs({
   onStageChange,
   onMutated,
   onArchived,
+  onTrashed,
 }: LeadDetailTabsProps) {
   const [contacts, setContacts] = useState(initialContacts)
 
@@ -61,6 +63,7 @@ export function LeadDetailTabs({
           onStageChange={onStageChange}
           onMutated={onMutated}
           onArchived={onArchived}
+          onTrashed={onTrashed}
         />
       </TabsContent>
 
