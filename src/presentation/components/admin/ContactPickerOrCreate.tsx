@@ -11,8 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/presentation/components/ui/select'
+import {
+  LeadContactRoleCombobox,
+  type LeadContactRoleOption,
+} from '@/presentation/components/admin/LeadContactRoleCombobox'
 import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
-import type { LeadContactRole } from '@/core/entities/LeadContact'
 
 interface ContactPickerOrCreateProps {
   leadId: string
@@ -29,7 +32,8 @@ export function ContactPickerOrCreate({ leadId, contacts, onContactsChange, valu
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState<LeadContactRole | ''>('')
+  const [roleId, setRoleId] = useState<string | null>(null)
+  const [roles, setRoles] = useState<LeadContactRoleOption[]>([])
   const [saving, setSaving] = useState(false)
 
   const visibleContacts = contacts.filter((c) => c.archivedAt === null)
@@ -52,7 +56,7 @@ export function ContactPickerOrCreate({ leadId, contacts, onContactsChange, valu
       const res = await fetch(`/api/admin/leads/${leadId}/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, email: email || undefined, role: role || undefined }),
+        body: JSON.stringify({ name, phone, email: email || undefined, roleId: roleId || undefined }),
       })
       if (!res.ok) throw new Error('Failed to create contact')
       const { contact } = await res.json()
@@ -64,7 +68,7 @@ export function ContactPickerOrCreate({ leadId, contacts, onContactsChange, valu
       }
       onContactsChange((prev) => [...prev, parsed])
       onChange(parsed.id)
-      setName(''); setPhone(''); setEmail(''); setRole(''); setCreating(false)
+      setName(''); setPhone(''); setEmail(''); setRoleId(null); setCreating(false)
       toast.success('Contact added')
     } catch {
       toast.error('Could not add contact')
@@ -79,15 +83,7 @@ export function ContactPickerOrCreate({ leadId, contacts, onContactsChange, valu
         <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
         <Input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <Input placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Select value={role} onValueChange={(v) => setRole(v as LeadContactRole)}>
-          <SelectTrigger><SelectValue placeholder="Role (optional)" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="owner">Owner</SelectItem>
-            <SelectItem value="site_manager">Site Manager</SelectItem>
-            <SelectItem value="spouse">Spouse</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
+        <LeadContactRoleCombobox value={roleId} onChange={setRoleId} roles={roles} onRolesChange={setRoles} />
         <div className="flex gap-2">
           <Button size="sm" onClick={createContact} disabled={saving}>Save contact</Button>
           <Button size="sm" variant="ghost" onClick={() => setCreating(false)}>Cancel</Button>

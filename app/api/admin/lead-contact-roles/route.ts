@@ -1,5 +1,6 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleLeadContactRoleRepository } from '@/infrastructure/repositories/DrizzleLeadContactRoleRepository'
+import { toLeadContactRoleDTO } from '@/presentation/types/LeadContactRoleDTO'
 
 function keyFromLabel(label: string): string {
   return label
@@ -16,7 +17,7 @@ export async function GET() {
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
     const roles = await new DrizzleLeadContactRoleRepository().findAll()
-    return Response.json({ roles })
+    return Response.json({ roles: roles.map(toLeadContactRoleDTO) })
   } catch (error) {
     console.error('Error fetching lead contact roles:', error)
     return Response.json(
@@ -48,11 +49,11 @@ export async function POST(request: Request) {
 
     const existing = await repo.findByKey(key)
     if (existing) {
-      return Response.json({ success: true, role: existing }, { status: 200 })
+      return Response.json({ success: true, role: toLeadContactRoleDTO(existing) }, { status: 200 })
     }
 
     const role = await repo.create({ key, label: trimmedLabel })
-    return Response.json({ success: true, role }, { status: 201 })
+    return Response.json({ success: true, role: toLeadContactRoleDTO(role) }, { status: 201 })
   } catch (error) {
     console.error('Error creating lead contact role:', error)
     return Response.json(
