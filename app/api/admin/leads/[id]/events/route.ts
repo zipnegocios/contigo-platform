@@ -3,6 +3,7 @@ import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
 import { ScheduleLeadEventUseCase } from '@/application/use-cases/leads/ScheduleLeadEventUseCase'
+import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
 
 export const LeadEventMetadataSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('call'), contactId: z.string().uuid().nullable() }),
@@ -18,6 +19,7 @@ export const LeadEventMetadataSchema = z.discriminatedUnion('kind', [
     channel: z.enum(['google_meet', 'zoom', 'teams', 'whatsapp', 'other']),
     link: z.string().nullable(),
   }),
+  z.object({ kind: z.literal('follow_up'), contactId: z.string().uuid().nullable() }),
 ])
 
 export async function POST(
@@ -54,7 +56,7 @@ export async function POST(
       metadata: parsedMetadata,
     })
 
-    return Response.json({ success: true, event }, { status: 201 })
+    return Response.json({ success: true, event: toLeadEventDTO(event) }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return Response.json({ error: 'Invalid input', details: error.issues }, { status: 400 })

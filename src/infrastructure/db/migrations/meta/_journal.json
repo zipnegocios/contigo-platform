@@ -64,6 +64,13 @@
       "when": 1782100856133,
       "tag": "20260622040056_cleanup_leads_archived_at_after_trash_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1782103221343,
+      "tag": "20260622044021_nosy_ego",
+      "breakpoints": true
     }
   ]
 }

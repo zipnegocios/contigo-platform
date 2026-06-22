@@ -1,6 +1,7 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { RestoreLeadEventUseCase } from '@/application/use-cases/leads/RestoreLeadEventUseCase'
+import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
 
 export async function POST(
   _request: Request,
@@ -14,7 +15,7 @@ export async function POST(
     const useCase = new RestoreLeadEventUseCase(new DrizzleLeadEventRepository())
     const event = await useCase.execute(eventId)
 
-    return Response.json({ success: true, event })
+    return Response.json({ success: true, event: toLeadEventDTO(event) })
   } catch (error) {
     console.error('Error restoring lead event:', error)
     return Response.json(

@@ -1,6 +1,6 @@
 'use client'
 
-import { Phone, MapPin, FileText, ArrowRight, Mail, StickyNote, type LucideIcon } from 'lucide-react'
+import { Phone, MapPin, FileText, ArrowRight, Mail, StickyNote, CalendarClock, type LucideIcon } from 'lucide-react'
 import type { LeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
 
 const ICONS: Record<string, LucideIcon> = {
@@ -11,6 +11,9 @@ const ICONS: Record<string, LucideIcon> = {
   visit_scheduled: MapPin,
   visit_completed: MapPin,
   visit_cancelled: MapPin,
+  event_scheduled: CalendarClock,
+  event_completed: CalendarClock,
+  event_cancelled: CalendarClock,
   document_uploaded: FileText,
   document_sent: FileText,
   email_sent: Mail,
@@ -25,6 +28,9 @@ const LABELS: Record<string, (payload: Record<string, unknown>) => string> = {
   visit_scheduled: (p) => `Visit scheduled for ${new Date(p.scheduledAt as string).toLocaleString()}`,
   visit_completed: () => 'Visit completed',
   visit_cancelled: () => 'Visit cancelled',
+  event_scheduled: (p) => `Event scheduled for ${new Date(p.scheduledAt as string).toLocaleString()}`,
+  event_completed: () => 'Event completed',
+  event_cancelled: () => 'Event cancelled',
   document_uploaded: (p) => `Document received: ${p.fileName}`,
   document_sent: (p) => `Document sent to client: ${p.fileName}`,
   note: (p) => (p.text as string) ?? 'Note added',

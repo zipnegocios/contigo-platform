@@ -90,6 +90,7 @@ export class DrizzleLeadEventRepository implements ILeadEventRepository {
       return meta as LeadEventMetadata
     }
     if (type === 'call') return { kind: 'call', contactId: null }
+    if (type === 'follow_up') return { kind: 'follow_up', contactId: null }
     if (type === 'site_visit') {
       return { kind: 'site_visit', contactId: null, mapsLink: null, address: null, referencePoint: null }
     }

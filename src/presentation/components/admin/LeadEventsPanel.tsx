@@ -22,6 +22,7 @@ const TYPE_LABELS: Record<LeadEventType, string> = {
   call: 'Call',
   site_visit: 'Site visit',
   meeting: 'Meeting',
+  follow_up: 'Follow-up',
 }
 
 const CHANNEL_LABELS: Record<'google_meet' | 'zoom' | 'teams' | 'whatsapp' | 'other', string> = {
@@ -87,7 +88,7 @@ export function LeadEventsPanel({ leadId, events, contacts, onContactsChange, on
 
   const summaryLine = (event: LeadEventDTO): string | null => {
     const meta = event.metadata
-    if (meta.kind === 'call') {
+    if (meta.kind === 'call' || meta.kind === 'follow_up') {
       return contactName(meta.contactId)
     }
     if (meta.kind === 'site_visit') {

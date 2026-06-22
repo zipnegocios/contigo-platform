@@ -1,10 +1,11 @@
-export type LeadEventType = 'call' | 'site_visit' | 'meeting'
+export type LeadEventType = 'call' | 'site_visit' | 'meeting' | 'follow_up'
 export type LeadEventStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
 
 export type LeadEventMetadata =
   | { kind: 'call'; contactId: string | null }
   | { kind: 'site_visit'; contactId: string | null; mapsLink: string | null; address: string | null; referencePoint: string | null }
   | { kind: 'meeting'; channel: 'google_meet' | 'zoom' | 'teams' | 'whatsapp' | 'other'; link: string | null }
+  | { kind: 'follow_up'; contactId: string | null }
 
 export interface CreateLeadEventInput {
   leadId: string

@@ -61,6 +61,7 @@ export function LeadEventForm({ leadId, contacts, onContactsChange, initialEvent
 
   const buildMetadata = (): LeadEventMetadata => {
     if (type === 'call') return { kind: 'call', contactId }
+    if (type === 'follow_up') return { kind: 'follow_up', contactId }
     if (type === 'site_visit') return { kind: 'site_visit', contactId, mapsLink: mapsLink || null, address: address || null, referencePoint: referencePoint || null }
     return { kind: 'meeting', channel, link: link || null }
   }
@@ -117,6 +118,7 @@ export function LeadEventForm({ leadId, contacts, onContactsChange, initialEvent
             <SelectItem value="call">Call</SelectItem>
             <SelectItem value="site_visit">Site visit</SelectItem>
             <SelectItem value="meeting">Meeting</SelectItem>
+            <SelectItem value="follow_up">Follow-up</SelectItem>
           </SelectContent>
         </Select>
         <input
@@ -138,7 +140,7 @@ export function LeadEventForm({ leadId, contacts, onContactsChange, initialEvent
         />
       </div>
 
-      {(type === 'call' || type === 'site_visit') && (
+      {(type === 'call' || type === 'site_visit' || type === 'follow_up') && (
         <div>
           <label className="text-fluid-xs font-medium uppercase tracking-wider mb-1 block" style={{ color: 'var(--neutral-600)' }}>Contact</label>
           <ContactPickerOrCreate

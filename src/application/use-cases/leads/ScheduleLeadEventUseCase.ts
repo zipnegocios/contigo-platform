@@ -24,9 +24,16 @@ export class ScheduleLeadEventUseCase {
 
     const contactId = input.metadata.kind !== 'meeting' ? input.metadata.contactId : null
 
+    const ACTIVITY_TYPE_BY_EVENT_TYPE = {
+      call: 'call_scheduled',
+      site_visit: 'visit_scheduled',
+      meeting: 'event_scheduled',
+      follow_up: 'event_scheduled',
+    } as const
+
     const activity = LeadActivity.create({
       leadId: input.leadId,
-      type: input.type === 'call' ? 'call_scheduled' : 'visit_scheduled',
+      type: ACTIVITY_TYPE_BY_EVENT_TYPE[input.type],
       payload: {
         eventId: event.id,
         scheduledAt: input.scheduledAt.toISOString(),

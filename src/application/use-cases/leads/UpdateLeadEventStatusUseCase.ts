@@ -4,8 +4,8 @@ import { ILeadEventRepository } from '@/core/repositories/ILeadEventRepository'
 import { ILeadActivityRepository } from '@/core/repositories/ILeadActivityRepository'
 
 const STATUS_TO_ACTIVITY = {
-  completed: { call: 'call_completed', site_visit: 'visit_completed', meeting: 'visit_completed' },
-  cancelled: { call: 'call_cancelled', site_visit: 'visit_cancelled', meeting: 'visit_cancelled' },
+  completed: { call: 'call_completed', site_visit: 'visit_completed', meeting: 'event_completed', follow_up: 'event_completed' },
+  cancelled: { call: 'call_cancelled', site_visit: 'visit_cancelled', meeting: 'event_cancelled', follow_up: 'event_cancelled' },
 } as const
 
 export class UpdateLeadEventStatusUseCase {

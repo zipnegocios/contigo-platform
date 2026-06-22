@@ -39,7 +39,7 @@ export const leadStageEnum = pgEnum('lead_stage', [
 
 export const adminRoleEnum = pgEnum('admin_role', ['owner', 'staff'])
 
-export const leadEventTypeEnum = pgEnum('lead_event_type', ['call', 'site_visit', 'meeting'])
+export const leadEventTypeEnum = pgEnum('lead_event_type', ['call', 'site_visit', 'meeting', 'follow_up'])
 
 export const leadEventStatusEnum = pgEnum('lead_event_status', [
   'scheduled',
@@ -78,6 +78,9 @@ export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
   'visit_scheduled',
   'visit_completed',
   'visit_cancelled',
+  'event_scheduled',
+  'event_completed',
+  'event_cancelled',
   'document_uploaded',
   'document_sent',
   'email_sent',

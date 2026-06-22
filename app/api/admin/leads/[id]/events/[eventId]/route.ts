@@ -5,6 +5,7 @@ import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/Dri
 import { UpdateLeadEventStatusUseCase } from '@/application/use-cases/leads/UpdateLeadEventStatusUseCase'
 import { UpdateLeadEventUseCase } from '@/application/use-cases/leads/UpdateLeadEventUseCase'
 import { LeadEventMetadataSchema } from '../route'
+import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
 
 export async function PATCH(
   request: Request,
@@ -44,7 +45,7 @@ export async function PATCH(
       metadata: parsedMetadata,
     })
 
-    return Response.json({ success: true, event })
+    return Response.json({ success: true, event: toLeadEventDTO(event) })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return Response.json({ error: 'Invalid input', details: error.issues }, { status: 400 })
