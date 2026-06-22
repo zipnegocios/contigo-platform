@@ -122,8 +122,8 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
         </AccordionTrigger>
         <AccordionContent className="px-6 py-5 space-y-4">
           <InfoField label="Name" value={<span className="text-fluid-base font-medium">{quote.name}</span>} />
-          <InfoField label="Email" value={quote.email.toString()} />
-          {quote.phone && <InfoField label="Phone" value={quote.phone.toString()} />}
+          <InfoField label="Email" value={quote.email} />
+          {quote.phone && <InfoField label="Phone" value={quote.phone} />}
           <LeadContactsPanel leadId={leadId} contacts={contacts} onContactsChange={onContactsChange} />
         </AccordionContent>
       </AccordionItem>
