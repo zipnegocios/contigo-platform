@@ -144,6 +144,33 @@ export const categories = pgTable(
   ],
 )
 
+// ============ FORMS TABLE ============
+// Catalog of buildable forms (Fase 4.2 Form Builder). One row per form,
+// e.g. the public "Request a Quote" form. activeVersionId points at the
+// form_versions row currently live; not a FK to avoid a circular FK cycle
+// with form_versions.form_id (enforced at the application layer instead).
+export const forms = pgTable('forms', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 150 }).notNull(),
+  slug: varchar('slug', { length: 150 }).notNull().unique(), // 'request-a-quote'
+  activeVersionId: uuid('active_version_id'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ============ FORM_VERSIONS TABLE ============
+// Versioned JSON form definitions. Never edited in place: every save in the
+// future drag-and-drop builder creates a new version row. `schema` shape is
+// FormSchema — defined in Task 4.2.2.
+export const formVersions = pgTable('form_versions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  formId: uuid('form_id')
+    .notNull()
+    .references(() => forms.id, { onDelete: 'cascade' }),
+  schema: jsonb('schema').notNull(), // FormSchema — ver Task 4.2.2
+  version: integer('version').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ============ QUOTES TABLE ============
 export const quotes = pgTable(
   'quotes',
@@ -158,6 +185,11 @@ export const quotes = pgTable(
     trackingToken: varchar('tracking_token', { length: 255 }).notNull().unique(),
     descriptionVector: jsonb('description_vector').$type<number[]>(),
     attachmentUrls: jsonb('attachment_urls').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    // Form Builder (Fase 4.2): which form version produced this quote, and
+    // the full raw submission payload. Nullable FK since quotes created
+    // before this feature shipped predate any form_versions row.
+    formVersionId: uuid('form_version_id').references(() => formVersions.id),
+    formData: jsonb('form_data').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
