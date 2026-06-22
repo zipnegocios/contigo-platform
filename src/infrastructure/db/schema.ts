@@ -87,6 +87,8 @@ export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
   'quote_status_changed',
 ])
 
+export const taskStatusEnum = pgEnum('task_status', ['open', 'in_progress', 'done'])
+
 // ============ LEAD CONTACT ROLES TABLE ============
 // Replaces leadContactRoleEnum: a real table lets admins add new roles from
 // the UI (combobox "create new") without an ALTER TYPE on a Postgres enum.
@@ -369,6 +371,48 @@ export const leadActivities = pgTable(
     index('idx_lead_activities_type').on(table.type),
   ],
 )
+
+// ============ LEAD TASKS TABLE ============
+export const leadTasks = pgTable('lead_tasks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  leadId: uuid('lead_id').notNull().references(() => leads.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'), // markdown plano — no hay editor rich text instalado en el repo; si se requiere WYSIWYG real, es una dependencia nueva a confirmar en ejecución
+  dueDate: timestamp('due_date', { withTimezone: true }),
+  status: taskStatusEnum('status').notNull().default('open'),
+  assigneeId: uuid('assignee_id').references(() => adminUsers.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  archivedAt: timestamp('archived_at', { withTimezone: true }),
+})
+
+// ============ TASK CHECKLIST ITEMS TABLE ============
+export const taskChecklistItems = pgTable('task_checklist_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  taskId: uuid('task_id').notNull().references(() => leadTasks.id, { onDelete: 'cascade' }),
+  label: varchar('label', { length: 255 }).notNull(),
+  position: integer('position').notNull().default(0),
+  isChecked: boolean('is_checked').notNull().default(false),
+})
+
+// ============ TASK COMMENTS TABLE ============
+export const taskComments = pgTable('task_comments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  taskId: uuid('task_id').notNull().references(() => leadTasks.id, { onDelete: 'cascade' }),
+  body: text('body').notNull(),
+  authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  editedAt: timestamp('edited_at', { withTimezone: true }),
+})
+
+// ============ TASK ATTACHMENTS TABLE ============
+export const taskAttachments = pgTable('task_attachments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  taskId: uuid('task_id').notNull().references(() => leadTasks.id, { onDelete: 'cascade' }),
+  key: text('key').notNull(), // key en bucket contigo-quotes, o key de Media Library si se elige desde el picker
+  filename: varchar('filename', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
 
 // ============ MEDIA FOLDERS TABLE ============
 export const mediaFolders = pgTable(
