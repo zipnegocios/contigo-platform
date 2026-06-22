@@ -14,6 +14,7 @@ import { QuoteDetailPanel } from './QuoteDetailPanel'
 import { LeadActivityTimeline } from './LeadActivityTimeline'
 import { LeadEventsPanel } from './LeadEventsPanel'
 import { LeadDocumentsPanel } from './LeadDocumentsPanel'
+import { LeadTasksPanel } from './LeadTasksPanel'
 
 interface LeadDetailTabsProps {
   lead: LeadDTO
@@ -53,6 +54,7 @@ export function LeadDetailTabs({
         <TabsTrigger value="activity">Activity ({activities.length})</TabsTrigger>
         <TabsTrigger value="calls-visits">Calls & Visits ({events.length})</TabsTrigger>
         <TabsTrigger value="documents">Documents ({documents.length})</TabsTrigger>
+        <TabsTrigger value="tasks">Tasks</TabsTrigger>
       </TabsList>
 
       <TabsContent value="summary">
@@ -92,6 +94,10 @@ export function LeadDetailTabs({
           clientAttachmentKeys={quote.attachmentUrls}
           onMutated={onMutated}
         />
+      </TabsContent>
+
+      <TabsContent value="tasks">
+        <LeadTasksPanel leadId={lead.id} />
       </TabsContent>
     </Tabs>
   )

@@ -326,7 +326,7 @@ export function MediaPickerModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[230] flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(30,26,22,0.72)' }}
       onClick={(e) => { e.stopPropagation(); if (e.target === e.currentTarget) onClose() }}
     >

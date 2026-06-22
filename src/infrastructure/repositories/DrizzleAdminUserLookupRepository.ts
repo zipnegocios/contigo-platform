@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { db } from '../db/client'
 import { adminUsers } from '../db/schema'
 
@@ -29,5 +29,21 @@ export class DrizzleAdminUserLookupRepository {
 
     if (!rows.length) return null
     return rows[0]
+  }
+
+  /**
+   * Active admin users for assignee/staff pickers. Never selects
+   * passwordHash. Ordered by name for stable dropdown listings.
+   */
+  async findAllActive(): Promise<AdminUserSummary[]> {
+    return db
+      .select({
+        id: adminUsers.id,
+        name: adminUsers.name,
+        email: adminUsers.email,
+      })
+      .from(adminUsers)
+      .where(eq(adminUsers.isActive, true))
+      .orderBy(asc(adminUsers.name))
   }
 }
