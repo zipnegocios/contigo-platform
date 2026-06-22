@@ -90,6 +90,22 @@ export class Quote {
     })
   }
 
+  withContact(contact: { name: string; email: Email; phone: Phone | null }): Quote {
+    return new Quote({
+      id: this.id,
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      service: this.service,
+      message: this.message,
+      trackingToken: this.trackingToken,
+      status: this.status,
+      attachmentUrls: this.attachmentUrls,
+      createdAt: this.createdAt,
+      updatedAt: new Date(),
+    })
+  }
+
   static reconstruct(props: {
     id: string
     name: string

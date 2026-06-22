@@ -17,8 +17,11 @@ import {
   AccordionTrigger,
 } from '@/presentation/components/ui/accordion'
 import { Button } from '@/presentation/components/ui/button'
+import { Input } from '@/presentation/components/ui/input'
 import { LeadStage } from '@/core/entities/Lead'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
+import { Email } from '@/core/value-objects/Email'
+import { Phone } from '@/core/value-objects/Phone'
 import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
 import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
 import { LeadNotesPanel } from './LeadNotesPanel'
@@ -55,6 +58,59 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
   const [stage, setStage] = useState<LeadStage>(initialStage)
   const [stageSaving, setStageSaving] = useState(false)
   const [archiving, setArchiving] = useState(false)
+
+  const [contactName, setContactName] = useState(quote.name)
+  const [contactEmail, setContactEmail] = useState(quote.email)
+  const [contactPhone, setContactPhone] = useState(quote.phone ?? '')
+  const [contactSaving, setContactSaving] = useState(false)
+  const [contactError, setContactError] = useState<string | null>(null)
+
+  const handleSaveContact = async () => {
+    setContactError(null)
+
+    try {
+      Email.create(contactEmail)
+      if (contactPhone.trim()) {
+        Phone.create(contactPhone)
+      }
+    } catch (error) {
+      setContactError(error instanceof Error ? error.message : 'Invalid contact information')
+      return
+    }
+
+    if (!contactName.trim()) {
+      setContactError('Name is required')
+      return
+    }
+
+    setContactSaving(true)
+    try {
+      const response = await fetch(`/api/admin/leads/${leadId}/contact`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: contactName.trim(),
+          email: contactEmail.trim(),
+          phone: contactPhone.trim() || undefined,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update contact information')
+      }
+
+      toast.success('Contact information updated')
+      router.refresh()
+      onMutated?.()
+    } catch (error) {
+      setContactError(error instanceof Error ? error.message : 'Failed to update contact information')
+      toast.error(error instanceof Error ? error.message : 'Failed to update contact information')
+      console.error(error)
+    } finally {
+      setContactSaving(false)
+    }
+  }
 
   const handleMoveToTrash = async () => {
     setArchiving(true)
@@ -121,9 +177,55 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
           </h3>
         </AccordionTrigger>
         <AccordionContent className="px-6 py-5 space-y-4">
-          <InfoField label="Name" value={<span className="text-fluid-base font-medium">{quote.name}</span>} />
-          <InfoField label="Email" value={quote.email} />
-          {quote.phone && <InfoField label="Phone" value={quote.phone} />}
+          <div>
+            <label
+              className="text-fluid-xs font-medium uppercase tracking-wider mb-1 block"
+              style={{ color: 'var(--neutral-600)' }}
+            >
+              Name
+            </label>
+            <Input
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+              disabled={contactSaving}
+            />
+          </div>
+          <div>
+            <label
+              className="text-fluid-xs font-medium uppercase tracking-wider mb-1 block"
+              style={{ color: 'var(--neutral-600)' }}
+            >
+              Email
+            </label>
+            <Input
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              disabled={contactSaving}
+            />
+          </div>
+          <div>
+            <label
+              className="text-fluid-xs font-medium uppercase tracking-wider mb-1 block"
+              style={{ color: 'var(--neutral-600)' }}
+            >
+              Phone
+            </label>
+            <Input
+              type="tel"
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+              disabled={contactSaving}
+            />
+          </div>
+          {contactError && (
+            <p className="text-fluid-xs" style={{ color: '#B91C1C' }}>
+              {contactError}
+            </p>
+          )}
+          <Button size="sm" onClick={handleSaveContact} disabled={contactSaving}>
+            {contactSaving ? 'Saving...' : 'Save'}
+          </Button>
           <LeadContactsPanel leadId={leadId} contacts={contacts} onContactsChange={onContactsChange} />
         </AccordionContent>
       </AccordionItem>
