@@ -9,6 +9,7 @@ import {
   jsonb,
   pgEnum,
   index,
+  primaryKey,
 } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
@@ -463,8 +464,35 @@ export const adminUsers = pgTable('admin_users', {
   passwordHash: text('password_hash').notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   role: adminRoleEnum('role').notNull().default('staff'),
+  // Staff profile fields (additive, nullable: no existing data to backfill).
+  title: varchar('title', { length: 100 }),
+  phone: varchar('phone', { length: 20 }),
   isActive: boolean('is_active').notNull().default(true),
   lastLogin: timestamp('last_login', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ============ PERMISSIONS TABLE ============
+// Granular permission catalog for staff users (Fase 4.1). Owners get every
+// key via backfill; staff get explicit grants managed from the admin UI.
+export const permissions = pgTable('permissions', {
+  key: varchar('key', { length: 50 }).primaryKey(), // 'leads.view', 'leads.edit', ...
+  label: varchar('label', { length: 150 }).notNull(),
+})
+
+// ============ STAFF_USER_PERMISSIONS TABLE ============
+// Join table granting permission keys to admin_users. Composite PK prevents
+// duplicate grants; cascades clean up on user or permission deletion.
+export const staffUserPermissions = pgTable(
+  'staff_user_permissions',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => adminUsers.id, { onDelete: 'cascade' }),
+    permissionKey: varchar('permission_key', { length: 50 })
+      .notNull()
+      .references(() => permissions.key, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.permissionKey] })],
+)
