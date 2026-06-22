@@ -9,7 +9,7 @@ import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 type LeadRow = {
   id: string
   quoteId: string
-  stage: string
+  stageId: string
   estimatedValue: number | null
   updatedAt: Date
   quote: QuoteDTO | null
@@ -83,9 +83,14 @@ export function LeadsKanban({ leads, onLeadsChange }: LeadsKanbanProps) {
     return `/admin/leads?${params.toString()}`
   }
 
+  // TODO(Task 2.3/2.4): `stages` is still the hardcoded 5-key list and this
+  // groups leads by matching `lead.stageId` against those keys, which no
+  // longer matches now that stageId is a pipeline_stages.id (UUID). This
+  // Kanban needs to be rebuilt against IPipelineStageRepository.findAll()
+  // — left as-is per Task 2.2 scope (domain/repository layer only).
   const groupedByStage = stages.reduce(
     (acc, stage) => {
-      acc[stage] = leads.filter((l) => l.stage === stage)
+      acc[stage] = leads.filter((l) => l.stageId === stage)
       return acc
     },
     {} as Record<string, LeadRow[]>,
@@ -107,7 +112,7 @@ export function LeadsKanban({ leads, onLeadsChange }: LeadsKanbanProps) {
     if (!draggedId || isLoading) return
 
     const lead = leads.find((l) => l.id === draggedId)
-    if (!lead || lead.stage === targetStage) {
+    if (!lead || lead.stageId === targetStage) {
       setDraggedId(null)
       return
     }
@@ -115,7 +120,7 @@ export function LeadsKanban({ leads, onLeadsChange }: LeadsKanbanProps) {
     const originalLeads = leads
     onLeadsChange((prev) =>
       prev.map((l) =>
-        l.id === draggedId ? { ...l, stage: targetStage, updatedAt: new Date() } : l,
+        l.id === draggedId ? { ...l, stageId: targetStage, updatedAt: new Date() } : l,
       ),
     )
     setDraggedId(null)
@@ -125,7 +130,7 @@ export function LeadsKanban({ leads, onLeadsChange }: LeadsKanbanProps) {
       const response = await fetch(`/api/admin/leads/${draggedId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: targetStage }),
+        body: JSON.stringify({ stageId: targetStage }),
       })
 
       if (!response.ok) throw new Error(`Failed to update lead: ${response.statusText}`)

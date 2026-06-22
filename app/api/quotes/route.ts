@@ -6,6 +6,7 @@ import { OpenAIEmbeddingService } from '@/infrastructure/services/OpenAIEmbeddin
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
 import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/DrizzleLeadContactRepository'
+import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { CreateLeadForQuoteUseCase } from '@/application/use-cases/leads/CreateLeadForQuoteUseCase'
 
 const CreateQuoteSchema = z.object({
@@ -33,7 +34,13 @@ export async function POST(request: Request) {
     const leadRepository = new DrizzleLeadRepository()
     const leadActivityRepository = new DrizzleLeadActivityRepository()
     const leadContactRepository = new DrizzleLeadContactRepository()
-    const createLeadForQuote = new CreateLeadForQuoteUseCase(leadRepository, leadActivityRepository, leadContactRepository)
+    const pipelineStageRepository = new DrizzlePipelineStageRepository()
+    const createLeadForQuote = new CreateLeadForQuoteUseCase(
+      leadRepository,
+      leadActivityRepository,
+      leadContactRepository,
+      pipelineStageRepository,
+    )
 
     // Create and execute use case
     const useCase = new CreateQuoteUseCase(

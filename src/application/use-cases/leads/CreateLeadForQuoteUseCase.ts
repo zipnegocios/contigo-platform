@@ -5,19 +5,27 @@ import { Quote } from '@/core/entities/Quote'
 import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 import { ILeadActivityRepository } from '@/core/repositories/ILeadActivityRepository'
 import { ILeadContactRepository } from '@/core/repositories/ILeadContactRepository'
+import { IPipelineStageRepository } from '@/core/repositories/IPipelineStageRepository'
 
 export class CreateLeadForQuoteUseCase {
   constructor(
     private leadRepository: ILeadRepository,
     private leadActivityRepository: ILeadActivityRepository,
     private leadContactRepository: ILeadContactRepository,
+    private pipelineStageRepository: IPipelineStageRepository,
   ) {}
 
   async execute(quote: Quote): Promise<Lead> {
     const existing = await this.leadRepository.findByQuoteId(quote.id)
     if (existing) return existing
 
-    const lead = Lead.create({ quoteId: quote.id })
+    const stages = await this.pipelineStageRepository.findAll()
+    const defaultStage = stages.find((s) => s.isDefault) ?? stages[0]
+    if (!defaultStage) {
+      throw new Error('No pipeline stages configured. Did the pipeline_stages seed migration run?')
+    }
+
+    const lead = Lead.create({ quoteId: quote.id, stageId: defaultStage.id })
     await this.leadRepository.save(lead)
 
     // Seed the primary contact so it has an id and can be selected later

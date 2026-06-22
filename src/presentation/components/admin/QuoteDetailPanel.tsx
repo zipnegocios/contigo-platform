@@ -18,7 +18,6 @@ import {
 } from '@/presentation/components/ui/accordion'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
-import { LeadStage } from '@/core/entities/Lead'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import { Email } from '@/core/value-objects/Email'
 import { Phone } from '@/core/value-objects/Phone'
@@ -31,7 +30,7 @@ import { QuoteAttachmentsGrid } from './QuoteAttachmentsGrid'
 interface QuoteDetailPanelProps {
   leadId: string
   quote: QuoteDTO
-  initialStage: LeadStage
+  initialStage: string
   notes: LeadNoteDTO[]
   contacts: LeadContactDTO[]
   onContactsChange: Dispatch<SetStateAction<LeadContactDTO[]>>
@@ -56,7 +55,7 @@ function InfoField({ label, value }: { label: string; value: React.ReactNode }) 
 
 export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts, onContactsChange, onStageChange, onMutated, onArchived, onTrashed }: QuoteDetailPanelProps) {
   const router = useRouter()
-  const [stage, setStage] = useState<LeadStage>(initialStage)
+  const [stage, setStage] = useState<string>(initialStage)
   const [stageSaving, setStageSaving] = useState(false)
   const [trashing, setTrashing] = useState(false)
   const [archiving, setArchiving] = useState(false)
@@ -144,13 +143,13 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
     }
   }
 
-  const handleStageSelect = async (newStage: LeadStage) => {
+  const handleStageSelect = async (newStage: string) => {
     setStageSaving(true)
     try {
       const response = await fetch(`/api/admin/leads/${leadId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: newStage }),
+        body: JSON.stringify({ stageId: newStage }),
       })
 
       if (!response.ok) {
@@ -340,7 +339,16 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
             >
               Stage
             </label>
-            <Select value={stage} onValueChange={(value) => handleStageSelect(value as LeadStage)} disabled={stageSaving}>
+            {/*
+              TODO(Task 2.3/2.4): this selector still lists the old 5
+              hardcoded stage keys as option values, but the backend now
+              expects a real pipeline_stages.id (UUID) in `stageId`. It will
+              not function correctly until Task 2.4 wires it up to
+              IPipelineStageRepository.findAll() and uses stage.id as the
+              option value. Left as-is per Task 2.2 scope (domain/repository
+              layer only) — not redesigning UI behavior here.
+            */}
+            <Select value={stage} onValueChange={(value) => handleStageSelect(value)} disabled={stageSaving}>
               <SelectTrigger style={{ borderColor: 'var(--neutral-200)' }}>
                 <SelectValue />
               </SelectTrigger>

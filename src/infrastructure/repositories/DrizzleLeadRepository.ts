@@ -1,33 +1,17 @@
 import { eq, desc, and, gte, lte, isNull, isNotNull } from 'drizzle-orm'
 import { db } from '../db/client'
-import { leads, quotes, pipelineStages } from '../db/schema'
+import { leads, quotes } from '../db/schema'
 import { Lead } from '@/core/entities/Lead'
 import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 
 export class DrizzleLeadRepository implements ILeadRepository {
   async save(lead: Lead): Promise<void> {
-    // TODO(Task 2.2): Lead entity will carry stageId once the PipelineStage
-    // domain/repository lands. Until then, resolve it here from the legacy
-    // `stage` enum value so the now-NOT-NULL leads.stage_id stays populated.
-    const [stageRow] = await db
-      .select({ id: pipelineStages.id })
-      .from(pipelineStages)
-      .where(eq(pipelineStages.key, lead.stage))
-      .limit(1)
-
-    if (!stageRow) {
-      throw new Error(
-        `No pipeline_stages row found for key "${lead.stage}". Did the pipeline_stages seed migration run?`,
-      )
-    }
-
     await db
       .insert(leads)
       .values({
         id: lead.id,
         quoteId: lead.quoteId,
-        stage: lead.stage,
-        stageId: stageRow.id,
+        stageId: lead.stageId,
         estimatedValue: lead.estimatedValue,
       })
       .onConflictDoNothing()
@@ -60,11 +44,11 @@ export class DrizzleLeadRepository implements ILeadRepository {
     return rows.map((row) => this.mapRowToLead(row))
   }
 
-  async findByStage(stage: string, limit = 100, offset = 0): Promise<Lead[]> {
+  async findByStage(stageId: string, limit = 100, offset = 0): Promise<Lead[]> {
     const rows = await db
       .select()
       .from(leads)
-      .where(eq(leads.stage, stage as any))
+      .where(eq(leads.stageId, stageId))
       .orderBy(desc(leads.updatedAt))
       .limit(limit)
       .offset(offset)
@@ -73,7 +57,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
   }
 
   async findAllFiltered(filters: {
-    stage?: string
+    stageId?: string
     createdFrom?: Date
     createdTo?: Date
     includeArchived?: boolean
@@ -82,7 +66,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
     onlyTrashed?: boolean
   }): Promise<Lead[]> {
     const conditions = []
-    if (filters.stage) conditions.push(eq(leads.stage, filters.stage as any))
+    if (filters.stageId) conditions.push(eq(leads.stageId, filters.stageId))
 
     if (filters.onlyArchived) {
       conditions.push(isNotNull(leads.archivedAt))
@@ -123,25 +107,10 @@ export class DrizzleLeadRepository implements ILeadRepository {
   }
 
   async update(lead: Lead): Promise<void> {
-    // TODO(Task 2.2): same as save() above — keep stage_id in sync with the
-    // legacy stage enum until the Lead entity carries stageId directly.
-    const [stageRow] = await db
-      .select({ id: pipelineStages.id })
-      .from(pipelineStages)
-      .where(eq(pipelineStages.key, lead.stage))
-      .limit(1)
-
-    if (!stageRow) {
-      throw new Error(
-        `No pipeline_stages row found for key "${lead.stage}". Did the pipeline_stages seed migration run?`,
-      )
-    }
-
     await db
       .update(leads)
       .set({
-        stage: lead.stage,
-        stageId: stageRow.id,
+        stageId: lead.stageId,
         estimatedValue: lead.estimatedValue,
         updatedAt: lead.updatedAt,
         archivedAt: lead.archivedAt,
@@ -154,7 +123,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
     return Lead.reconstruct({
       id: row.id,
       quoteId: row.quoteId,
-      stage: row.stage,
+      stageId: row.stageId,
       estimatedValue: row.estimatedValue,
       updatedAt: row.updatedAt,
       archivedAt: row.archivedAt,

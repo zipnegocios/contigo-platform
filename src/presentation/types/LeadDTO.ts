@@ -1,9 +1,9 @@
-import { Lead, LeadStage } from '@/core/entities/Lead'
+import { Lead } from '@/core/entities/Lead'
 
 export interface LeadDTO {
   id: string
   quoteId: string
-  stage: LeadStage
+  stageId: string
   estimatedValue: number | null
   updatedAt: Date
   archivedAt: Date | null
@@ -14,7 +14,7 @@ export function toLeadDTO(lead: Lead): LeadDTO {
   return {
     id: lead.id,
     quoteId: lead.quoteId,
-    stage: lead.stage,
+    stageId: lead.stageId,
     estimatedValue: lead.estimatedValue,
     updatedAt: lead.updatedAt,
     archivedAt: lead.archivedAt,

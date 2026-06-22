@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
-    const stage = searchParams.get('stage') ?? undefined
+    const stageId = searchParams.get('stageId') ?? undefined
     const from = searchParams.get('from') ? new Date(searchParams.get('from')!) : undefined
     const to = searchParams.get('to') ? new Date(searchParams.get('to')!) : undefined
     const archived = searchParams.get('archived') === 'true'
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const quoteRepo = new DrizzleQuoteRepository()
 
     const leads = await leadRepo.findAllFiltered({
-      stage,
+      stageId,
       createdFrom: from,
       createdTo: to,
       onlyArchived: archived,

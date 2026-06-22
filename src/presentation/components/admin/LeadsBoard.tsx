@@ -9,7 +9,7 @@ import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 interface LeadRow {
   id: string
   quoteId: string
-  stage: string
+  stageId: string
   estimatedValue: number | null
   updatedAt: Date
   quote: QuoteDTO | null
@@ -23,9 +23,9 @@ interface LeadsBoardProps {
 export function LeadsBoard({ view, leads: initialLeads }: LeadsBoardProps) {
   const [leads, setLeads] = useState<LeadRow[]>(initialLeads)
 
-  const handleStageChange = (leadId: string, newStage: string) => {
+  const handleStageChange = (leadId: string, newStageId: string) => {
     setLeads((prev) =>
-      prev.map((l) => (l.id === leadId ? { ...l, stage: newStage, updatedAt: new Date() } : l)),
+      prev.map((l) => (l.id === leadId ? { ...l, stageId: newStageId, updatedAt: new Date() } : l)),
     )
   }
 

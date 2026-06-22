@@ -18,7 +18,7 @@ interface LeadsTrashViewProps {
   leads: Array<{
     id: string
     quoteId: string
-    stage: string
+    stageId: string
     estimatedValue: number | null
     updatedAt: Date
     quote: QuoteDTO | null
@@ -71,7 +71,7 @@ export function LeadsTrashView({ leads }: LeadsTrashViewProps) {
                 <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>{lead.quote?.name || 'Unknown'}</TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.email ?? '—'}</TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.service ?? '—'}</TableCell>
-                <TableCell className="py-3.5 text-fluid-sm capitalize" style={{ color: '#6B6560' }}>{lead.stage}</TableCell>
+                <TableCell className="py-3.5 text-fluid-sm capitalize" style={{ color: '#6B6560' }}>{lead.stageId}</TableCell>
                 <TableCell className="py-3.5">
                   <Button size="sm" variant="outline" disabled={restoringId === lead.id} onClick={() => restoreLead(lead.id)}>
                     Restore

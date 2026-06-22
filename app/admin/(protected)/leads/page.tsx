@@ -34,7 +34,7 @@ export default async function LeadsPage({
       return {
         id: lead.id,
         quoteId: lead.quoteId,
-        stage: lead.stage,
+        stageId: lead.stageId,
         estimatedValue: lead.estimatedValue,
         updatedAt: lead.updatedAt,
         quote: quote ? toQuoteDTO(quote) : null,

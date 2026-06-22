@@ -40,9 +40,9 @@ export function LeadDetailModal({ onStageChange, onLeadArchived }: LeadDetailMod
       .then((json) => setData(json))
   }
 
-  const handleStageChange = (newStage: string) => {
-    if (leadId) onStageChange?.(leadId, newStage)
-    setData((prev: any) => (prev ? { ...prev, lead: { ...prev.lead, stage: newStage } } : prev))
+  const handleStageChange = (newStageId: string) => {
+    if (leadId) onStageChange?.(leadId, newStageId)
+    setData((prev: any) => (prev ? { ...prev, lead: { ...prev.lead, stageId: newStageId } } : prev))
   }
 
   const close = () => {

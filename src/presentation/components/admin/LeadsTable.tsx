@@ -17,7 +17,7 @@ interface LeadsTableProps {
   leads: Array<{
     id: string
     quoteId: string
-    stage: string
+    stageId: string
     estimatedValue: number | null
     updatedAt: Date
     quote: QuoteDTO | null
@@ -90,7 +90,7 @@ export function LeadsTable({ leads }: LeadsTableProps) {
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.email ?? '—'}</TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.service ?? '—'}</TableCell>
                 <TableCell className="py-3.5">
-                  <StageBadge stage={lead.stage} />
+                  <StageBadge stage={lead.stageId} />
                 </TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>
                   {lead.updatedAt.toLocaleDateString()}

@@ -1,13 +1,12 @@
-export type LeadStage = 'prospect' | 'contacted' | 'quoted' | 'won' | 'lost'
-
 export interface CreateLeadInput {
   quoteId: string
+  stageId: string
 }
 
 export class Lead {
   readonly id: string
   readonly quoteId: string
-  readonly stage: LeadStage
+  readonly stageId: string
   readonly estimatedValue: number | null
   readonly updatedAt: Date
   readonly archivedAt: Date | null
@@ -16,7 +15,7 @@ export class Lead {
   private constructor(props: {
     id: string
     quoteId: string
-    stage: LeadStage
+    stageId: string
     estimatedValue: number | null
     updatedAt: Date
     archivedAt: Date | null
@@ -24,7 +23,7 @@ export class Lead {
   }) {
     this.id = props.id
     this.quoteId = props.quoteId
-    this.stage = props.stage
+    this.stageId = props.stageId
     this.estimatedValue = props.estimatedValue
     this.updatedAt = props.updatedAt
     this.archivedAt = props.archivedAt
@@ -37,7 +36,7 @@ export class Lead {
     return new Lead({
       id,
       quoteId: input.quoteId,
-      stage: 'prospect',
+      stageId: input.stageId,
       estimatedValue: null,
       updatedAt: new Date(),
       archivedAt: null,
@@ -45,11 +44,11 @@ export class Lead {
     })
   }
 
-  withStage(stage: LeadStage): Lead {
+  withStage(stageId: string): Lead {
     return new Lead({
       id: this.id,
       quoteId: this.quoteId,
-      stage,
+      stageId,
       estimatedValue: this.estimatedValue,
       updatedAt: new Date(),
       archivedAt: this.archivedAt,
@@ -61,7 +60,7 @@ export class Lead {
     return new Lead({
       id: this.id,
       quoteId: this.quoteId,
-      stage: this.stage,
+      stageId: this.stageId,
       estimatedValue: value,
       updatedAt: new Date(),
       archivedAt: this.archivedAt,
@@ -92,7 +91,7 @@ export class Lead {
   static reconstruct(props: {
     id: string
     quoteId: string
-    stage: LeadStage
+    stageId: string
     estimatedValue: number | null
     updatedAt: Date
     archivedAt: Date | null

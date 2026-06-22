@@ -69,19 +69,10 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { stage } = body
+    const { stageId } = body
 
-    if (!stage) {
-      return Response.json({ error: 'Stage is required' }, { status: 400 })
-    }
-
-    // Validate stage is one of the allowed values
-    const validStages = ['prospect', 'contacted', 'quoted', 'won', 'lost']
-    if (!validStages.includes(stage)) {
-      return Response.json(
-        { error: `Invalid stage. Must be one of: ${validStages.join(', ')}` },
-        { status: 400 },
-      )
+    if (!stageId) {
+      return Response.json({ error: 'stageId is required' }, { status: 400 })
     }
 
     const leadRepo = new DrizzleLeadRepository()
@@ -98,7 +89,7 @@ export async function PATCH(
 
     const updatedLead = await changeLeadStageUseCase.execute(
       params.id,
-      stage as 'prospect' | 'contacted' | 'quoted' | 'won' | 'lost',
+      stageId as string,
       (session.user as any)?.id,
     )
 

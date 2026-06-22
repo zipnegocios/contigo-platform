@@ -5,9 +5,9 @@ export interface ILeadRepository {
   findById(id: string): Promise<Lead | null>
   findByQuoteId(quoteId: string): Promise<Lead | null>
   findAll(limit?: number, offset?: number): Promise<Lead[]>
-  findByStage(stage: string, limit?: number, offset?: number): Promise<Lead[]>
+  findByStage(stageId: string, limit?: number, offset?: number): Promise<Lead[]>
   findAllFiltered(filters: {
-    stage?: string
+    stageId?: string
     createdFrom?: Date
     createdTo?: Date
     includeArchived?: boolean

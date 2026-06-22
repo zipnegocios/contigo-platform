@@ -56,7 +56,7 @@ export function LeadDetailTabs({
         <QuoteDetailPanel
           leadId={lead.id}
           quote={quote}
-          initialStage={lead.stage}
+          initialStage={lead.stageId}
           notes={notes}
           contacts={contacts}
           onContactsChange={setContacts}
