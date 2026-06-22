@@ -14,6 +14,7 @@ import {
   Tag,
   Images,
   Globe,
+  UserCog,
 } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 
@@ -24,6 +25,7 @@ const navItems = [
   { label: 'Categories', href: '/admin/categories', icon: Tag },
   { label: 'Media Library', href: '/admin/media', icon: Images },
   { label: 'Leads', href: '/admin/leads', icon: Trello },
+  { label: 'Leads Management', href: '/admin/leads/management/staff', icon: UserCog },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 

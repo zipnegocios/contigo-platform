@@ -1,10 +1,10 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleTaskRepository } from '@/infrastructure/repositories/DrizzleTaskRepository'
-import { DrizzleAdminUserLookupRepository } from '@/infrastructure/repositories/DrizzleAdminUserLookupRepository'
+import { DrizzleAdminUserRepository } from '@/infrastructure/repositories/DrizzleAdminUserRepository'
 import { UpdateTaskUseCase } from '@/application/use-cases/tasks/UpdateTaskUseCase'
 import { AssignTaskUseCase } from '@/application/use-cases/tasks/AssignTaskUseCase'
 import { Task } from '@/core/entities/Task'
-import { toTaskDTO } from '@/presentation/types/TaskDTO'
+import { toTaskDTO, TaskAssigneeDTO } from '@/presentation/types/TaskDTO'
 
 export async function GET(
   _request: Request,
@@ -18,8 +18,11 @@ export async function GET(
     const task = await new DrizzleTaskRepository().findById(taskId)
     if (!task) return Response.json({ error: 'Task not found' }, { status: 404 })
 
-    const assignee = task.assigneeId
-      ? await new DrizzleAdminUserLookupRepository().findById(task.assigneeId)
+    const assigneeUser = task.assigneeId
+      ? await new DrizzleAdminUserRepository().findById(task.assigneeId)
+      : null
+    const assignee: TaskAssigneeDTO | null = assigneeUser
+      ? { id: assigneeUser.id, name: assigneeUser.name, email: assigneeUser.email }
       : null
 
     return Response.json({ task: toTaskDTO(task, assignee) })
@@ -73,8 +76,11 @@ export async function PATCH(
     }
 
     const updatedTask = task as Task
-    const assignee = updatedTask.assigneeId
-      ? await new DrizzleAdminUserLookupRepository().findById(updatedTask.assigneeId)
+    const assigneeUser = updatedTask.assigneeId
+      ? await new DrizzleAdminUserRepository().findById(updatedTask.assigneeId)
+      : null
+    const assignee: TaskAssigneeDTO | null = assigneeUser
+      ? { id: assigneeUser.id, name: assigneeUser.name, email: assigneeUser.email }
       : null
 
     return Response.json({ success: true, task: toTaskDTO(updatedTask, assignee) })

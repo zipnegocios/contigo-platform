@@ -1,8 +1,8 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleTaskRepository } from '@/infrastructure/repositories/DrizzleTaskRepository'
-import { DrizzleAdminUserLookupRepository } from '@/infrastructure/repositories/DrizzleAdminUserLookupRepository'
+import { DrizzleAdminUserRepository } from '@/infrastructure/repositories/DrizzleAdminUserRepository'
 import { CreateTaskUseCase } from '@/application/use-cases/tasks/CreateTaskUseCase'
-import { toTaskDTO } from '@/presentation/types/TaskDTO'
+import { toTaskDTO, TaskAssigneeDTO } from '@/presentation/types/TaskDTO'
 
 export async function GET(
   _request: Request,
@@ -15,10 +15,13 @@ export async function GET(
     const { id } = await params
     const tasks = await new DrizzleTaskRepository().findByLeadId(id)
 
-    const lookupRepo = new DrizzleAdminUserLookupRepository()
+    const lookupRepo = new DrizzleAdminUserRepository()
     const taskDTOs = await Promise.all(
       tasks.map(async (task) => {
-        const assignee = task.assigneeId ? await lookupRepo.findById(task.assigneeId) : null
+        const assigneeUser = task.assigneeId ? await lookupRepo.findById(task.assigneeId) : null
+        const assignee: TaskAssigneeDTO | null = assigneeUser
+          ? { id: assigneeUser.id, name: assigneeUser.name, email: assigneeUser.email }
+          : null
         return toTaskDTO(task, assignee)
       }),
     )
@@ -58,8 +61,11 @@ export async function POST(
       assigneeId,
     })
 
-    const assignee = task.assigneeId
-      ? await new DrizzleAdminUserLookupRepository().findById(task.assigneeId)
+    const assigneeUser = task.assigneeId
+      ? await new DrizzleAdminUserRepository().findById(task.assigneeId)
+      : null
+    const assignee: TaskAssigneeDTO | null = assigneeUser
+      ? { id: assigneeUser.id, name: assigneeUser.name, email: assigneeUser.email }
       : null
 
     return Response.json({ success: true, task: toTaskDTO(task, assignee) }, { status: 201 })

@@ -1,8 +1,8 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleTaskRepository } from '@/infrastructure/repositories/DrizzleTaskRepository'
-import { DrizzleAdminUserLookupRepository } from '@/infrastructure/repositories/DrizzleAdminUserLookupRepository'
+import { DrizzleAdminUserRepository } from '@/infrastructure/repositories/DrizzleAdminUserRepository'
 import { RestoreTaskUseCase } from '@/application/use-cases/tasks/RestoreTaskUseCase'
-import { toTaskDTO } from '@/presentation/types/TaskDTO'
+import { toTaskDTO, TaskAssigneeDTO } from '@/presentation/types/TaskDTO'
 
 export async function POST(
   _request: Request,
@@ -16,8 +16,11 @@ export async function POST(
     const useCase = new RestoreTaskUseCase(new DrizzleTaskRepository())
     const task = await useCase.execute(taskId)
 
-    const assignee = task.assigneeId
-      ? await new DrizzleAdminUserLookupRepository().findById(task.assigneeId)
+    const assigneeUser = task.assigneeId
+      ? await new DrizzleAdminUserRepository().findById(task.assigneeId)
+      : null
+    const assignee: TaskAssigneeDTO | null = assigneeUser
+      ? { id: assigneeUser.id, name: assigneeUser.name, email: assigneeUser.email }
       : null
 
     return Response.json({ success: true, task: toTaskDTO(task, assignee) })
