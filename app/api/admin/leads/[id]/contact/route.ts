@@ -39,6 +39,17 @@ export async function PATCH(
     return Response.json({ success: true, quote: toQuoteDTO(updatedQuote) })
   } catch (error) {
     console.error('Error updating lead contact:', error)
+
+    // Email.create / Phone.create throw plain Errors prefixed this way for
+    // invalid input — surface those as client errors (400) rather than 500.
+    if (
+      error instanceof Error &&
+      (error.message.startsWith('Invalid email format') ||
+        error.message.startsWith('Invalid phone number'))
+    ) {
+      return Response.json({ error: error.message }, { status: 400 })
+    }
+
     return Response.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 },
