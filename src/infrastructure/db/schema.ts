@@ -99,6 +99,21 @@ export const leadContactRoles = pgTable('lead_contact_roles', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// ============ PIPELINE STAGES TABLE ============
+// Replaces leadStageEnum: a real table lets admins rename/reorder/create
+// stages from the UI (Kanban) without an ALTER TYPE on a Postgres enum.
+// Must be declared before leads due to the FK reference.
+export const pipelineStages = pgTable('pipeline_stages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  key: varchar('key', { length: 50 }).notNull().unique(),
+  label: varchar('label', { length: 100 }).notNull(),
+  position: integer('position').notNull().default(0),
+  color: varchar('color', { length: 7 }).notNull().default('#E2C063'),
+  isDefault: boolean('is_default').notNull().default(false),
+  terminalKind: varchar('terminal_kind', { length: 10 }), // 'won' | 'lost' | null
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ============ CATEGORIES TABLE ============
 // Must be declared before projects and services due to FK references
 export const categories = pgTable(
@@ -213,7 +228,13 @@ export const leads = pgTable(
     quoteId: uuid('quote_id')
       .notNull()
       .references(() => quotes.id, { onDelete: 'cascade' }),
+    // Deprecated: superseded by stageId (FK to pipeline_stages). Left in
+    // place until a later migration confirms production reads exclusively
+    // from stageId, then drops this column + the lead_stage enum.
     stage: leadStageEnum('stage').notNull().default('prospect'),
+    stageId: uuid('stage_id')
+      .notNull()
+      .references(() => pipelineStages.id),
     estimatedValue: integer('estimated_value'), // cents
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
@@ -221,6 +242,7 @@ export const leads = pgTable(
   },
   (table) => [
     index('idx_leads_stage').on(table.stage),
+    index('idx_leads_stage_id').on(table.stageId),
     index('idx_leads_quote_id').on(table.quoteId),
     index('idx_leads_archived_at').on(table.archivedAt),
     index('idx_leads_trashed_at').on(table.trashedAt),

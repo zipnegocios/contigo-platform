@@ -1,17 +1,33 @@
 import { eq, desc, and, gte, lte, isNull, isNotNull } from 'drizzle-orm'
 import { db } from '../db/client'
-import { leads, quotes } from '../db/schema'
+import { leads, quotes, pipelineStages } from '../db/schema'
 import { Lead } from '@/core/entities/Lead'
 import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 
 export class DrizzleLeadRepository implements ILeadRepository {
   async save(lead: Lead): Promise<void> {
+    // TODO(Task 2.2): Lead entity will carry stageId once the PipelineStage
+    // domain/repository lands. Until then, resolve it here from the legacy
+    // `stage` enum value so the now-NOT-NULL leads.stage_id stays populated.
+    const [stageRow] = await db
+      .select({ id: pipelineStages.id })
+      .from(pipelineStages)
+      .where(eq(pipelineStages.key, lead.stage))
+      .limit(1)
+
+    if (!stageRow) {
+      throw new Error(
+        `No pipeline_stages row found for key "${lead.stage}". Did the pipeline_stages seed migration run?`,
+      )
+    }
+
     await db
       .insert(leads)
       .values({
         id: lead.id,
         quoteId: lead.quoteId,
         stage: lead.stage,
+        stageId: stageRow.id,
         estimatedValue: lead.estimatedValue,
       })
       .onConflictDoNothing()
@@ -107,10 +123,25 @@ export class DrizzleLeadRepository implements ILeadRepository {
   }
 
   async update(lead: Lead): Promise<void> {
+    // TODO(Task 2.2): same as save() above — keep stage_id in sync with the
+    // legacy stage enum until the Lead entity carries stageId directly.
+    const [stageRow] = await db
+      .select({ id: pipelineStages.id })
+      .from(pipelineStages)
+      .where(eq(pipelineStages.key, lead.stage))
+      .limit(1)
+
+    if (!stageRow) {
+      throw new Error(
+        `No pipeline_stages row found for key "${lead.stage}". Did the pipeline_stages seed migration run?`,
+      )
+    }
+
     await db
       .update(leads)
       .set({
         stage: lead.stage,
+        stageId: stageRow.id,
         estimatedValue: lead.estimatedValue,
         updatedAt: lead.updatedAt,
         archivedAt: lead.archivedAt,

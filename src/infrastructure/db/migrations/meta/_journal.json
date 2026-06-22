@@ -71,6 +71,20 @@
       "when": 1782103221343,
       "tag": "20260622044021_nosy_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1782104050292,
+      "tag": "20260622045410_add_pipeline_stages_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1782104089841,
+      "tag": "20260622045449_backfill_and_finalize_leads_stage_id",
+      "breakpoints": true
     }
   ]
 }
