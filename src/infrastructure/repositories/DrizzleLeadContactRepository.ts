@@ -12,7 +12,7 @@ export class DrizzleLeadContactRepository implements ILeadContactRepository {
       name: contact.name,
       phone: contact.phone,
       email: contact.email,
-      role: contact.role,
+      roleId: contact.roleId,
       isPrimary: contact.isPrimary,
     })
   }
@@ -39,7 +39,7 @@ export class DrizzleLeadContactRepository implements ILeadContactRepository {
         name: contact.name,
         phone: contact.phone,
         email: contact.email,
-        role: contact.role,
+        roleId: contact.roleId,
         isPrimary: contact.isPrimary,
         updatedAt: contact.updatedAt,
         archivedAt: contact.archivedAt,
@@ -54,7 +54,7 @@ export class DrizzleLeadContactRepository implements ILeadContactRepository {
       name: row.name,
       phone: row.phone,
       email: row.email,
-      role: row.role,
+      roleId: row.roleId,
       isPrimary: row.isPrimary,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,

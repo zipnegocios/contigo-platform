@@ -12,10 +12,10 @@ export async function PATCH(
 
     const { contactId } = await params
     const body = await request.json()
-    const { name, phone, email, role } = body
+    const { name, phone, email, roleId } = body
 
     const useCase = new UpdateLeadContactUseCase(new DrizzleLeadContactRepository())
-    const contact = await useCase.execute(contactId, { name, phone, email, role })
+    const contact = await useCase.execute(contactId, { name, phone, email, roleId })
 
     return Response.json({ success: true, contact })
   } catch (error) {

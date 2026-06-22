@@ -84,6 +84,18 @@ export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
   'quote_status_changed',
 ])
 
+// ============ LEAD CONTACT ROLES TABLE ============
+// Replaces leadContactRoleEnum: a real table lets admins add new roles from
+// the UI (combobox "create new") without an ALTER TYPE on a Postgres enum.
+// Must be declared before leadContacts due to the FK reference.
+export const leadContactRoles = pgTable('lead_contact_roles', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  key: varchar('key', { length: 50 }).notNull().unique(),
+  label: varchar('label', { length: 100 }).notNull(),
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // ============ CATEGORIES TABLE ============
 // Must be declared before projects and services due to FK references
 export const categories = pgTable(
@@ -294,7 +306,11 @@ export const leadContacts = pgTable(
     name: varchar('name', { length: 255 }).notNull(),
     phone: varchar('phone', { length: 20 }).notNull(),
     email: varchar('email', { length: 255 }),
+    // Deprecated: superseded by roleId (FK to lead_contact_roles). Left in
+    // place (per migration plan) until a later, separate migration drops it.
+    // Application code no longer writes to this column.
     role: leadContactRoleEnum('role'),
+    roleId: uuid('role_id').references(() => leadContactRoles.id, { onDelete: 'set null' }),
     isPrimary: boolean('is_primary').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -303,6 +319,7 @@ export const leadContacts = pgTable(
   (table) => [
     index('idx_lead_contacts_lead_id').on(table.leadId),
     index('idx_lead_contacts_archived_at').on(table.archivedAt),
+    index('idx_lead_contacts_role_id').on(table.roleId),
   ],
 )
 

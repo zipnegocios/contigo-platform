@@ -1,3 +1,7 @@
+// Deprecated: the fixed enum has been superseded by the lead_contact_roles
+// table (see LeadContactRole entity) so admins can add roles from the UI.
+// Kept only for the legacy `role` column, which is no longer written to by
+// application code but has not yet been dropped from the schema.
 export type LeadContactRole = 'owner' | 'site_manager' | 'spouse' | 'other'
 
 export interface CreateLeadContactInput {
@@ -5,7 +9,7 @@ export interface CreateLeadContactInput {
   name: string
   phone: string
   email?: string
-  role?: LeadContactRole
+  roleId?: string | null
   isPrimary?: boolean
 }
 
@@ -15,7 +19,7 @@ export class LeadContact {
   readonly name: string
   readonly phone: string
   readonly email: string | null
-  readonly role: LeadContactRole | null
+  readonly roleId: string | null
   readonly isPrimary: boolean
   readonly createdAt: Date
   readonly updatedAt: Date
@@ -27,7 +31,7 @@ export class LeadContact {
     name: string
     phone: string
     email: string | null
-    role: LeadContactRole | null
+    roleId: string | null
     isPrimary: boolean
     createdAt: Date
     updatedAt: Date
@@ -38,7 +42,7 @@ export class LeadContact {
     this.name = props.name
     this.phone = props.phone
     this.email = props.email
-    this.role = props.role
+    this.roleId = props.roleId
     this.isPrimary = props.isPrimary
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
@@ -53,7 +57,7 @@ export class LeadContact {
       name: input.name,
       phone: input.phone,
       email: input.email ?? null,
-      role: input.role ?? null,
+      roleId: input.roleId ?? null,
       isPrimary: input.isPrimary ?? false,
       createdAt: now,
       updatedAt: now,
@@ -61,13 +65,13 @@ export class LeadContact {
     })
   }
 
-  withDetails(input: { name?: string; phone?: string; email?: string | null; role?: LeadContactRole | null }): LeadContact {
+  withDetails(input: { name?: string; phone?: string; email?: string | null; roleId?: string | null }): LeadContact {
     return new LeadContact({
       ...this,
       name: input.name ?? this.name,
       phone: input.phone ?? this.phone,
       email: input.email !== undefined ? input.email : this.email,
-      role: input.role !== undefined ? input.role : this.role,
+      roleId: input.roleId !== undefined ? input.roleId : this.roleId,
       updatedAt: new Date(),
     })
   }
@@ -86,7 +90,7 @@ export class LeadContact {
     name: string
     phone: string
     email: string | null
-    role: LeadContactRole | null
+    roleId: string | null
     isPrimary: boolean
     createdAt: Date
     updatedAt: Date

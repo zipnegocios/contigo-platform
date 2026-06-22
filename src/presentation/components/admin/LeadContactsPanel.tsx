@@ -1,18 +1,14 @@
 'use client'
 
-import { useState, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/presentation/components/ui/select'
+  LeadContactRoleCombobox,
+  type LeadContactRoleOption,
+} from '@/presentation/components/admin/LeadContactRoleCombobox'
 import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
-import type { LeadContactRole } from '@/core/entities/LeadContact'
 
 interface LeadContactsPanelProps {
   leadId: string
@@ -20,22 +16,29 @@ interface LeadContactsPanelProps {
   onContactsChange: Dispatch<SetStateAction<LeadContactDTO[]>>
 }
 
-const ROLE_LABELS: Record<LeadContactRole, string> = {
-  owner: 'Owner',
-  site_manager: 'Site Manager',
-  spouse: 'Spouse',
-  other: 'Other',
-}
-
 export function LeadContactsPanel({ leadId, contacts, onContactsChange }: LeadContactsPanelProps) {
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState<LeadContactRole | ''>('')
+  const [roleId, setRoleId] = useState<string | null>(null)
+  const [roles, setRoles] = useState<LeadContactRoleOption[]>([])
   const [saving, setSaving] = useState(false)
 
   const visibleContacts = contacts.filter((c) => c.archivedAt === null)
+
+  useEffect(() => {
+    if (!visibleContacts.some((c) => c.roleId)) return
+    fetch('/api/admin/lead-contact-roles')
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('Failed to load roles'))))
+      .then((data) => setRoles(data.roles ?? []))
+      .catch(() => {
+        // Non-fatal: role badges simply won't render labels.
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const roleLabelFor = (roleId: string | null) => roles.find((r) => r.id === roleId)?.label ?? null
 
   const addContact = async () => {
     if (!name.trim() || !phone.trim()) {
@@ -47,7 +50,7 @@ export function LeadContactsPanel({ leadId, contacts, onContactsChange }: LeadCo
       const res = await fetch(`/api/admin/leads/${leadId}/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, email: email || undefined, role: role || undefined }),
+        body: JSON.stringify({ name, phone, email: email || undefined, roleId: roleId || undefined }),
       })
       if (!res.ok) throw new Error('Failed to add contact')
       const { contact } = await res.json()
@@ -61,7 +64,7 @@ export function LeadContactsPanel({ leadId, contacts, onContactsChange }: LeadCo
       setName('')
       setPhone('')
       setEmail('')
-      setRole('')
+      setRoleId(null)
       setShowForm(false)
       toast.success('Contact added')
     } catch {
@@ -103,12 +106,12 @@ export function LeadContactsPanel({ leadId, contacts, onContactsChange }: LeadCo
                   Primary
                 </span>
               )}
-              {contact.role && (
+              {roleLabelFor(contact.roleId) && (
                 <span
                   className="ml-2 text-fluid-xs px-1.5 py-0.5 rounded"
                   style={{ backgroundColor: 'var(--neutral-50)', color: 'var(--neutral-600)' }}
                 >
-                  {ROLE_LABELS[contact.role]}
+                  {roleLabelFor(contact.roleId)}
                 </span>
               )}
             </p>
@@ -130,17 +133,7 @@ export function LeadContactsPanel({ leadId, contacts, onContactsChange }: LeadCo
           <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
           <Input placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Select value={role} onValueChange={(v) => setRole(v as LeadContactRole)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Role (optional)" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="owner">Owner</SelectItem>
-              <SelectItem value="site_manager">Site Manager</SelectItem>
-              <SelectItem value="spouse">Spouse</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
+          <LeadContactRoleCombobox value={roleId} onChange={setRoleId} roles={roles} onRolesChange={setRoles} />
           <div className="flex gap-2">
             <Button size="sm" onClick={addContact} disabled={saving}>
               Save contact

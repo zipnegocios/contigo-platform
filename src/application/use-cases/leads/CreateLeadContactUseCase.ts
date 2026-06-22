@@ -1,4 +1,4 @@
-import { LeadContact, LeadContactRole } from '@/core/entities/LeadContact'
+import { LeadContact } from '@/core/entities/LeadContact'
 import { ILeadContactRepository } from '@/core/repositories/ILeadContactRepository'
 
 export class CreateLeadContactUseCase {
@@ -9,7 +9,7 @@ export class CreateLeadContactUseCase {
     name: string
     phone: string
     email?: string
-    role?: LeadContactRole
+    roleId?: string | null
     isPrimary?: boolean
   }): Promise<LeadContact> {
     const contact = LeadContact.create(input)

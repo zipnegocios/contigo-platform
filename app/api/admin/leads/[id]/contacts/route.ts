@@ -32,14 +32,14 @@ export async function POST(
 
     const { id } = await params
     const body = await request.json()
-    const { name, phone, email, role, isPrimary } = body
+    const { name, phone, email, roleId, isPrimary } = body
 
     if (!name || !phone) {
       return Response.json({ error: 'name and phone are required' }, { status: 400 })
     }
 
     const useCase = new CreateLeadContactUseCase(new DrizzleLeadContactRepository())
-    const contact = await useCase.execute({ leadId: id, name, phone, email, role, isPrimary })
+    const contact = await useCase.execute({ leadId: id, name, phone, email, roleId, isPrimary })
 
     return Response.json({ success: true, contact }, { status: 201 })
   } catch (error) {
