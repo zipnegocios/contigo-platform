@@ -23,7 +23,7 @@ export default function AboutHero() {
 
   return (
     <div
-      className="relative py-24 px-6 md:px-16 overflow-hidden"
+      className="relative pt-40 pb-24 px-6 md:px-16 overflow-hidden"
       style={{
         backgroundColor: 'var(--petrol-800)',
         borderBottom: '1px solid var(--gold-a15)',

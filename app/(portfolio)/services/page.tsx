@@ -73,7 +73,7 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
     <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
       {/* Header */}
       <div
-        className="relative py-24 px-6 md:px-16"
+        className="relative pt-40 pb-24 px-6 md:px-16"
         style={{
           backgroundColor: 'var(--petrol-800)',
           borderBottom: '1px solid rgba(226,192,99,0.15)',

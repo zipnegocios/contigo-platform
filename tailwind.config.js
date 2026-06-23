@@ -138,8 +138,8 @@ export default {
            these three rects live and depends on them staying in lockstep
            with each other and with MorphingLogo.tsx's own width. */
         "logo-hero": "clamp(22rem, 38vw, 32rem)",
-        "logo-nav-desktop": "clamp(5rem, 7vw, 7rem)",
-        "logo-nav-mobile": "clamp(4.5rem, 10vw, 6rem)",
+        "logo-nav-desktop": "clamp(10rem, 14vw, 14rem)",
+        "logo-nav-mobile": "clamp(9rem, 20vw, 12rem)",
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",

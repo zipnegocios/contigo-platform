@@ -75,7 +75,7 @@ export function SimpleHeader() {
               viewBox={LOGO_VIEWBOX}
               xmlns="http://www.w3.org/2000/svg"
               style={{
-                width: scrolled ? 'clamp(6.5rem, 8vw, 9rem)' : 'clamp(8rem, 10vw, 11rem)',
+                width: scrolled ? 'clamp(13rem, 16vw, 18rem)' : 'clamp(16rem, 20vw, 22rem)',
                 height: 'auto',
                 color: scrolled ? '#0D3C4C' : '#E2C063',
                 transition: 'all 500ms',

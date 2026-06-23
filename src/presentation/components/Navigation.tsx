@@ -66,18 +66,19 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             ref={(el) => context.setNavDockDesktopRef(el)}
             className="hidden lg:block flex-shrink-0 w-logo-nav-desktop"
             style={{
+              gridColumn: '1',
               aspectRatio: '1024 / 354.041',
               visibility: 'hidden',
               pointerEvents: 'none',
             }}
           />
 
-          {/* Logo dock — mobile (centered) */}
+          {/* Logo dock — mobile (left-aligned, matching SimpleHeader's internal-page layout) */}
           <div
             ref={(el) => context.setNavDockMobileRef(el)}
-            className="lg:hidden flex justify-center flex-shrink-0 absolute left-1/2 w-logo-nav-mobile"
+            className="lg:hidden flex-shrink-0 w-logo-nav-mobile"
             style={{
-              transform: 'translateX(-50%)',
+              gridColumn: '1',
               aspectRatio: '1024 / 354.041',
               visibility: 'hidden',
               pointerEvents: 'none',
