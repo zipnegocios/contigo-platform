@@ -18,6 +18,15 @@ export interface FieldValidation {
   min?: number
   max?: number
   pattern?: string
+  /**
+   * Custom error message to use instead of Zod's generic default, applied
+   * to whichever constraint check is relevant for this field's type (e.g.
+   * the `.min()` call for a minLength-validated string, or the enum check
+   * for a required select). See Task 4.2.3 fix-up: the original public
+   * quote form had branded copy (e.g. "Please select a service") that a
+   * bare Zod default would otherwise silently replace.
+   */
+  message?: string
 }
 
 export interface FormField {
@@ -63,23 +72,28 @@ function buildBaseSchema(field: FormField, renderer: RendererPrimitive): z.ZodTy
     case 'TextInputRenderer': {
       if (field.type === 'number' || field.type === 'currency' || field.type === 'percentage') {
         let numberSchema = z.coerce.number()
-        if (validation?.min !== undefined) numberSchema = numberSchema.min(validation.min)
-        if (validation?.max !== undefined) numberSchema = numberSchema.max(validation.max)
+        if (validation?.min !== undefined) numberSchema = numberSchema.min(validation.min, validation.message)
+        if (validation?.max !== undefined) numberSchema = numberSchema.max(validation.max, validation.message)
         return numberSchema
       }
 
       let stringSchema = z.string()
-      if (field.type === 'email') stringSchema = stringSchema.email()
-      if (validation?.minLength !== undefined) stringSchema = stringSchema.min(validation.minLength)
-      if (validation?.maxLength !== undefined) stringSchema = stringSchema.max(validation.maxLength)
-      if (validation?.pattern !== undefined) stringSchema = stringSchema.regex(new RegExp(validation.pattern))
+      if (field.type === 'email') stringSchema = stringSchema.email(validation?.message)
+      if (validation?.minLength !== undefined)
+        stringSchema = stringSchema.min(validation.minLength, validation.message)
+      if (validation?.maxLength !== undefined)
+        stringSchema = stringSchema.max(validation.maxLength, validation.message)
+      if (validation?.pattern !== undefined)
+        stringSchema = stringSchema.regex(new RegExp(validation.pattern), validation.message)
       return stringSchema
     }
 
     case 'TextareaRenderer': {
       let stringSchema = z.string()
-      if (validation?.minLength !== undefined) stringSchema = stringSchema.min(validation.minLength)
-      if (validation?.maxLength !== undefined) stringSchema = stringSchema.max(validation.maxLength)
+      if (validation?.minLength !== undefined)
+        stringSchema = stringSchema.min(validation.minLength, validation.message)
+      if (validation?.maxLength !== undefined)
+        stringSchema = stringSchema.max(validation.maxLength, validation.message)
       return stringSchema
     }
 
@@ -95,7 +109,7 @@ function buildBaseSchema(field: FormField, renderer: RendererPrimitive): z.ZodTy
       // Single-choice types: select, radio_group, segmented, button_group,
       // combobox.
       if (field.options && field.options.length > 0) {
-        return z.enum(field.options as [string, ...string[]])
+        return z.enum(field.options as [string, ...string[]], validation?.message)
       }
       return z.string()
     }
@@ -105,8 +119,8 @@ function buildBaseSchema(field: FormField, renderer: RendererPrimitive): z.ZodTy
 
     case 'RangeRenderer': {
       let numberSchema = z.coerce.number()
-      if (validation?.min !== undefined) numberSchema = numberSchema.min(validation.min)
-      if (validation?.max !== undefined) numberSchema = numberSchema.max(validation.max)
+      if (validation?.min !== undefined) numberSchema = numberSchema.min(validation.min, validation.message)
+      if (validation?.max !== undefined) numberSchema = numberSchema.max(validation.max, validation.message)
       return numberSchema
     }
 
@@ -152,7 +166,7 @@ function applyRequired(baseSchema: z.ZodTypeAny, field: FormField): z.ZodTypeAny
       return baseSchema.optional()
     }
     const hadMinLength = field.validation?.minLength !== undefined
-    return hadMinLength ? baseSchema : baseSchema.min(1, 'Required')
+    return hadMinLength ? baseSchema : baseSchema.min(1, field.validation?.message ?? 'Required')
   }
 
   // Non-string types (number/date/boolean/array/enum/literal/unknown/...):
