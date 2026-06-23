@@ -15,6 +15,7 @@ import {
   Images,
   Globe,
   UserCog,
+  LayoutTemplate,
 } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 
@@ -26,6 +27,7 @@ const navItems = [
   { label: 'Media Library', href: '/admin/media', icon: Images },
   { label: 'Leads', href: '/admin/leads', icon: Trello },
   { label: 'Leads Management', href: '/admin/leads/management/staff', icon: UserCog },
+  { label: 'Form Builder', href: '/admin/leads/management/form-builder', icon: LayoutTemplate },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
