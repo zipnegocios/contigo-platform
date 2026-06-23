@@ -149,7 +149,7 @@ export default function Footer() {
             className="text-fluid-xs"
             style={{ color: 'var(--neutral-600)' }}
           >
-            ABN: 12 345 678 901
+            ABN: 25 698 028 394
           </p>
         </div>
       </div>
