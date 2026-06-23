@@ -51,7 +51,10 @@ export function MorphingLogo() {
       className="w-logo-hero"
       style={{
         position: 'fixed',
-        top: 0,
+        // -15px corrects a constant vertical offset between the SVG glyph's
+        // visual bounds and its aspect-ratio box, verified against both the
+        // hero dock and sticky nav dock targets.
+        top: -15,
         left: 0,
         zIndex: 101,
         aspectRatio: '1024 / 354.041',
