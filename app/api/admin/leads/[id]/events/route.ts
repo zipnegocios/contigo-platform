@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
 import { ScheduleLeadEventUseCase } from '@/application/use-cases/leads/ScheduleLeadEventUseCase'
@@ -30,6 +31,11 @@ export async function POST(
     const { id } = await params
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'leads.edit'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const body = await request.json()
     const { type, scheduledAt, durationMinutes, location, notes, metadata } = body

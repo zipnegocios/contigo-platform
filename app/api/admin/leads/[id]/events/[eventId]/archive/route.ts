@@ -1,4 +1,5 @@
 import { auth } from '@/infrastructure/auth/auth.config'
+import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { ArchiveLeadEventUseCase } from '@/application/use-cases/leads/ArchiveLeadEventUseCase'
 import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
@@ -10,6 +11,11 @@ export async function POST(
   try {
     const session = await auth()
     if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as any)?.id
+    if (!userId || !(await hasPermission(userId, 'leads.edit'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { eventId } = await params
     const useCase = new ArchiveLeadEventUseCase(new DrizzleLeadEventRepository())
