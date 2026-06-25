@@ -10,7 +10,7 @@ const REVEALED_COLOR = '#E3C064';
 const HIDDEN_COLOR = '#3A3028';
 const OPEN_CLIP = 'inset(0 0 0 0)';
 
-export default function HeritageSection() {
+export default function BrandPromiseSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function HeritageSection() {
 
   return (
     <section
-      id="heritage"
+      id="brand-promise"
       ref={sectionRef}
       className="flip-section"
     >

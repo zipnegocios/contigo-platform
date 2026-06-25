@@ -1,19 +1,78 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { ProjectGallery } from '@/presentation/components/ProjectGallery'
+import {
+  SERVICE_ROOT_SLUGS,
+  SERVICE_ROOT_NAMES,
+  isServiceRootSlug,
+} from '@/presentation/data/serviceCategoryMeta'
 
 function isVideo(url: string) {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
 }
 
+/**
+ * Resolves the service for `item` and validates it belongs to an active
+ * child category of the `category` root. Returns `null` if anything in the
+ * chain is missing/inactive/unpublished/mismatched — callers should treat
+ * `null` as a 404.
+ */
+async function resolveServiceForCategory(category: string, item: string) {
+  if (!isServiceRootSlug(category)) return null
+
+  const categoryRepo = new DrizzleCategoryRepository()
+  const serviceRepo = new DrizzleServiceRepository()
+
+  const [root, service] = await Promise.all([
+    categoryRepo.findBySlug(category, 'service'),
+    serviceRepo.findBySlug(item),
+  ])
+
+  if (!root || !root.isActive) return null
+  if (!service || !service.published) return null
+  if (!service.categoryId) return null
+
+  const flatCats = await categoryRepo.findFlat('service')
+  const childIds = new Set(
+    flatCats.filter((c) => c.parentId === root.id && c.isActive).map((c) => c.id),
+  )
+
+  if (!childIds.has(service.categoryId)) return null
+
+  return { root, service }
+}
+
 export async function generateStaticParams() {
   try {
     if (!process.env.DATABASE_URL) return []
-    const repo = new DrizzleServiceRepository()
-    const services = await repo.findPublished()
-    return services.map((s) => ({ slug: s.slug }))
+
+    const categoryRepo = new DrizzleCategoryRepository()
+    const serviceRepo = new DrizzleServiceRepository()
+
+    const flatCats = await categoryRepo.findFlat('service')
+    const services = await serviceRepo.findPublished()
+
+    const params: { category: string; item: string }[] = []
+
+    for (const category of SERVICE_ROOT_SLUGS) {
+      const root = flatCats.find((c) => c.parentId === null && c.slug === category)
+      if (!root || !root.isActive) continue
+
+      const childIds = new Set(
+        flatCats.filter((c) => c.parentId === root.id && c.isActive).map((c) => c.id),
+      )
+
+      for (const service of services) {
+        if (service.categoryId && childIds.has(service.categoryId)) {
+          params.push({ category, item: service.slug })
+        }
+      }
+    }
+
+    return params
   } catch {
     return []
   }
@@ -22,12 +81,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ category: string; item: string }>
 }): Promise<Metadata> {
-  const { slug } = await params
-  const repo = new DrizzleServiceRepository()
-  const service = await repo.findBySlug(slug)
-  if (!service || !service.published) return { title: 'Service not found' }
+  const { category, item } = await params
+  const resolved = await resolveServiceForCategory(category, item)
+  if (!resolved) return { title: 'Service not found' }
+
+  const { service } = resolved
   return {
     title: `${service.name} | Contigo Constructions`,
     description: service.shortDescription,
@@ -43,19 +103,21 @@ export async function generateMetadata({
 export const dynamicParams = true
 export const dynamic = 'force-dynamic'
 
-export default async function ServiceDetailPage({
+export default async function ServiceItemPage({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ category: string; item: string }>
 }) {
-  const { slug } = await params
-  const repo = new DrizzleServiceRepository()
-  const service = await repo.findBySlug(slug)
+  const { category, item } = await params
+  const resolved = await resolveServiceForCategory(category, item)
 
-  if (!service || !service.published) notFound()
+  if (!resolved) notFound()
+
+  const { service } = resolved
+  const categoryName = SERVICE_ROOT_NAMES[category as keyof typeof SERVICE_ROOT_NAMES]
 
   return (
-    <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
+    <>
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <div className="relative" style={{ height: '70vh', maxHeight: 600, minHeight: 400 }}>
         {isVideo(service.imageUrl) ? (
@@ -85,6 +147,13 @@ export default async function ServiceDetailPage({
         />
 
         <div className="absolute bottom-0 left-0 right-0 px-8 pb-12 md:px-16 md:pb-16">
+          <Link
+            href={`/services/${category}`}
+            className="inline-block text-fluid-xs uppercase tracking-widest mb-4"
+            style={{ color: '#E2C063' }}
+          >
+            ← Back to {categoryName}
+          </Link>
           <h1
             className="text-fluid-5xl font-semibold leading-none"
             style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
@@ -158,6 +227,6 @@ export default async function ServiceDetailPage({
           </aside>
         </div>
       </div>
-    </div>
+    </>
   )
 }

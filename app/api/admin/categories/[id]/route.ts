@@ -36,9 +36,11 @@ export async function PATCH(
       return Response.json({ error: 'Cannot rename system category' }, { status: 403 })
     }
 
-    // Prevent circular reference: new parentId must not be self or a descendant
+    // Prevent circular reference: new parentId must not be self or a descendant.
+    // Must include inactive categories too, otherwise an inactive descendant
+    // would not be detected and a cycle could slip through.
     if (input.parentId !== undefined && input.parentId !== null) {
-      const flat = await repo.findFlat(category.type)
+      const flat = await repo.findFlat(category.type, false)
       const descendantIds = getDescendantIds(flat, id)
       if (input.parentId === id || descendantIds.includes(input.parentId)) {
         return Response.json({ error: 'parentId creates circular reference' }, { status: 400 })

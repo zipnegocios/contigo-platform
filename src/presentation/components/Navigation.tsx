@@ -1,9 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { Mic, Menu, X } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 import { useLogoMorphContext } from '@/presentation/providers/LogoMorphProvider'
+
+const NAV_ITEMS = [
+  { label: 'Services', id: 'services' },
+  { label: 'Projects', id: 'projects' },
+  { label: 'About', href: '/about' },
+  { label: 'Contact', id: 'contact' },
+] as const
 
 interface NavigationProps {
   onVoiceSearch: () => void
@@ -93,27 +101,28 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
               pointerEvents: scrolled ? 'auto' : 'none',
             }}
           >
-            {[
-              { label: 'Services', id: 'services' },
-              { label: 'Projects', id: 'projects' },
-              { label: 'About', id: 'heritage' },
-              { label: 'Contact', id: 'contact' },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => scrollTo(item.id)}
-                className="relative text-fluid-sm font-medium transition-all duration-500 group"
-                style={{
-                  color: '#0d3c4c',
-                }}
-              >
-                {item.label}
+            {NAV_ITEMS.map((item) => {
+              const className = 'relative text-fluid-sm font-medium transition-all duration-500 group'
+              const style = { color: '#0d3c4c' }
+              const underline = (
                 <span
                   className="absolute -bottom-1 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full"
                   style={{ backgroundColor: 'var(--contigo-primary)' }}
                 />
-              </button>
-            ))}
+              )
+
+              return 'href' in item ? (
+                <Link key={item.label} href={item.href} className={className} style={style}>
+                  {item.label}
+                  {underline}
+                </Link>
+              ) : (
+                <button key={item.label} onClick={() => scrollTo(item.id)} className={className} style={style}>
+                  {item.label}
+                  {underline}
+                </button>
+              )
+            })}
           </div>
 
           {/* Right actions */}
@@ -175,21 +184,20 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
         }}
       >
         <div className="flex flex-col pt-32 px-8 gap-6 sm:pt-24">
-          {[
-            { label: 'Services', id: 'services' },
-            { label: 'Projects', id: 'projects' },
-            { label: 'About', id: 'heritage' },
-            { label: 'Contact', id: 'contact' },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => scrollTo(item.id)}
-              className="text-left min-h-[44px] flex items-center text-fluid-lg font-medium transition-colors hover:text-contigo-primary"
-              style={{ color: 'var(--contigo-foreground)' }}
-            >
-              {item.label}
-            </button>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const className = 'text-left min-h-[44px] flex items-center text-fluid-lg font-medium transition-colors hover:text-contigo-primary'
+            const style = { color: 'var(--contigo-foreground)' }
+
+            return 'href' in item ? (
+              <Link key={item.label} href={item.href} onClick={() => setMobileOpen(false)} className={className} style={style}>
+                {item.label}
+              </Link>
+            ) : (
+              <button key={item.label} onClick={() => scrollTo(item.id)} className={className} style={style}>
+                {item.label}
+              </button>
+            )
+          })}
           <Button onClick={() => scrollTo('contact')} variant="primary" className="mt-4">
             Get a Quote
           </Button>

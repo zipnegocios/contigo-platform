@@ -11,6 +11,7 @@ interface CategoryFormModalProps {
   allFlat: FlatCategory[]
   editTarget?: FlatCategory | null
   defaultParentId?: string | null
+  typeSelectable?: boolean
   onClose: () => void
 }
 
@@ -45,6 +46,7 @@ export function CategoryFormModal({
   allFlat,
   editTarget,
   defaultParentId,
+  typeSelectable = false,
   onClose,
 }: CategoryFormModalProps) {
   const router = useRouter()
@@ -52,11 +54,23 @@ export function CategoryFormModal({
   const [parentId, setParentId] = useState<string>(editTarget?.parentId ?? defaultParentId ?? '')
   const [description, setDescription] = useState(editTarget?.description ?? '')
   const [icon, setIcon] = useState(editTarget?.icon ?? '')
+  const [selectedType, setSelectedType] = useState<CategoryType>(type)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // The type prop is fixed unless typeSelectable is on (only true for "New
+  // root category" while the filter is "All" — see CategoryTreeView). In
+  // every other flow (edit, add-child, single-type filter) the type is
+  // determined by the parent/context and must not be overridden by stale
+  // local state.
+  const effectiveType = typeSelectable ? selectedType : type
+
   const slugPreview = makeSlugPreview(name)
-  const options = getIndentedOptions(allFlat, editTarget?.id)
+  // Scope parent options to the effective type so a project can never end up
+  // with a parentId pointing at a service category (or vice versa) — allFlat
+  // may now contain both types mixed together when invoked from the
+  // unified "All" view.
+  const options = getIndentedOptions(allFlat.filter((c) => c.type === effectiveType), editTarget?.id)
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -74,7 +88,7 @@ export function CategoryFormModal({
       if (mode === 'create') {
         const body: CreateCategoryInput = {
           name: name.trim(),
-          type,
+          type: effectiveType,
           parentId: parentId || null,
           description: description.trim() || null,
           icon: icon.trim() || null,
@@ -158,13 +172,30 @@ export function CategoryFormModal({
             <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>
               Type
             </label>
-            <input
-              type="text"
-              value={type}
-              readOnly
-              className="w-full px-3 py-2 rounded-lg text-fluid-sm capitalize"
-              style={{ backgroundColor: 'var(--neutral-200)', color: '#6B6560', border: '1px solid #E5DDD0' }}
-            />
+            {typeSelectable ? (
+              <select
+                value={selectedType}
+                onChange={(e) => {
+                  setSelectedType(e.target.value as CategoryType)
+                  // The previously selected parent may belong to the other
+                  // type — clear it so we never submit a cross-type parentId.
+                  setParentId('')
+                }}
+                className="w-full px-3 py-2 rounded-lg text-fluid-sm capitalize outline-none"
+                style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
+              >
+                <option value="service">Service</option>
+                <option value="project">Project</option>
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={effectiveType}
+                readOnly
+                className="w-full px-3 py-2 rounded-lg text-fluid-sm capitalize"
+                style={{ backgroundColor: 'var(--neutral-200)', color: '#6B6560', border: '1px solid #E5DDD0' }}
+              />
+            )}
           </div>
 
           <div>

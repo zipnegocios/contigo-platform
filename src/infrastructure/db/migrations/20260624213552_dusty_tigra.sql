@@ -1,0 +1,1 @@
+ALTER TABLE "services" ADD COLUMN "request_form_id" uuid;

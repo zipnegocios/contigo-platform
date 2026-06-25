@@ -10,7 +10,7 @@ type IconLogoProps = {
 /**
  * Inline vector rendering of the brand icon mark (logo-family_icon-logo.svg).
  * Inlined as JSX rather than <img>/next/image so `fill="currentColor"` can
- * inherit the surrounding CSS `color` — the same pattern HeritageSection
+ * inherit the surrounding CSS `color` — the same pattern BrandPromiseSection
  * uses for the brand lockup via brand-lockup-paths.tsx.
  */
 export function IconLogo({ className, style, label }: IconLogoProps) {

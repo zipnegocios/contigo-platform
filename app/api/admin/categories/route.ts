@@ -40,7 +40,8 @@ export async function GET(request: Request) {
     const type = searchParams.get('type') as CategoryType | null
 
     const repo = new DrizzleCategoryRepository()
-    const cats = await repo.findAll(type ?? undefined)
+    // Admin management list must keep showing inactive categories.
+    const cats = await repo.findAll(type ?? undefined, false)
     return Response.json(cats.map(serializeCategory))
   } catch (error) {
     console.error(error)

@@ -42,18 +42,30 @@ function mapToEntity(row: CategoryRow): Category {
 }
 
 export class DrizzleCategoryRepository implements ICategoryRepository {
-  async findAll(type?: CategoryType): Promise<Category[]> {
-    const rows = type
-      ? await db.select().from(categories).where(eq(categories.type, type)).orderBy(asc(categories.orderIndex), asc(categories.name))
-      : await db.select().from(categories).orderBy(asc(categories.orderIndex), asc(categories.name))
-    return rows.map(mapToEntity)
-  }
+  async findAll(type?: CategoryType, activeOnly: boolean = true): Promise<Category[]> {
+    const conditions = [
+      type ? eq(categories.type, type) : undefined,
+      activeOnly ? eq(categories.isActive, true) : undefined,
+    ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
-  async findFlat(type: CategoryType): Promise<FlatCategory[]> {
     const rows = await db
       .select()
       .from(categories)
-      .where(eq(categories.type, type))
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(asc(categories.orderIndex), asc(categories.name))
+    return rows.map(mapToEntity)
+  }
+
+  async findFlat(type: CategoryType, activeOnly: boolean = true): Promise<FlatCategory[]> {
+    const conditions = [
+      eq(categories.type, type),
+      activeOnly ? eq(categories.isActive, true) : undefined,
+    ].filter((c): c is NonNullable<typeof c> => c !== undefined)
+
+    const rows = await db
+      .select()
+      .from(categories)
+      .where(and(...conditions))
       .orderBy(asc(categories.orderIndex), asc(categories.name))
     return rows.map(mapToFlat)
   }

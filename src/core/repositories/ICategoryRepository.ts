@@ -2,8 +2,8 @@ import { Category } from '../entities/Category'
 import type { FlatCategory, CategoryType, ReorderItem } from '@/types/category'
 
 export interface ICategoryRepository {
-  findAll(type?: CategoryType): Promise<Category[]>
-  findFlat(type: CategoryType): Promise<FlatCategory[]>
+  findAll(type?: CategoryType, activeOnly?: boolean): Promise<Category[]>
+  findFlat(type: CategoryType, activeOnly?: boolean): Promise<FlatCategory[]>
   findById(id: string): Promise<Category | null>
   findBySlug(slug: string, type?: CategoryType): Promise<Category | null>
   save(category: Category): Promise<void>

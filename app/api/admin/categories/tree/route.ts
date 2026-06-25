@@ -18,7 +18,8 @@ export async function GET(request: Request) {
     }
 
     const repo = new DrizzleCategoryRepository()
-    const flat = await repo.findFlat(type)
+    // Admin must keep seeing inactive categories so they can be managed/reactivated.
+    const flat = await repo.findFlat(type, false)
     const tree = buildCategoryTree(flat)
 
     return Response.json({ tree, flat })

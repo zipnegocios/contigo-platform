@@ -14,9 +14,10 @@ interface CategoryTreeNodeProps {
   allFlat: FlatCategory[]
   type: CategoryType
   depth?: number
+  showTypeChip?: boolean
 }
 
-export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTreeNodeProps) {
+export function CategoryTreeNode({ node, allFlat, type, depth = 0, showTypeChip = false }: CategoryTreeNodeProps) {
   const router = useRouter()
   const [expanded, setExpanded] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -100,6 +101,11 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTre
             <span className="text-[10px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--neutral-600)' }}>
               {node.slug}
             </span>
+            {showTypeChip && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded font-mono capitalize" style={{ backgroundColor: 'rgba(226,192,99,0.12)', color: 'var(--neutral-600)' }}>
+                {node.type}
+              </span>
+            )}
             {node.isSystem && (
               <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(82,183,136,0.15)', color: '#52B788' }}>
                 system
@@ -168,6 +174,7 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0 }: CategoryTre
               allFlat={allFlat}
               type={type}
               depth={depth + 1}
+              showTypeChip={showTypeChip}
             />
           ))}
         </SortableContext>

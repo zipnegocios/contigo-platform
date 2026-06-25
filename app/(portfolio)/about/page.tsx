@@ -3,7 +3,7 @@ import AboutHero from '@/presentation/sections/AboutHero'
 import MissionVisionSection from '@/presentation/sections/MissionVisionSection'
 import ValuePropositionBand from '@/presentation/sections/ValuePropositionBand'
 import CoreValuesSection from '@/presentation/sections/CoreValuesSection'
-import HeritageSection from '@/presentation/sections/HeritageSection'
+import BrandPromiseSection from '@/presentation/sections/BrandPromiseSection'
 import AboutClosingCTA from '@/presentation/sections/AboutClosingCTA'
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default function AboutPage() {
       <MissionVisionSection />
       <ValuePropositionBand />
       <CoreValuesSection />
-      <HeritageSection />
+      <BrandPromiseSection />
       <AboutClosingCTA />
     </div>
   )

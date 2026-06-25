@@ -246,6 +246,8 @@ export const services = pgTable(
     orderIndex: integer('order_index').notNull().default(0),
     categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
     published: boolean('published').notNull().default(true),
+    // Form Builder hook (Fase 6 - work order CRM en curso); se conecta cuando ese módulo esté listo, sin lógica todavía.
+    requestFormId: uuid('request_form_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

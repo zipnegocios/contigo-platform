@@ -3,7 +3,7 @@ import { VoiceSearchNav } from '@/presentation/components/VoiceSearchNav'
 import HeroSection from '@/presentation/sections/HeroSection'
 import BrandBar from '@/presentation/sections/BrandBar'
 import ServicesSection from '@/presentation/sections/ServicesSection'
-import HeritageSection from '@/presentation/sections/HeritageSection'
+import BrandPromiseSection from '@/presentation/sections/BrandPromiseSection'
 import ProjectsSection from '@/presentation/sections/ProjectsSection'
 import Footer from '@/presentation/sections/Footer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
@@ -56,7 +56,7 @@ export default async function HomePage() {
         <HeroSection />
         <BrandBar />
         <ServicesSection />
-        <HeritageSection />
+        <BrandPromiseSection />
         <ProjectsSection projects={projects} />
         <ContactSection />
       </main>

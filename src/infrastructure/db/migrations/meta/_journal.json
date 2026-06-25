@@ -127,6 +127,13 @@
       "when": 1782194264900,
       "tag": "20260623055744_update_request_a_quote_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1782336952726,
+      "tag": "20260624213552_dusty_tigra",
+      "breakpoints": true
     }
   ]
 }

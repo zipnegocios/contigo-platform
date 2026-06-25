@@ -10,7 +10,9 @@ export default async function ProjectsPage() {
 
   const [allProjects, flatCats] = await Promise.all([
     projectRepo.findAll(100),
-    categoryRepo.findFlat('service'),
+    // Include inactive categories so projects linked to a category the
+    // taxonomy migration deactivates still resolve a label here.
+    categoryRepo.findFlat('service', false),
   ])
 
   const catMap = new Map(flatCats.map((c) => [c.id, c.name]))
