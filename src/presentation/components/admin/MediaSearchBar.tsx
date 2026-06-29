@@ -26,7 +26,7 @@ export function MediaSearchBar() {
       <div className="flex items-center gap-2">
         <div
           className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl"
-          style={{ backgroundColor: 'rgba(226,192,99,0.06)', border: '1px solid rgba(226,192,99,0.15)' }}
+          style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.15)' }}
         >
           <Search className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: 'var(--neutral-600)', flexShrink: 0 }} />
           <input
@@ -81,7 +81,7 @@ export function MediaSearchBar() {
       {expanded && (
         <div
           className="rounded-2xl p-4 space-y-4"
-          style={{ backgroundColor: 'rgba(226,192,99,0.04)', border: '1px solid rgba(226,192,99,0.12)' }}
+          style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.12)' }}
         >
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {/* Media type */}

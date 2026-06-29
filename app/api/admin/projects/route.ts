@@ -3,6 +3,30 @@ import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleP
 import { Project } from '@/core/entities/Project'
 import type { GalleryItem } from '@/types/media'
 
+export async function GET() {
+  try {
+    const session = await auth()
+    if (!session) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const projectRepo = new DrizzleProjectRepository()
+    const projects = await projectRepo.findAll(200)
+
+    const mapped = projects.map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      coverImageUrl: p.coverImageUrl,
+    }))
+
+    return Response.json(mapped)
+  } catch (error) {
+    console.error(error)
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = await auth()

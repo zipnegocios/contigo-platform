@@ -7,6 +7,7 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { Readable } from 'stream'
 import { inferMediaType } from '@/core/lib/inferMediaType'
 
 export interface R2MediaObject {
@@ -172,6 +173,59 @@ export async function renamePrefix(
   }
 
   return urlMap
+}
+
+/**
+ * Renames a single object (copy + delete). Returns the new public URL.
+ */
+export async function renameObjectKey(
+  bucket: string,
+  oldKey: string,
+  newKey: string,
+): Promise<string> {
+  const client = getR2Client()
+  const assetsUrl = process.env.NEXT_PUBLIC_ASSETS_URL || 'https://assets.contigoconstructions.com.au'
+
+  await client.send(new CopyObjectCommand({
+    Bucket: bucket,
+    CopySource: `${bucket}/${oldKey}`,
+    Key: newKey,
+  }))
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: oldKey }))
+
+  return `${assetsUrl}/${newKey}`
+}
+
+/**
+ * Reads an object's full body into a Buffer.
+ */
+export async function getObjectBuffer(bucket: string, key: string): Promise<Buffer> {
+  const client = getR2Client()
+  const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+  const stream = response.Body as Readable
+  const chunks: Buffer[] = []
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+  return Buffer.concat(chunks)
+}
+
+/**
+ * Uploads a Buffer directly to R2 (server-side, not a presigned browser upload).
+ */
+export async function putObjectBuffer(
+  bucket: string,
+  key: string,
+  body: Buffer,
+  contentType: string,
+): Promise<void> {
+  const client = getR2Client()
+  await client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+  }))
 }
 
 /**

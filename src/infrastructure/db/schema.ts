@@ -482,6 +482,7 @@ export const mediaMetadata = pgTable(
     height: integer('height'),
     duration: integer('duration'),
     format: varchar('format', { length: 100 }),
+    optimized: boolean('optimized').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

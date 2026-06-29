@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Search, Check, Film, Image as ImageIcon } from 'lucide-react'
+import { X, Search, Check, Film, Image as ImageIcon, FolderOpen, Briefcase, ExternalLink } from 'lucide-react'
 import type { MediaObject } from './MediaLibraryContext'
 import type { GalleryItem } from '@/types/media'
 
@@ -10,6 +10,8 @@ interface Entity {
   name: string
   type: 'project' | 'service'
   coverUrl: string | null
+  slug: string
+  previewPath: string | null
 }
 
 interface AssignToEntityModalProps {
@@ -36,17 +38,21 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
       const services = sRes.ok ? await sRes.json() : []
 
       const mapped: Entity[] = [
-        ...projects.map((p: { id: string; title: string; coverImageUrl: string | null }) => ({
+        ...projects.map((p: { id: string; title: string; slug: string; coverImageUrl: string | null }) => ({
           id: p.id,
           name: p.title,
           type: 'project' as const,
           coverUrl: p.coverImageUrl,
+          slug: p.slug,
+          previewPath: `/projects/${p.slug}`,
         })),
-        ...services.map((s: { id: string; name: string; imageUrl: string | null }) => ({
+        ...services.map((s: { id: string; name: string; slug: string; imageUrl: string | null; previewPath: string | null }) => ({
           id: s.id,
           name: s.name,
           type: 'service' as const,
           coverUrl: s.imageUrl,
+          slug: s.slug,
+          previewPath: s.previewPath,
         })),
       ]
       setEntities(mapped)
@@ -55,9 +61,13 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
     load()
   }, [])
 
-  const filtered = entities.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()))
+  const trimmedSearch = search.trim()
+  const filtered = trimmedSearch.length >= 3
+    ? entities.filter((e) => e.name.toLowerCase().includes(trimmedSearch.toLowerCase()))
+    : []
   const projects = filtered.filter((e) => e.type === 'project')
   const services = filtered.filter((e) => e.type === 'service')
+  const showHint = trimmedSearch.length < 3
 
   async function handleAssign() {
     if (!selectedId) return
@@ -170,6 +180,10 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
 
             {loading ? (
               <div className="py-6 text-center text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>Loading…</div>
+            ) : showHint ? (
+              <p className="text-fluid-sm text-center py-4" style={{ color: '#6B6560' }}>
+                Type at least 3 characters to search…
+              </p>
             ) : (
               <div className="space-y-3 max-h-48 overflow-y-auto">
                 {projects.length > 0 && (
@@ -213,11 +227,20 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
 }
 
 function EntityRow({ entity, selected, onSelect }: { entity: Entity; selected: boolean; onSelect: () => void }) {
+  const TypeIcon = entity.type === 'project' ? FolderOpen : Briefcase
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
-      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-left transition-all"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelect()
+        }
+      }}
+      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-left transition-all cursor-pointer"
       style={{
         backgroundColor: selected ? 'rgba(226,192,99,0.15)' : 'rgba(226,192,99,0.04)',
         border: `1px solid ${selected ? 'var(--contigo-primary)' : 'rgba(226,192,99,0.08)'}`,
@@ -234,8 +257,27 @@ function EntityRow({ entity, selected, onSelect }: { entity: Entity; selected: b
           <ImageIcon size={16} style={{ color: 'var(--neutral-600)' }} />
         )}
       </div>
+
+      <TypeIcon size={14} className="flex-shrink-0" style={{ color: 'var(--neutral-600)' }} />
+
       <span className="flex-1 truncate font-medium">{entity.name}</span>
+
+      {entity.previewPath && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            window.open(entity.previewPath!, '_blank', 'noopener,noreferrer')
+          }}
+          className="flex-shrink-0 p-1 rounded"
+          style={{ color: 'var(--neutral-600)' }}
+          title="Preview"
+        >
+          <ExternalLink size={14} />
+        </button>
+      )}
+
       {selected && <Check size={14} strokeWidth={3} />}
-    </button>
+    </div>
   )
 }

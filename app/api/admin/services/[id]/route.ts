@@ -7,6 +7,38 @@ import type { GalleryItem } from '@/types/media'
 
 const BUCKET = process.env.R2_ASSETS_BUCKET || 'contigo-assets'
 
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const session = await auth()
+    if (!session) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id } = await params
+    const serviceRepo = new DrizzleServiceRepository()
+    const service = await serviceRepo.findById(id)
+
+    if (!service) {
+      return Response.json({ error: 'Service not found' }, { status: 404 })
+    }
+
+    return Response.json({
+      id: service.id,
+      name: service.name,
+      slug: service.slug,
+      imageUrl: service.imageUrl,
+      posterUrl: service.posterUrl,
+      galleryItems: service.galleryItems,
+    })
+  } catch (error) {
+    console.error(error)
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },

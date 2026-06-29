@@ -81,6 +81,9 @@ interface MediaLibraryContextValue {
   renameFolder: (id: string, name: string) => Promise<void>
   createTag: (name: string, color: string) => Promise<MediaTag>
   deleteTag: (id: string) => Promise<void>
+  renameTag: (id: string, name: string) => Promise<void>
+  renameMedia: (key: string, newName: string) => Promise<void>
+  optimizeMedia: (key: string) => Promise<void>
   // Bulk selection
   selectedKeys: string[]
   toggleSelectKey: (key: string) => void
@@ -266,6 +269,7 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
   const blankMeta = (key: string): MediaMetadata => ({
     id: '', key, tags: [], folderId: null, notes: null,
     width: null, height: null, duration: null, format: null,
+    optimized: false,
   })
 
   const moveToFolder = useCallback(async (key: string, folderId: string | null) => {
@@ -307,6 +311,24 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
       body: JSON.stringify({ key }),
     })
   }, [])
+
+  const renameMedia = useCallback(async (key: string, newName: string) => {
+    await fetch('/api/admin/media/rename', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, newName }),
+    })
+    await refreshItems()
+  }, [refreshItems])
+
+  const optimizeMedia = useCallback(async (key: string) => {
+    await fetch('/api/admin/media/optimize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+    })
+    await refreshItems()
+  }, [refreshItems])
 
   const createFolder = useCallback(async (name: string, parentId?: string): Promise<MediaFolder> => {
     const res = await fetch('/api/admin/media/folders', {
@@ -366,6 +388,20 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
       body: JSON.stringify({ id }),
     })
   }, [tags])
+
+  // Note: tags are referenced by name (not id) in mediaMetadata.tags, unlike
+  // folders which use a stable folderId. Renaming a tag does not cascade into
+  // items' stored tag-name arrays — a pre-existing property of this system.
+  const renameTag = useCallback(async (id: string, name: string) => {
+    setTags((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, name } : t)).sort((a, b) => a.name.localeCompare(b.name))
+    )
+    await fetch('/api/admin/media/tags', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, name }),
+    })
+  }, [])
 
   const openDetail = useCallback((item: MediaObject) => setDetailItem(item), [])
   const closeDetail = useCallback(() => setDetailItem(null), [])
@@ -477,7 +513,8 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
         detailItem, openDetail, closeDetail,
         entityContext,
         moveToFolder, updateMetadata, deleteItem, refreshItems,
-        createFolder, deleteFolder, renameFolder, createTag, deleteTag,
+        createFolder, deleteFolder, renameFolder, createTag, deleteTag, renameTag,
+        renameMedia, optimizeMedia,
         selectedKeys, toggleSelectKey, clearSelection, selectAllFiltered,
         bulkMoveToFolder, bulkDelete, bulkAddTag, bulkRemoveTag,
       }}

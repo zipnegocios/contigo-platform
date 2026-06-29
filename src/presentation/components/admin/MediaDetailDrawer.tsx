@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Copy, Check, Film, Image as ImageIcon, ExternalLink, ImagePlus, Trash2 } from 'lucide-react'
+import { X, Copy, Check, Film, Image as ImageIcon, ExternalLink, ImagePlus, Trash2, Pencil } from 'lucide-react'
 import { useMediaLibrary } from './MediaLibraryContext'
 import { AssignToEntityModal } from './AssignToEntityModal'
 import { aspectRatio, formatDuration } from '@/presentation/lib/extractMediaMetadata'
@@ -38,7 +38,7 @@ function MetaField({ label, value, gold }: { label: string; value: string; gold?
 }
 
 export function MediaDetailDrawer() {
-  const { detailItem, closeDetail, folders, tags, updateMetadata, deleteItem, entityContext } = useMediaLibrary()
+  const { detailItem, closeDetail, folders, tags, updateMetadata, deleteItem, entityContext, renameMedia } = useMediaLibrary()
 
   const [copied, setCopied] = useState(false)
   const [assignModalOpen, setAssignModalOpen] = useState(false)
@@ -48,6 +48,8 @@ export function MediaDetailDrawer() {
   const [localFolderId, setLocalFolderId] = useState<string>('')
   const [localNotes, setLocalNotes] = useState<string>('')
   const [localTags, setLocalTags] = useState<string[]>([])
+  const [editingName, setEditingName] = useState(false)
+  const [editNameVal, setEditNameVal] = useState('')
 
   const item = detailItem
 
@@ -83,11 +85,21 @@ export function MediaDetailDrawer() {
   const height = item.metadata?.height ?? measuredDims?.height ?? null
   const duration = item.metadata?.duration ?? measuredDuration ?? null
   const filename = item.key.split('/').pop() ?? item.key
+  const lastDotIdx = filename.lastIndexOf('.')
+  const baseName = lastDotIdx > 0 ? filename.slice(0, lastDotIdx) : filename
+  const extension = lastDotIdx > 0 ? filename.slice(lastDotIdx) : ''
 
   const handleCopy = () => {
     navigator.clipboard.writeText(item.publicUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleRenameCommit = async () => {
+    setEditingName(false)
+    const trimmed = editNameVal.trim()
+    if (!trimmed || trimmed === baseName) return
+    await renameMedia(item.key, trimmed)
   }
 
   const handleFolderChange = async (folderId: string) => {
@@ -152,14 +164,51 @@ export function MediaDetailDrawer() {
           className="flex items-center justify-between px-4 py-3 flex-shrink-0"
           style={{ borderBottom: '1px solid rgba(226,192,99,0.1)' }}
         >
-          <h3
-            className="text-fluid-sm font-semibold truncate pr-2"
-            style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}
-            title={filename}
-          >
-            {filename}
-          </h3>
+          {editingName ? (
+            <div className="flex items-center gap-1 flex-1 pr-2 min-w-0">
+              <input
+                autoFocus
+                value={editNameVal}
+                onChange={(e) => setEditNameVal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleRenameCommit()
+                  if (e.key === 'Escape') setEditingName(false)
+                }}
+                onBlur={handleRenameCommit}
+                className="flex-1 text-fluid-sm font-semibold bg-transparent outline-none border-b min-w-0"
+                style={{ color: 'var(--neutral-50)', borderColor: 'rgba(226,192,99,0.4)', fontFamily: 'var(--font-cormorant)' }}
+              />
+              {extension && (
+                <span
+                  className="text-fluid-sm font-semibold flex-shrink-0"
+                  style={{ color: 'var(--neutral-600)', fontFamily: 'var(--font-cormorant)' }}
+                >
+                  {extension}
+                </span>
+              )}
+            </div>
+          ) : (
+            <h3
+              className="text-fluid-sm font-semibold truncate pr-2 cursor-text"
+              style={{ color: 'var(--neutral-50)', fontFamily: 'var(--font-cormorant)' }}
+              title={filename}
+              onDoubleClick={() => { setEditNameVal(baseName); setEditingName(true) }}
+            >
+              {filename}
+            </h3>
+          )}
           <div className="flex items-center gap-1 flex-shrink-0">
+            {!editingName && (
+              <button
+                type="button"
+                onClick={() => { setEditNameVal(baseName); setEditingName(true) }}
+                className="p-1.5 rounded-lg"
+                style={{ color: 'var(--neutral-600)' }}
+                title="Rename file"
+              >
+                <Pencil className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
+              </button>
+            )}
             <a
               href={item.publicUrl}
               target="_blank"

@@ -71,7 +71,7 @@ export async function PATCH(request: Request) {
 
   if (!key) return Response.json({ error: 'key is required' }, { status: 400 })
 
-  const allowed = ['folderId', 'tags', 'notes', 'width', 'height', 'duration', 'format'] as const
+  const allowed = ['folderId', 'tags', 'notes', 'width', 'height', 'duration', 'format', 'optimized'] as const
   const patch: Record<string, unknown> = { updatedAt: new Date() }
   for (const field of allowed) {
     if (field in updates) patch[field] = updates[field]

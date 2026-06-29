@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -11,8 +11,9 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core'
-import { LayoutGrid, Folder, FolderOpen, X, ChevronDown } from 'lucide-react'
+import { LayoutGrid, Folder, FolderOpen, X, ChevronDown, Check } from 'lucide-react'
 import { MediaCard } from './MediaCard'
+import { AssignToEntityModal } from './AssignToEntityModal'
 import { useMediaLibrary, type MediaObject } from './MediaLibraryContext'
 
 const PAGE_SIZE = 24
@@ -201,9 +202,48 @@ interface ContextMenuState {
   y: number
 }
 
-function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () => void }) {
-  const { folders, moveToFolder, openDetail, deleteItem } = useMediaLibrary()
-  const [showFolderSub, setShowFolderSub] = useState(false)
+type FlyoutKind = 'folder' | 'tag' | null
+
+function ContextMenu({
+  state,
+  onClose,
+  onAssign,
+}: {
+  state: ContextMenuState
+  onClose: () => void
+  onAssign: (item: MediaObject) => void
+}) {
+  const { folders, tags, moveToFolder, openDetail, deleteItem, updateMetadata, optimizeMedia } = useMediaLibrary()
+  const [openFlyout, setOpenFlyout] = useState<FlyoutKind>(null)
+  const [flyoutPos, setFlyoutPos] = useState<{ top: number; left: number } | null>(null)
+  const [optimizing, setOptimizing] = useState(false)
+
+  const folderBtnRef = useRef<HTMLButtonElement>(null)
+  const tagBtnRef = useRef<HTMLButtonElement>(null)
+
+  const openFlyoutAt = (kind: Exclude<FlyoutKind, null>, btnRef: React.RefObject<HTMLButtonElement | null>) => {
+    const rect = btnRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const FLYOUT_WIDTH = 180
+    let left = rect.right
+    if (left + FLYOUT_WIDTH > window.innerWidth) {
+      left = rect.left - FLYOUT_WIDTH
+    }
+    setFlyoutPos({ top: rect.top, left })
+    setOpenFlyout(kind)
+  }
+
+  const itemTags = state.item.metadata?.tags ?? []
+
+  const handleOptimize = async () => {
+    setOptimizing(true)
+    try {
+      await optimizeMedia(state.item.key)
+    } finally {
+      setOptimizing(false)
+      onClose()
+    }
+  }
 
   return (
     <>
@@ -221,28 +261,35 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
 
         <div style={{ borderTop: '1px solid rgba(226,192,99,0.08)' }} className="my-1" />
 
-        <div
-          className="relative"
-          onMouseEnter={() => setShowFolderSub(true)}
-          onMouseLeave={() => setShowFolderSub(false)}
+        <button
+          ref={folderBtnRef}
+          type="button"
+          onClick={() => openFlyoutAt('folder', folderBtnRef)}
+          className="w-full text-left px-4 py-2 text-fluid-sm flex items-center justify-between transition-colors hover:bg-white/5"
+          style={{ color: 'var(--neutral-50)' }}
         >
-          <MenuItem rightArrow>Move to folder</MenuItem>
-          {showFolderSub && (
-            <div
-              className="absolute left-full top-0 rounded-xl overflow-hidden py-1 min-w-[160px]"
-              style={{ backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
-            >
-              <MenuItem dimmed onClick={() => { moveToFolder(state.item.key, null); onClose() }}>
-                No folder
-              </MenuItem>
-              {folders.map((f) => (
-                <MenuItem key={f.id} onClick={() => { moveToFolder(state.item.key, f.id); onClose() }}>
-                  {f.name}
-                </MenuItem>
-              ))}
-            </div>
-          )}
-        </div>
+          <span>Move to folder</span>
+          <span style={{ color: 'var(--neutral-600)', fontSize: 10 }}>▶</span>
+        </button>
+
+        <button
+          ref={tagBtnRef}
+          type="button"
+          onClick={() => openFlyoutAt('tag', tagBtnRef)}
+          className="w-full text-left px-4 py-2 text-fluid-sm flex items-center justify-between transition-colors hover:bg-white/5"
+          style={{ color: 'var(--neutral-50)' }}
+        >
+          <span>Assign Tag</span>
+          <span style={{ color: 'var(--neutral-600)', fontSize: 10 }}>▶</span>
+        </button>
+
+        <MenuItem onClick={() => { onAssign(state.item); onClose() }}>Assign Media</MenuItem>
+
+        {state.item.mediaType === 'image' && (
+          <MenuItem onClick={handleOptimize} dimmed={optimizing}>
+            {optimizing ? 'Optimizing…' : 'Optimize'}
+          </MenuItem>
+        )}
 
         <div style={{ borderTop: '1px solid rgba(226,192,99,0.08)' }} className="my-1" />
 
@@ -258,6 +305,55 @@ function ContextMenu({ state, onClose }: { state: ContextMenuState; onClose: () 
           Delete
         </MenuItem>
       </div>
+
+      {/* Flyouts are rendered as fixed-positioned siblings (not nested inside
+          the menu box above) because that box has overflow-hidden for its
+          rounded corners, which previously clipped a nested absolute submenu. */}
+      {openFlyout === 'folder' && flyoutPos && (
+        <div
+          className="fixed z-[55] rounded-xl overflow-hidden py-1 min-w-[160px]"
+          style={{ top: flyoutPos.top, left: flyoutPos.left, backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MenuItem dimmed onClick={() => { moveToFolder(state.item.key, null); onClose() }}>
+            No folder
+          </MenuItem>
+          {folders.map((f) => (
+            <MenuItem key={f.id} onClick={() => { moveToFolder(state.item.key, f.id); onClose() }}>
+              {f.name}
+            </MenuItem>
+          ))}
+        </div>
+      )}
+
+      {openFlyout === 'tag' && flyoutPos && (
+        <div
+          className="fixed z-[55] rounded-xl overflow-hidden py-1 min-w-[180px]"
+          style={{ top: flyoutPos.top, left: flyoutPos.left, backgroundColor: 'var(--petrol-800)', border: '1px solid rgba(226,192,99,0.2)', boxShadow: '0 16px 40px rgba(0,0,0,0.5)' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {tags.map((t) => {
+            const active = itemTags.includes(t.name)
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  const next = active ? itemTags.filter((n) => n !== t.name) : [...itemTags, t.name]
+                  updateMetadata(state.item.key, { tags: next })
+                  // Intentionally do NOT close the menu — user may toggle several tags.
+                }}
+                className="w-full text-left px-4 py-2 text-fluid-sm flex items-center gap-2 transition-colors hover:bg-white/5"
+                style={{ color: 'var(--neutral-50)' }}
+              >
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
+                <span className="flex-1">{t.name}</span>
+                {active && <Check className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" strokeWidth={3} />}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </>
   )
 }
@@ -344,6 +440,7 @@ export function MediaGrid() {
   } = useMediaLibrary()
 
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
+  const [assignItem, setAssignItem] = useState<MediaObject | null>(null)
   const [activeDragKey, setActiveDragKey] = useState<string | null>(null)
   const [displayLimit, setDisplayLimit] = useState(PAGE_SIZE)
 
@@ -481,7 +578,15 @@ export function MediaGrid() {
       {activeDragKey && <FloatingFolderTargets />}
 
       {contextMenu && (
-        <ContextMenu state={contextMenu} onClose={() => setContextMenu(null)} />
+        <ContextMenu state={contextMenu} onClose={() => setContextMenu(null)} onAssign={setAssignItem} />
+      )}
+
+      {assignItem && (
+        <AssignToEntityModal
+          item={assignItem}
+          onClose={() => setAssignItem(null)}
+          onAssigned={() => setAssignItem(null)}
+        />
       )}
     </DndContext>
   )

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useDroppable } from '@dnd-kit/core'
-import { Folder, FolderOpen, Plus, X, Check, ChevronDown, ChevronRight, Tag } from 'lucide-react'
+import { Folder, FolderOpen, Plus, X, Check, ChevronDown, ChevronRight, Tag, Pencil } from 'lucide-react'
 import { useMediaLibrary } from './MediaLibraryContext'
 
 const TAG_COLORS = [
@@ -98,6 +98,18 @@ function DroppableFolderRow({
         </span>
       </div>
 
+      {onRename && !editing && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setEditing(true) }}
+          className="opacity-0 group-hover:opacity-100 p-1 rounded flex-shrink-0 transition-opacity"
+          style={{ color: 'var(--neutral-600)' }}
+          title="Rename folder"
+        >
+          <Pencil className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
+        </button>
+      )}
+
       {onDelete && (
         <button
           type="button"
@@ -109,6 +121,91 @@ function DroppableFolderRow({
           <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
         </button>
       )}
+    </div>
+  )
+}
+
+// ─── Tag chip (toggle / rename / delete) ──────────────────────────────────────
+
+function TagChip({
+  tag,
+  active,
+  count,
+  onToggle,
+  onDelete,
+  onRename,
+}: {
+  tag: { id: string; name: string; color: string }
+  active: boolean
+  count: number
+  onToggle: () => void
+  onDelete: () => void
+  onRename: (name: string) => void
+}) {
+  const [editing, setEditing] = useState(false)
+  const [editVal, setEditVal] = useState(tag.name)
+
+  const handleRename = () => {
+    if (editVal.trim() && editVal !== tag.name) onRename(editVal.trim())
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <div
+        className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+        style={{ border: `1px solid ${tag.color}`, backgroundColor: `${tag.color}22` }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: tag.color }} />
+        <input
+          autoFocus
+          value={editVal}
+          onChange={(e) => setEditVal(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleRename()
+            if (e.key === 'Escape') setEditing(false)
+          }}
+          onBlur={handleRename}
+          className="text-[10px] font-medium bg-transparent outline-none w-16"
+          style={{ color: tag.color }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="group/tag flex items-center gap-0.5">
+      <button
+        type="button"
+        onClick={onToggle}
+        onDoubleClick={() => setEditing(true)}
+        className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-all"
+        style={{
+          backgroundColor: active ? `${tag.color}22` : 'rgba(107,101,96,0.12)',
+          border: `1px solid ${active ? tag.color : 'rgba(107,101,96,0.25)'}`,
+          color: active ? tag.color : 'var(--neutral-600)',
+        }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tag.color }} />
+        {tag.name} ({count})
+      </button>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setEditing(true) }}
+        className="opacity-0 group-hover/tag:opacity-100 p-0.5 rounded transition-opacity"
+        style={{ color: 'var(--neutral-600)' }}
+        title="Rename tag"
+      >
+        <Pencil className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
+      </button>
+      <button
+        type="button"
+        onClick={onDelete}
+        className="opacity-0 group-hover/tag:opacity-100 p-0.5 rounded transition-opacity"
+        style={{ color: '#e87070' }}
+      >
+        <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
+      </button>
     </div>
   )
 }
@@ -129,6 +226,7 @@ export function MediaBankSidebar() {
     renameFolder,
     createTag,
     deleteTag,
+    renameTag,
   } = useMediaLibrary()
 
   const [foldersExpanded, setFoldersExpanded] = useState(true)
@@ -160,7 +258,7 @@ export function MediaBankSidebar() {
       className="flex-shrink-0 rounded-2xl p-3 space-y-1 overflow-y-auto"
       style={{
         width: 230,
-        backgroundColor: 'rgba(226,192,99,0.03)',
+        backgroundColor: 'var(--petrol-800)',
         border: '1px solid rgba(226,192,99,0.1)',
         maxHeight: '70vh',
       }}
@@ -263,37 +361,17 @@ export function MediaBankSidebar() {
       {tagsExpanded && (
         <>
           <div className="px-2 py-1 flex flex-wrap gap-1.5">
-            {tags.map((t) => {
-              const active = selectedTagNames.includes(t.name)
-              const count = items.filter((i) => i.metadata?.tags?.includes(t.name)).length
-              return (
-                <div key={t.id} className="group/tag flex items-center gap-0.5">
-                  <button
-                    type="button"
-                    onClick={() => toggleTag(t.name)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-all"
-                    style={{
-                      backgroundColor: active ? `${t.color}22` : 'rgba(107,101,96,0.12)',
-                      border: `1px solid ${active ? t.color : 'rgba(107,101,96,0.25)'}`,
-                      color: active ? t.color : 'var(--neutral-600)',
-                    }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: t.color }} />
-                    {t.name} ({count})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm(`Delete tag "${t.name}"?`)) deleteTag(t.id)
-                    }}
-                    className="opacity-0 group-hover/tag:opacity-100 p-0.5 rounded transition-opacity"
-                    style={{ color: '#e87070' }}
-                  >
-                    <X className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
-                  </button>
-                </div>
-              )
-            })}
+            {tags.map((t) => (
+              <TagChip
+                key={t.id}
+                tag={t}
+                active={selectedTagNames.includes(t.name)}
+                count={items.filter((i) => i.metadata?.tags?.includes(t.name)).length}
+                onToggle={() => toggleTag(t.name)}
+                onDelete={() => { if (confirm(`Delete tag "${t.name}"?`)) deleteTag(t.id) }}
+                onRename={(name) => renameTag(t.id, name)}
+              />
+            ))}
           </div>
 
           {creatingTag ? (

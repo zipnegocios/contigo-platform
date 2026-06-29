@@ -1,6 +1,6 @@
 'use client'
 
-import { Film, Image, Info, Trash2, Check } from 'lucide-react'
+import { Film, Image, Info, Trash2, Check, Zap, ZapOff } from 'lucide-react'
 import { useDraggable } from '@dnd-kit/core'
 import type { MediaTag } from '@/types/media'
 import type { MediaObject } from './MediaLibraryContext'
@@ -137,6 +137,28 @@ export function MediaCard({
             style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: 'var(--neutral-50)', pointerEvents: 'none' }}
           >
             {Math.floor(item.metadata.duration / 60)}:{String(item.metadata.duration % 60).padStart(2, '0')}
+          </span>
+        )}
+
+        {/* Optimized (WebP) badge — images only */}
+        {item.mediaType === 'image' && (
+          <span
+            className="absolute bottom-2 left-2 p-1 rounded-full z-20"
+            style={{
+              backgroundColor: item.metadata?.optimized ? 'rgba(226,192,99,0.9)' : 'rgba(22,18,14,0.55)',
+              pointerEvents: 'none',
+            }}
+            title={item.metadata?.optimized ? 'Optimized (WebP)' : 'Not optimized'}
+          >
+            {item.metadata?.optimized ? (
+              <Zap
+                className="w-[clamp(0.65rem,1.3vw,0.8rem)] h-[clamp(0.65rem,1.3vw,0.8rem)]"
+                style={{ color: 'var(--petrol-800)' }}
+                fill="var(--petrol-800)"
+              />
+            ) : (
+              <ZapOff className="w-[clamp(0.65rem,1.3vw,0.8rem)] h-[clamp(0.65rem,1.3vw,0.8rem)]" style={{ color: 'var(--neutral-600)' }} />
+            )}
           </span>
         )}
 

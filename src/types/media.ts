@@ -35,4 +35,5 @@ export interface MediaMetadata {
   height: number | null
   duration: number | null
   format: string | null
+  optimized: boolean
 }
