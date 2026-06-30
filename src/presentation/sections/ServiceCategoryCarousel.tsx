@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { gsap } from 'gsap'
-import useEmblaCarousel from 'embla-carousel-react'
+import gsap from 'gsap'
 import { ServiceIcon } from '@/presentation/components/ServiceIcons'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 
@@ -17,425 +16,609 @@ export interface ServiceCategoryCarouselItem {
 }
 
 interface Props {
-  categorySlug: string
   items: ServiceCategoryCarouselItem[]
+  categorySlug: string
+  categoryName: string
+  tagline: string
 }
 
-// Arrow button shared style (mirrors ProjectsSection.tsx pattern)
-const arrowBtnStyle: React.CSSProperties = {
-  backgroundColor: 'rgba(30,26,22,0.6)',
-  color: '#E2C063',
-  border: '1px solid rgba(226,192,99,0.3)',
-}
+// Reference: docs/temporal-service-cards/src/script.js (Timed Cards Opening)
+const CARD_W = 200
+const CARD_H = 300
+const GAP = 40
+const PROGRESS_W = 260
+const EASE = 'sine.inOut'
 
-/**
- * Hero + Queue carousel for a single service category.
- *
- * Desktop (≥1024px): Large hero card (image, icon, name, shortDescription, CTA)
- * with a horizontal scrollable queue strip below. Auto-advances every 4.2 s.
- *
- * Mobile (<1024px): Single-card Embla swipeable slider showing full hero cards.
- *
- * Both DOM branches are always mounted (CSS display:none only) for SEO/no-JS.
- * Parent applies `key={category}` so remount resets all state between routes.
- */
-export function ServiceCategoryCarousel({ categorySlug, items }: Props) {
-  const [activeIndex, setActiveIndex] = useState(0)
+export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tagline }: Props) {
+  const n = items.length
+
+  // Mutable rotation refs — no re-render during animation
+  const orderRef = useRef<number[]>(items.map((_, i) => i))
   const animatingRef = useRef(false)
   const isPausedRef = useRef(false)
-  const heroContentRef = useRef<HTMLDivElement>(null)
-  const rootRef = useRef<HTMLDivElement>(null)
+  const mountedRef = useRef(false)
+  const loopRunningRef = useRef(false)
+  const isEvenActiveRef = useRef(true) // tracks which details panel is currently visible
 
-  // Embla: desktop queue (loop, scroll by card)
-  const [emblaQueueRef, emblaQueueApi] = useEmblaCarousel({
-    loop: true,
-    align: 'start',
-    containScroll: 'trimSnaps',
-  })
+  // React state — drives JSX content of the two alternating details panels
+  const [evenContent, setEvenContent] = useState<ServiceCategoryCarouselItem>(items[0])
+  const [oddContent, setOddContent] = useState<ServiceCategoryCarouselItem>(items[Math.min(1, n - 1)])
 
-  // Embla: mobile slider (loop, center)
-  const [emblaMobileRef, emblaMobileApi] = useEmblaCarousel({
-    loop: true,
-    align: 'center',
-  })
+  // Layout (computed on mount from actual DOM measurements)
+  const layoutRef = useRef({ w: 0, h: 0, offsetLeft: 0, offsetTop: 0 })
 
-  // ── Navigation helpers ──────────────────────────────────────────────────────
-  const goPrev = useCallback(() => {
-    setActiveIndex((i) => (i - 1 + items.length) % items.length)
-  }, [items.length])
+  // DOM refs
+  const containerRef = useRef<HTMLDivElement>(null)
+  const coverRef = useRef<HTMLDivElement>(null)
+  const indicatorRef = useRef<HTMLDivElement>(null)
+  const paginationRef = useRef<HTMLDivElement>(null)
+  const progressFgRef = useRef<HTMLDivElement>(null)
+  const slideCounterRef = useRef<HTMLSpanElement>(null)
+  const detailsEvenRef = useRef<HTMLDivElement>(null)
+  const detailsOddRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const cardQueueContentRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  const goNext = useCallback(() => {
-    setActiveIndex((i) => (i + 1) % items.length)
-  }, [items.length])
+  // ── Helpers ──────────────────────────────────────────────────────────────────
 
-  // ── Embla select listener wiring ────────────────────────────────────────────
-  useEffect(() => {
-    if (!emblaQueueApi) return
-    const onSelect = () => {
-      setActiveIndex(emblaQueueApi.selectedScrollSnap())
-    }
-    emblaQueueApi.on('select', onSelect)
-    emblaQueueApi.on('reInit', onSelect)
-    return () => {
-      emblaQueueApi.off('select', onSelect)
-      emblaQueueApi.off('reInit', onSelect)
-    }
-  }, [emblaQueueApi])
+  function computeLayout() {
+    const el = containerRef.current!
+    // Set height dynamically to fill remaining viewport below the element
+    const top = el.getBoundingClientRect().top
+    const vh = window.innerHeight
+    const h = Math.max(520, vh - top)
+    el.style.height = `${h}px`
 
-  useEffect(() => {
-    if (!emblaMobileApi) return
-    const onSelect = () => {
-      setActiveIndex(emblaMobileApi.selectedScrollSnap())
-    }
-    emblaMobileApi.on('select', onSelect)
-    emblaMobileApi.on('reInit', onSelect)
-    return () => {
-      emblaMobileApi.off('select', onSelect)
-      emblaMobileApi.off('reInit', onSelect)
-    }
-  }, [emblaMobileApi])
+    const w = el.offsetWidth
+    const offsetLeft = Math.max(0, w - 830)
+    const offsetTop = Math.max(0, h - 430)
+    layoutRef.current = { w, h, offsetLeft, offsetTop }
+  }
 
-  // ── Sync Embla scroll position when activeIndex changes externally ──────────
-  useEffect(() => {
-    emblaQueueApi?.scrollTo(activeIndex, true)
-  }, [activeIndex, emblaQueueApi])
-
-  useEffect(() => {
-    emblaMobileApi?.scrollTo(activeIndex, true)
-  }, [activeIndex, emblaMobileApi])
-
-  // ── GSAP hero crossfade on activeIndex change ────────────────────────────────
-  // Only fires after first mount (skip initial render).
-  const didMountHeroRef = useRef(false)
-
-  useLayoutEffect(() => {
-    if (!didMountHeroRef.current) {
-      didMountHeroRef.current = true
-      return
-    }
-    if (!heroContentRef.current) return
-
-    if (prefersReducedMotion()) {
-      // Instant swap — no animation
-      animatingRef.current = false
-      return
-    }
-
-    if (animatingRef.current) return
-    animatingRef.current = true
-
-    const el = heroContentRef.current
-
-    // Phase 1: fade OUT
-    gsap.to(el, {
-      opacity: 0,
-      y: -8,
-      duration: 0.25,
-      ease: 'power2.in',
-      onComplete: () => {
-        // Phase 2: fade IN (React already rendered new content since state updated)
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 8 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.35,
-            ease: 'power3.out',
-            clearProps: 'opacity,transform',
-            onComplete: () => {
-              animatingRef.current = false
-            },
-          },
-        )
-      },
+  function animPromise(target: gsap.TweenTarget, duration: number, props: gsap.TweenVars): Promise<void> {
+    return new Promise<void>(resolve => {
+      gsap.to(target, { ...props, duration, onComplete: resolve })
     })
-  }, [activeIndex])
+  }
 
-  // ── Entrance stagger on mount ────────────────────────────────────────────────
-  useEffect(() => {
-    if (prefersReducedMotion()) return
+  // ── step() ──────────────────────────────────────────────────────────────────
+  // Returns a Promise that resolves when the CTA stagger finishes (~0.75s).
+  // animatingRef is cleared in the hero-card onComplete (~0.5s).
 
-    const ctx = gsap.context(() => {
-      const cards = rootRef.current?.querySelectorAll('.svc-queue-card')
-      if (cards && cards.length) {
-        gsap.fromTo(
-          cards,
-          { opacity: 0, y: 22 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'power3.out',
-            stagger: 0.07,
-            clearProps: 'opacity,transform',
-          },
-        )
-      }
-    }, rootRef)
+  const stepImpl = useCallback((dir: 'next' | 'prev' = 'next') => {
+    return new Promise<void>(resolve => {
+      if (animatingRef.current) { resolve(); return }
+      animatingRef.current = true
 
-    return () => ctx.revert()
+      const { w, h, offsetLeft, offsetTop } = layoutRef.current
+      const order = orderRef.current
+
+      // Rotate order array
+      if (dir === 'next') order.push(order.shift()!)
+      else order.unshift(order.pop()!)
+
+      const [active, ...rest] = order
+      // prv = the card that was hero, now going to queue
+      const prv = dir === 'next' ? rest[rest.length - 1] : rest[0]
+      const prvQueueIdx = dir === 'next' ? rest.length - 1 : 0
+
+      // Toggle which details panel is active
+      const wasEven = isEvenActiveRef.current
+      isEvenActiveRef.current = !wasEven
+
+      const activePanelRef = wasEven ? detailsEvenRef : detailsOddRef
+      const inactivePanelRef = wasEven ? detailsOddRef : detailsEvenRef
+
+      // Update inactive panel content via React state.
+      // Panel is opacity:0 with 0.4s delay before fading in — plenty of time to render.
+      if (wasEven) setOddContent(items[active])
+      else setEvenContent(items[active])
+
+      const inactivePanel = inactivePanelRef.current!
+      const activePanel = activePanelRef.current!
+
+      // Reset inactive panel slide-up elements (they start off below their overflow containers)
+      gsap.set(inactivePanel.querySelectorAll('.svc-place'), { y: 100 })
+      gsap.set(inactivePanel.querySelectorAll('.svc-title'), { y: 100 })
+      gsap.set(inactivePanel.querySelector('.svc-desc'), { y: 50 })
+      gsap.set(inactivePanel.querySelector('.svc-cta'), { y: 60 })
+      gsap.set(inactivePanelRef.current, { zIndex: 22 })
+      gsap.set(activePanelRef.current, { zIndex: 12 })
+
+      // Fade out active panel, stagger-slide-up inactive panel
+      gsap.to(activePanel, { opacity: 0, ease: EASE })
+      gsap.to(inactivePanel, { opacity: 1, delay: 0.4, ease: EASE })
+      gsap.to(inactivePanel.querySelectorAll('.svc-place'), { y: 0, delay: 0.1, duration: 0.7, ease: EASE })
+      gsap.to(inactivePanel.querySelectorAll('.svc-title'), { y: 0, delay: 0.15, duration: 0.7, ease: EASE })
+      gsap.to(inactivePanel.querySelector('.svc-desc'), { y: 0, delay: 0.3, duration: 0.4, ease: EASE })
+      gsap.to(inactivePanel.querySelector('.svc-cta'), {
+        y: 0, delay: 0.35, duration: 0.4, ease: EASE,
+        onComplete: resolve, // loop() awaits this
+      })
+
+      // Card animations
+      gsap.set(cardRefs.current[prv], { zIndex: 10 })
+      gsap.set(cardRefs.current[active], { zIndex: 20 })
+      gsap.to(cardRefs.current[prv], { scale: 1.5, ease: EASE })
+      gsap.to(cardQueueContentRefs.current[active], { opacity: 0, duration: 0.3, ease: EASE })
+
+      // Update slide counter imperatively (no re-render)
+      if (slideCounterRef.current) slideCounterRef.current.textContent = String(active + 1)
+
+      // Progress bar
+      gsap.to(progressFgRef.current, { width: PROGRESS_W * (1 / n) * (active + 1), ease: EASE })
+
+      // Expand new hero card to fill container
+      gsap.to(cardRefs.current[active], {
+        x: 0, y: 0, width: w, height: h, borderRadius: 0,
+        ease: EASE,
+        onComplete: () => {
+          // Reposition old hero to its queue slot
+          const endX = offsetLeft + prvQueueIdx * (CARD_W + GAP)
+          gsap.set(cardRefs.current[prv], {
+            x: endX, y: offsetTop, width: CARD_W, height: CARD_H,
+            zIndex: 30, borderRadius: 10, scale: 1,
+          })
+          gsap.set(cardQueueContentRefs.current[prv], {
+            x: endX, y: offsetTop + CARD_H - 100, opacity: 1, zIndex: 40,
+          })
+
+          // Reset now-inactive details panel for next use
+          gsap.set(activePanel, { opacity: 0, zIndex: 12 })
+          gsap.set(activePanel.querySelectorAll('.svc-place, .svc-title'), { y: 100 })
+          gsap.set(activePanel.querySelector('.svc-desc'), { y: 50 })
+          gsap.set(activePanel.querySelector('.svc-cta'), { y: 60 })
+
+          // Shift remaining queue cards to new positions
+          rest.forEach((idx, i) => {
+            if (idx !== prv) {
+              const xNew = offsetLeft + i * (CARD_W + GAP)
+              gsap.to(cardRefs.current[idx], {
+                x: xNew, y: offsetTop, width: CARD_W, height: CARD_H,
+                ease: EASE, delay: 0.1 * (i + 1),
+              })
+              gsap.to(cardQueueContentRefs.current[idx], {
+                x: xNew, y: offsetTop + CARD_H - 100,
+                opacity: 1, zIndex: 40, ease: EASE, delay: 0.1 * (i + 1),
+              })
+            }
+          })
+
+          animatingRef.current = false
+        },
+      })
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categorySlug])
+  }, [n])
 
-  // ── Auto-advance timer ────────────────────────────────────────────────────────
+  // ── loop() — indicator bar is the visual timer ────────────────────────────
+
+  async function runLoop() {
+    while (loopRunningRef.current && mountedRef.current) {
+      if (prefersReducedMotion()) break
+      const { w } = layoutRef.current
+      await animPromise(indicatorRef.current!, 2, { x: 0 })
+      if (!loopRunningRef.current || !mountedRef.current) break
+      await animPromise(indicatorRef.current!, 0.8, { x: w, delay: 0.3 })
+      if (!loopRunningRef.current || !mountedRef.current) break
+      gsap.set(indicatorRef.current!, { x: -w })
+      if (!isPausedRef.current) await stepImpl('next')
+      if (!loopRunningRef.current || !mountedRef.current) break
+    }
+  }
+
+  function startLoop() {
+    if (loopRunningRef.current) return
+    loopRunningRef.current = true
+    runLoop()
+  }
+
+  function stopLoop() {
+    loopRunningRef.current = false
+    if (indicatorRef.current) {
+      gsap.killTweensOf(indicatorRef.current)
+      gsap.set(indicatorRef.current, { x: -(layoutRef.current.w || 2000) })
+    }
+  }
+
+  // ── Init on mount ─────────────────────────────────────────────────────────
+
   useEffect(() => {
-    if (prefersReducedMotion()) return
-    if (items.length <= 1) return
+    mountedRef.current = true
+    if (!containerRef.current) return
 
-    const id = setInterval(() => {
-      if (!isPausedRef.current) {
-        setActiveIndex((i) => (i + 1) % items.length)
-      }
-    }, 4200)
+    computeLayout()
+    const { w, h, offsetLeft, offsetTop } = layoutRef.current
+    const [active, ...rest] = orderRef.current
+    const rm = prefersReducedMotion()
 
-    return () => clearInterval(id)
-  }, [activeIndex, items.length])
+    // Cover is visible (white overlay hides everything during setup)
+    gsap.set(coverRef.current, { x: 0 })
 
-  // ── Hover/focus pause handlers ──────────────────────────────────────────────
-  const pauseCarousel = useCallback(() => {
-    isPausedRef.current = true
+    // Hero card: full container size
+    gsap.set(cardRefs.current[active], { x: 0, y: 0, width: w, height: h, zIndex: 20, borderRadius: 0 })
+    gsap.set(cardQueueContentRefs.current[active], { x: 0, y: 0, opacity: 0 })
+
+    // Queue cards: staggered off-screen right (400px beyond offsetLeft)
+    rest.forEach((i, index) => {
+      gsap.set(cardRefs.current[i], {
+        x: offsetLeft + 400 + index * (CARD_W + GAP),
+        y: offsetTop, width: CARD_W, height: CARD_H, zIndex: 30, borderRadius: 10,
+      })
+      gsap.set(cardQueueContentRefs.current[i], {
+        x: offsetLeft + 400 + index * (CARD_W + GAP),
+        y: offsetTop + CARD_H - 100, zIndex: 40, opacity: 1,
+      })
+    })
+
+    // Details panels: hidden (active panel also starts off-screen left for the entrance slide)
+    gsap.set(detailsEvenRef.current, { opacity: 0, x: -200, zIndex: 22 })
+    gsap.set(detailsOddRef.current, { opacity: 0, zIndex: 12 })
+    // Pre-set inactive (odd) panel text to off-below state
+    if (detailsOddRef.current) {
+      gsap.set(detailsOddRef.current.querySelectorAll('.svc-place, .svc-title'), { y: 100 })
+      gsap.set(detailsOddRef.current.querySelector('.svc-desc'), { y: 50 })
+      gsap.set(detailsOddRef.current.querySelector('.svc-cta'), { y: 60 })
+    }
+
+    // Progress bar initial position (1/n filled)
+    gsap.set(progressFgRef.current, { width: PROGRESS_W / n })
+
+    // Pagination: off-screen below (will slide up)
+    gsap.set(paginationRef.current, {
+      top: offsetTop + 330, left: offsetLeft,
+      y: 200, opacity: 0, zIndex: 60,
+    })
+
+    // Indicator: off-screen left
+    gsap.set(indicatorRef.current, { x: -w })
+
+    if (rm) {
+      // Reduced motion: instant layout, no animations, no auto-advance
+      gsap.set(coverRef.current, { x: w + 400 })
+      rest.forEach((i, index) => {
+        gsap.set(cardRefs.current[i], { x: offsetLeft + index * (CARD_W + GAP) })
+        gsap.set(cardQueueContentRefs.current[i], { x: offsetLeft + index * (CARD_W + GAP) })
+      })
+      gsap.set(paginationRef.current, { y: 0, opacity: 1 })
+      gsap.set(detailsEvenRef.current, { opacity: 1, x: 0 })
+      return
+    }
+
+    const startDelay = 0.6
+
+    // Slide cover out to reveal
+    gsap.to(coverRef.current, {
+      x: w + 400, delay: 0.5, ease: EASE,
+      onComplete: () => { if (mountedRef.current) startLoop() },
+    })
+
+    // Stagger queue cards into view from right
+    rest.forEach((i, index) => {
+      gsap.to(cardRefs.current[i], {
+        x: offsetLeft + index * (CARD_W + GAP), zIndex: 30,
+        delay: startDelay + 0.05 * index, ease: EASE,
+      })
+      gsap.to(cardQueueContentRefs.current[i], {
+        x: offsetLeft + index * (CARD_W + GAP), zIndex: 40,
+        delay: startDelay + 0.05 * index, ease: EASE,
+      })
+    })
+
+    // Slide pagination up
+    gsap.to(paginationRef.current, { y: 0, opacity: 1, ease: EASE, delay: startDelay })
+
+    // Slide active details panel in from left
+    gsap.to(detailsEvenRef.current, { opacity: 1, x: 0, ease: EASE, delay: startDelay })
+
+    return () => {
+      mountedRef.current = false
+      stopLoop()
+      const allTargets = [
+        ...cardRefs.current,
+        ...cardQueueContentRefs.current,
+        detailsEvenRef.current,
+        detailsOddRef.current,
+        indicatorRef.current,
+        paginationRef.current,
+        progressFgRef.current,
+        coverRef.current,
+      ].filter(Boolean) as gsap.TweenTarget[]
+      gsap.killTweensOf(allTargets)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const resumeCarousel = useCallback(() => {
-    isPausedRef.current = false
+  // ── Pause / resume handlers ───────────────────────────────────────────────
+
+  const handleMouseEnter = useCallback(() => { isPausedRef.current = true }, [])
+  const handleMouseLeave = useCallback(() => { isPausedRef.current = false }, [])
+
+  const handleFocus = useCallback((e: React.FocusEvent<HTMLElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+      isPausedRef.current = true
+    }
   }, [])
 
-  const handleBlurOutside = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
-    // Only resume if focus has truly left the carousel root
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
       isPausedRef.current = false
     }
   }, [])
 
-  const handleFocusInside = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
-    // No-op when focus moves between internal elements; only pause when entering from outside
-    if (e.currentTarget.contains(e.relatedTarget as Node | null)) return
-    pauseCarousel()
-  }, [pauseCarousel])
+  const handlePrev = useCallback(() => { stepImpl('prev') }, [stepImpl])
+  const handleNext = useCallback(() => { stepImpl('next') }, [stepImpl])
 
-  // ── Keyboard navigation ─────────────────────────────────────────────────────
-  const handleKeyDownCapture = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault()
-        goPrev()
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault()
-        goNext()
-      }
-    },
-    [goPrev, goNext],
-  )
+  // ── Early return for empty / single-item ─────────────────────────────────
 
-  if (items.length === 0) return null
+  if (n === 0) return null
 
-  const activeItem = items[activeIndex]
+  // ── Details panel render helper ───────────────────────────────────────────
+  // Two panels with identical structure, driven by evenContent / oddContent state.
+  // GSAP controls opacity/position; React controls text content.
 
-  // ── Render helpers ──────────────────────────────────────────────────────────
-
-  /** Full hero card content — used by desktop hero slot and each mobile slide */
-  function renderHeroContent(item: ServiceCategoryCarouselItem, isActive = true) {
+  function renderDetailsPanel(
+    ref: React.RefObject<HTMLDivElement | null>,
+    content: ServiceCategoryCarouselItem,
+    ariaLive?: 'polite',
+  ) {
     return (
-      <div className="relative w-full rounded-2xl overflow-hidden" style={{ minHeight: '55vh', backgroundColor: '#1E1A16' }}>
-        {/* Background image */}
-        {item.imageUrl && (
-          <img
-            src={item.imageUrl}
-            alt={item.name}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(30,26,22,0) 0%, rgba(30,26,22,0.85) 100%)',
-          }}
-        />
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-end h-full p-8 md:p-12" style={{ minHeight: '55vh' }}>
-          {/* Icon with data-active for self-draw CSS trigger */}
-          <div className="svc-carousel-hero" data-active={isActive || undefined}>
-            <span className="inline-block mb-4" style={{ color: '#E2C063' }}>
-              <ServiceIcon name={item.iconKey} className="w-12 h-12" />
-            </span>
+      <div
+        ref={ref}
+        className="absolute pointer-events-none select-none"
+        style={{ left: '60px', top: '180px', maxWidth: '500px', color: '#FAF6F0' }}
+        aria-live={ariaLive}
+      >
+        {/* Place label — inside overflow:hidden container for slide-up reveal */}
+        <div style={{ height: '46px', overflow: 'hidden' }}>
+          <div
+            className="svc-place"
+            style={{ paddingTop: '14px', fontSize: '13px', fontWeight: 500, color: '#A89E8C', display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <span style={{ display: 'inline-block', width: '28px', height: '4px', borderRadius: '99px', backgroundColor: '#A89E8C', flexShrink: 0 }} />
+            {categoryName}
           </div>
+        </div>
 
+        {/* Service name — large, inside overflow:hidden */}
+        <div style={{ height: '88px', overflow: 'hidden', marginTop: '6px' }}>
           <h2
-            className="text-fluid-4xl font-semibold leading-tight mb-3"
-            style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+            className="svc-title"
+            style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontSize: 'clamp(2.25rem, 4.5vw, 3.75rem)',
+              fontWeight: 600,
+              lineHeight: 1.05,
+              color: '#FAF6F0',
+              margin: 0,
+            }}
           >
-            {item.name}
+            {content.name}
           </h2>
+        </div>
 
-          <p
-            className="text-fluid-base max-w-xl leading-relaxed mb-6"
-            style={{ color: '#A89E8C' }}
-          >
-            {item.shortDescription}
-          </p>
+        {/* Icon (title-2 equivalent) — inside overflow:hidden */}
+        <div style={{ height: '52px', overflow: 'hidden', marginTop: '6px' }}>
+          <div className="svc-title" style={{ color: '#E2C063' }}>
+            <ServiceIcon name={content.iconKey} className="w-10 h-10" />
+          </div>
+        </div>
 
-          {item.published && (
+        {/* Description */}
+        <p
+          className="svc-desc"
+          style={{
+            color: '#A89E8C',
+            fontFamily: 'var(--font-cormorant)',
+            fontSize: '1.1rem',
+            lineHeight: 1.65,
+            maxWidth: '440px',
+            marginTop: '18px',
+          }}
+        >
+          {content.shortDescription}
+        </p>
+
+        {/* CTA buttons */}
+        <div
+          className="svc-cta pointer-events-auto"
+          style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}
+        >
+          {content.published && (
             <Link
-              href={`/services/${categorySlug}/${item.slug}`}
-              className="inline-flex items-center gap-2 text-fluid-sm uppercase tracking-widest font-medium transition-opacity hover:opacity-70"
-              style={{ color: '#E2C063' }}
+              href={`/services/${categorySlug}/${content.slug}`}
+              className="inline-flex items-center gap-2 text-sm transition-colors hover:bg-[#E2C063] hover:text-[#1E1A16]"
+              style={{ padding: '8px 20px', border: '1px solid #E2C063', color: '#E2C063' }}
             >
-              View full details
-              <span aria-hidden="true">→</span>
+              View Service →
             </Link>
           )}
+          <Link
+            href="/#contact"
+            className="inline-flex items-center gap-2 text-sm transition-colors hover:border-white hover:text-white"
+            style={{ padding: '8px 20px', border: '1px solid rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.65)' }}
+          >
+            Request Quote
+          </Link>
         </div>
       </div>
     )
   }
 
-  /** Compact queue card — image + icon + name, no description or CTA */
-  function renderQueueCard(item: ServiceCategoryCarouselItem, isActive: boolean, index: number) {
-    return (
-      <button
-        key={item.slug}
-        onClick={() => setActiveIndex(index)}
-        aria-current={isActive ? 'true' : undefined}
-        aria-label={`View ${item.name}`}
-        className="svc-queue-card shrink-0 relative rounded-xl overflow-hidden transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        style={{
-          flex: '0 0 clamp(120px, 22vw, 180px)',
-          aspectRatio: '3/4',
-          backgroundColor: '#1E1A16',
-          border: isActive
-            ? '2px solid #E2C063'
-            : '1px solid rgba(226,192,99,0.2)',
-        }}
-      >
-        {item.imageUrl && (
-          <img
-            src={item.imageUrl}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
-          />
-        )}
-        {/* Gradient */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(30,26,22,0) 30%, rgba(30,26,22,0.9) 100%)',
-          }}
-        />
-        {/* Icon */}
-        <span
-          className="absolute top-3 left-3"
-          style={{ color: isActive ? '#E2C063' : '#A89E8C' }}
-        >
-          <ServiceIcon name={item.iconKey} className="w-6 h-6" />
-        </span>
-        {/* Name */}
-        <span
-          className="absolute bottom-3 left-3 right-3 text-left text-fluid-xs leading-tight"
-          style={{
-            fontFamily: 'var(--font-cormorant)',
-            color: isActive ? '#FAF6F0' : '#A89E8C',
-            fontWeight: 500,
-          }}
-        >
-          {item.name}
-        </span>
-      </button>
-    )
-  }
+  // ── JSX ───────────────────────────────────────────────────────────────────
 
   return (
-    <div
-      ref={rootRef}
+    <section
+      ref={containerRef}
+      className="relative overflow-hidden w-full"
+      style={{ minHeight: '520px' }}
       role="region"
       aria-roledescription="carousel"
-      onMouseEnter={pauseCarousel}
-      onMouseLeave={resumeCarousel}
-      onFocus={handleFocusInside}
-      onBlur={handleBlurOutside}
-      onKeyDownCapture={handleKeyDownCapture}
+      aria-label={`${categoryName} services`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus as React.FocusEventHandler<HTMLElement>}
+      onBlur={handleBlur as React.FocusEventHandler<HTMLElement>}
     >
-      {/* Screen reader live region */}
-      <div aria-live="polite" className="sr-only">
-        {activeItem.name}
-      </div>
+      {/* ── White cover overlay — reveals on load via GSAP slide-out ─────── */}
+      <div ref={coverRef} className="absolute inset-0 z-[100]" style={{ backgroundColor: '#FAF6F0' }} />
 
-      {/* ── Desktop/tablet: hero + queue (≥1024px) ──────────────────────────── */}
-      <div className="hidden lg:flex flex-col gap-6">
-        {/* Hero */}
-        <div className="relative">
-          <div ref={heroContentRef}>
-            {renderHeroContent(activeItem)}
-          </div>
+      {/* ── Golden timer indicator bar ───────────────────────────────────── */}
+      <div ref={indicatorRef} className="absolute top-0 left-0 right-0 z-[60]" style={{ height: '5px', backgroundColor: '#E2C063' }} />
 
-          {/* Prev/next arrows — overlaid on hero */}
-          <div className="absolute bottom-6 right-6 flex gap-2 z-20">
-            <button
-              onClick={goPrev}
-              aria-label="Previous service"
-              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex items-center justify-center text-fluid-xl transition-opacity hover:opacity-80"
-              style={arrowBtnStyle}
-            >
-              ‹
-            </button>
-            <button
-              onClick={goNext}
-              aria-label="Next service"
-              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex items-center justify-center text-fluid-xl transition-opacity hover:opacity-80"
-              style={arrowBtnStyle}
-            >
-              ›
-            </button>
-          </div>
-        </div>
-
-        {/* Queue strip */}
-        <div ref={emblaQueueRef} className="overflow-hidden">
-          <div className="flex gap-3">
-            {items.map((item, i) => renderQueueCard(item, i === activeIndex, i))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Mobile: single-card Embla slider (<1024px) ──────────────────────── */}
-      <div className="lg:hidden">
-        <div ref={emblaMobileRef} className="overflow-hidden">
-          <div className="flex">
-            {items.map((item, i) => (
-              <div
-                key={item.slug}
-                role="group"
-                aria-roledescription="slide"
-                className="min-w-0 shrink-0 grow-0 basis-full"
-              >
-                {renderHeroContent(item, i === activeIndex)}
+      {/* ═══ Desktop carousel (≥1024px) — GSAP controlled ════════════════ */}
+      <div className="hidden lg:block absolute inset-0">
+        {/* All n cards — absolutely positioned; GSAP owns x/y/width/height/zIndex */}
+        {items.map((item, i) => (
+          <div
+            key={item.slug}
+            ref={el => { cardRefs.current[i] = el }}
+            className="absolute overflow-hidden"
+            style={{
+              backgroundColor: '#1E1A16',
+              backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              cursor: 'pointer',
+            }}
+            onClick={() => { if (!animatingRef.current) stepImpl('next') }}
+            role="button"
+            aria-label={`View ${item.name}`}
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') stepImpl('next') }}
+          >
+            {/* Gradient overlay */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: 'linear-gradient(to bottom, rgba(30,26,22,0) 0%, rgba(30,26,22,0.75) 100%)' }}
+            />
+            {/* Icon fallback when no image */}
+            {!item.imageUrl && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div style={{ color: '#E2C063' }}>
+                  <ServiceIcon name={item.iconKey} className="w-24 h-24 opacity-15" />
+                </div>
               </div>
-            ))}
+            )}
+            {/* Queue card text overlay — GSAP positions this; fades out when card becomes hero */}
+            <div
+              ref={el => { cardQueueContentRefs.current[i] = el }}
+              className="absolute"
+              style={{ left: 0, top: 0, paddingLeft: '14px', pointerEvents: 'none' }}
+            >
+              <div style={{ width: '28px', height: '5px', borderRadius: '99px', backgroundColor: 'rgba(255,255,255,0.8)', marginBottom: '7px' }} />
+              <div style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-cormorant)', lineHeight: 1.3 }}>
+                {item.name}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* ── Details panel EVEN ─────────────────────────────────────────── */}
+        {renderDetailsPanel(detailsEvenRef, evenContent, 'polite')}
+
+        {/* ── Details panel ODD ─────────────────────────────────────────── */}
+        {renderDetailsPanel(detailsOddRef, oddContent)}
+
+        {/* ── Pagination: arrows + progress bar + slide counter ─────────── */}
+        <div
+          ref={paginationRef}
+          className="absolute flex items-center gap-3"
+        >
+          <button
+            onClick={handlePrev}
+            aria-label="Previous service"
+            className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
+            style={{ width: '50px', height: '50px', borderRadius: '999px', border: '2px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            onClick={handleNext}
+            aria-label="Next service"
+            className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
+            style={{ width: '50px', height: '50px', borderRadius: '999px', border: '2px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+
+          {/* Progress bar */}
+          <div style={{ marginLeft: '24px', width: `${PROGRESS_W}px`, height: '3px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
+            <div ref={progressFgRef} style={{ height: '100%', backgroundColor: '#E2C063' }} />
+          </div>
+
+          {/* Slide counter */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+            <span ref={slideCounterRef} style={{ color: 'white', fontSize: '28px', fontWeight: 700, lineHeight: 1 }}>1</span>
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>/ {n}</span>
           </div>
         </div>
-
-        {/* Mobile prev/next arrows */}
-        <div className="flex justify-center gap-3 mt-4">
-          <button
-            onClick={goPrev}
-            aria-label="Previous service"
-            className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex items-center justify-center text-fluid-xl transition-opacity hover:opacity-80"
-            style={arrowBtnStyle}
-          >
-            ‹
-          </button>
-          <button
-            onClick={goNext}
-            aria-label="Next service"
-            className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex items-center justify-center text-fluid-xl transition-opacity hover:opacity-80"
-            style={arrowBtnStyle}
-          >
-            ›
-          </button>
-        </div>
       </div>
-    </div>
+
+      {/* ═══ Mobile fallback (<1024px) — CSS scroll-snap, no GSAP ═════════ */}
+      {/* Always in DOM for SEO — all item text is in server-rendered HTML */}
+      <div
+        className="lg:hidden h-full"
+        style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' as never }}
+      >
+        {items.map((item) => (
+          <div
+            key={item.slug}
+            className="shrink-0 relative"
+            style={{
+              width: '100%',
+              minHeight: '480px',
+              scrollSnapAlign: 'start',
+              backgroundColor: '#1E1A16',
+              backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, rgba(30,26,22,0) 25%, rgba(30,26,22,0.88) 100%)' }}
+            />
+            <div className="absolute inset-x-0 bottom-0 p-8">
+              {/* tagline */}
+              <p style={{ color: '#A89E8C', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>
+                {tagline}
+              </p>
+              <div style={{ color: '#E2C063', marginBottom: '10px' }}>
+                <ServiceIcon name={item.iconKey} className="w-9 h-9" />
+              </div>
+              <h2
+                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '2.25rem', fontWeight: 600, color: '#FAF6F0', marginBottom: '12px', lineHeight: 1.1 }}
+              >
+                {item.name}
+              </h2>
+              <p style={{ color: '#A89E8C', fontSize: '1rem', lineHeight: 1.65, marginBottom: '20px', fontFamily: 'var(--font-cormorant)' }}>
+                {item.shortDescription}
+              </p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                {item.published && (
+                  <Link
+                    href={`/services/${categorySlug}/${item.slug}`}
+                    style={{ color: '#E2C063', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid #E2C063', padding: '7px 16px' }}
+                  >
+                    View Service →
+                  </Link>
+                )}
+                <Link
+                  href="/#contact"
+                  style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid rgba(255,255,255,0.3)', padding: '7px 16px' }}
+                >
+                  Request Quote
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
