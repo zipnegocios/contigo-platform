@@ -43,6 +43,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
   // React state — drives JSX content of the two alternating details panels
   const [evenContent, setEvenContent] = useState<ServiceCategoryCarouselItem>(items[0])
   const [oddContent, setOddContent] = useState<ServiceCategoryCarouselItem>(items[Math.min(1, n - 1)])
+  const [mobileIdx, setMobileIdx] = useState(0)
 
   // Layout (computed on mount from actual DOM measurements)
   const layoutRef = useRef({ w: 0, h: 0, offsetLeft: 0, offsetTop: 0 })
@@ -58,6 +59,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
   const detailsOddRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const cardQueueContentRefs = useRef<(HTMLDivElement | null)[]>([])
+  const mobileScrollRef = useRef<HTMLDivElement>(null)
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -119,7 +121,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
 
       // Reset inactive panel slide-up elements (they start off below their overflow containers)
       gsap.set(inactivePanel.querySelectorAll('.svc-place'), { y: 100 })
-      gsap.set(inactivePanel.querySelectorAll('.svc-title'), { y: 100 })
+      gsap.set(inactivePanel.querySelectorAll('.svc-title'), { y: 200 })
       gsap.set(inactivePanel.querySelector('.svc-desc'), { y: 50 })
       gsap.set(inactivePanel.querySelector('.svc-cta'), { y: 60 })
       gsap.set(inactivePanelRef.current, { zIndex: 22 })
@@ -165,7 +167,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
 
           // Reset now-inactive details panel for next use
           gsap.set(activePanel, { opacity: 0, zIndex: 12 })
-          gsap.set(activePanel.querySelectorAll('.svc-place, .svc-title'), { y: 100 })
+          gsap.set(activePanel.querySelectorAll('.svc-place'), { y: 100 })
+          gsap.set(activePanel.querySelectorAll('.svc-title'), { y: 200 })
           gsap.set(activePanel.querySelector('.svc-desc'), { y: 50 })
           gsap.set(activePanel.querySelector('.svc-cta'), { y: 60 })
 
@@ -256,7 +259,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
     gsap.set(detailsOddRef.current, { opacity: 0, zIndex: 12 })
     // Pre-set inactive (odd) panel text to off-below state
     if (detailsOddRef.current) {
-      gsap.set(detailsOddRef.current.querySelectorAll('.svc-place, .svc-title'), { y: 100 })
+      gsap.set(detailsOddRef.current.querySelectorAll('.svc-place'), { y: 100 })
+      gsap.set(detailsOddRef.current.querySelectorAll('.svc-title'), { y: 200 })
       gsap.set(detailsOddRef.current.querySelector('.svc-desc'), { y: 50 })
       gsap.set(detailsOddRef.current.querySelector('.svc-cta'), { y: 60 })
     }
@@ -380,15 +384,15 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
           </div>
         </div>
 
-        {/* Service name — large, inside overflow:hidden */}
-        <div style={{ height: '88px', overflow: 'hidden', marginTop: '6px' }}>
+        {/* Service name — large, inside overflow:hidden (no fixed height — multi-line safe) */}
+        <div style={{ overflow: 'hidden', marginTop: '6px' }}>
           <h2
             className="svc-title"
             style={{
               fontFamily: 'var(--font-cormorant)',
-              fontSize: 'clamp(2.25rem, 4.5vw, 3.75rem)',
+              fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
               fontWeight: 600,
-              lineHeight: 1.05,
+              lineHeight: 1.1,
               color: '#FAF6F0',
               margin: 0,
             }}
@@ -559,65 +563,139 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
         </div>
       </div>
 
-      {/* ═══ Mobile fallback (<1024px) — CSS scroll-snap, no GSAP ═════════ */}
+      {/* ═══ Mobile fallback (<1024px) — CSS scroll-snap + arrows ═══════ */}
       {/* Always in DOM for SEO — all item text is in server-rendered HTML */}
-      <div
-        className="lg:hidden h-full"
-        style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' as never }}
-      >
-        {items.map((item) => (
-          <div
-            key={item.slug}
-            className="shrink-0 relative"
-            style={{
-              width: '100%',
-              minHeight: '480px',
-              scrollSnapAlign: 'start',
-              backgroundColor: '#1E1A16',
-              backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
+      <div className="lg:hidden relative h-full" style={{ minHeight: '520px' }}>
+        {/* Scroll container */}
+        <div
+          ref={mobileScrollRef}
+          className="flex h-full overflow-x-auto"
+          style={{ scrollSnapType: 'x mandatory', scrollBehavior: 'smooth' }}
+          onScroll={e => {
+            const el = e.currentTarget
+            const idx = Math.round(el.scrollLeft / el.offsetWidth)
+            if (idx !== mobileIdx) setMobileIdx(idx)
+          }}
+        >
+          {items.map((item) => (
             <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom, rgba(30,26,22,0) 25%, rgba(30,26,22,0.88) 100%)' }}
-            />
-            <div className="absolute inset-x-0 bottom-0 p-8">
-              {/* tagline */}
-              <p style={{ color: '#A89E8C', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>
-                {tagline}
-              </p>
-              <div style={{ color: '#E2C063', marginBottom: '10px' }}>
-                <ServiceIcon name={item.iconKey} className="w-9 h-9" />
-              </div>
-              <h2
-                style={{ fontFamily: 'var(--font-cormorant)', fontSize: '2.25rem', fontWeight: 600, color: '#FAF6F0', marginBottom: '12px', lineHeight: 1.1 }}
-              >
-                {item.name}
-              </h2>
-              <p style={{ color: '#A89E8C', fontSize: '1rem', lineHeight: 1.65, marginBottom: '20px', fontFamily: 'var(--font-cormorant)' }}>
-                {item.shortDescription}
-              </p>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {item.published && (
+              key={item.slug}
+              className="shrink-0 relative"
+              style={{
+                width: '100%',
+                minHeight: '520px',
+                scrollSnapAlign: 'start',
+                flex: '0 0 100%',
+                backgroundColor: '#1E1A16',
+                backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
+              <div
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(to bottom, rgba(30,26,22,0) 20%, rgba(30,26,22,0.92) 100%)' }}
+              />
+              {/* Content — leaves space at bottom for the nav bar */}
+              <div className="absolute inset-x-0 bottom-20 px-6 pb-2">
+                <p style={{ color: '#A89E8C', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '10px' }}>
+                  {categoryName}
+                </p>
+                <div style={{ color: '#E2C063', marginBottom: '10px' }}>
+                  <ServiceIcon name={item.iconKey} className="w-9 h-9" />
+                </div>
+                <h2 style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(1.5rem, 7vw, 2.25rem)', fontWeight: 600, color: '#FAF6F0', marginBottom: '10px', lineHeight: 1.1 }}>
+                  {item.name}
+                </h2>
+                <p style={{ color: '#A89E8C', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '18px', fontFamily: 'var(--font-cormorant)', maxWidth: '42ch' }}>
+                  {item.shortDescription}
+                </p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {item.published && (
+                    <Link
+                      href={`/services/${categorySlug}/${item.slug}`}
+                      style={{ color: '#E2C063', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid #E2C063', padding: '7px 14px' }}
+                    >
+                      View Service →
+                    </Link>
+                  )}
                   <Link
-                    href={`/services/${categorySlug}/${item.slug}`}
-                    style={{ color: '#E2C063', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid #E2C063', padding: '7px 16px' }}
+                    href="/#contact"
+                    style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid rgba(255,255,255,0.3)', padding: '7px 14px' }}
                   >
-                    View Service →
+                    Request Quote
                   </Link>
-                )}
-                <Link
-                  href="/#contact"
-                  style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid rgba(255,255,255,0.3)', padding: '7px 16px' }}
-                >
-                  Request Quote
-                </Link>
+                </div>
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* Navigation bar: prev / dots / next */}
+        <div
+          className="absolute bottom-0 inset-x-0 z-10 flex items-center justify-between px-5 py-4"
+          style={{ background: 'linear-gradient(to top, rgba(30,26,22,0.85) 0%, transparent 100%)' }}
+        >
+          <button
+            aria-label="Previous service"
+            onClick={() => {
+              const next = Math.max(0, mobileIdx - 1)
+              setMobileIdx(next)
+              mobileScrollRef.current?.scrollTo({ left: next * (mobileScrollRef.current.offsetWidth), behavior: 'smooth' })
+            }}
+            className="flex items-center justify-center shrink-0 transition-colors hover:border-white disabled:opacity-30"
+            disabled={mobileIdx === 0}
+            style={{ width: '42px', height: '42px', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.45)', color: 'rgba(255,255,255,0.8)' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+
+          {/* Dot / pill indicators */}
+          <div className="flex items-center gap-[6px]">
+            {n <= 12 ? items.map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Go to service ${i + 1}`}
+                onClick={() => {
+                  setMobileIdx(i)
+                  mobileScrollRef.current?.scrollTo({ left: i * (mobileScrollRef.current.offsetWidth), behavior: 'smooth' })
+                }}
+                style={{
+                  width: i === mobileIdx ? '20px' : '6px',
+                  height: '6px',
+                  borderRadius: '3px',
+                  backgroundColor: i === mobileIdx ? '#E2C063' : 'rgba(255,255,255,0.4)',
+                  transition: 'all 0.25s ease',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                }}
+              />
+            )) : (
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>
+                {mobileIdx + 1} / {n}
+              </span>
+            )}
           </div>
-        ))}
+
+          <button
+            aria-label="Next service"
+            onClick={() => {
+              const next = Math.min(n - 1, mobileIdx + 1)
+              setMobileIdx(next)
+              mobileScrollRef.current?.scrollTo({ left: next * (mobileScrollRef.current.offsetWidth), behavior: 'smooth' })
+            }}
+            className="flex items-center justify-center shrink-0 transition-colors hover:border-white disabled:opacity-30"
+            disabled={mobileIdx === n - 1}
+            style={{ width: '42px', height: '42px', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.45)', color: 'rgba(255,255,255,0.8)' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
   )
