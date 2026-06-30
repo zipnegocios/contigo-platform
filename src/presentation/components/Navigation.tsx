@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Mic, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 import { useLogoMorphContext } from '@/presentation/providers/LogoMorphProvider'
 
@@ -13,12 +13,7 @@ const NAV_ITEMS = [
   { label: 'Contact', id: 'contact' },
 ] as const
 
-interface NavigationProps {
-  onVoiceSearch: () => void
-  isListening: boolean
-}
-
-export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
+export function Navigation() {
   const navRef = useRef<HTMLElement>(null)
   const context = useLogoMorphContext()
   const [scrolled, setScrolled] = useState(false)
@@ -136,25 +131,6 @@ export function Navigation({ onVoiceSearch, isListening }: NavigationProps) {
             >
               Get a Quote
             </Button>
-
-            {/* Voice search button */}
-            <button
-              onClick={onVoiceSearch}
-              className="relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-all duration-500"
-              style={{
-                color: scrolled ? '#0d3c4c' : 'rgba(255, 255, 255, 0.8)',
-                border: `1px solid ${scrolled ? 'rgba(13, 60, 76, 0.2)' : 'rgba(255,255,255,0.3)'}`,
-              }}
-              title="Voice search"
-            >
-              <Mic className="w-[clamp(1.25rem,1.8vw,1.5rem)] h-[clamp(1.25rem,1.8vw,1.5rem)] transition-all duration-500" />
-              {isListening && (
-                <span
-                  className="absolute inset-0 rounded-full voice-pulse"
-                  style={{ border: '2px solid var(--contigo-primary)' }}
-                />
-              )}
-            </button>
 
             {/* Mobile hamburger */}
             <button

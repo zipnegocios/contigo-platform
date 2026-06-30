@@ -1,5 +1,5 @@
 import nextDynamic from 'next/dynamic'
-import { VoiceSearchNav } from '@/presentation/components/VoiceSearchNav'
+import { Navigation } from '@/presentation/components/Navigation'
 import HeroSection from '@/presentation/sections/HeroSection'
 import BrandBar from '@/presentation/sections/BrandBar'
 import ServicesSection from '@/presentation/sections/ServicesSection'
@@ -50,7 +50,7 @@ export default async function HomePage() {
 
   return (
     <MarketingPageClient>
-      <VoiceSearchNav />
+      <Navigation />
 
       <main className="relative">
         <HeroSection />

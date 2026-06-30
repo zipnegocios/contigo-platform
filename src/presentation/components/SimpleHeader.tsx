@@ -1,11 +1,9 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Mic, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
-import { useVoiceSearch } from '@/presentation/hooks/useVoiceSearch'
 import { logoPaths, LOGO_VIEWBOX } from './logo-paths'
 import { ContactInfoModal } from './ContactInfoModal'
 import { QuoteFormModal } from './QuoteFormModal'
@@ -17,7 +15,6 @@ const NAV_LINKS = [
 ]
 
 export function SimpleHeader() {
-  const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [contactModalOpen, setContactModalOpen] = useState(false)
@@ -32,25 +29,6 @@ export function SimpleHeader() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const handleTranscript = useCallback(
-    (transcript: string) => {
-      if (transcript.includes('service') || transcript.includes('build')) {
-        router.push('/services')
-      } else if (transcript.includes('project') || transcript.includes('work')) {
-        router.push('/projects')
-      } else if (transcript.includes('about') || transcript.includes('heritage')) {
-        router.push('/about')
-      } else if (transcript.includes('contact')) {
-        setContactModalOpen(true)
-      } else {
-        setQuoteModalOpen(true)
-      }
-    },
-    [router]
-  )
-
-  const { isListening, startListening } = useVoiceSearch(handleTranscript)
 
   return (
     <>
@@ -131,25 +109,6 @@ export function SimpleHeader() {
             >
               Request a Quote
             </Button>
-
-            {/* Voice search button */}
-            <button
-              onClick={startListening}
-              className="relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-all duration-500"
-              style={{
-                color: scrolled ? '#0d3c4c' : 'rgba(255, 255, 255, 0.8)',
-                border: `1px solid ${scrolled ? 'rgba(13, 60, 76, 0.2)' : 'rgba(255,255,255,0.3)'}`,
-              }}
-              title="Voice search"
-            >
-              <Mic className="w-[clamp(1.25rem,1.8vw,1.5rem)] h-[clamp(1.25rem,1.8vw,1.5rem)] transition-all duration-500" />
-              {isListening && (
-                <span
-                  className="absolute inset-0 rounded-full voice-pulse"
-                  style={{ border: '2px solid var(--contigo-primary)' }}
-                />
-              )}
-            </button>
 
             {/* Mobile hamburger */}
             <button
