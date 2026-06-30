@@ -1,4 +1,4 @@
-export type CategoryType = 'project' | 'service'
+export type CategoryType = 'project' | 'service' | 'shared'
 
 export interface FlatCategory {
   id: string

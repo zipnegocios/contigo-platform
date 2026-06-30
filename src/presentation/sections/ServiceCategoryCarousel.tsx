@@ -448,16 +448,14 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
           >
             Request a Quote
           </Link>
-          {/* Secondary: View Detail — ghost, only when published */}
-          {content.published && (
-            <Link
-              href={`/services/${categorySlug}/${content.slug}`}
-              className="inline-flex items-center gap-2 text-sm transition-all hover:bg-white/10 active:scale-95"
-              style={{ padding: '11px 24px', border: '1.5px solid rgba(255,255,255,0.55)', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
-            >
-              View Detail →
-            </Link>
-          )}
+          {/* Secondary: View Detail — always visible */}
+          <Link
+            href={`/services/${categorySlug}/${content.slug}`}
+            className="inline-flex items-center gap-2 text-sm transition-all hover:bg-white/10 active:scale-95"
+            style={{ padding: '11px 24px', border: '1.5px solid rgba(255,255,255,0.55)', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
+          >
+            View Detail →
+          </Link>
         </div>
       </div>
     )
@@ -702,15 +700,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
                   >
                     Request a Quote
                   </Link>
-                  {/* Secondary CTA: ghost, only when published */}
-                  {item.published && (
-                    <Link
-                      href={`/services/${categorySlug}/${item.slug}`}
-                      style={{ color: '#FFFFFF', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1.5px solid rgba(255,255,255,0.5)', padding: '10px 18px' }}
-                    >
-                      View Detail →
-                    </Link>
-                  )}
+                  {/* Secondary CTA: always visible */}
+                  <Link
+                    href={`/services/${categorySlug}/${item.slug}`}
+                    style={{ color: '#FFFFFF', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1.5px solid rgba(255,255,255,0.5)', padding: '10px 18px' }}
+                  >
+                    View Detail →
+                  </Link>
                 </div>
               </div>
             </div>

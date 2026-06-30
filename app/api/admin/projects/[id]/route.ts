@@ -1,5 +1,6 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { Project } from '@/core/entities/Project'
 import { renamePrefix } from '@/infrastructure/services/R2StorageService'
 import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
@@ -87,12 +88,23 @@ export async function PATCH(
       }))
     }
 
+    // When categoryId changes, resolve the category name to keep the
+    // legacy varchar column in sync with the FK.
+    const newCategoryId: string | null =
+      body.categoryId !== undefined ? body.categoryId : project.categoryId
+    let newCategoryName: string = body.category || project.category
+    if (body.categoryId && body.categoryId !== project.categoryId) {
+      const catRepo = new DrizzleCategoryRepository()
+      const cat = await catRepo.findById(body.categoryId)
+      if (cat) newCategoryName = cat.name
+    }
+
     const updatedProject = Project.reconstruct({
       id: project.id,
       slug: newSlug,
       title: newTitle,
-      category: body.category || project.category,
-      categoryId: body.categoryId !== undefined ? body.categoryId : project.categoryId,
+      category: newCategoryName,
+      categoryId: newCategoryId,
       description: body.description || project.description,
       location: body.location || project.location,
       completedDate: body.completedDate ? new Date(body.completedDate) : project.completedDate,

@@ -5,10 +5,17 @@ export default async function CategoriesPage() {
   const repo = new DrizzleCategoryRepository()
   // Admin Category Manager must keep showing inactive categories so they
   // can be reviewed/reactivated, not just the default active-only set.
-  const [serviceFlat, projectFlat] = await Promise.all([
+  const [serviceFlat, projectFlat, sharedFlatMapped] = await Promise.all([
     repo.findFlat('service', false),
     repo.findFlat('project', false),
+    repo.findFlat('shared', false),
   ])
+
+  // Remove shared categories from the service/project flat lists so they
+  // don't appear twice (findFlat now includes shared in both queries).
+  const sharedIds = new Set(sharedFlatMapped.map((c) => c.id))
+  const serviceOnly = serviceFlat.filter((c) => !sharedIds.has(c.id))
+  const projectOnly = projectFlat.filter((c) => !sharedIds.has(c.id))
 
   return (
     <div className="space-y-6">
@@ -24,7 +31,11 @@ export default async function CategoriesPage() {
         </p>
       </div>
 
-      <CategoryManagerClient serviceFlat={serviceFlat} projectFlat={projectFlat} />
+      <CategoryManagerClient
+        sharedFlat={sharedFlatMapped}
+        serviceFlat={serviceOnly}
+        projectFlat={projectOnly}
+      />
     </div>
   )
 }

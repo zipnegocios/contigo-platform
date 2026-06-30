@@ -184,8 +184,9 @@ export function CategoryFormModal({
                 className="w-full px-3 py-2 rounded-lg text-fluid-sm capitalize outline-none"
                 style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
               >
-                <option value="service">Service</option>
-                <option value="project">Project</option>
+                <option value="shared">Shared (Main)</option>
+                <option value="service">Service-Only</option>
+                <option value="project">Project-Only</option>
               </select>
             ) : (
               <input

@@ -6,7 +6,7 @@ import type { CategoryType } from '@/types/category'
 
 const CreateSchema = z.object({
   name: z.string().min(1).max(255),
-  type: z.enum(['project', 'service']),
+  type: z.enum(['project', 'service', 'shared']),
   parentId: z.string().uuid().nullable().optional(),
   description: z.string().nullable().optional(),
   icon: z.string().max(100).nullable().optional(),

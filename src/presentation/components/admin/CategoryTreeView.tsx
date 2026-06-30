@@ -32,8 +32,9 @@ interface CategoryTreeViewProps {
 }
 
 const GROUP_LABELS: Record<CategoryType, string> = {
-  service: 'Services',
-  project: 'Projects',
+  shared: 'Main Categories (Services & Projects)',
+  service: 'Service-Only',
+  project: 'Project-Only',
 }
 
 function GroupSection({

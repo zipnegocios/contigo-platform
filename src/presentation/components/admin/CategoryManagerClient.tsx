@@ -5,6 +5,7 @@ import type { CategoryType, FlatCategory } from '@/types/category'
 import { CategoryTreeView } from './CategoryTreeView'
 
 interface CategoryManagerClientProps {
+  sharedFlat: FlatCategory[]
   serviceFlat: FlatCategory[]
   projectFlat: FlatCategory[]
 }
@@ -13,21 +14,23 @@ type CategoryFilter = 'all' | CategoryType
 
 const FILTERS: Array<{ value: CategoryFilter; label: string }> = [
   { value: 'all', label: 'All' },
+  { value: 'shared', label: 'Main' },
   { value: 'service', label: 'Services' },
   { value: 'project', label: 'Projects' },
 ]
 
-export function CategoryManagerClient({ serviceFlat, projectFlat }: CategoryManagerClientProps) {
+export function CategoryManagerClient({ sharedFlat, serviceFlat, projectFlat }: CategoryManagerClientProps) {
   const [filter, setFilter] = useState<CategoryFilter>('all')
 
   const groups = useMemo(() => {
-    const all = [
-      { type: 'service' as const, flat: serviceFlat },
-      { type: 'project' as const, flat: projectFlat },
-    ]
-    if (filter === 'all') return all
-    return all.filter((g) => g.type === filter)
-  }, [filter, serviceFlat, projectFlat])
+    const shared = { type: 'shared' as const, flat: sharedFlat }
+    const service = { type: 'service' as const, flat: serviceFlat }
+    const project = { type: 'project' as const, flat: projectFlat }
+    if (filter === 'all') return [shared, service, project]
+    if (filter === 'shared') return [shared]
+    if (filter === 'service') return [shared, service]
+    return [shared, project]
+  }, [filter, sharedFlat, serviceFlat, projectFlat])
 
   return (
     <div>

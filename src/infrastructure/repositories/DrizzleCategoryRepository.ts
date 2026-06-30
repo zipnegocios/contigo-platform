@@ -1,4 +1,4 @@
-import { eq, asc, and } from 'drizzle-orm'
+import { eq, asc, and, or } from 'drizzle-orm'
 import { db } from '../db/client'
 import { categories } from '../db/schema'
 import { Category } from '@/core/entities/Category'
@@ -43,8 +43,14 @@ function mapToEntity(row: CategoryRow): Category {
 
 export class DrizzleCategoryRepository implements ICategoryRepository {
   async findAll(type?: CategoryType, activeOnly: boolean = true): Promise<Category[]> {
+    // When filtering by 'project' or 'service', also include 'shared' categories.
+    const typeCondition = type
+      ? type === 'shared'
+        ? eq(categories.type, 'shared')
+        : or(eq(categories.type, type), eq(categories.type, 'shared'))
+      : undefined
     const conditions = [
-      type ? eq(categories.type, type) : undefined,
+      typeCondition,
       activeOnly ? eq(categories.isActive, true) : undefined,
     ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
@@ -57,8 +63,12 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
   }
 
   async findFlat(type: CategoryType, activeOnly: boolean = true): Promise<FlatCategory[]> {
+    // When filtering by 'project' or 'service', also include 'shared' categories.
+    const typeCondition = type === 'shared'
+      ? eq(categories.type, 'shared')
+      : or(eq(categories.type, type), eq(categories.type, 'shared'))
     const conditions = [
-      eq(categories.type, type),
+      typeCondition,
       activeOnly ? eq(categories.isActive, true) : undefined,
     ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
@@ -76,8 +86,9 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
   }
 
   async findBySlug(slug: string, type?: CategoryType): Promise<Category | null> {
+    // When filtering by a specific type, also accept 'shared' categories.
     const condition = type
-      ? and(eq(categories.slug, slug), eq(categories.type, type))
+      ? and(eq(categories.slug, slug), or(eq(categories.type, type), eq(categories.type, 'shared')))
       : eq(categories.slug, slug)
     const rows = await db.select().from(categories).where(condition).limit(1)
     return rows.length ? mapToEntity(rows[0]) : null

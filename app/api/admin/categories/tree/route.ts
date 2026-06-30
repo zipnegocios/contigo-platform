@@ -13,8 +13,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const type = (searchParams.get('type') ?? 'project') as CategoryType
 
-    if (type !== 'project' && type !== 'service') {
-      return Response.json({ error: 'type must be project or service' }, { status: 400 })
+    if (type !== 'project' && type !== 'service' && type !== 'shared') {
+      return Response.json({ error: 'type must be project, service, or shared' }, { status: 400 })
     }
 
     const repo = new DrizzleCategoryRepository()

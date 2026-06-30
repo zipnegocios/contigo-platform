@@ -164,7 +164,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
 
                 <div className="mt-2">
                   <HierarchicalCategorySelect
-                    type="service"
+                    type="project"
                     value={formData.categoryId}
                     onChange={(id) => setFormData({ ...formData, categoryId: id })}
                     label="Category"
