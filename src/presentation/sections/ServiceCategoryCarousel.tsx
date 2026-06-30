@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import gsap from 'gsap'
 import { ServiceIcon } from '@/presentation/components/ServiceIcons'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
+import { SERVICE_ROOT_SLUGS, SERVICE_ROOT_NAMES } from '@/presentation/data/serviceCategoryMeta'
 
 export interface ServiceCategoryCarouselItem {
   slug: string
@@ -31,6 +33,7 @@ const EASE = 'sine.inOut'
 
 export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tagline }: Props) {
   const n = items.length
+  const pathname = usePathname()
 
   // Mutable rotation refs — no re-render during animation
   const orderRef = useRef<number[]>(items.map((_, i) => i))
@@ -370,39 +373,40 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
       <div
         ref={ref}
         className="absolute pointer-events-none select-none"
-        style={{ left: '60px', top: '180px', maxWidth: '500px', color: '#FAF6F0' }}
+        style={{ left: '60px', top: '220px', maxWidth: '520px', color: '#FAF6F0' }}
         aria-live={ariaLive}
       >
-        {/* Place label — inside overflow:hidden container for slide-up reveal */}
+        {/* Place label */}
         <div style={{ height: '46px', overflow: 'hidden' }}>
           <div
             className="svc-place"
-            style={{ paddingTop: '14px', fontSize: '13px', fontWeight: 500, color: '#A89E8C', display: 'flex', alignItems: 'center', gap: '10px' }}
+            style={{ paddingTop: '14px', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.12em' }}
           >
-            <span style={{ display: 'inline-block', width: '28px', height: '4px', borderRadius: '99px', backgroundColor: '#A89E8C', flexShrink: 0 }} />
+            <span style={{ display: 'inline-block', width: '24px', height: '2px', borderRadius: '99px', backgroundColor: '#E2C063', flexShrink: 0 }} />
             {categoryName}
           </div>
         </div>
 
-        {/* Service name — large, inside overflow:hidden (no fixed height — multi-line safe) */}
+        {/* Service name */}
         <div style={{ overflow: 'hidden', marginTop: '6px' }}>
           <h2
             className="svc-title"
             style={{
               fontFamily: 'var(--font-cormorant)',
-              fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
+              fontSize: 'clamp(1.75rem, 3.5vw, 3.5rem)',
               fontWeight: 600,
-              lineHeight: 1.1,
-              color: '#FAF6F0',
+              lineHeight: 1.08,
+              color: '#FFFFFF',
               margin: 0,
+              textShadow: '0 2px 20px rgba(0,0,0,0.4)',
             }}
           >
             {content.name}
           </h2>
         </div>
 
-        {/* Icon (title-2 equivalent) — inside overflow:hidden */}
-        <div style={{ height: '52px', overflow: 'hidden', marginTop: '6px' }}>
+        {/* Icon */}
+        <div style={{ height: '52px', overflow: 'hidden', marginTop: '10px' }}>
           <div className="svc-title" style={{ color: '#E2C063' }}>
             <ServiceIcon name={content.iconKey} className="w-10 h-10" />
           </div>
@@ -412,12 +416,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
         <p
           className="svc-desc"
           style={{
-            color: '#A89E8C',
+            color: 'rgba(255,255,255,0.82)',
             fontFamily: 'var(--font-cormorant)',
-            fontSize: '1.1rem',
-            lineHeight: 1.65,
-            maxWidth: '440px',
-            marginTop: '18px',
+            fontSize: '1.15rem',
+            lineHeight: 1.6,
+            maxWidth: '420px',
+            marginTop: '16px',
+            textShadow: '0 1px 8px rgba(0,0,0,0.5)',
           }}
         >
           {content.shortDescription}
@@ -426,24 +431,26 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
         {/* CTA buttons */}
         <div
           className="svc-cta pointer-events-auto"
-          style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}
+          style={{ marginTop: '28px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}
         >
+          {/* Primary: Request a Quote — always visible, solid gold */}
+          <Link
+            href="/#contact"
+            className="inline-flex items-center gap-2 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
+            style={{ padding: '11px 24px', backgroundColor: '#E2C063', color: '#1E1A16', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
+          >
+            Request a Quote
+          </Link>
+          {/* Secondary: View Detail — ghost, only when published */}
           {content.published && (
             <Link
               href={`/services/${categorySlug}/${content.slug}`}
-              className="inline-flex items-center gap-2 text-sm transition-colors hover:bg-[#E2C063] hover:text-[#1E1A16]"
-              style={{ padding: '8px 20px', border: '1px solid #E2C063', color: '#E2C063' }}
+              className="inline-flex items-center gap-2 text-sm transition-all hover:bg-white/10 active:scale-95"
+              style={{ padding: '11px 24px', border: '1.5px solid rgba(255,255,255,0.55)', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
             >
-              View Service →
+              View Detail →
             </Link>
           )}
-          <Link
-            href="/#contact"
-            className="inline-flex items-center gap-2 text-sm transition-colors hover:border-white hover:text-white"
-            style={{ padding: '8px 20px', border: '1px solid rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.65)' }}
-          >
-            Request Quote
-          </Link>
         </div>
       </div>
     )
@@ -455,7 +462,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
     <section
       ref={containerRef}
       className="relative overflow-hidden w-full"
-      style={{ minHeight: '520px' }}
+      style={{ height: '100dvh', minHeight: '520px' }}
       role="region"
       aria-roledescription="carousel"
       aria-label={`${categoryName} services`}
@@ -472,6 +479,48 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
 
       {/* ═══ Desktop carousel (≥1024px) — GSAP controlled ════════════════ */}
       <div className="hidden lg:block absolute inset-0">
+        {/* Left-side gradient — always on, makes details panel text readable */}
+        <div
+          className="absolute inset-0 pointer-events-none z-[16]"
+          style={{ background: 'linear-gradient(105deg, rgba(12,9,6,0.82) 0%, rgba(12,9,6,0.55) 38%, transparent 62%)' }}
+        />
+
+        {/* Top gradient — for category tabs readability */}
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none z-[16]"
+          style={{ height: '180px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)' }}
+        />
+
+        {/* ── Category tabs — overlaid inside the carousel ────────────── */}
+        <nav
+          className="absolute z-[55] flex flex-wrap gap-2"
+          style={{ top: '88px', left: '60px' }}
+          aria-label="Service categories"
+        >
+          {SERVICE_ROOT_SLUGS.map((slug) => {
+            const isActive = slug === categorySlug
+            return (
+              <Link
+                key={slug}
+                href={`/services/${slug}`}
+                aria-current={isActive ? 'page' : undefined}
+                className="text-xs uppercase tracking-widest px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm"
+                style={
+                  isActive
+                    ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
+                    : {
+                        border: '1px solid rgba(255,255,255,0.35)',
+                        color: 'rgba(255,255,255,0.8)',
+                        backgroundColor: 'rgba(0,0,0,0.25)',
+                      }
+                }
+              >
+                {SERVICE_ROOT_NAMES[slug]}
+              </Link>
+            )
+          })}
+        </nav>
+
         {/* All n cards — absolutely positioned; GSAP owns x/y/width/height/zIndex */}
         {items.map((item, i) => (
           <div
@@ -491,10 +540,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
             tabIndex={0}
             onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') stepImpl('next') }}
           >
-            {/* Gradient overlay */}
+            {/* Gradient overlay — bottom fade */}
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, rgba(30,26,22,0) 0%, rgba(30,26,22,0.75) 100%)' }}
+              style={{ background: 'linear-gradient(to bottom, rgba(20,16,12,0) 30%, rgba(20,16,12,0.7) 100%)' }}
             />
             {/* Icon fallback when no image */}
             {!item.imageUrl && (
@@ -565,7 +614,26 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
 
       {/* ═══ Mobile fallback (<1024px) — CSS scroll-snap + arrows ═══════ */}
       {/* Always in DOM for SEO — all item text is in server-rendered HTML */}
-      <div className="lg:hidden relative h-full" style={{ minHeight: '520px' }}>
+      <div className="lg:hidden relative h-full" style={{ height: '100dvh', minHeight: '520px' }}>
+        {/* Top gradient + category tabs overlay */}
+        <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
+             style={{ height: '160px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
+        <nav className="absolute z-30 flex flex-wrap gap-2 px-4 pointer-events-auto" style={{ top: '84px' }} aria-label="Service categories">
+          {SERVICE_ROOT_SLUGS.map((slug) => {
+            const isActive = slug === categorySlug
+            return (
+              <Link key={slug} href={`/services/${slug}`} aria-current={isActive ? 'page' : undefined}
+                    className="text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full transition-all backdrop-blur-sm"
+                    style={isActive
+                      ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
+                      : { border: '1px solid rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.85)', backgroundColor: 'rgba(0,0,0,0.3)' }
+                    }>
+                {SERVICE_ROOT_NAMES[slug]}
+              </Link>
+            )
+          })}
+        </nav>
+
         {/* Scroll container */}
         <div
           ref={mobileScrollRef}
@@ -592,39 +660,42 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
                 backgroundPosition: 'center',
               }}
             >
+              {/* Bottom gradient for content readability */}
               <div
                 className="absolute inset-0"
-                style={{ background: 'linear-gradient(to bottom, rgba(30,26,22,0) 20%, rgba(30,26,22,0.92) 100%)' }}
+                style={{ background: 'linear-gradient(to bottom, rgba(10,8,5,0) 25%, rgba(10,8,5,0.95) 85%, rgba(10,8,5,1) 100%)' }}
               />
               {/* Content — leaves space at bottom for the nav bar */}
               <div className="absolute inset-x-0 bottom-20 px-6 pb-2">
-                <p style={{ color: '#A89E8C', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '10px' }}>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px', fontWeight: 600 }}>
                   {categoryName}
                 </p>
                 <div style={{ color: '#E2C063', marginBottom: '10px' }}>
                   <ServiceIcon name={item.iconKey} className="w-9 h-9" />
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(1.5rem, 7vw, 2.25rem)', fontWeight: 600, color: '#FAF6F0', marginBottom: '10px', lineHeight: 1.1 }}>
+                <h2 style={{ fontFamily: 'var(--font-cormorant)', fontSize: 'clamp(1.75rem, 7vw, 2.5rem)', fontWeight: 600, color: '#FFFFFF', marginBottom: '10px', lineHeight: 1.08 }}>
                   {item.name}
                 </h2>
-                <p style={{ color: '#A89E8C', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '18px', fontFamily: 'var(--font-cormorant)', maxWidth: '42ch' }}>
+                <p style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '20px', fontFamily: 'var(--font-cormorant)', maxWidth: '42ch' }}>
                   {item.shortDescription}
                 </p>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {/* Primary CTA: solid gold, always visible */}
+                  <Link
+                    href="/#contact"
+                    style={{ backgroundColor: '#E2C063', color: '#1E1A16', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 18px' }}
+                  >
+                    Request a Quote
+                  </Link>
+                  {/* Secondary CTA: ghost, only when published */}
                   {item.published && (
                     <Link
                       href={`/services/${categorySlug}/${item.slug}`}
-                      style={{ color: '#E2C063', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid #E2C063', padding: '7px 14px' }}
+                      style={{ color: '#FFFFFF', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1.5px solid rgba(255,255,255,0.5)', padding: '10px 18px' }}
                     >
-                      View Service →
+                      View Detail →
                     </Link>
                   )}
-                  <Link
-                    href="/#contact"
-                    style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid rgba(255,255,255,0.3)', padding: '7px 14px' }}
-                  >
-                    Request Quote
-                  </Link>
                 </div>
               </div>
             </div>
