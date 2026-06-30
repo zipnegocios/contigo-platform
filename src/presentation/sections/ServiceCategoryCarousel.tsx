@@ -63,6 +63,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const cardQueueContentRefs = useRef<(HTMLDivElement | null)[]>([])
   const mobileScrollRef = useRef<HTMLDivElement>(null)
+  const desktopTabsRef = useRef<HTMLElement>(null)
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -78,6 +79,12 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
     const offsetLeft = Math.max(0, w - 830)
     const offsetTop = Math.max(0, h - 430)
     layoutRef.current = { w, h, offsetLeft, offsetTop }
+
+    // Position desktop tabs just above the queue cards row
+    if (desktopTabsRef.current) {
+      desktopTabsRef.current.style.left = `${offsetLeft}px`
+      desktopTabsRef.current.style.top = `${offsetTop - 52}px`
+    }
   }
 
   function animPromise(target: gsap.TweenTarget, duration: number, props: gsap.TweenVars): Promise<void> {
@@ -485,16 +492,17 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
           style={{ background: 'linear-gradient(105deg, rgba(12,9,6,0.82) 0%, rgba(12,9,6,0.55) 38%, transparent 62%)' }}
         />
 
-        {/* Top gradient — for category tabs readability */}
+        {/* Bottom gradient — fades toward queue card row */}
         <div
-          className="absolute top-0 left-0 right-0 pointer-events-none z-[16]"
-          style={{ height: '180px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)' }}
+          className="absolute bottom-0 left-0 right-0 pointer-events-none z-[16]"
+          style={{ height: '200px', background: 'linear-gradient(to top, rgba(8,6,4,0.65) 0%, transparent 100%)' }}
         />
 
-        {/* ── Category tabs — overlaid inside the carousel ────────────── */}
+        {/* ── Category tabs — positioned above queue cards by computeLayout() ── */}
         <nav
+          ref={desktopTabsRef as React.RefObject<HTMLDivElement>}
           className="absolute z-[55] flex flex-wrap gap-2"
-          style={{ top: '88px', left: '60px' }}
+          style={{ top: '0px', left: '0px' }}
           aria-label="Service categories"
         >
           {SERVICE_ROOT_SLUGS.map((slug) => {
@@ -615,24 +623,32 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
       {/* ═══ Mobile fallback (<1024px) — CSS scroll-snap + arrows ═══════ */}
       {/* Always in DOM for SEO — all item text is in server-rendered HTML */}
       <div className="lg:hidden relative h-full" style={{ height: '100dvh', minHeight: '520px' }}>
-        {/* Top gradient + category tabs overlay */}
+        {/* Top gradient — only covers header area on mobile */}
         <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
-             style={{ height: '160px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%)' }} />
-        <nav className="absolute z-30 flex flex-wrap gap-2 px-4 pointer-events-auto" style={{ top: '84px' }} aria-label="Service categories">
-          {SERVICE_ROOT_SLUGS.map((slug) => {
-            const isActive = slug === categorySlug
-            return (
-              <Link key={slug} href={`/services/${slug}`} aria-current={isActive ? 'page' : undefined}
-                    className="text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full transition-all backdrop-blur-sm"
-                    style={isActive
-                      ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
-                      : { border: '1px solid rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.85)', backgroundColor: 'rgba(0,0,0,0.3)' }
-                    }>
-                {SERVICE_ROOT_NAMES[slug]}
-              </Link>
-            )
-          })}
-        </nav>
+             style={{ height: '120px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
+
+        {/* Category tabs — single-line horizontal scroll, sits BELOW the mobile header */}
+        <div className="absolute z-30 left-0 right-0 pointer-events-auto" style={{ top: '92px' }}>
+          <nav
+            className="flex gap-2 px-4"
+            style={{ overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as never, flexWrap: 'nowrap' }}
+            aria-label="Service categories"
+          >
+            {SERVICE_ROOT_SLUGS.map((slug) => {
+              const isActive = slug === categorySlug
+              return (
+                <Link key={slug} href={`/services/${slug}`} aria-current={isActive ? 'page' : undefined}
+                      className="shrink-0 text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full transition-all backdrop-blur-sm"
+                      style={isActive
+                        ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
+                        : { border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.9)', backgroundColor: 'rgba(0,0,0,0.35)' }
+                      }>
+                  {SERVICE_ROOT_NAMES[slug]}
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
 
         {/* Scroll container */}
         <div
