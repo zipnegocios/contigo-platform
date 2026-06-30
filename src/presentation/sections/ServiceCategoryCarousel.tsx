@@ -627,10 +627,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
         <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
              style={{ height: '120px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
 
-        {/* Category tabs — vertical column, left-aligned, below the mobile header */}
+        {/* Category filters — vertical column where the antetítulo used to be */}
         <nav
-          className="absolute z-30 flex flex-col items-start gap-2 pointer-events-auto"
-          style={{ top: '100px', left: '20px' }}
+          className="absolute z-30 flex flex-col items-start gap-[6px] pointer-events-auto"
+          style={{ bottom: '360px', left: '20px' }}
           aria-label="Service categories"
         >
           {SERVICE_ROOT_SLUGS.map((slug) => {
@@ -640,10 +640,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
                 key={slug}
                 href={`/services/${slug}`}
                 aria-current={isActive ? 'page' : undefined}
-                className="text-[10px] uppercase tracking-widest px-4 py-2 rounded-full transition-all backdrop-blur-sm whitespace-nowrap"
+                className="text-[9px] uppercase tracking-widest px-3 py-1.5 rounded-full transition-all backdrop-blur-sm whitespace-nowrap"
                 style={isActive
                   ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
-                  : { border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.9)', backgroundColor: 'rgba(0,0,0,0.35)' }
+                  : { border: '1px solid rgba(255,255,255,0.38)', color: 'rgba(255,255,255,0.88)', backgroundColor: 'rgba(0,0,0,0.38)' }
                 }
               >
                 {SERVICE_ROOT_NAMES[slug]}
@@ -685,9 +685,6 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
               />
               {/* Content — leaves space at bottom for the nav bar */}
               <div className="absolute inset-x-0 bottom-20 px-6 pb-2">
-                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px', fontWeight: 600 }}>
-                  {categoryName}
-                </p>
                 <div style={{ color: '#E2C063', marginBottom: '10px' }}>
                   <ServiceIcon name={item.iconKey} className="w-9 h-9" />
                 </div>
@@ -720,11 +717,18 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
           ))}
         </div>
 
-        {/* Navigation bar: prev / dots / next */}
+        {/* Navigation bar: category name + prev / dots / next */}
         <div
-          className="absolute bottom-0 inset-x-0 z-10 flex items-center justify-between px-5 py-4"
-          style={{ background: 'linear-gradient(to top, rgba(30,26,22,0.85) 0%, transparent 100%)' }}
+          className="absolute bottom-0 inset-x-0 z-10 flex flex-col"
+          style={{ background: 'linear-gradient(to top, rgba(20,16,12,0.92) 0%, transparent 100%)' }}
         >
+          {/* Category name centrado sobre los dots */}
+          <div className="text-center pt-3 pb-1">
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.18em', fontWeight: 600 }}>
+              {categoryName}
+            </span>
+          </div>
+          <div className="flex items-center justify-between px-5 pb-4 pt-1">
           <button
             aria-label="Previous service"
             onClick={() => {
@@ -784,8 +788,9 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
-        </div>
-      </div>
+          </div>{/* end arrows row */}
+        </div>{/* end nav bar */}
+      </div>{/* end mobile wrapper */}
     </section>
   )
 }
