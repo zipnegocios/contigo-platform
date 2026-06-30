@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
-import { ServiceCategoryGrid } from '@/presentation/sections/ServiceCategoryGrid'
-import type { ServiceCategoryGridItem } from '@/presentation/sections/ServiceCategoryGrid'
+import { ServiceCategoryCarousel } from '@/presentation/sections/ServiceCategoryCarousel'
+import type { ServiceCategoryCarouselItem } from '@/presentation/sections/ServiceCategoryCarousel'
 import {
   SERVICE_ROOT_SLUGS,
   SERVICE_ROOT_NAMES,
@@ -52,7 +52,7 @@ export default async function ServiceCategoryPage({
 
   let categoryName: string = fallbackName
   let categorySupport: string | null = null
-  let items: ServiceCategoryGridItem[] = SERVICE_FALLBACK_CATALOGUE[category].map((f) => ({
+  let items: ServiceCategoryCarouselItem[] = SERVICE_FALLBACK_CATALOGUE[category].map((f) => ({
     slug: f.slug,
     name: f.name,
     shortDescription: f.shortDescription,
@@ -145,7 +145,7 @@ export default async function ServiceCategoryPage({
             </p>
           </div>
         ) : (
-          <ServiceCategoryGrid key={category} categorySlug={category} items={items} />
+          <ServiceCategoryCarousel key={category} categorySlug={category} items={items} />
         )}
       </div>
     </>

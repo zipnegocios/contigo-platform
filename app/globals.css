@@ -1041,6 +1041,10 @@
   .atelier-copy[data-active] .svc-draw {
     stroke-dashoffset: 0;
   }
+  /* Hero icon self-draw for ServiceCategoryCarousel */
+  .svc-carousel-hero[data-active] .svc-draw {
+    stroke-dashoffset: 0;
+  }
 
   /* Closing — solid dark finale */
   .atelier-closing {
