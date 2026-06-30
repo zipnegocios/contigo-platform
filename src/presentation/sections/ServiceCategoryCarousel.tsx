@@ -627,28 +627,30 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
         <div className="absolute top-0 left-0 right-0 z-20 pointer-events-none"
              style={{ height: '120px', background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
 
-        {/* Category tabs — single-line horizontal scroll, sits BELOW the mobile header */}
-        <div className="absolute z-30 left-0 right-0 pointer-events-auto" style={{ top: '92px' }}>
-          <nav
-            className="flex gap-2 px-4"
-            style={{ overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' as never, flexWrap: 'nowrap' }}
-            aria-label="Service categories"
-          >
-            {SERVICE_ROOT_SLUGS.map((slug) => {
-              const isActive = slug === categorySlug
-              return (
-                <Link key={slug} href={`/services/${slug}`} aria-current={isActive ? 'page' : undefined}
-                      className="shrink-0 text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full transition-all backdrop-blur-sm"
-                      style={isActive
-                        ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
-                        : { border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.9)', backgroundColor: 'rgba(0,0,0,0.35)' }
-                      }>
-                  {SERVICE_ROOT_NAMES[slug]}
-                </Link>
-              )
-            })}
-          </nav>
-        </div>
+        {/* Category tabs — vertical column, left-aligned, below the mobile header */}
+        <nav
+          className="absolute z-30 flex flex-col items-start gap-2 pointer-events-auto"
+          style={{ top: '100px', left: '20px' }}
+          aria-label="Service categories"
+        >
+          {SERVICE_ROOT_SLUGS.map((slug) => {
+            const isActive = slug === categorySlug
+            return (
+              <Link
+                key={slug}
+                href={`/services/${slug}`}
+                aria-current={isActive ? 'page' : undefined}
+                className="text-[10px] uppercase tracking-widest px-4 py-2 rounded-full transition-all backdrop-blur-sm whitespace-nowrap"
+                style={isActive
+                  ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
+                  : { border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.9)', backgroundColor: 'rgba(0,0,0,0.35)' }
+                }
+              >
+                {SERVICE_ROOT_NAMES[slug]}
+              </Link>
+            )
+          })}
+        </nav>
 
         {/* Scroll container */}
         <div
