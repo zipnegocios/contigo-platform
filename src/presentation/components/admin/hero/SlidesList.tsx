@@ -22,12 +22,14 @@ import { HeroImagePair } from './HeroImagePair'
 import { ButtonsManager } from './ButtonsManager'
 
 interface EntityOption { id: string; label: string; slug: string }
+interface FormOption { id: string; name: string; slug: string }
 
 interface Props {
   slides: HeroSlide[]
   onChange: (slides: HeroSlide[]) => void
   serviceOptions: EntityOption[]
   projectOptions: EntityOption[]
+  formOptions: FormOption[]
 }
 
 const inputStyle: React.CSSProperties = {
@@ -91,7 +93,7 @@ function SortableThumb({ slide, index, isActive, onClick, onDelete }: {
   )
 }
 
-export function SlidesList({ slides, onChange, serviceOptions, projectOptions }: Props) {
+export function SlidesList({ slides, onChange, serviceOptions, projectOptions, formOptions }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(slides[0]?.id ?? null)
   const sensors = useSensors(useSensor(PointerSensor))
 
@@ -199,6 +201,7 @@ export function SlidesList({ slides, onChange, serviceOptions, projectOptions }:
               buttons={selectedSlide.buttons}
               serviceOptions={serviceOptions}
               projectOptions={projectOptions}
+              formOptions={formOptions}
               onChange={(btns) => patchSlide({ buttons: btns })}
             />
           </div>

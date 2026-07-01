@@ -1,5 +1,5 @@
 export type ButtonStyle = 'primary' | 'secondary'
-export type ButtonLinkType = 'custom' | 'service' | 'project' | 'scroll'
+export type ButtonLinkType = 'custom' | 'service' | 'project' | 'scroll' | 'form'
 
 export interface HeroButton {
   id: string
@@ -10,6 +10,9 @@ export interface HeroButton {
   scrollTarget?: string
   entityId?: string
   entityLabel?: string
+  formId?: string
+  formSlug?: string
+  formName?: string
 }
 
 export interface HeroSlide {

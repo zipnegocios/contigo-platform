@@ -1,19 +1,22 @@
 import { DrizzleHeroConfigRepository } from '@/infrastructure/repositories/DrizzleHeroConfigRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { DrizzleFormRepository } from '@/infrastructure/repositories/DrizzleFormRepository'
 import { HeroConfigEditor } from '@/presentation/components/admin/hero/HeroConfigEditor'
 
 export const metadata = { title: 'Hero Section — Contigo Admin' }
 
 export default async function HeroPage() {
-  const [config, services, projects] = await Promise.all([
+  const [config, services, projects, forms] = await Promise.all([
     new DrizzleHeroConfigRepository().get(),
     new DrizzleServiceRepository().findAll(),
     new DrizzleProjectRepository().findAll(),
+    new DrizzleFormRepository().findAll(),
   ])
 
   const serviceOptions = services.map((s) => ({ id: s.id, label: s.name, slug: s.slug }))
   const projectOptions = projects.map((p) => ({ id: p.id, label: p.title, slug: p.slug }))
+  const formOptions = forms.map((f) => ({ id: f.id, name: f.name, slug: f.slug }))
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -36,6 +39,7 @@ export default async function HeroPage() {
         initialConfig={config}
         serviceOptions={serviceOptions}
         projectOptions={projectOptions}
+        formOptions={formOptions}
       />
     </div>
   )

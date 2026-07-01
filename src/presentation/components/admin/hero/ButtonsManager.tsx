@@ -20,11 +20,13 @@ import { CSS } from '@dnd-kit/utilities'
 import type { HeroButton, ButtonLinkType, ButtonStyle } from '@/core/entities/HeroConfig'
 
 interface EntityOption { id: string; label: string; slug: string }
+interface FormOption { id: string; name: string; slug: string }
 
 interface Props {
   buttons: HeroButton[]
   serviceOptions: EntityOption[]
   projectOptions: EntityOption[]
+  formOptions: FormOption[]
   onChange: (buttons: HeroButton[]) => void
 }
 
@@ -32,6 +34,7 @@ function linkLabel(btn: HeroButton): string {
   if (btn.linkType === 'scroll') return `#${btn.scrollTarget || btn.href}`
   if (btn.linkType === 'service') return btn.entityLabel ? `Service: ${btn.entityLabel}` : btn.href
   if (btn.linkType === 'project') return btn.entityLabel ? `Project: ${btn.entityLabel}` : btn.href
+  if (btn.linkType === 'form') return btn.formName ? `Form: ${btn.formName}` : '—'
   return btn.href || '—'
 }
 
@@ -44,9 +47,10 @@ interface SortableButtonProps {
   onChange: (patch: Partial<HeroButton>) => void
   serviceOptions: EntityOption[]
   projectOptions: EntityOption[]
+  formOptions: FormOption[]
 }
 
-function SortableButton({ button, expanded, onToggle, onDelete, onChange, serviceOptions, projectOptions }: SortableButtonProps) {
+function SortableButton({ button, expanded, onToggle, onDelete, onChange, serviceOptions, projectOptions, formOptions }: SortableButtonProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: button.id })
   const style = { transform: CSS.Transform.toString(transform), transition }
 
@@ -132,19 +136,20 @@ function SortableButton({ button, expanded, onToggle, onDelete, onChange, servic
             <select
               style={{ ...inputStyle }}
               value={button.linkType}
-              onChange={(e) => onChange({ linkType: e.target.value as ButtonLinkType, href: '', scrollTarget: undefined, entityId: undefined, entityLabel: undefined })}
+              onChange={(e) => onChange({ linkType: e.target.value as ButtonLinkType, href: '', scrollTarget: undefined, entityId: undefined, entityLabel: undefined, formId: undefined, formSlug: undefined, formName: undefined })}
             >
               <option value="scroll">Page section (scroll)</option>
               <option value="custom">Custom URL</option>
               <option value="service">Service page</option>
               <option value="project">Project page</option>
+              <option value="form">Open form (modal)</option>
             </select>
           </div>
 
           {/* Link target */}
           <div style={{ marginTop: 10 }}>
             <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#6B6560', marginBottom: 4 }}>
-              {button.linkType === 'scroll' ? 'Section ID' : button.linkType === 'custom' ? 'URL' : button.linkType === 'service' ? 'Service' : 'Project'}
+              {button.linkType === 'scroll' ? 'Section ID' : button.linkType === 'custom' ? 'URL' : button.linkType === 'service' ? 'Service' : button.linkType === 'form' ? 'Form' : 'Project'}
             </label>
             {button.linkType === 'scroll' && (
               <input
@@ -192,6 +197,21 @@ function SortableButton({ button, expanded, onToggle, onDelete, onChange, servic
                 ))}
               </select>
             )}
+            {button.linkType === 'form' && (
+              <select
+                style={inputStyle}
+                value={button.formId ?? ''}
+                onChange={(e) => {
+                  const opt = formOptions.find((f) => f.id === e.target.value)
+                  if (opt) onChange({ formId: opt.id, formSlug: opt.slug, formName: opt.name, href: '' })
+                }}
+              >
+                <option value="">Select a form…</option>
+                {formOptions.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
       )}
@@ -199,7 +219,7 @@ function SortableButton({ button, expanded, onToggle, onDelete, onChange, servic
   )
 }
 
-export function ButtonsManager({ buttons, serviceOptions, projectOptions, onChange }: Props) {
+export function ButtonsManager({ buttons, serviceOptions, projectOptions, formOptions, onChange }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const sensors = useSensors(useSensor(PointerSensor))
 
@@ -246,6 +266,7 @@ export function ButtonsManager({ buttons, serviceOptions, projectOptions, onChan
               onChange={(patch) => updateButton(btn.id, patch)}
               serviceOptions={serviceOptions}
               projectOptions={projectOptions}
+              formOptions={formOptions}
             />
           ))}
         </SortableContext>

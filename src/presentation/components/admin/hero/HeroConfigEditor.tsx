@@ -9,11 +9,13 @@ import { ButtonsManager } from './ButtonsManager'
 import { SlidesList } from './SlidesList'
 
 interface EntityOption { id: string; label: string; slug: string }
+interface FormOption { id: string; name: string; slug: string }
 
 interface Props {
   initialConfig: HeroConfig | null
   serviceOptions: EntityOption[]
   projectOptions: EntityOption[]
+  formOptions: FormOption[]
 }
 
 const DEFAULT_CONFIG: HeroConfigInput = {
@@ -61,7 +63,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: 'border-box',
 }
 
-export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions }: Props) {
+export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions, formOptions }: Props) {
   const [config, setConfig] = useState<HeroConfigInput>(() => {
     if (!initialConfig) return DEFAULT_CONFIG
     const { id: _id, updatedAt: _updatedAt, ...rest } = initialConfig
@@ -211,6 +213,7 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
               buttons={config.buttons}
               serviceOptions={serviceOptions}
               projectOptions={projectOptions}
+              formOptions={formOptions}
               onChange={(btns) => patch({ buttons: btns })}
             />
           </div>
@@ -225,6 +228,7 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
               onChange={(slides) => patch({ slides })}
               serviceOptions={serviceOptions}
               projectOptions={projectOptions}
+              formOptions={formOptions}
             />
           </div>
 

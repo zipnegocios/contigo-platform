@@ -6,11 +6,14 @@ const ButtonSchema = z.object({
   id: z.string(),
   label: z.string().min(1).max(100),
   style: z.enum(['primary', 'secondary']),
-  linkType: z.enum(['custom', 'service', 'project', 'scroll']),
+  linkType: z.enum(['custom', 'service', 'project', 'scroll', 'form']),
   href: z.string(),
   scrollTarget: z.string().optional(),
   entityId: z.string().optional(),
   entityLabel: z.string().optional(),
+  formId: z.string().optional(),
+  formSlug: z.string().optional(),
+  formName: z.string().optional(),
 })
 
 const SlideSchema = z.object({

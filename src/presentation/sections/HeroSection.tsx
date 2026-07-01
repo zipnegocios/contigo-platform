@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import type { HeroConfig, HeroButton } from '@/core/entities/HeroConfig'
+import { DynamicFormModal } from '@/presentation/components/DynamicFormModal'
 
 const FALLBACK_CONFIG: HeroConfig = {
   id: 'fallback',
@@ -24,13 +25,16 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 }
 
-function CTAButtons({ buttons }: { buttons: HeroButton[] }) {
+function CTAButtons({ buttons, onOpenForm }: { buttons: HeroButton[]; onOpenForm: (slug: string, name?: string) => void }) {
   return (
     <div className="flex flex-wrap gap-4 mt-8" style={{ opacity: 0, transform: 'translateY(20px)' }} data-hero-cta>
       {buttons.map((btn) => {
-        const handleClick = btn.linkType === 'scroll'
-          ? () => scrollTo(btn.scrollTarget ?? btn.href.replace('#', ''))
-          : () => { window.location.href = btn.href }
+        const handleClick =
+          btn.linkType === 'scroll'
+            ? () => scrollTo(btn.scrollTarget ?? btn.href.replace('#', ''))
+            : btn.linkType === 'form'
+              ? () => onOpenForm(btn.formSlug ?? '', btn.formName)
+              : () => { window.location.href = btn.href }
         if (btn.style === 'primary') {
           return (
             <button key={btn.id} onClick={handleClick} className="btn-primary">
@@ -60,6 +64,7 @@ interface Props {
 export default function HeroSection({ config }: Props) {
   const cfg = config ?? FALLBACK_CONFIG
   const [activeIdx, setActiveIdx] = useState(0)
+  const [formModal, setFormModal] = useState<{ slug: string; name?: string } | null>(null)
 
   const imgWrapRef  = useRef<HTMLDivElement>(null)
   const overlayRef  = useRef<HTMLDivElement>(null)
@@ -264,7 +269,10 @@ export default function HeroSection({ config }: Props) {
         )}
 
         <div ref={ctaRef} style={{ opacity: 0, transform: 'translateY(20px)' }}>
-          <CTAButtons buttons={displayButtons} />
+          <CTAButtons
+            buttons={displayButtons}
+            onOpenForm={(slug, name) => setFormModal({ slug, name })}
+          />
         </div>
       </div>
 
@@ -289,6 +297,13 @@ export default function HeroSection({ config }: Props) {
           ))}
         </div>
       )}
+
+      <DynamicFormModal
+        slug={formModal?.slug ?? null}
+        formName={formModal?.name}
+        open={formModal !== null}
+        onClose={() => setFormModal(null)}
+      />
     </section>
   )
 }
