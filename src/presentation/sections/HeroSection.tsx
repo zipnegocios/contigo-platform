@@ -2,10 +2,7 @@
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { gsap } from 'gsap'
-import { useLogoMorphContext } from '@/presentation/providers/LogoMorphProvider'
-
 export default function HeroSection() {
-  const context = useLogoMorphContext()
   const imgWrapRef  = useRef<HTMLDivElement>(null)
   const overlayRef  = useRef<HTMLDivElement>(null)
   const overlineRef = useRef<HTMLSpanElement>(null)
@@ -107,9 +104,8 @@ export default function HeroSection() {
         className="absolute bottom-0 left-0 w-full page-padding"
         style={{ zIndex: 3, paddingBottom: 'clamp(3rem, 8vh, 6rem)' }}
       >
-        {/* Logo morph dock placeholder — in normal flow before overline, invisible, shares page-padding */}
+        {/* Spacer that preserves vertical rhythm above hero text */}
         <div
-          ref={(el) => context.setHeroDockRef(el)}
           className="w-logo-hero"
           style={{
             aspectRatio: '1024 / 354.041',
