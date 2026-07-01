@@ -12,7 +12,7 @@ export default async function ProjectsPage() {
     projectRepo.findAll(100),
     // Include inactive categories so projects linked to a category the
     // taxonomy migration deactivates still resolve a label here.
-    categoryRepo.findFlat('service', false),
+    categoryRepo.findFlat('shared', false),
   ])
 
   const catMap = new Map(flatCats.map((c) => [c.id, c.name]))

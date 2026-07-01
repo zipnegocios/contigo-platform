@@ -57,7 +57,7 @@ export class Category {
       name: input.name.trim(),
       slug: makeSlug(input.name),
       parentId: input.parentId ?? null,
-      type: input.type,
+      type: 'shared',
       description: input.description ?? null,
       icon: input.icon ?? null,
       orderIndex: 0,

@@ -1,4 +1,4 @@
-export type CategoryType = 'project' | 'service' | 'shared'
+export type CategoryType = 'shared'
 
 export interface FlatCategory {
   id: string
@@ -21,7 +21,6 @@ export interface CategoryNode extends FlatCategory {
 
 export interface CreateCategoryInput {
   name: string
-  type: CategoryType
   parentId?: string | null
   description?: string | null
   icon?: string | null

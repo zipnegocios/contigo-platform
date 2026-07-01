@@ -3,15 +3,14 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import type { FlatCategory, CategoryType, CreateCategoryInput, UpdateCategoryInput } from '@/types/category'
+import type { FlatCategory, UpdateCategoryInput, CreateCategoryInput } from '@/types/category'
 
 interface CategoryFormModalProps {
   mode: 'create' | 'edit'
-  type: CategoryType
+  type: 'shared'
   allFlat: FlatCategory[]
   editTarget?: FlatCategory | null
   defaultParentId?: string | null
-  typeSelectable?: boolean
   onClose: () => void
 }
 
@@ -42,11 +41,9 @@ function getIndentedOptions(flat: FlatCategory[], excludeId?: string): Array<{ i
 
 export function CategoryFormModal({
   mode,
-  type,
   allFlat,
   editTarget,
   defaultParentId,
-  typeSelectable = false,
   onClose,
 }: CategoryFormModalProps) {
   const router = useRouter()
@@ -54,16 +51,10 @@ export function CategoryFormModal({
   const [parentId, setParentId] = useState<string>(editTarget?.parentId ?? defaultParentId ?? '')
   const [description, setDescription] = useState(editTarget?.description ?? '')
   const [icon, setIcon] = useState(editTarget?.icon ?? '')
-  const [selectedType, setSelectedType] = useState<CategoryType>(type)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // The type prop is fixed unless typeSelectable is on (only true for "New
-  // root category" while the filter is "All" — see CategoryTreeView). In
-  // every other flow (edit, add-child, single-type filter) the type is
-  // determined by the parent/context and must not be overridden by stale
-  // local state.
-  const effectiveType = typeSelectable ? selectedType : type
+  const effectiveType = 'shared'
 
   const slugPreview = makeSlugPreview(name)
   // Scope parent options to the effective type so a project can never end up
@@ -88,7 +79,6 @@ export function CategoryFormModal({
       if (mode === 'create') {
         const body: CreateCategoryInput = {
           name: name.trim(),
-          type: effectiveType,
           parentId: parentId || null,
           description: description.trim() || null,
           icon: icon.trim() || null,
@@ -168,36 +158,6 @@ export function CategoryFormModal({
             )}
           </div>
 
-          <div>
-            <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>
-              Type
-            </label>
-            {typeSelectable ? (
-              <select
-                value={selectedType}
-                onChange={(e) => {
-                  setSelectedType(e.target.value as CategoryType)
-                  // The previously selected parent may belong to the other
-                  // type — clear it so we never submit a cross-type parentId.
-                  setParentId('')
-                }}
-                className="w-full px-3 py-2 rounded-lg text-fluid-sm capitalize outline-none"
-                style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
-              >
-                <option value="shared">Shared (Main)</option>
-                <option value="service">Service-Only</option>
-                <option value="project">Project-Only</option>
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={effectiveType}
-                readOnly
-                className="w-full px-3 py-2 rounded-lg text-fluid-sm capitalize"
-                style={{ backgroundColor: 'var(--neutral-200)', color: '#6B6560', border: '1px solid #E5DDD0' }}
-              />
-            )}
-          </div>
 
           <div>
             <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>Parent category</label>

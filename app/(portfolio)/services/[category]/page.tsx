@@ -70,7 +70,9 @@ export default async function ServiceCategoryPage({
       const categoryRepo = new DrizzleCategoryRepository()
       const serviceRepo = new DrizzleServiceRepository()
 
-      const root = await categoryRepo.findBySlug(category, 'service')
+      // After migration, categories are flat (no leaf nodes). Services have
+      // categoryId pointing directly to the root category.
+      const root = await categoryRepo.findBySlug(category, 'shared')
 
       if (!root || !root.isActive) {
         rootInactiveOrMissing = true
@@ -78,26 +80,19 @@ export default async function ServiceCategoryPage({
         categoryName = root.name
         categorySupport = root.description
 
-        const flatCats = await categoryRepo.findFlat('service')
-        const childIds = new Set(
-          flatCats
-            .filter((c) => c.parentId === root.id && c.isActive)
-            .map((c) => c.id),
-        )
-
         const allServices = await serviceRepo.findAll(100)
         const matched = allServices
-          .filter((s) => s.categoryId && childIds.has(s.categoryId))
+          .filter((s) => s.categoryId === root.id)
           .sort((a, b) => a.orderIndex - b.orderIndex)
+
+        const fallback = SERVICE_FALLBACK_CATALOGUE[category] ?? []
 
         items = matched.map((s) => ({
           slug: s.slug,
           name: s.name,
           shortDescription: s.shortDescription,
           iconKey:
-            flatCats.find((c) => c.id === s.categoryId)?.icon ??
-            SERVICE_FALLBACK_CATALOGUE[category].find((f) => f.slug === s.slug)?.iconKey ??
-            'new-home',
+            fallback.find((f) => f.slug === s.slug)?.iconKey ?? 'new-home',
           imageUrl: s.imageUrl,
           published: s.published,
         }))

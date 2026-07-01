@@ -6,7 +6,6 @@ import type { CategoryType } from '@/types/category'
 
 const CreateSchema = z.object({
   name: z.string().min(1).max(255),
-  type: z.enum(['project', 'service', 'shared']),
   parentId: z.string().uuid().nullable().optional(),
   description: z.string().nullable().optional(),
   icon: z.string().max(100).nullable().optional(),
@@ -62,7 +61,6 @@ export async function POST(request: Request) {
     const repo = new DrizzleCategoryRepository()
     const category = Category.create({
       name: input.name,
-      type: input.type,
       parentId: input.parentId ?? null,
       description: input.description ?? null,
       icon: input.icon ?? null,

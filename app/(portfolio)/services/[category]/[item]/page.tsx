@@ -26,8 +26,10 @@ async function resolveServiceForCategory(category: string, item: string) {
   const categoryRepo = new DrizzleCategoryRepository()
   const serviceRepo = new DrizzleServiceRepository()
 
+  // After migration, categories are flat — services have categoryId pointing
+  // directly to the root category (no leaf indirection).
   const [root, service] = await Promise.all([
-    categoryRepo.findBySlug(category, 'service'),
+    categoryRepo.findBySlug(category, 'shared'),
     serviceRepo.findBySlug(item),
   ])
 
@@ -35,12 +37,7 @@ async function resolveServiceForCategory(category: string, item: string) {
   if (!service || !service.published) return null
   if (!service.categoryId) return null
 
-  const flatCats = await categoryRepo.findFlat('service')
-  const childIds = new Set(
-    flatCats.filter((c) => c.parentId === root.id && c.isActive).map((c) => c.id),
-  )
-
-  if (!childIds.has(service.categoryId)) return null
+  if (service.categoryId !== root.id) return null
 
   return { root, service }
 }
@@ -52,7 +49,8 @@ export async function generateStaticParams() {
     const categoryRepo = new DrizzleCategoryRepository()
     const serviceRepo = new DrizzleServiceRepository()
 
-    const flatCats = await categoryRepo.findFlat('service')
+    // After migration, services.categoryId points directly to root categories.
+    const flatCats = await categoryRepo.findFlat('shared')
     const services = await serviceRepo.findPublished()
 
     const params: { category: string; item: string }[] = []
@@ -61,12 +59,8 @@ export async function generateStaticParams() {
       const root = flatCats.find((c) => c.parentId === null && c.slug === category)
       if (!root || !root.isActive) continue
 
-      const childIds = new Set(
-        flatCats.filter((c) => c.parentId === root.id && c.isActive).map((c) => c.id),
-      )
-
       for (const service of services) {
-        if (service.categoryId && childIds.has(service.categoryId)) {
+        if (service.categoryId === root.id) {
           params.push({ category, item: service.slug })
         }
       }

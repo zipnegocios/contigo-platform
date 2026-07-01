@@ -33,8 +33,6 @@ interface CategoryTreeViewProps {
 
 const GROUP_LABELS: Record<CategoryType, string> = {
   shared: 'Main Categories (Services & Projects)',
-  service: 'Service-Only',
-  project: 'Project-Only',
 }
 
 function GroupSection({
@@ -216,8 +214,7 @@ export function CategoryTreeView({ groups }: CategoryTreeViewProps) {
       {showCreateModal && (
         <CategoryFormModal
           mode="create"
-          type={defaultCreateType}
-          typeSelectable={typeSelectable}
+          type="shared"
           allFlat={combinedAllFlat}
           onClose={() => setShowCreateModal(false)}
         />

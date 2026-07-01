@@ -216,7 +216,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
                 </div>
 
                 <HierarchicalCategorySelect
-                  type="service"
+                  type="shared"
                   value={formData.categoryId}
                   onChange={(id) => setFormData({ ...formData, categoryId: id })}
                   label="Category"

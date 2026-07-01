@@ -40,7 +40,7 @@ export async function GET() {
 
     const [serviceList, flatCats] = await Promise.all([
       serviceRepo.findAll(200),
-      categoryRepo.findFlat('service'),
+      categoryRepo.findFlat('shared'),
     ])
 
     const catById = new Map<string, FlatCategory>(flatCats.map((c) => [c.id, c]))
