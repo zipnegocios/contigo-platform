@@ -3,6 +3,7 @@ import { db } from '../db/client'
 import { services } from '../db/schema'
 import { Service } from '@/core/entities/Service'
 import type { GalleryItem } from '@/types/media'
+import type { PageBlock } from '@/types/pageBlocks'
 
 function normaliseGalleryRow(raw: unknown): GalleryItem[] {
   if (!Array.isArray(raw)) return []
@@ -29,6 +30,7 @@ export class DrizzleServiceRepository {
         orderIndex: service.orderIndex,
         categoryId: service.categoryId,
         published: service.published,
+        pageBlocks: service.pageBlocks,
       })
       .onConflictDoNothing()
   }
@@ -83,6 +85,7 @@ export class DrizzleServiceRepository {
         orderIndex: service.orderIndex,
         categoryId: service.categoryId,
         published: service.published,
+        pageBlocks: service.pageBlocks,
         updatedAt: new Date(),
       })
       .where(eq(services.id, service.id))
@@ -114,6 +117,7 @@ export class DrizzleServiceRepository {
       orderIndex: row.orderIndex as number,
       categoryId: (row.categoryId as string | null) ?? null,
       published: row.published as boolean,
+      pageBlocks: (row.pageBlocks as PageBlock[] | null) ?? null,
       createdAt: row.createdAt as Date,
       updatedAt: row.updatedAt as Date,
     })

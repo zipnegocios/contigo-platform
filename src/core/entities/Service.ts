@@ -1,5 +1,6 @@
 import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 import type { GalleryItem } from '@/types/media'
+import type { PageBlock } from '@/types/pageBlocks'
 
 export interface CreateServiceInput {
   name: string
@@ -10,6 +11,7 @@ export interface CreateServiceInput {
   galleryItems?: GalleryItem[]
   orderIndex?: number
   categoryId?: string | null
+  pageBlocks?: PageBlock[] | null
 }
 
 export class Service {
@@ -24,6 +26,7 @@ export class Service {
   readonly orderIndex: number
   readonly categoryId: string | null
   readonly published: boolean
+  readonly pageBlocks: PageBlock[] | null
   readonly createdAt: Date
   readonly updatedAt: Date
 
@@ -39,6 +42,7 @@ export class Service {
     orderIndex: number
     categoryId: string | null
     published: boolean
+    pageBlocks: PageBlock[] | null
     createdAt: Date
     updatedAt: Date
   }) {
@@ -53,6 +57,7 @@ export class Service {
     this.orderIndex = props.orderIndex
     this.categoryId = props.categoryId
     this.published = props.published
+    this.pageBlocks = props.pageBlocks
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }
@@ -74,6 +79,7 @@ export class Service {
       orderIndex: input.orderIndex || 0,
       categoryId: input.categoryId ?? null,
       published: true,
+      pageBlocks: input.pageBlocks ?? null,
       createdAt: now,
       updatedAt: now,
     })
@@ -92,6 +98,7 @@ export class Service {
       orderIndex,
       categoryId: this.categoryId,
       published: this.published,
+      pageBlocks: this.pageBlocks,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     })
@@ -109,6 +116,7 @@ export class Service {
     orderIndex: number
     categoryId?: string | null
     published: boolean
+    pageBlocks: PageBlock[] | null
     createdAt: Date
     updatedAt: Date
   }): Service {

@@ -4,6 +4,7 @@ import { Service } from '@/core/entities/Service'
 import { renamePrefix } from '@/infrastructure/services/R2StorageService'
 import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 import type { GalleryItem } from '@/types/media'
+import type { PageBlock } from '@/types/pageBlocks'
 
 const BUCKET = process.env.R2_ASSETS_BUCKET || 'contigo-assets'
 
@@ -91,6 +92,7 @@ export async function PATCH(
       orderIndex: service.orderIndex,
       categoryId: body.categoryId !== undefined ? body.categoryId : service.categoryId,
       published: body.published !== undefined ? Boolean(body.published) : service.published,
+      pageBlocks: body.pageBlocks !== undefined ? (body.pageBlocks as PageBlock[] | null) : service.pageBlocks,
       createdAt: service.createdAt,
       updatedAt: new Date(),
     })
