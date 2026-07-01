@@ -5,6 +5,7 @@ import BrandBar from '@/presentation/sections/BrandBar'
 import ServicesSection from '@/presentation/sections/ServicesSection'
 import BrandPromiseSection from '@/presentation/sections/BrandPromiseSection'
 import ProjectsSection from '@/presentation/sections/ProjectsSection'
+import MasterBuildersSection from '@/presentation/sections/MasterBuildersSection'
 import Footer from '@/presentation/sections/Footer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { DrizzleHeroConfigRepository } from '@/infrastructure/repositories/DrizzleHeroConfigRepository'
@@ -68,6 +69,7 @@ export default async function HomePage() {
         <ServicesSection />
         <BrandPromiseSection />
         <ProjectsSection projects={projects} />
+        <MasterBuildersSection />
         <ContactSection />
       </main>
 

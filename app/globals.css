@@ -1171,6 +1171,81 @@
   }
 }
 
+/* ==========================================================================
+   Master Builders membership card — ambient gold border glow
+   The border illuminates in the brand gold and a soft beam travels around
+   the edge. It does NOT track the cursor; the shine is autonomous.
+   ========================================================================== */
+@property --mba-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.mba-card {
+  position: relative;
+  border-radius: 22px;
+  background:
+    radial-gradient(130% 120% at 50% -10%, rgba(31, 90, 112, 0.38) 0%, transparent 58%),
+    var(--petrol-950, #051E27);
+  isolation: isolate;
+}
+
+/* Rotating gold beam that lights up the border ring */
+.mba-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--mba-angle),
+    rgba(226, 192, 99, 0.05) 0deg,
+    rgba(226, 192, 99, 0.05) 150deg,
+    rgba(226, 192, 99, 0.55) 245deg,
+    #f6e6b0 300deg,
+    rgba(226, 192, 99, 0.55) 355deg,
+    rgba(226, 192, 99, 0.05) 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: mbaBeam 7s linear infinite;
+  pointer-events: none;
+}
+
+/* Static base border + breathing ambient outer glow */
+.mba-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(226, 192, 99, 0.20);
+  box-shadow:
+    0 0 34px -6px rgba(226, 192, 99, 0.28),
+    0 0 78px -22px rgba(226, 192, 99, 0.22);
+  animation: mbaBreath 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.mba-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes mbaBeam {
+  to { --mba-angle: 360deg; }
+}
+@keyframes mbaBreath {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -4,6 +4,7 @@ import MissionVisionSection from '@/presentation/sections/MissionVisionSection'
 import ValuePropositionBand from '@/presentation/sections/ValuePropositionBand'
 import CoreValuesSection from '@/presentation/sections/CoreValuesSection'
 import BrandPromiseSection from '@/presentation/sections/BrandPromiseSection'
+import MasterBuildersSection from '@/presentation/sections/MasterBuildersSection'
 import AboutClosingCTA from '@/presentation/sections/AboutClosingCTA'
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function AboutPage() {
       <ValuePropositionBand />
       <CoreValuesSection />
       <BrandPromiseSection />
+      <MasterBuildersSection />
       <AboutClosingCTA />
     </div>
   )

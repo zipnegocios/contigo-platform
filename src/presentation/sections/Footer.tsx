@@ -145,12 +145,20 @@ export default function Footer() {
           >
             &copy; 2025 Contigo Constructions Pty Ltd. All rights reserved.
           </p>
-          <p
-            className="text-fluid-xs"
-            style={{ color: 'var(--neutral-600)' }}
-          >
-            ABN: 25 698 028 394
-          </p>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 items-center sm:items-end text-right">
+            <p
+              className="text-fluid-xs"
+              style={{ color: 'var(--neutral-600)' }}
+            >
+              ABN: 25 698 028 394
+            </p>
+            <p
+              className="text-fluid-xs"
+              style={{ color: 'var(--neutral-600)' }}
+            >
+              BLD Licence No. 357596
+            </p>
+          </div>
         </div>
       </div>
     </footer>
