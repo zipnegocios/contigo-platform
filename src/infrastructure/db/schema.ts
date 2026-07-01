@@ -14,6 +14,7 @@ import {
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 import type { GalleryItem } from '@/types/media'
+import type { PageBlock } from '@/types/pageBlocks'
 
 // ============ ENUMS ============
 export const quoteStatusEnum = pgEnum('quote_status', [
@@ -243,6 +244,7 @@ export const services = pgTable(
     imageUrl: text('image_url').notNull(),
     posterUrl: text('poster_url'),
     galleryItems: jsonb('gallery_items').$type<GalleryItem[]>().notNull().default(sql`'[]'::jsonb`),
+    pageBlocks: jsonb('page_blocks').$type<PageBlock[]>(),
     orderIndex: integer('order_index').notNull().default(0),
     categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
     published: boolean('published').notNull().default(true),
