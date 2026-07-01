@@ -829,11 +829,25 @@ export function FormPageBuilder({ slug, formName, initialFields, versions }: Pro
   const selectedField = fields.find((f) => f.id === selectedFieldId) ?? null
 
   function addField(type: string) {
+    const descriptor = FIELD_TYPE_REGISTRY[type]
+    const needsOptions = descriptor?.renderer === 'ChoiceRenderer' &&
+      !['switch', 'yes_no', 'checkbox'].includes(type)
+
     const newField: FormField = {
       id: crypto.randomUUID(),
       type,
       label: fieldTypeLabel(type),
       required: false,
+      // Sensible per-type defaults so the canvas shows something immediately
+      ...(needsOptions && { options: ['Option 1', 'Option 2', 'Option 3'] }),
+      ...(type === 'currency'       && { currencyCode: 'AUD' }),
+      ...(type === 'rating'         && { maxRating: 5, ratingStyle: 'star' as const }),
+      ...(type === 'heading_block'  && { headingLevel: 2 as const, content: 'Section heading' }),
+      ...(type === 'paragraph_block'&& { content: 'Add your paragraph text here.' }),
+      ...(type === 'html_embed'     && { content: '<!-- HTML content -->' }),
+      ...(type === 'step'           && { stepTitle: 'Step', stepDescription: '' }),
+      ...(type === 'slider'         && { validation: { min: 0, max: 100 }, step: 1 }),
+      ...(type === 'range_slider'   && { validation: { min: 0, max: 100 }, step: 1 }),
     }
     setFields((prev) => [...prev, newField])
     setSelectedFieldId(newField.id)

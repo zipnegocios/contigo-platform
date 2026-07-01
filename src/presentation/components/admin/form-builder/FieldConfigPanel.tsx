@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Lock, Trash2, X } from 'lucide-react'
 import { Input } from '@/presentation/components/ui/input'
 import { Label } from '@/presentation/components/ui/label'
@@ -41,9 +42,16 @@ export function FieldConfigPanel({ field, onChange, onDelete, onClose }: FieldCo
     onChange({ ...field, validation: { ...field.validation, ...partial } })
   }
 
-  const optionsText = (field.options ?? []).join('\n')
+  // Local state for options textarea — avoids cursor-jump caused by filtering empty lines on every keystroke.
+  // Only re-initialises when the selected field changes (field.id), not on every options update.
+  const [optionsText, setOptionsText] = useState(() => (field.options ?? []).join('\n'))
+  useEffect(() => {
+    setOptionsText((field.options ?? []).join('\n'))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field.id])
 
   function handleOptionsChange(text: string) {
+    setOptionsText(text) // keeps raw text (preserves trailing newlines while typing)
     const options = text
       .split('\n')
       .map((line) => line.trim())
@@ -71,11 +79,13 @@ export function FieldConfigPanel({ field, onChange, onDelete, onClose }: FieldCo
   const isStepMarker     = field.type === 'step'
   const isContentBlock   = isParagraphBlock || isHeadingBlock || isHtmlEmbed
   const showPlaceholder  = !isNonInteractive && !isContentBlock && !isChoiceRenderer
-  const showRequired     = !isNonInteractive
-  const showValidation   = isTextInput || isTextarea
-  const showOptions      = isChoiceRenderer
-  const showSystemMapping = descriptor?.isDataField === true
-  const showVisibility   = descriptor?.isDataField === true
+  // paragraph_block is TextareaRenderer in the registry but is a static content block — exclude it from interactive sections
+  const showRequired     = !isNonInteractive && !isContentBlock
+  const showValidation   = (isTextInput || isTextarea) && !isContentBlock
+  // switch/yes_no/checkbox have fixed options (no user-defined list needed)
+  const showOptions      = isChoiceRenderer && !['switch', 'yes_no', 'checkbox'].includes(field.type)
+  const showSystemMapping = descriptor?.isDataField === true && !isContentBlock
+  const showVisibility   = descriptor?.isDataField === true && !isContentBlock
 
   const selectStyle: React.CSSProperties = {
     width: '100%',
