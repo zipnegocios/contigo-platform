@@ -10,6 +10,7 @@ export type PageBlock =
   | { id: string; type: 'comparison-cards'; data: ComparisonCardsBlockData }
   | { id: string; type: 'whatsapp-cta';     data: WhatsAppCtaBlockData }
   | { id: string; type: 'custom';           data: CustomBlockData }
+  | { id: string; type: 'form';             data: FormBlockData }
 
 export interface HeroBlockData {
   imageUrl: string
@@ -70,6 +71,13 @@ export interface CustomBlockData {
   js: string
 }
 
+export interface FormBlockData {
+  formSlug: string
+  displayMode: 'inline' | 'modal'
+  buttonLabel: string
+  buttonStyle: 'primary' | 'secondary'
+}
+
 // Default data for each block type (used when adding a new block)
 export const BLOCK_DEFAULTS: { [K in PageBlock['type']]: Extract<PageBlock, { type: K }>['data'] } = {
   'hero':             { imageUrl: '', title: '', subtitle: '', overlayOpacity: 40 },
@@ -83,6 +91,7 @@ export const BLOCK_DEFAULTS: { [K in PageBlock['type']]: Extract<PageBlock, { ty
   'comparison-cards': { cards: [{ title: 'Option A', points: [''] }] },
   'whatsapp-cta':    { phoneNumber: '', message: 'Hi, I\'m interested in your services.', label: 'Chat on WhatsApp', style: 'button' },
   'custom':          { html: '<div style="padding: 4rem 2rem; text-align: center;">\n  <h2>Your Custom Section</h2>\n  <p>Edit HTML, CSS and JS in the panel.</p>\n</div>', css: '', js: '' },
+  'form':            { formSlug: 'request-a-quote', displayMode: 'inline', buttonLabel: 'Request a Quote', buttonStyle: 'primary' },
 }
 
 export const BLOCK_LABELS: Record<PageBlock['type'], string> = {
@@ -97,4 +106,5 @@ export const BLOCK_LABELS: Record<PageBlock['type'], string> = {
   'comparison-cards': 'Comparison Cards',
   'whatsapp-cta':    'WhatsApp CTA',
   'custom':          'Custom Code',
+  'form':            'Form Embed',
 }

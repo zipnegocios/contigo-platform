@@ -3,20 +3,27 @@ import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleFormRepository } from '@/infrastructure/repositories/DrizzleFormRepository'
 import { buildZodValidator, type FormSchema } from '@/core/form-schema/FormSchema'
 
-/**
- * Versioned save endpoint for the Form Builder (Task 4.2.4). POST-only:
- * inserts a brand new `form_versions` row for the form identified by
- * `slug` and repoints `forms.activeVersionId` at it — an existing version
- * row's `schema` is never edited in place (`DrizzleFormRepository.createNewVersion`
- * wraps both writes in a single transaction).
- *
- * Before persisting, the submitted schema must successfully build a Zod
- * validator via `buildZodValidator` — this is the safety net behind the
- * builder UI's own protections (e.g. the locked consent field can't be
- * unrequired/deleted in the UI), catching any schema that would violate the
- * "must have a required consent field" hard rule or otherwise fail to
- * compile into a validator.
- */
+export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  try {
+    const session = await auth()
+    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as { id?: string })?.id
+    if (!userId || !(await hasPermission(userId, 'form_builder.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { slug } = await params
+    const repo = new DrizzleFormRepository()
+    const versions = await repo.findVersionsBySlug(slug)
+
+    return Response.json(versions)
+  } catch (error) {
+    console.error('GET /api/admin/forms/[slug]/versions:', error)
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const session = await auth()

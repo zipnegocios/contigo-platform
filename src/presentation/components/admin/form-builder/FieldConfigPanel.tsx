@@ -83,6 +83,35 @@ export function FieldConfigPanel({ field, onChange, onDelete, onClose }: FieldCo
         </button>
       </div>
 
+      {/* Locked-field explanation banner */}
+      {field.locked && (
+        <div
+          style={{
+            background: 'rgba(226,192,99,0.08)',
+            border: '1px solid rgba(226,192,99,0.25)',
+            borderRadius: 8,
+            padding: '0.75rem 1rem',
+            fontSize: '0.75rem',
+            color: '#6B6560',
+          }}
+        >
+          <strong style={{ color: '#2D2924', display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+            <Lock style={{ width: 12, height: 12 }} />
+            System field
+          </strong>
+          {field.mapsToSystemField && (
+            <p style={{ marginBottom: 4 }}>
+              Maps to <code style={{ color: '#E2C063', background: 'rgba(226,192,99,0.12)', padding: '1px 4px', borderRadius: 3 }}>{field.mapsToSystemField}</code> in the quote record.
+            </p>
+          )}
+          <p>
+            <strong style={{ color: '#2D2924' }}>Editable:</strong> label, placeholder, help text.
+            <br />
+            <strong style={{ color: '#2D2924' }}>Locked:</strong> required status, field type, delete.
+          </p>
+        </div>
+      )}
+
       {/* Label */}
       <div className="space-y-1.5">
         <Label htmlFor="field-label" className="text-fluid-xs">

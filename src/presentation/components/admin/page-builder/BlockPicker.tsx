@@ -17,12 +17,13 @@ const BLOCK_ICONS: Record<PageBlock['type'], string> = {
   'comparison-cards': '⚖',
   'whatsapp-cta':    '💬',
   'custom':          '</>',
+  'form':            '📋',
 }
 
 const BLOCK_TYPES: PageBlock['type'][] = [
   'hero', 'rich-text', 'gallery', 'process',
   'two-column', 'features-grid', 'cta',
-  'image-carousel', 'comparison-cards', 'whatsapp-cta', 'custom',
+  'image-carousel', 'comparison-cards', 'whatsapp-cta', 'custom', 'form',
 ]
 
 interface BlockPickerProps {
