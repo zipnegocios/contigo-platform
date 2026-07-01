@@ -133,7 +133,11 @@ const fieldComponents: FieldComponentOverrides = {
   consent_checkbox: ConsentFieldOverride,
 }
 
-export function QuoteForm() {
+interface QuoteFormProps {
+  layout?: 'section' | 'modal'
+}
+
+export function QuoteForm({ layout = 'section' }: QuoteFormProps) {
   const attachmentInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -242,7 +246,7 @@ export function QuoteForm() {
   }
 
   return (
-    <div className="contact-form-wrapper">
+    <div className={`contact-form-wrapper${layout === 'modal' ? ' contact-form-wrapper--modal' : ''}`}>
       {/* Blobs layer: soft CSS-blurred gold orbs (GPU-composited, no SVG filter) */}
       <div className="gooey-blobs-layer" aria-hidden="true">
         <div className="gooey-blob blob-1" />
@@ -327,6 +331,7 @@ export function QuoteForm() {
                   variant="primary"
                   size="lg"
                   className="w-full contact-submit-btn"
+                  style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
                 >
                   {isSubmitting && (
                     <Loader className="w-[clamp(0.875rem,1.4vw,1rem)] h-[clamp(0.875rem,1.4vw,1rem)] animate-spin" />

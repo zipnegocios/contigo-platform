@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/presentation/components/ui/dialog'
 import { QuoteForm } from './QuoteForm'
 
 interface QuoteFormModalProps {
@@ -12,18 +12,14 @@ export function QuoteFormModal({ open, onOpenChange }: QuoteFormModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-xl max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-lg max-h-[88vh] overflow-y-auto border-0 p-0"
         style={{ backgroundColor: 'var(--contigo-background)' }}
       >
-        <DialogHeader>
-          <DialogTitle
-            className="text-fluid-2xl font-cormorant font-bold"
-            style={{ color: 'var(--contigo-foreground)' }}
-          >
-            Request a Quote
-          </DialogTitle>
-        </DialogHeader>
-        <QuoteForm />
+        <DialogTitle className="sr-only">Request a Quote</DialogTitle>
+        <div
+          style={{ height: 3, background: 'linear-gradient(90deg, var(--gold-400), var(--gold-600))' }}
+        />
+        <QuoteForm layout="modal" />
       </DialogContent>
     </Dialog>
   )

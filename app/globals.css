@@ -535,6 +535,23 @@
     transform: translateZ(0);
   }
 
+  /* Modal layout: content-height panel, tighter spacing, no double frame.
+     The blurred gold orbs still bleed behind, but the fixed 640px reserve
+     is dropped so the dialog only takes the height the form needs. */
+  .contact-form-wrapper--modal {
+    height: auto;
+    max-width: 100%;
+  }
+  .contact-form-wrapper--modal .form-overlay {
+    height: auto;
+    padding: clamp(1.5rem, 4vw, 2.25rem);
+    justify-content: flex-start;
+    gap: 1.1rem;
+    border: none;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.55);
+  }
+
   /* Overline técnico dentro del panel */
   .form-overline {
     font-family: var(--font-space-grotesk), sans-serif;
