@@ -18,6 +18,7 @@
 
   html {
     scroll-behavior: auto;
+    overflow-x: hidden;
   }
 
   body {
@@ -1206,6 +1207,26 @@
     radial-gradient(130% 120% at 50% -10%, rgba(31, 90, 112, 0.38) 0%, transparent 58%),
     var(--petrol-950, #051E27);
   isolation: isolate;
+}
+
+/* Slim, branded scrollbar for bounded-height modal cards — replaces the
+   default OS-gray scrollbar so any internal overflow reads as intentional. */
+.modal-scroll-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(226, 192, 99, 0.55) transparent;
+}
+.modal-scroll-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-scroll-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-scroll-panel::-webkit-scrollbar-thumb {
+  background-color: rgba(226, 192, 99, 0.55);
+  border-radius: 999px;
+}
+.modal-scroll-panel::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(226, 192, 99, 0.85);
 }
 
 /* Rotating gold beam that lights up the border ring */
