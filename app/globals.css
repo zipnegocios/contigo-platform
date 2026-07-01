@@ -441,7 +441,7 @@
     position: relative;
     width: 100%;
     max-width: 560px;
-    height: 640px;
+    height: 588px;
     margin: 0 auto;
     overflow: visible;
   }
@@ -544,9 +544,9 @@
   }
   .contact-form-wrapper--modal .form-overlay {
     height: auto;
-    padding: clamp(1.5rem, 4vw, 2.25rem);
+    padding: clamp(1.35rem, 3.5vw, 2rem);
     justify-content: flex-start;
-    gap: 1.1rem;
+    gap: 0.85rem;
     border: none;
     box-shadow: none;
     background: rgba(255, 255, 255, 0.55);
@@ -572,7 +572,7 @@
   .ff-field textarea,
   .form-overlay select {
     width: 100%;
-    padding: 1.25rem 1rem 0.5rem;
+    padding: 1.1rem 1rem 0.4rem;
     border: 1px solid rgba(29, 29, 27, 0.1);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.7);
@@ -584,8 +584,8 @@
 
   .ff-field textarea {
     resize: vertical;
-    min-height: 120px;
-    padding-top: 1.5rem;
+    min-height: 96px;
+    padding-top: 1.3rem;
   }
 
   .ff-field input:focus,
@@ -605,7 +605,7 @@
   .ff-field label {
     position: absolute;
     left: 1rem;
-    top: 0.95rem;
+    top: 0.8rem;
     font-family: var(--font-alegreya-sans), sans-serif;
     font-size: 1rem;
     color: var(--neutral-600);
@@ -645,7 +645,7 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6560' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
-    padding: 1.25rem 2.5rem 0.5rem 1rem;
+    padding: 1.1rem 2.5rem 0.4rem 1rem;
     cursor: pointer;
     color: var(--neutral-800);
   }

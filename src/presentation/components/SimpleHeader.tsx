@@ -33,12 +33,15 @@ export function SimpleHeader() {
   return (
     <>
       <header
-        className="fixed top-0 left-0 w-full z-[100] transition-all duration-500"
+        className="fixed top-0 left-0 w-full z-[100] transition-all duration-300"
         style={{
           backgroundColor: scrolled ? 'rgba(255, 255, 255, 0.8)' : 'transparent',
           backdropFilter: scrolled ? 'blur(12px)' : 'none',
           WebkitBackdropFilter: scrolled ? 'blur(12px)' : 'none',
           borderBottom: scrolled ? '1px solid rgba(0, 0, 0, 0.05)' : 'none',
+          opacity: contactModalOpen || quoteModalOpen ? 0 : 1,
+          pointerEvents: contactModalOpen || quoteModalOpen ? 'none' : 'auto',
+          visibility: contactModalOpen || quoteModalOpen ? 'hidden' : 'visible',
         }}
       >
         <div

@@ -265,7 +265,7 @@ export function QuoteForm({ layout = 'section' }: QuoteFormProps) {
             schema={schema}
             onSubmit={onSubmit}
             fieldComponents={fieldComponents}
-            className="contact-form flex flex-col gap-5"
+            className="contact-form flex flex-col gap-4"
             beforeFields={<span className="form-overline">Request a Quote</span>}
           >
             {({ isSubmitting }) => (
