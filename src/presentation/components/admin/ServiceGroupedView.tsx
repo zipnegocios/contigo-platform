@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { Trash2, GripVertical, Pencil } from 'lucide-react'
+import { Trash2, GripVertical, Pencil, Settings2 } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
 
 export interface ServiceGroupItem {
@@ -189,6 +189,17 @@ function CategorySection({ group }: { group: ServiceGroup }) {
                   >
                     <Link href={`/admin/services/${svc.id}/edit`}>
                       <Pencil className="w-3.5 h-3.5" />
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="min-h-[36px] min-w-[36px] p-0 transition-all duration-150"
+                    style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                  >
+                    <Link href={`/admin/services/${svc.id}/builder`}>
+                      <Settings2 className="w-3.5 h-3.5" />
                     </Link>
                   </Button>
                   <Button
