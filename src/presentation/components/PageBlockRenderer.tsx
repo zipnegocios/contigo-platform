@@ -9,6 +9,7 @@ import { CtaBlock } from './blocks/CtaBlock'
 import { ImageCarouselBlock } from './blocks/ImageCarouselBlock'
 import { ComparisonCardsBlock } from './blocks/ComparisonCardsBlock'
 import { WhatsAppCtaBlock } from './blocks/WhatsAppCtaBlock'
+import { CustomBlock } from './blocks/CustomBlock'
 
 interface PageBlockRendererProps {
   blocks: PageBlock[]
@@ -29,6 +30,7 @@ export function PageBlockRenderer({ blocks }: PageBlockRendererProps) {
           case 'image-carousel':  return <ImageCarouselBlock   key={block.id} data={block.data} />
           case 'comparison-cards': return <ComparisonCardsBlock key={block.id} data={block.data} />
           case 'whatsapp-cta':    return <WhatsAppCtaBlock     key={block.id} data={block.data} />
+          case 'custom':          return <CustomBlock          key={block.id} data={block.data} />
           default:                return null
         }
       })}

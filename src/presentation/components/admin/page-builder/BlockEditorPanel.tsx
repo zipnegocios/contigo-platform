@@ -12,6 +12,7 @@ import { CtaEditor } from './editors/CtaEditor'
 import { ImageCarouselEditor } from './editors/ImageCarouselEditor'
 import { ComparisonCardsEditor } from './editors/ComparisonCardsEditor'
 import { WhatsAppCtaEditor } from './editors/WhatsAppCtaEditor'
+import { CustomEditor } from './editors/CustomEditor'
 
 interface BlockEditorPanelProps {
   block: PageBlock
@@ -37,6 +38,7 @@ export function BlockEditorPanel({ block, onChange }: BlockEditorPanelProps) {
         {block.type === 'image-carousel'   && <ImageCarouselEditor   data={block.data} onChange={onChange} />}
         {block.type === 'comparison-cards' && <ComparisonCardsEditor data={block.data} onChange={onChange} />}
         {block.type === 'whatsapp-cta'     && <WhatsAppCtaEditor     data={block.data} onChange={onChange} />}
+        {block.type === 'custom'           && <CustomEditor           data={block.data} onChange={onChange} />}
       </div>
     </div>
   )
