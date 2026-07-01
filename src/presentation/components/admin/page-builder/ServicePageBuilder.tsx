@@ -4,38 +4,22 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ChevronLeft, Save, ExternalLink, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import {
+  ChevronLeft, Save, ExternalLink, Search, Loader2, X,
+  Monitor, Tablet, Smartphone, Plus,
+} from 'lucide-react'
 import type { PageBlock } from '@/types/pageBlocks'
 import { BLOCK_DEFAULTS, BLOCK_LABELS } from '@/types/pageBlocks'
+import { BLOCK_ICONS, ELEMENT_CATEGORIES } from './blockMeta'
 import { BlockList } from './BlockList'
 import { BlockEditorPanel } from './BlockEditorPanel'
 import { PreviewPageWrapper } from './PreviewPageWrapper'
 import { PageBlockRenderer } from '@/presentation/components/PageBlockRenderer'
 
-// ─── Block type metadata ─────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
-const BLOCK_ICONS: Record<PageBlock['type'], string> = {
-  'hero':             '🖼',
-  'rich-text':        '📝',
-  'gallery':          '🗃',
-  'process':          '📋',
-  'two-column':       '⬛',
-  'features-grid':    '⊞',
-  'cta':              '🔲',
-  'image-carousel':   '🎠',
-  'comparison-cards': '⚖',
-  'whatsapp-cta':     '💬',
-  'custom':           '</>',
-  'form':             '📋',
-}
-
-const ALL_BLOCK_TYPES: PageBlock['type'][] = [
-  'hero', 'rich-text', 'gallery', 'process', 'two-column',
-  'features-grid', 'cta', 'image-carousel', 'comparison-cards',
-  'whatsapp-cta', 'custom', 'form',
-]
-
-// ─── Props ───────────────────────────────────────────────────────────────────
+type DeviceWidth = 'full' | 'tablet' | 'mobile'
+type PanelTab = 'elements' | 'blocks'
 
 interface ServicePageBuilderProps {
   service: {
@@ -51,6 +35,8 @@ interface ServicePageBuilderProps {
   categorySlug: string
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function initBlocks(service: ServicePageBuilderProps['service']): PageBlock[] {
   if (service.pageBlocks && service.pageBlocks.length > 0) return service.pageBlocks
   return [{
@@ -65,78 +51,121 @@ function initBlocks(service: ServicePageBuilderProps['service']): PageBlock[] {
   }]
 }
 
+const DEVICE_CONFIG: { id: DeviceWidth; label: string; maxWidth: string | undefined }[] = [
+  { id: 'full',   label: 'Desktop',    maxWidth: undefined },
+  { id: 'tablet', label: '768px',      maxWidth: '768px' },
+  { id: 'mobile', label: '390px',      maxWidth: '390px' },
+]
+
 // ─── Elements panel ──────────────────────────────────────────────────────────
 
 function ElementsPanel({ onAdd }: { onAdd: (type: PageBlock['type']) => void }) {
   const [search, setSearch] = useState('')
-  const filtered = ALL_BLOCK_TYPES.filter((t) =>
-    BLOCK_LABELS[t].toLowerCase().includes(search.toLowerCase())
-  )
+
+  const categories = ELEMENT_CATEGORIES.map((cat) => ({
+    ...cat,
+    types: cat.types.filter((t) =>
+      BLOCK_LABELS[t].toLowerCase().includes(search.toLowerCase()),
+    ),
+  })).filter((cat) => cat.types.length > 0)
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Search */}
-      <div className="p-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search elements..."
-          className="w-full rounded-md px-3 py-2 text-fluid-xs outline-none"
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.07)',
-            color: 'rgba(255,255,255,0.9)',
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}
-        />
-      </div>
-
-      {/* Grid */}
-      <div className="flex-1 overflow-y-auto p-3">
-        <div className="grid grid-cols-2 gap-2">
-          {filtered.map((type) => (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Search input */}
+      <div style={{ padding: '10px 12px', flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ position: 'relative' }}>
+          <Search
+            size={13}
+            style={{
+              position: 'absolute', left: 10, top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'rgba(255,255,255,0.28)', pointerEvents: 'none',
+            }}
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search elements…"
+            style={{
+              width: '100%', paddingLeft: 32, paddingRight: search ? 28 : 10,
+              paddingTop: 7, paddingBottom: 7, borderRadius: 7,
+              fontSize: '0.73rem', outline: 'none', boxSizing: 'border-box',
+              backgroundColor: 'rgba(255,255,255,0.06)',
+              color: 'rgba(255,255,255,0.85)',
+              border: '1px solid rgba(255,255,255,0.09)',
+            }}
+          />
+          {search && (
             <button
-              key={type}
-              onClick={() => onAdd(type)}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-lg text-center transition-all"
-              style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(226,192,99,0.15)'
-                e.currentTarget.style.borderColor = 'rgba(226,192,99,0.4)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+              onClick={() => setSearch('')}
+              style={{
+                position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', cursor: 'pointer', padding: 2,
+                color: 'rgba(255,255,255,0.35)', display: 'flex',
               }}
             >
-              <span
-                className="leading-none"
-                style={
-                  type === 'custom'
-                    ? { fontFamily: 'monospace', fontSize: '0.85rem', color: '#E2C063', fontWeight: 700 }
-                    : { fontSize: '1.25rem' }
-                }
-              >
-                {BLOCK_ICONS[type]}
-              </span>
-              <span className="text-fluid-xs font-medium leading-tight" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                {BLOCK_LABELS[type]}
-              </span>
+              <X size={11} />
             </button>
-          ))}
+          )}
         </div>
+      </div>
 
-        {filtered.length === 0 && (
-          <p className="text-center py-8 text-fluid-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            No elements found
-          </p>
+      {/* Category list */}
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 16 }}>
+        {categories.map((cat) => (
+          <div key={cat.label}>
+            <p style={{
+              padding: '14px 14px 5px',
+              fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em',
+              textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)',
+            }}>
+              {cat.label}
+            </p>
+            {cat.types.map((type) => {
+              const Icon = BLOCK_ICONS[type]
+              return (
+                <button
+                  key={type}
+                  onClick={() => onAdd(type)}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center',
+                    gap: 10, padding: '8px 14px',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    textAlign: 'left', transition: 'background 120ms ease',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(226,192,99,0.07)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                >
+                  <span style={{
+                    width: 28, height: 28, flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.07)',
+                  }}>
+                    <Icon size={14} style={{ color: 'rgba(255,255,255,0.5)' }} />
+                  </span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>
+                    {BLOCK_LABELS[type]}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        ))}
+
+        {categories.length === 0 && (
+          <div style={{ padding: '2.5rem 1rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)' }}>
+              Nothing matches &ldquo;{search}&rdquo;
+            </p>
+          </div>
         )}
       </div>
     </div>
   )
 }
 
-// ─── Main component ──────────────────────────────────────────────────────────
+// ─── Main builder ─────────────────────────────────────────────────────────────
 
 export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilderProps) {
   const router = useRouter()
@@ -145,20 +174,22 @@ export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilder
   const [published, setPublished] = useState(service.published)
   const [saving, setSaving] = useState(false)
   const [panelOpen, setPanelOpen] = useState(true)
-  const [panelTab, setPanelTab] = useState<'elements' | 'blocks'>('elements')
+  const [panelTab, setPanelTab] = useState<PanelTab>('elements')
+  const [deviceWidth, setDeviceWidth] = useState<DeviceWidth>('full')
 
   const activeBlock = blocks.find((b) => b.id === activeBlockId) ?? null
+  const ActiveBlockIcon = activeBlock ? BLOCK_ICONS[activeBlock.type] : null
   const visitUrl = `/services/${categorySlug}/${service.slug}`
+  const canvasMaxWidth = DEVICE_CONFIG.find((d) => d.id === deviceWidth)?.maxWidth
 
   // ── Block operations ──────────────────────────────────────────────────────
 
   const addBlock = useCallback((type: PageBlock['type']) => {
-    const newBlock: PageBlock = {
+    const newBlock = {
       id: crypto.randomUUID(),
       type,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: BLOCK_DEFAULTS[type] as any,
-    }
+      data: BLOCK_DEFAULTS[type],
+    } as PageBlock
     setBlocks((prev) => [...prev, newBlock])
     setActiveBlockId(newBlock.id)
     setPanelTab('blocks')
@@ -216,221 +247,290 @@ export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilder
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: '#F5EFE8' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', backgroundColor: '#161210' }}>
 
       {/* ── Top bar ── */}
-      <header
-        className="flex items-center justify-between px-4 flex-shrink-0"
-        style={{
-          backgroundColor: 'white',
-          borderBottom: '1px solid #E5DDD0',
-          minHeight: '52px',
-          zIndex: 10,
-        }}
-      >
-        {/* Left */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setPanelOpen((v) => !v)}
-            className="p-1.5 rounded-md transition-all"
-            style={{ color: '#6B6560' }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
-            title={panelOpen ? 'Close panel' : 'Open panel'}
-          >
-            {panelOpen
-              ? <PanelLeftClose className="w-4 h-4" />
-              : <PanelLeftOpen className="w-4 h-4" />}
-          </button>
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 12px 0 16px', flexShrink: 0, height: 50,
+        backgroundColor: '#1C1916', borderBottom: '1px solid rgba(255,255,255,0.06)',
+        zIndex: 20,
+      }}>
 
+        {/* Left: breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
           <Link
             href="/admin/services"
-            className="flex items-center gap-1 text-fluid-sm transition-opacity hover:opacity-70"
-            style={{ color: '#6B6560' }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 3,
+              fontSize: '0.72rem', color: 'rgba(255,255,255,0.38)',
+              textDecoration: 'none', flexShrink: 0,
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.75)' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.38)' }}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft size={13} />
             Services
           </Link>
-          <span style={{ color: '#C5BDB5' }}>›</span>
-          <span className="text-fluid-sm font-medium" style={{ color: '#2D2924' }}>{service.name}</span>
+          <span style={{ color: 'rgba(255,255,255,0.18)', fontSize: '0.72rem' }}>/</span>
+          <span style={{
+            fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.82)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200,
+          }}>
+            {service.name}
+          </span>
+          <span style={{
+            fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.08em',
+            padding: '2px 7px', borderRadius: 99,
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            color: 'rgba(255,255,255,0.28)',
+            textTransform: 'uppercase', flexShrink: 0,
+          }}>
+            Builder
+          </span>
         </div>
 
-        {/* Right */}
-        <div className="flex items-center gap-2">
+        {/* Center: device switcher */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 1,
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          borderRadius: 8, padding: '3px',
+        }}>
+          {([
+            { id: 'full'   as DeviceWidth, Icon: Monitor,    label: 'Full' },
+            { id: 'tablet' as DeviceWidth, Icon: Tablet,     label: '768' },
+            { id: 'mobile' as DeviceWidth, Icon: Smartphone, label: '390' },
+          ]).map(({ id, Icon, label }) => (
+            <button
+              key={id}
+              title={id === 'full' ? 'Full width' : `${label}px`}
+              onClick={() => setDeviceWidth(id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '5px 10px', borderRadius: 6,
+                border: 'none', cursor: 'pointer',
+                backgroundColor: deviceWidth === id ? 'rgba(255,255,255,0.11)' : 'transparent',
+                color: deviceWidth === id ? '#E2C063' : 'rgba(255,255,255,0.38)',
+                transition: 'all 140ms ease',
+                fontSize: '0.68rem', fontWeight: deviceWidth === id ? 600 : 500,
+              }}
+              onMouseEnter={(e) => { if (deviceWidth !== id) e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}
+              onMouseLeave={(e) => { if (deviceWidth !== id) e.currentTarget.style.color = 'rgba(255,255,255,0.38)' }}
+            >
+              <Icon size={14} />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Right: actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <a
             href={visitUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-fluid-xs font-medium transition-all"
-            style={{ border: '1px solid #E5DDD0', color: '#6B6560' }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F5EFE8' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '5px 11px', borderRadius: 7,
+              fontSize: '0.72rem', fontWeight: 500,
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.5)',
+              textDecoration: 'none', transition: 'all 140ms',
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement
+              el.style.borderColor = 'rgba(255,255,255,0.22)'
+              el.style.color = 'rgba(255,255,255,0.85)'
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement
+              el.style.borderColor = 'rgba(255,255,255,0.1)'
+              el.style.color = 'rgba(255,255,255,0.5)'
+            }}
           >
-            <ExternalLink className="w-3.5 h-3.5" />
-            Visit Page
+            <ExternalLink size={12} />
+            Visit
           </a>
 
           <button
             onClick={togglePublished}
-            className="px-3 py-1.5 rounded-full text-fluid-xs font-medium transition-all"
-            style={published
-              ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d', border: '1px solid rgba(34,197,94,0.3)' }
-              : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560', border: '1px solid #E5DDD0' }}
+            style={{
+              padding: '5px 11px', borderRadius: 7,
+              fontSize: '0.72rem', fontWeight: 600,
+              border: 'none', cursor: 'pointer', transition: 'all 140ms',
+              ...(published
+                ? { backgroundColor: 'rgba(74,222,128,0.12)', color: '#4ade80' }
+                : { backgroundColor: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.45)' }),
+            }}
           >
-            {published ? 'Published' : 'Draft'}
+            {published ? '● Published' : '○ Draft'}
           </button>
 
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-fluid-xs font-semibold min-h-[34px] transition-all"
             style={{
-              backgroundColor: saving ? '#C8A55C' : '#E2C063',
-              color: '#1E1A16',
-              cursor: saving ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '6px 16px', borderRadius: 7,
+              fontSize: '0.75rem', fontWeight: 700,
+              border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
+              backgroundColor: saving ? 'rgba(226,192,99,0.55)' : '#E2C063',
+              color: '#1A1714', transition: 'background 140ms ease',
+              letterSpacing: '0.01em',
             }}
           >
-            <Save className="w-3.5 h-3.5" />
+            {saving
+              ? <Loader2 size={13} style={{ animation: 'pb-spin 0.8s linear infinite' }} />
+              : <Save size={13} />}
             {saving ? 'Saving…' : 'Save'}
           </button>
         </div>
       </header>
 
       {/* ── Body ── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
         {/* ── Left panel ── */}
-        <div
-          className="flex-shrink-0 flex flex-col overflow-hidden"
-          style={{
-            width: panelOpen ? '380px' : '0',
-            transition: 'width 280ms cubic-bezier(0.4,0,0.2,1)',
-            backgroundColor: '#1E1A16',
-          }}
-        >
+        <div style={{
+          flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          width: panelOpen ? 310 : 0,
+          transition: 'width 260ms cubic-bezier(0.4,0,0.2,1)',
+          backgroundColor: '#1C1916',
+          borderRight: '1px solid rgba(255,255,255,0.05)',
+        }}>
           {/* Panel tabs */}
-          <div
-            className="flex flex-shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', minHeight: '42px' }}
-          >
+          <div style={{
+            display: 'flex', flexShrink: 0, height: 40,
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+          }}>
             {(['elements', 'blocks'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setPanelTab(tab)}
-                className="flex-1 text-fluid-xs font-semibold transition-all"
                 style={{
-                  color: panelTab === tab ? '#E2C063' : 'rgba(255,255,255,0.45)',
-                  borderBottom: panelTab === tab ? '2px solid #E2C063' : '2px solid transparent',
+                  flex: 1, border: 'none', cursor: 'pointer',
+                  fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.01em',
                   backgroundColor: 'transparent',
+                  color: panelTab === tab ? '#E2C063' : 'rgba(255,255,255,0.33)',
+                  borderBottom: panelTab === tab ? '2px solid #E2C063' : '2px solid transparent',
+                  transition: 'all 140ms ease',
                 }}
               >
-                {tab === 'elements' ? 'Elements' : 'Blocks'}
+                {tab === 'elements' ? 'Add' : `Page (${blocks.length})`}
               </button>
             ))}
           </div>
 
-          {/* Panel content */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Panel body */}
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+
+            {/* — Add elements tab */}
             {panelTab === 'elements' && (
               <ElementsPanel onAdd={addBlock} />
             )}
 
+            {/* — Page structure tab */}
             {panelTab === 'blocks' && (
-              <div className="flex flex-col h-full overflow-hidden">
-                {/* Block count header */}
-                <div
-                  className="px-4 py-2 flex-shrink-0 flex items-center justify-between"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
-                >
-                  <span className="text-fluid-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    {blocks.length} {blocks.length === 1 ? 'block' : 'blocks'}
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+                {/* Structure header */}
+                <div style={{
+                  padding: '7px 12px', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                }}>
+                  <span style={{
+                    fontSize: '0.57rem', fontWeight: 700, letterSpacing: '0.1em',
+                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)',
+                  }}>
+                    Page structure
                   </span>
                   <button
                     onClick={() => setPanelTab('elements')}
-                    className="text-fluid-xs px-2 py-1 rounded transition-all"
-                    style={{ color: '#E2C063', border: '1px solid rgba(226,192,99,0.3)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(226,192,99,0.1)' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 4,
+                      padding: '3px 8px', borderRadius: 5,
+                      border: '1px solid rgba(226,192,99,0.22)',
+                      background: 'rgba(226,192,99,0.06)',
+                      color: '#E2C063', fontSize: '0.68rem', fontWeight: 600,
+                      cursor: 'pointer', transition: 'background 130ms',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(226,192,99,0.12)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(226,192,99,0.06)' }}
                   >
-                    + Add
+                    <Plus size={10} /> Add
                   </button>
                 </div>
 
-                {/* Block list — dark-themed wrapper */}
-                <div
-                  className="overflow-y-auto"
-                  style={{
-                    maxHeight: activeBlock ? '200px' : undefined,
-                    flex: activeBlock ? 'none' : '1',
-                    backgroundColor: '#1E1A16',
-                  }}
-                >
-                  <style>{`
-                    .dark-block-list li { border-color: rgba(255,255,255,0.06) !important; }
-                    .dark-block-list li > span { color: rgba(255,255,255,0.85) !important; }
-                    .dark-block-list li button { color: rgba(255,255,255,0.4) !important; }
-                  `}</style>
-                  <div className="dark-block-list">
-                    <BlockList
-                      blocks={blocks}
-                      activeBlockId={activeBlockId}
-                      onSelect={setActiveBlockId}
-                      onDelete={deleteBlock}
-                      onReorder={reorderBlocks}
-                    />
-                  </div>
+                {/* Block list */}
+                <div style={{
+                  overflowY: 'auto',
+                  flex: activeBlock ? '0 0 auto' : 1,
+                  maxHeight: activeBlock ? '220px' : undefined,
+                }}>
+                  <BlockList
+                    blocks={blocks}
+                    activeBlockId={activeBlockId}
+                    onSelect={setActiveBlockId}
+                    onDelete={deleteBlock}
+                    onReorder={reorderBlocks}
+                  />
                 </div>
 
-                {/* Editor for selected block */}
-                {activeBlock && (
-                  <div
-                    className="flex-1 overflow-y-auto flex flex-col"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#262220' }}
-                  >
-                    <div
-                      className="px-4 py-2.5 flex-shrink-0 flex items-center justify-between"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
-                    >
-                      <span className="text-fluid-xs font-semibold" style={{ color: '#E2C063' }}>
-                        {BLOCK_LABELS[activeBlock.type]}
-                      </span>
+                {/* Active block editor */}
+                {activeBlock && ActiveBlockIcon && (
+                  <div style={{
+                    flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                    borderTop: '1px solid rgba(255,255,255,0.07)',
+                    backgroundColor: '#201D1A',
+                  }}>
+                    {/* Editor header */}
+                    <div style={{
+                      padding: '9px 12px', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{
+                          width: 24, height: 24, flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          borderRadius: 5, backgroundColor: 'rgba(226,192,99,0.14)',
+                        }}>
+                          <ActiveBlockIcon size={12} style={{ color: '#E2C063' }} />
+                        </span>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#E2C063', letterSpacing: '0.01em' }}>
+                          {BLOCK_LABELS[activeBlock.type]}
+                        </span>
+                      </div>
                       <button
                         onClick={() => setActiveBlockId(null)}
-                        className="text-fluid-xs px-1.5 py-0.5 rounded transition-colors"
-                        style={{ color: 'rgba(255,255,255,0.4)' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)' }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          color: 'rgba(255,255,255,0.28)', padding: 4, borderRadius: 4,
+                          display: 'flex', alignItems: 'center', transition: 'color 130ms',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.28)' }}
                       >
-                        ✕
+                        <X size={13} />
                       </button>
                     </div>
-                    <div className="overflow-y-auto flex-1">
-                      <style>{`
-                        /* Hide BlockEditorPanel's built-in "Editing: X" header — we show our own */
-                        .dark-editor > div > div:first-child { display: none !important; }
-                        .dark-editor > div { border-top: none !important; }
-                        .dark-editor label { color: rgba(255,255,255,0.7) !important; }
-                        .dark-editor input:not([type="range"]), .dark-editor select {
-                          background: rgba(255,255,255,0.07) !important;
-                          color: rgba(255,255,255,0.9) !important;
-                          border-color: rgba(255,255,255,0.15) !important;
-                        }
-                        .dark-editor input::placeholder { color: rgba(255,255,255,0.3) !important; }
-                        .dark-editor textarea:not(.code-editor) {
-                          background: rgba(255,255,255,0.07) !important;
-                          color: rgba(255,255,255,0.9) !important;
-                          border-color: rgba(255,255,255,0.15) !important;
-                        }
-                        .dark-editor textarea::placeholder { color: rgba(255,255,255,0.3) !important; }
-                        .dark-editor span { color: rgba(255,255,255,0.6) !important; }
-                      `}</style>
-                      <div className="dark-editor">
-                        <BlockEditorPanel
-                          block={activeBlock}
-                          onChange={(data) => updateBlock(activeBlock.id, data)}
-                        />
-                      </div>
+
+                    {/* Editor fields */}
+                    <div className="pb-dark-editor" style={{ flex: 1, overflowY: 'auto' }}>
+                      <BlockEditorPanel
+                        block={activeBlock}
+                        onChange={(data) => updateBlock(activeBlock.id, data)}
+                      />
                     </div>
+                  </div>
+                )}
+
+                {/* No selection hint */}
+                {!activeBlock && blocks.length > 0 && (
+                  <div style={{ padding: '1.5rem 14px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.22)', lineHeight: 1.6 }}>
+                      Select a block above to edit its content and settings.
+                    </p>
                   </div>
                 )}
               </div>
@@ -438,33 +538,132 @@ export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilder
           </div>
         </div>
 
-        {/* ── Canvas ── */}
-        <div
-          className="flex-1 overflow-y-auto"
-          style={{ backgroundColor: '#DDD8D0' }}
-        >
+        {/* ── Canvas column ── */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+          {/* Canvas toolbar */}
+          <div style={{
+            height: 34, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0 14px',
+            backgroundColor: '#181513',
+            borderBottom: '1px solid rgba(255,255,255,0.04)',
+          }}>
+            <button
+              onClick={() => setPanelOpen((v) => !v)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontSize: '0.65rem', fontWeight: 600,
+                color: 'rgba(255,255,255,0.28)',
+                padding: '3px 8px', borderRadius: 5, transition: 'all 130ms',
+                letterSpacing: '0.02em',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'rgba(255,255,255,0.65)'
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255,255,255,0.28)'
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              {panelOpen ? '‹ Hide panel' : '› Show panel'}
+            </button>
+
+            <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.18)', fontVariantNumeric: 'tabular-nums' }}>
+              {deviceWidth === 'full' ? 'Full width' : deviceWidth === 'tablet' ? 'Tablet · 768px' : 'Mobile · 390px'}
+              {' · '}
+              {blocks.length} {blocks.length === 1 ? 'block' : 'blocks'}
+            </span>
+          </div>
+
+          {/* Canvas viewport */}
           <div
-            className="mx-auto bg-white"
-            style={{ minHeight: '100%', boxShadow: '0 0 0 1px rgba(0,0,0,0.08), 0 4px 24px rgba(0,0,0,0.12)' }}
+            style={{
+              flex: 1, overflowY: 'auto',
+              backgroundColor: '#1E1B17',
+              backgroundImage: deviceWidth !== 'full'
+                ? 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)'
+                : undefined,
+              backgroundSize: '22px 22px',
+              padding: deviceWidth !== 'full' ? '28px 16px' : 0,
+            }}
           >
-            {blocks.length === 0 ? (
-              <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
-                <div className="text-center">
-                  <p className="text-fluid-2xl mb-2" style={{ color: '#9C8F83' }}>∅</p>
-                  <p className="text-fluid-sm" style={{ color: '#9C8F83' }}>
-                    No blocks yet — add one from the Elements panel.
+            <div
+              style={{
+                margin: '0 auto',
+                width: canvasMaxWidth ?? '100%',
+                maxWidth: canvasMaxWidth,
+                minHeight: deviceWidth !== 'full' ? '80vh' : '100%',
+                backgroundColor: '#fff',
+                boxShadow: deviceWidth !== 'full'
+                  ? '0 0 0 1px rgba(0,0,0,0.25), 0 12px 48px rgba(0,0,0,0.5)'
+                  : 'none',
+                borderRadius: deviceWidth !== 'full' ? 4 : 0,
+                overflow: 'hidden',
+                transition: 'max-width 280ms cubic-bezier(0.4,0,0.2,1)',
+              }}
+            >
+              {blocks.length === 0 ? (
+                <div style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  justifyContent: 'center', minHeight: '70vh', gap: 14,
+                }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: 14,
+                    border: '2px dashed rgba(0,0,0,0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Plus size={22} style={{ color: 'rgba(0,0,0,0.18)' }} />
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: 'rgba(0,0,0,0.28)', textAlign: 'center', lineHeight: 1.5 }}>
+                    Add your first element<br />from the panel on the left.
                   </p>
                 </div>
-              </div>
-            ) : (
-              <PreviewPageWrapper>
-                <PageBlockRenderer blocks={blocks} />
-              </PreviewPageWrapper>
-            )}
+              ) : (
+                <PreviewPageWrapper>
+                  <PageBlockRenderer blocks={blocks} />
+                </PreviewPageWrapper>
+              )}
+            </div>
           </div>
         </div>
-
       </div>
+
+      {/* Global styles */}
+      <style>{`
+        @keyframes pb-spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+
+        /* Dark mode overrides for BlockEditorPanel fields */
+        .pb-dark-editor > div > div:first-child { display: none !important; }
+        .pb-dark-editor > div { border-top: none !important; }
+        .pb-dark-editor label {
+          color: rgba(255,255,255,0.6) !important;
+          font-size: 0.7rem !important;
+          font-weight: 500 !important;
+        }
+        .pb-dark-editor input:not([type="range"]),
+        .pb-dark-editor select {
+          background: rgba(255,255,255,0.07) !important;
+          color: rgba(255,255,255,0.88) !important;
+          border-color: rgba(255,255,255,0.11) !important;
+        }
+        .pb-dark-editor input::placeholder,
+        .pb-dark-editor textarea::placeholder {
+          color: rgba(255,255,255,0.22) !important;
+        }
+        .pb-dark-editor textarea:not(.code-editor) {
+          background: rgba(255,255,255,0.07) !important;
+          color: rgba(255,255,255,0.88) !important;
+          border-color: rgba(255,255,255,0.11) !important;
+        }
+        .pb-dark-editor p.text-fluid-xs,
+        .pb-dark-editor span:not([data-keep]) {
+          color: rgba(255,255,255,0.5) !important;
+        }
+        .pb-dark-editor .p-4 { padding: 12px 14px !important; }
+        .pb-dark-editor .space-y-4 > * + * { margin-top: 10px !important; }
+      `}</style>
     </div>
   )
 }
