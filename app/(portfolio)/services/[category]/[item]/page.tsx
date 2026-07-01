@@ -9,6 +9,8 @@ import {
   SERVICE_ROOT_NAMES,
   isServiceRootSlug,
 } from '@/presentation/data/serviceCategoryMeta'
+import { PageBlockRenderer } from '@/presentation/components/PageBlockRenderer'
+import type { Service } from '@/core/entities/Service'
 
 function isVideo(url: string) {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
@@ -110,8 +112,16 @@ export default async function ServiceItemPage({
   const { service } = resolved
   const categoryName = SERVICE_ROOT_NAMES[category as keyof typeof SERVICE_ROOT_NAMES]
 
+  if (service.pageBlocks && service.pageBlocks.length > 0) {
+    return (
+      <main>
+        <PageBlockRenderer blocks={service.pageBlocks} />
+      </main>
+    )
+  }
+
   return (
-    <>
+    <main>
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <div className="relative" style={{ height: '70vh', maxHeight: 600, minHeight: 400 }}>
         {isVideo(service.imageUrl) ? (
@@ -163,64 +173,69 @@ export default async function ServiceItemPage({
         </div>
       </div>
 
-      {/* ── Body ──────────────────────────────────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
-        <div className="flex flex-col lg:flex-row gap-16">
+      <LegacyServiceBody service={service} />
+    </main>
+  )
+}
 
-          {/* ── Left: Description + Gallery ─────────────────────────────────── */}
-          <div className="flex-1 min-w-0">
-            {service.fullDescription && (
-              <p
-                className="text-fluid-xl leading-relaxed mb-12"
-                style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)' }}
-              >
-                {service.fullDescription}
-              </p>
-            )}
+function LegacyServiceBody({ service }: { service: Service }) {
+  return (
+    <div className="max-w-6xl mx-auto px-6 md:px-12 py-16">
+      <div className="flex flex-col lg:flex-row gap-16">
 
-            {service.galleryItems.length > 0 && (
-              <ProjectGallery items={service.galleryItems} />
-            )}
-          </div>
-
-          {/* ── Right: CTA sidebar ──────────────────────────────────────────── */}
-          <aside className="lg:w-72 xl:w-80 flex-shrink-0">
-            <div
-              className="rounded-2xl p-8 sticky top-8"
-              style={{
-                backgroundColor: '#1E1A16',
-                border: '1px solid rgba(226,192,99,0.18)',
-              }}
+        {/* ── Left: Description + Gallery ─────────────────────────────────── */}
+        <div className="flex-1 min-w-0">
+          {service.fullDescription && (
+            <p
+              className="text-fluid-xl leading-relaxed mb-12"
+              style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)' }}
             >
-              <h3
-                className="text-fluid-xs uppercase tracking-widest mb-4"
-                style={{ color: '#E2C063' }}
-              >
-                Interested?
-              </h3>
-              <p className="text-fluid-sm mb-6" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
-                Our team specialises in {service.name.toLowerCase()}. Tell us about your project and we&apos;ll be in touch.
-              </p>
+              {service.fullDescription}
+            </p>
+          )}
 
-              <Link
-                href="/#contact"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-semibold transition-all duration-200 mb-3"
-                style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
-              >
-                Request a Quote
-              </Link>
-
-              <Link
-                href="/projects"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-medium transition-all duration-200"
-                style={{ border: '1px solid rgba(226,192,99,0.3)', color: '#E2C063' }}
-              >
-                View Our Projects
-              </Link>
-            </div>
-          </aside>
+          {service.galleryItems.length > 0 && (
+            <ProjectGallery items={service.galleryItems} />
+          )}
         </div>
+
+        {/* ── Right: CTA sidebar ──────────────────────────────────────────── */}
+        <aside className="lg:w-72 xl:w-80 flex-shrink-0">
+          <div
+            className="rounded-2xl p-8 sticky top-8"
+            style={{
+              backgroundColor: '#1E1A16',
+              border: '1px solid rgba(226,192,99,0.18)',
+            }}
+          >
+            <h3
+              className="text-fluid-xs uppercase tracking-widest mb-4"
+              style={{ color: '#E2C063' }}
+            >
+              Interested?
+            </h3>
+            <p className="text-fluid-sm mb-6" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
+              Our team specialises in {service.name.toLowerCase()}. Tell us about your project and we&apos;ll be in touch.
+            </p>
+
+            <Link
+              href="/#contact"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-semibold transition-all duration-200 mb-3"
+              style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+            >
+              Request a Quote
+            </Link>
+
+            <Link
+              href="/projects"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-medium transition-all duration-200"
+              style={{ border: '1px solid rgba(226,192,99,0.3)', color: '#E2C063' }}
+            >
+              View Our Projects
+            </Link>
+          </div>
+        </aside>
       </div>
-    </>
+    </div>
   )
 }
