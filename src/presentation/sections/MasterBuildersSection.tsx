@@ -291,7 +291,7 @@ export default function MasterBuildersSection() {
                   maxWidth: '26rem',
                 }}
               >
-                In short: for you, it is a safety filter that dramatically lowers the risk of a poor
+                For you, it is a safety filter that dramatically lowers the risk of a poor
                 build — and the peace of mind that comes with it.
               </p>
               <a
