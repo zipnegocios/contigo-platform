@@ -681,7 +681,7 @@ export function FormPageBuilder({ slug, formName, initialFields, versions }: Pro
                 )}
               </div>
 
-              {/* Config panel for selected field */}
+              {/* Config panel for selected field — rendered in a light card inside the dark panel */}
               {selectedField && panelTab === 'fields' && (
                 <div
                   style={{
@@ -689,14 +689,16 @@ export function FormPageBuilder({ slug, formName, initialFields, versions }: Pro
                     overflowY: 'auto',
                     maxHeight: '45%',
                     flexShrink: 0,
+                    background: '#F5EFE8',
                   }}
                 >
                   <div
                     style={{
-                      // Dark theme overrides for FieldConfigPanel
-                      filter: 'none',
-                      padding: '0.75rem',
-                    }}
+                      padding: '0.5rem',
+                      // Override FieldConfigPanel's fixed dimensions to fit the embedded context
+                      '--field-config-width': '100%',
+                      '--field-config-max-height': 'none',
+                    } as React.CSSProperties}
                   >
                     <FieldConfigPanel
                       field={selectedField}

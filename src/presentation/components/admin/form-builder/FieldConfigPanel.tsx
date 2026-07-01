@@ -57,10 +57,10 @@ export function FieldConfigPanel({ field, onChange, onDelete, onClose }: FieldCo
     <aside
       className="flex-shrink-0 rounded-2xl p-4 overflow-y-auto space-y-4"
       style={{
-        width: 320,
+        width: 'var(--field-config-width, 320px)',
         backgroundColor: 'rgba(226,192,99,0.03)',
         border: '1px solid rgba(226,192,99,0.1)',
-        maxHeight: 'calc(100vh - 220px)',
+        maxHeight: 'var(--field-config-max-height, calc(100vh - 220px))',
       }}
     >
       <div className="flex items-center justify-between">
