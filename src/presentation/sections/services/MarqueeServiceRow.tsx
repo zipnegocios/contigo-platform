@@ -110,7 +110,7 @@ export default function MarqueeServiceRow({
         const delta = e.clientX - dragStartXRef.current
         totalMovementRef.current = Math.max(totalMovementRef.current, Math.abs(delta))
         gsap.set(track, {
-          x: gsap.utils.wrap(-oneSetWidth, 0, trackStartXRef.current + delta),
+          x: gsap.utils.wrap(min, max, trackStartXRef.current + delta),
         })
       }
 
@@ -147,7 +147,7 @@ export default function MarqueeServiceRow({
         tween.pause()
         const currentX = gsap.getProperty(track, 'x') as number
         const step = navDir * direction * CARD_WIDTH_PX
-        const targetX = gsap.utils.wrap(-oneSetWidth, 0, currentX + step)
+        const targetX = gsap.utils.wrap(min, max, currentX + step)
         gsap.to(track, {
           x: targetX,
           duration: 0.5,
