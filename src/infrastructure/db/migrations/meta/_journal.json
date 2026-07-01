@@ -148,6 +148,13 @@
       "when": 1782901627000,
       "tag": "20260701110827_grant_form_builder_all_admins",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1782950400000,
+      "tag": "20260702000000_add_hero_config",
+      "breakpoints": true
     }
   ]
 }

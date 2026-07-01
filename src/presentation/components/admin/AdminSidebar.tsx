@@ -16,6 +16,7 @@ import {
   Globe,
   UserCog,
   LayoutTemplate,
+  LayoutPanelTop,
 } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 
@@ -24,6 +25,7 @@ const navItems = [
   { label: 'Projects', href: '/admin/projects', icon: FolderOpen },
   { label: 'Services', href: '/admin/services', icon: Briefcase },
   { label: 'Categories', href: '/admin/categories', icon: Tag },
+  { label: 'Hero Section', href: '/admin/hero', icon: LayoutPanelTop },
   { label: 'Media Library', href: '/admin/media', icon: Images },
   { label: 'Leads', href: '/admin/leads', icon: Trello },
   { label: 'Leads Management', href: '/admin/leads/management/staff', icon: UserCog },

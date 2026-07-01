@@ -7,6 +7,7 @@ import BrandPromiseSection from '@/presentation/sections/BrandPromiseSection'
 import ProjectsSection from '@/presentation/sections/ProjectsSection'
 import Footer from '@/presentation/sections/Footer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { DrizzleHeroConfigRepository } from '@/infrastructure/repositories/DrizzleHeroConfigRepository'
 import { MarketingPageClient } from './MarketingPageClient'
 
 const ContactSection = nextDynamic(
@@ -28,6 +29,15 @@ export default async function HomePage() {
     coverImageUrl: string
     coverPosterUrl: string | null
   }[] = []
+
+  let heroConfigData = null
+  try {
+    if (process.env.DATABASE_URL) {
+      heroConfigData = await new DrizzleHeroConfigRepository().get()
+    }
+  } catch (err) {
+    console.error('HomePage: failed to fetch hero config', err)
+  }
 
   try {
     if (process.env.DATABASE_URL) {
@@ -53,7 +63,7 @@ export default async function HomePage() {
       <SimpleHeader />
 
       <main className="relative">
-        <HeroSection />
+        <HeroSection config={heroConfigData} />
         <BrandBar />
         <ServicesSection />
         <BrandPromiseSection />

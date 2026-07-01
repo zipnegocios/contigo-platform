@@ -533,3 +533,20 @@ export const staffUserPermissions = pgTable(
   },
   (table) => [primaryKey({ columns: [table.userId, table.permissionKey] })],
 )
+
+// ============ HERO_CONFIG TABLE ============
+// Singleton row (one record) controls the homepage hero section CMS.
+export const heroConfig = pgTable('hero_config', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  mode: varchar('mode', { length: 20 }).notNull().default('single'),
+  headline: text('headline').notNull().default(''),
+  subtitle: text('subtitle'),
+  eyebrow: varchar('eyebrow', { length: 255 }),
+  desktopImageUrl: text('desktop_image_url'),
+  mobileImageUrl: text('mobile_image_url'),
+  buttons: jsonb('buttons').notNull().default(sql`'[]'::jsonb`),
+  slides: jsonb('slides').notNull().default(sql`'[]'::jsonb`),
+  autoplayInterval: integer('autoplay_interval').notNull().default(5000),
+  overlayOpacity: integer('overlay_opacity').notNull().default(50),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
