@@ -36,8 +36,14 @@ import { toast } from 'sonner'
 import type { FormField } from '@/core/form-schema/FormSchema'
 import type { FormVersionSummary } from '@/core/repositories/IFormRepository'
 import { FIELD_CATEGORIES, fieldTypeLabel } from './fieldCategories'
+import { FIELD_TYPE_REGISTRY } from '@/core/form-schema/fieldTypes'
 import { FieldConfigPanel } from './FieldConfigPanel'
 import { FormVersionsDrawer } from './FormVersionsDrawer'
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  AUD: '$', USD: '$', EUR: '€', GBP: '£', NZD: '$',
+  CAD: '$', JPY: '¥', CHF: 'Fr', SGD: '$', HKD: '$',
+}
 
 interface Props {
   slug: string
@@ -368,101 +374,431 @@ function FieldsTab({
 
 function FieldPreview({ field }: { field: FormField }) {
   const inputBase: React.CSSProperties = {
-    width: '100%',
-    padding: '0.5rem 0.75rem',
-    border: '1px solid #E5DDD0',
-    borderRadius: 6,
-    fontSize: '0.875rem',
-    background: '#fafafa',
-    boxSizing: 'border-box',
-    color: '#6B6560',
+    width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #E5DDD0',
+    borderRadius: 6, fontSize: '0.875rem', background: '#fafafa',
+    boxSizing: 'border-box', color: '#6B6560',
+  }
+  const descriptor = FIELD_TYPE_REGISTRY[field.type]
+  const renderer   = descriptor?.renderer
+  const t = field.type
+
+  // ── Layout/nav/system non-interactive types ──────────────────────────────
+  if (t === 'divider')
+    return <hr style={{ border: 'none', borderTop: '1px solid #E5DDD0', margin: '0.5rem 0' }} />
+
+  if (t === 'spacer')
+    return <div style={{ height: field.colSpan ? `${field.colSpan * 8}px` : '32px' }} />
+
+  if (t === 'step') {
+    return (
+      <div style={{ borderLeft: '3px solid #E2C063', paddingLeft: 12, margin: '0.75rem 0' }}>
+        <p style={{ fontWeight: 700, fontSize: '0.95rem', color: '#2D2924', margin: 0 }}>
+          {field.stepTitle ?? field.label}
+        </p>
+        {field.stepDescription && (
+          <p style={{ fontSize: '0.78rem', color: '#6B6560', marginTop: 2, marginBottom: 0 }}>
+            {field.stepDescription}
+          </p>
+        )}
+      </div>
+    )
   }
 
-  const type = field.type
+  if (t === 'heading_block') {
+    const level = field.headingLevel ?? 2
+    const sizes = ['2rem', '1.5rem', '1.25rem', '1.1rem', '1rem', '0.9rem']
+    return (
+      <div style={{ fontWeight: 700, fontSize: sizes[level - 1], color: '#2D2924', margin: '0.5rem 0' }}>
+        {field.content ?? field.label}
+      </div>
+    )
+  }
 
+  if (t === 'paragraph_block') {
+    return (
+      <p style={{ fontSize: '0.9rem', lineHeight: 1.65, color: '#4a4540', margin: 0 }}>
+        {field.content
+          ? field.content
+          : <span style={{ fontStyle: 'italic', color: '#9B968F' }}>(Paragraph text — set content in the panel)</span>
+        }
+      </p>
+    )
+  }
+
+  if (t === 'html_embed') {
+    return (
+      <div style={{
+        background: '#F5EFE8', border: '1px dashed #E5DDD0', borderRadius: 6,
+        padding: '0.6rem', fontSize: '0.75rem', fontFamily: 'monospace',
+        color: '#6B6560', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+      }}>
+        {field.content
+          ? (field.content.length > 200 ? field.content.slice(0, 200) + '…' : field.content)
+          : '<!-- HTML embed — add content in the panel -->'}
+      </div>
+    )
+  }
+
+  if (renderer === 'NavRenderer') {
+    const navBtn = (label: string, isPrimary: boolean) => (
+      <button disabled style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        padding: '0.45rem 1rem', borderRadius: 6, fontSize: '0.85rem', fontWeight: 600,
+        cursor: 'default', border: isPrimary ? 'none' : '1px solid #E5DDD0',
+        background: isPrimary ? '#E2C063' : 'transparent',
+        color: isPrimary ? '#2D2924' : '#6B6560',
+      }}>{label}</button>
+    )
+    if (t === 'back_button') return navBtn(`← ${field.label}`, false)
+    if (t === 'submit_button' || t === 'next_button' || t === 'save_and_continue') return navBtn(field.label, true)
+    if (t === 'progress_bar' || t === 'stepper' || t === 'breadcrumbs') {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {[1, 2, 3].map(n => (
+            <div key={n} style={{
+              width: 28, height: 28, borderRadius: '50%',
+              background: n === 1 ? '#E2C063' : '#E5DDD0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '0.7rem', fontWeight: 700,
+              color: n === 1 ? '#2D2924' : '#6B6560',
+            }}>{n}</div>
+          ))}
+        </div>
+      )
+    }
+    return <div style={{ fontSize: '0.8rem', color: '#6B6560', fontStyle: 'italic' }}>[{fieldTypeLabel(t)}]</div>
+  }
+
+  if (renderer === 'LayoutRenderer') {
+    return (
+      <div style={{
+        border: '1px dashed #E5DDD0', borderRadius: 6, padding: '0.5rem',
+        fontSize: '0.75rem', color: '#6B6560', fontStyle: 'italic',
+      }}>
+        [{fieldTypeLabel(t)}]
+      </div>
+    )
+  }
+
+  if (renderer === 'SystemFieldRenderer') {
+    return (
+      <div style={{
+        background: '#F5EFE8', border: '1px solid #E5DDD0', borderRadius: 6,
+        padding: '0.4rem 0.75rem', fontSize: '0.75rem', color: '#9B968F', fontStyle: 'italic',
+      }}>
+        {fieldTypeLabel(t)} (auto-populated)
+      </div>
+    )
+  }
+
+  // ── Data field controls ─────────────────────────────────────────────────
   let control: React.ReactNode = null
 
-  if (['text', 'email', 'phone', 'url', 'slug', 'masked', 'postcode', 'password', 'hidden'].includes(type)) {
-    control = <input readOnly placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}…`} style={inputBase} />
-  } else if (['textarea', 'rich_text'].includes(type)) {
+  if (renderer === 'TextInputRenderer') {
+    if (t === 'currency') {
+      const sym = CURRENCY_SYMBOLS[field.currencyCode ?? 'AUD'] ?? '$'
+      control = (
+        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #E5DDD0', borderRadius: 6, background: '#fafafa', overflow: 'hidden' }}>
+          <span style={{ padding: '0.5rem 0.6rem', background: '#F5EFE8', borderRight: '1px solid #E5DDD0', fontSize: '0.85rem', color: '#6B6560', fontWeight: 600 }}>{sym}</span>
+          <input readOnly type="number" placeholder="0.00" style={{ ...inputBase, border: 'none', borderRadius: 0, flex: 1 }} />
+        </div>
+      )
+    } else if (t === 'percentage') {
+      control = (
+        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #E5DDD0', borderRadius: 6, background: '#fafafa', overflow: 'hidden' }}>
+          <input readOnly type="number" placeholder="0" style={{ ...inputBase, border: 'none', borderRadius: 0, flex: 1 }} />
+          <span style={{ padding: '0.5rem 0.6rem', background: '#F5EFE8', borderLeft: '1px solid #E5DDD0', fontSize: '0.85rem', color: '#6B6560' }}>%</span>
+        </div>
+      )
+    } else if (t === 'number') {
+      control = <input readOnly type="number" placeholder={field.placeholder ?? '0'} style={inputBase} />
+    } else if (t === 'hidden') {
+      control = <div style={{ ...inputBase, background: '#F5EFE8', fontSize: '0.75rem', fontStyle: 'italic', color: '#9B968F' }}>Hidden field (not shown to user)</div>
+    } else {
+      const typeAttr = t === 'email' ? 'email' : t === 'phone' ? 'tel' : t === 'url' ? 'url' : t === 'password' ? 'password' : 'text'
+      control = <input readOnly type={typeAttr} placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}…`} style={inputBase} />
+    }
+  }
+
+  else if (renderer === 'TextareaRenderer') {
     control = <textarea readOnly rows={3} placeholder={field.placeholder ?? ''} style={{ ...inputBase, resize: 'none' }} />
-  } else if (type === 'select' || type === 'combobox') {
+  }
+
+  else if (renderer === 'ChoiceRenderer') {
+    const opts = field.options ?? []
+
+    if (t === 'switch') {
+      control = (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'default' }}>
+          <div style={{ width: 40, height: 22, borderRadius: 11, background: '#E5DDD0', position: 'relative' }}>
+            <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', position: 'absolute', top: 2, left: 2, boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+          </div>
+          <span style={{ fontSize: '0.875rem', color: '#6B6560' }}>{field.label}</span>
+        </label>
+      )
+    } else if (t === 'yes_no') {
+      control = (
+        <div style={{ display: 'flex', gap: 8 }}>
+          {['Yes', 'No'].map(opt => (
+            <button key={opt} disabled style={{ padding: '0.4rem 1.2rem', border: '1px solid #E5DDD0', borderRadius: 6, background: '#fafafa', fontSize: '0.85rem', color: '#6B6560', cursor: 'default' }}>{opt}</button>
+          ))}
+        </div>
+      )
+    } else if (t === 'checkbox') {
+      control = (
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.875rem', color: '#2D2924' }}>
+          <input type="checkbox" readOnly style={{ marginTop: 2, accentColor: '#E2C063' }} />
+          <span>{field.label}</span>
+        </label>
+      )
+    } else if (t === 'checkbox_group') {
+      control = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {(opts.length > 0 ? opts : ['Option A', 'Option B']).map(o => (
+            <label key={o} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', color: '#2D2924' }}>
+              <input type="checkbox" readOnly style={{ accentColor: '#E2C063' }} /> {o}
+            </label>
+          ))}
+        </div>
+      )
+    } else if (t === 'radio_group') {
+      control = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {(opts.length > 0 ? opts : ['Option A', 'Option B']).map(o => (
+            <label key={o} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', color: '#2D2924' }}>
+              <input type="radio" readOnly style={{ accentColor: '#E2C063' }} /> {o}
+            </label>
+          ))}
+        </div>
+      )
+    } else if (t === 'button_group' || t === 'segmented') {
+      control = (
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          {(opts.length > 0 ? opts : ['Option A', 'Option B', 'Option C']).map((o, i) => (
+            <button key={o} disabled style={{
+              padding: '0.35rem 0.9rem',
+              border: '1px solid #E5DDD0',
+              borderRadius: t === 'segmented' ? 0 : 6,
+              background: i === 0 ? '#E2C063' : '#fafafa',
+              fontSize: '0.8rem',
+              color: i === 0 ? '#2D2924' : '#6B6560',
+              cursor: 'default',
+              fontWeight: i === 0 ? 700 : 400,
+            }}>{o}</button>
+          ))}
+        </div>
+      )
+    } else if (t === 'multi_select') {
+      control = (
+        <select multiple disabled size={Math.min(opts.length > 0 ? opts.length : 3, 4)} style={inputBase}>
+          {(opts.length > 0 ? opts : ['Option A', 'Option B', 'Option C']).map(o => <option key={o}>{o}</option>)}
+        </select>
+      )
+    } else if (t === 'tags_input') {
+      control = (
+        <div style={{ ...inputBase, display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center', minHeight: 42 }}>
+          {opts.slice(0, 3).map(o => (
+            <span key={o} style={{ background: '#E2C063', color: '#2D2924', borderRadius: 4, padding: '1px 7px', fontSize: '0.78rem', fontWeight: 600 }}>{o}</span>
+          ))}
+          <span style={{ fontSize: '0.8rem', color: '#9B968F', fontStyle: 'italic' }}>+ type to add…</span>
+        </div>
+      )
+    } else {
+      control = (
+        <select disabled style={inputBase}>
+          <option>{field.placeholder ?? 'Select…'}</option>
+          {opts.map(o => <option key={o}>{o}</option>)}
+        </select>
+      )
+    }
+  }
+
+  else if (renderer === 'DateTimeRenderer') {
+    if (t === 'date_range') {
+      control = (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input type="date" readOnly style={{ ...inputBase, flex: 1 }} />
+          <span style={{ color: '#6B6560', fontSize: '0.8rem' }}>→</span>
+          <input type="date" readOnly style={{ ...inputBase, flex: 1 }} />
+        </div>
+      )
+    } else if (t === 'duration') {
+      control = (
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          {(['HH', 'MM', 'SS'] as const).map((p, i) => (
+            <span key={p} style={{ display: 'contents' }}>
+              <input readOnly placeholder={p} style={{ ...inputBase, width: 60 }} />
+              {i < 2 && <span style={{ color: '#6B6560' }}>:</span>}
+            </span>
+          ))}
+        </div>
+      )
+    } else if (t === 'month_year') {
+      control = <input type="month" readOnly style={inputBase} />
+    } else {
+      const typeAttr = t === 'time' ? 'time' : t === 'datetime' ? 'datetime-local' : 'date'
+      control = <input type={typeAttr} readOnly style={inputBase} />
+    }
+  }
+
+  else if (renderer === 'RangeRenderer') {
+    if (t === 'rating') {
+      const max = field.maxRating ?? 5
+      const rStyle = field.ratingStyle ?? 'star'
+      const glyphs: Record<string, string> = { star: '★', heart: '♥', number: '' }
+      control = (
+        <div style={{ display: 'flex', gap: 4 }}>
+          {Array.from({ length: max }, (_, i) => (
+            <span key={i} style={{ fontSize: '1.4rem', color: i < 3 ? '#E2C063' : '#E5DDD0', cursor: 'default' }}>
+              {rStyle === 'number' ? String(i + 1) : glyphs[rStyle]}
+            </span>
+          ))}
+        </div>
+      )
+    } else {
+      const min = field.validation?.min ?? 0
+      const max = field.validation?.max ?? 100
+      const stepVal = field.step ?? 1
+      if (t === 'range_slider') {
+        control = (
+          <div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
+              <input type="range" readOnly min={min} max={max} step={stepVal} defaultValue={min} style={{ flex: 1, accentColor: '#E2C063' }} />
+              <input type="range" readOnly min={min} max={max} step={stepVal} defaultValue={max} style={{ flex: 1, accentColor: '#E2C063' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#9B968F' }}>
+              <span>{min}</span><span>{max}</span>
+            </div>
+          </div>
+        )
+      } else if (t === 'number_stepper') {
+        control = (
+          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #E5DDD0', borderRadius: 6, overflow: 'hidden', width: 130 }}>
+            <button disabled style={{ padding: '0.5rem 0.7rem', background: '#F5EFE8', border: 'none', fontSize: '1rem', color: '#6B6560', cursor: 'default' }}>−</button>
+            <input readOnly type="number" defaultValue={min} style={{ ...inputBase, border: 'none', borderRadius: 0, textAlign: 'center', width: 50 }} />
+            <button disabled style={{ padding: '0.5rem 0.7rem', background: '#F5EFE8', border: 'none', fontSize: '1rem', color: '#6B6560', cursor: 'default' }}>+</button>
+          </div>
+        )
+      } else {
+        control = (
+          <div>
+            <input type="range" readOnly min={min} max={max} step={stepVal} defaultValue={(min + max) / 2} style={{ width: '100%', accentColor: '#E2C063' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#9B968F' }}>
+              <span>{min}</span><span>{max}</span>
+            </div>
+          </div>
+        )
+      }
+    }
+  }
+
+  else if (renderer === 'FileRenderer') {
+    if (t === 'signature') {
+      control = (
+        <div style={{ border: '1px solid #E5DDD0', borderRadius: 6, background: '#fafafa', height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9B968F', fontSize: '0.78rem', fontStyle: 'italic' }}>
+          Signature area
+        </div>
+      )
+    } else {
+      const isMulti = t === 'file_upload_multi' || t === 'dropzone'
+      control = (
+        <div style={{ border: '2px dashed #E5DDD0', borderRadius: 8, background: '#F5EFE8', padding: '1.2rem', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.8rem', color: '#6B6560', margin: 0 }}>
+            {t === 'image_upload' ? '🖼️ Click or drag to upload image' : isMulti ? '📁 Click or drag files here' : '📎 Click or drag file here'}
+          </p>
+          {field.acceptedFileTypes && field.acceptedFileTypes.length > 0 && (
+            <p style={{ fontSize: '0.7rem', color: '#9B968F', margin: '4px 0 0' }}>{field.acceptedFileTypes.join(', ')}</p>
+          )}
+          {field.maxFileSize && (
+            <p style={{ fontSize: '0.7rem', color: '#9B968F', margin: '2px 0 0' }}>Max {field.maxFileSize} MB</p>
+          )}
+        </div>
+      )
+    }
+  }
+
+  else if (renderer === 'CompositeRenderer') {
+    if (t === 'full_name') {
+      control = (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <input readOnly placeholder="First name" style={inputBase} />
+          <input readOnly placeholder="Last name" style={inputBase} />
+        </div>
+      )
+    } else if (t === 'address') {
+      control = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <input readOnly placeholder="Street address" style={inputBase} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            <input readOnly placeholder="City" style={inputBase} />
+            <input readOnly placeholder="State" style={inputBase} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            <input readOnly placeholder="Postcode" style={inputBase} />
+            <input readOnly placeholder="Country" style={inputBase} />
+          </div>
+        </div>
+      )
+    } else if (t === 'country_select') {
+      control = (
+        <select disabled style={inputBase}>
+          <option>Australia</option><option>New Zealand</option>
+          <option>United States</option><option>United Kingdom</option>
+        </select>
+      )
+    } else if (t === 'state_select') {
+      control = (
+        <select disabled style={inputBase}>
+          <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+        </select>
+      )
+    } else {
+      control = <input readOnly placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}…`} style={inputBase} />
+    }
+  }
+
+  else if (renderer === 'LocationRenderer') {
     control = (
-      <select disabled style={inputBase}>
-        <option>Select…</option>
-        {(field.options ?? []).map((o) => <option key={o}>{o}</option>)}
-      </select>
-    )
-  } else if (['checkbox', 'consent_checkbox', 'terms_acceptance'].includes(type)) {
-    control = (
-      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.875rem', color: '#2D2924' }}>
-        <input type="checkbox" readOnly style={{ marginTop: 2, accentColor: '#E2C063' }} />
-        <span>{field.label}</span>
-      </label>
-    )
-  } else if (type === 'radio_group') {
-    control = (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {(field.options ?? ['Option A', 'Option B']).map((o) => (
-          <label key={o} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', color: '#2D2924' }}>
-            <input type="radio" readOnly style={{ accentColor: '#E2C063' }} /> {o}
-          </label>
-        ))}
-      </div>
-    )
-  } else if (type === 'number' || type === 'currency' || type === 'percentage') {
-    control = <input type="number" readOnly placeholder="0" style={inputBase} />
-  } else if (type === 'date' || type === 'datetime' || type === 'time') {
-    control = <input type={type === 'time' ? 'time' : type === 'datetime' ? 'datetime-local' : 'date'} readOnly style={inputBase} />
-  } else if (type === 'submit_button' || type === 'next_button') {
-    control = (
-      <button
-        disabled
-        style={{
-          background: '#E2C063',
-          color: '#2D2924',
-          border: 'none',
-          borderRadius: 6,
-          padding: '0.6rem 1.5rem',
-          fontWeight: 700,
-          fontSize: '0.875rem',
-          cursor: 'default',
-        }}
-      >
-        {field.label}
-      </button>
-    )
-  } else {
-    control = (
-      <div
-        style={{
-          ...inputBase,
-          background: '#F5EFE8',
-          color: '#6B6560',
-          fontSize: '0.78rem',
-          fontStyle: 'italic',
-        }}
-      >
-        {fieldTypeLabel(type)} input
+      <div style={{ border: '1px solid #E5DDD0', borderRadius: 6, background: '#F5EFE8', height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B6560', fontSize: '0.78rem' }}>
+        📍 {fieldTypeLabel(t)}
       </div>
     )
   }
 
-  // Consent/checkbox: label is the control itself
-  const showLabel = !['checkbox', 'consent_checkbox', 'terms_acceptance', 'submit_button', 'next_button'].includes(type)
+  else if (renderer === 'ConsentRenderer') {
+    if (t === 'captcha') {
+      control = (
+        <div style={{ border: '1px solid #E5DDD0', borderRadius: 6, background: '#F5EFE8', padding: '0.75rem', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 20, height: 20, border: '1px solid #E5DDD0', borderRadius: 3, background: '#fff' }} />
+          <span style={{ fontSize: '0.85rem', color: '#6B6560' }}>I'm not a robot</span>
+          <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#9B968F' }}>reCAPTCHA</span>
+        </div>
+      )
+    } else {
+      control = (
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.875rem', color: '#2D2924' }}>
+          <input type="checkbox" readOnly style={{ marginTop: 2, accentColor: '#E2C063' }} />
+          <span>{field.label}</span>
+        </label>
+      )
+    }
+  }
+
+  else {
+    control = (
+      <div style={{ ...inputBase, background: '#F5EFE8', color: '#6B6560', fontSize: '0.78rem', fontStyle: 'italic' }}>
+        {fieldTypeLabel(t)} — configure in the panel
+      </div>
+    )
+  }
+
+  const showLabel = !['checkbox', 'consent_checkbox', 'terms_acceptance', 'captcha',
+    'switch', 'yes_no', 'submit_button', 'next_button', 'back_button', 'save_and_continue'].includes(t)
 
   return (
     <div style={{ marginBottom: '1.25rem' }}>
       {showLabel && (
-        <label
-          style={{
-            display: 'block',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: '#2D2924',
-            marginBottom: 4,
-          }}
-        >
+        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#2D2924', marginBottom: 4 }}>
           {field.label}
           {field.required && <span style={{ color: '#e87070', marginLeft: 3 }}>*</span>}
         </label>
