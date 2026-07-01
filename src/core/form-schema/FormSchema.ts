@@ -43,6 +43,18 @@ export interface FormField {
   visibilityConditions?: unknown
   mapsToSystemField?: string
   locked?: boolean
+  // ---- Type-specific optional properties ----
+  currencyCode?: string                          // ISO 4217: 'AUD' | 'USD' | 'EUR' | 'GBP' | 'NZD' | 'CAD' | 'JPY' | 'CHF'
+  content?: string                               // Static content for paragraph_block / heading_block / html_embed
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6         // heading_block only (default 2)
+  step?: number                                  // Increment for slider / range_slider / number_stepper
+  maxRating?: number                             // Default 5 for rating type
+  ratingStyle?: 'star' | 'heart' | 'number'     // Display style for rating
+  acceptedFileTypes?: string[]                   // MIME types e.g. ['image/*', 'application/pdf']
+  maxFileSize?: number                           // In MB (0 = no limit)
+  maxFiles?: number                              // For file_upload_multi / dropzone
+  stepTitle?: string                             // For 'step' LayoutRenderer type
+  stepDescription?: string                       // For 'step' LayoutRenderer type
 }
 
 export interface FormStep {
