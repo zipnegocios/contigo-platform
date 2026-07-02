@@ -1,8 +1,8 @@
 'use client';
+import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { useScrollReveal } from '@/presentation/hooks/useScrollReveal';
-import { buttonVariants } from '@/presentation/design-system/components/atoms';
 import MarqueeServiceRow from './services/MarqueeServiceRow';
-import ServiceRowMobile from './services/ServiceRowMobile';
 import { splitIntoRows } from './services/marqueeGeometry';
 
 export interface ServiceCardData {
@@ -28,6 +28,14 @@ export default function ServicesSection({ services }: ServicesSectionProps) {
   // appears in exactly one row (carrying its own category for the flip + link).
   const rows = splitIntoRows(services, ROW_COUNT);
 
+  // Section-wide "which card is open" — only one card (across all 3 rows,
+  // desktop and mobile alike) may be flipped at a time, so opening a new one
+  // implicitly closes whatever was open. All rows pause while any card is open.
+  const [openCardKey, setOpenCardKey] = useState<string | null>(null);
+  const handleCardToggle = (loopKey: string) => {
+    setOpenCardKey((prev) => (prev === loopKey ? null : loopKey));
+  };
+
   return (
     <section id="services" className="section-gap">
       {/* Header */}
@@ -41,26 +49,37 @@ export default function ServicesSection({ services }: ServicesSectionProps) {
         <h2 style={{ color: 'var(--neutral-800)' }}>Our Services</h2>
       </div>
 
-      {/* 3 service rows */}
+      {/* 3 service rows — same autonomous marquee behavior at every viewport size */}
       <div className="flex flex-col gap-4 md:gap-6">
         {rows.map((rowItems, idx) => (
-          <div key={idx}>
-            {/* Desktop: autonomous marquee */}
-            <div className="hidden lg:block">
-              <MarqueeServiceRow items={rowItems} direction={idx % 2 === 0 ? -1 : 1} />
-            </div>
-            {/* Mobile: scroll-snap row — always in DOM for SEO */}
-            <div className="lg:hidden">
-              <ServiceRowMobile items={rowItems} />
-            </div>
-          </div>
+          <MarqueeServiceRow
+            key={idx}
+            items={rowItems}
+            direction={idx % 2 === 0 ? -1 : 1}
+            openCardKey={openCardKey}
+            onCardToggle={handleCardToggle}
+          />
         ))}
       </div>
 
-      {/* CTA */}
-      <div className="text-center mt-12">
-        <a href="/services" className={buttonVariants({ variant: 'primary', size: 'lg' })}>
-          View All Services
+      {/* CTA — brand-gold button with a light sweep + lift on hover */}
+      <div className="text-center mt-14">
+        <a
+          href="/services"
+          className="service-cta-gold group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-9 py-4 text-fluid-sm font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style={{
+            background: 'linear-gradient(135deg, var(--gold-400, #E2C063) 0%, var(--gold-600, #C9A04E) 100%)',
+            color: 'var(--petrol-950, #051E27)',
+            fontFamily: 'var(--font-alegreya-sans)',
+          }}
+        >
+          {/* Light sweep */}
+          <span
+            aria-hidden
+            className="service-cta-sweep pointer-events-none absolute inset-y-0 -left-full w-1/2 skew-x-[-20deg] bg-white/35 blur-md transition-[left] duration-700 ease-out group-hover:left-[140%]"
+          />
+          <span className="relative z-10">View All Services</span>
+          <ArrowRight className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </a>
       </div>
     </section>

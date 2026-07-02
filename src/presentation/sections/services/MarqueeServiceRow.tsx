@@ -20,6 +20,9 @@ const DRAG_THRESHOLD_PX = 6
 interface MarqueeServiceRowProps {
   items: ServiceCardData[]
   direction: -1 | 1
+  /** Section-wide "which card is open" key (a loopKey), or null if none. */
+  openCardKey: string | null
+  onCardToggle: (loopKey: string) => void
 }
 
 const arrowBtn: React.CSSProperties = {
@@ -37,13 +40,21 @@ function estimateCardWidthPx(): number {
   return h * 1.8 + GAP_PX
 }
 
-export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRowProps) {
+export default function MarqueeServiceRow({
+  items,
+  direction,
+  openCardKey,
+  onCardToggle,
+}: MarqueeServiceRowProps) {
   const rowRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const prevBtnRef = useRef<HTMLButtonElement>(null)
   const nextBtnRef = useRef<HTMLButtonElement>(null)
   const tweenRef = useRef<gsap.core.Tween | null>(null)
   const suppressNextClickRef = useRef(false)
+  // Bridge from the section-wide "is any card open" state (render scope) into
+  // the tween controls that live inside the mount-once effect closure.
+  const setPausedByFlipRef = useRef<((paused: boolean) => void) | undefined>(undefined)
 
   const isPointerDownRef = useRef(false)
   const isDraggingRef = useRef(false)
@@ -57,6 +68,7 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
     estimateCardWidthPx(),
   )
   const loopItems = buildLoopItems(items, duplicationCount)
+  const isPaused = openCardKey !== null
 
   useEffect(() => {
     // gsap.context()'s callback return value is NOT invoked by GSAP itself —
@@ -68,8 +80,9 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
       const track = trackRef.current
       if (!track) return
 
-      // Guard: reduced motion or sub-desktop viewport — static row, no tween/listeners.
-      if (prefersReducedMotion() || window.innerWidth < 1024) {
+      // Guard: reduced motion — static row, no tween/listeners. Autoplay now
+      // runs at every viewport width (mobile recreates the desktop marquee).
+      if (prefersReducedMotion()) {
         gsap.set(track, { x: 0 })
         return
       }
@@ -82,18 +95,23 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
       // modifier maps any raw x into this window, and the track holds enough
       // duplicated sets that this window is always fully covered — so the
       // viewport never shows an empty gap, whichever way the row travels.
-      // (A [0, oneSetWidth] window for rightward rows leaves a growing empty
-      // strip on the left, since the cards only extend rightward from x=0.)
       const min = -oneSetWidth
       const max = 0
 
-      // A fresh tween with no explicit `x` start animates FROM the element's
-      // current computed position, so drag-release and arrow-nudge resume
-      // seamlessly. We kill + recreate (never pause/resume) to avoid the
-      // tween's frozen playhead snapping back to its own expected position.
-      const createTween = () =>
-        gsap.to(track, {
-          x: direction === -1 ? -oneSetWidth : oneSetWidth,
+      // A fresh tween targets exactly one set-width of travel RELATIVE to the
+      // element's current position (not a fixed absolute endpoint), so every
+      // creation — whether the very first mount or the Nth flip/drag/arrow
+      // resume — covers the same distance in the same duration and therefore
+      // holds constant speed. An absolute endpoint (e.g. always "-oneSetWidth")
+      // would make a resume-near-the-end-of-cycle travel a tiny remaining
+      // distance in the same fixed duration, crawling to a near-standstill.
+      // We kill + recreate (never pause/resume) to avoid the tween's frozen
+      // playhead snapping back to its own position.
+      const createTween = () => {
+        const currentX = (gsap.getProperty(track, 'x') as number) || 0
+        const target = direction === -1 ? currentX - oneSetWidth : currentX + oneSetWidth
+        return gsap.to(track, {
+          x: target,
           duration: oneSetWidth / PIXELS_PER_SECOND,
           ease: 'none',
           repeat: -1,
@@ -104,26 +122,61 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
             x: gsap.utils.unitize(gsap.utils.wrap(min, max)),
           },
         })
+      }
 
-      let tween = createTween()
+      // ── Centralised play/pause ───────────────────────────────────────
+      // `tween` is null whenever autoplay is intentionally stopped (a card is
+      // open anywhere in the section, or a drag is in progress here).
+      let tween: gsap.core.Tween | null = createTween()
       tweenRef.current = tween
+      let pausedByFlip = false
+
+      const applyTimeScale = () => {
+        if (tween) tween.timeScale(isHoveringRef.current ? HOVER_TIME_SCALE : 1)
+      }
+      const pauseAutoplay = () => {
+        if (tween) {
+          tween.kill()
+          tween = null
+          tweenRef.current = null
+        }
+      }
+      const resumeAutoplay = () => {
+        // Never resume while a card is open (anywhere) or mid-drag here.
+        if (pausedByFlip || isDraggingRef.current) return
+        if (!tween) {
+          tween = createTween()
+          tweenRef.current = tween
+        }
+        applyTimeScale()
+      }
+
+      // Driven by the `isPaused` prop (section-wide, one open card at a time).
+      setPausedByFlipRef.current = (paused: boolean) => {
+        pausedByFlip = paused
+        if (paused) pauseAutoplay()
+        else resumeAutoplay()
+      }
+      // Sync initial state (in case this row mounts while a card elsewhere is open).
+      setPausedByFlipRef.current(isPaused)
 
       // ── Hover slowdown (mouse only) ──────────────────────────────────
       const handlePointerEnter = (e: PointerEvent) => {
         if (e.pointerType !== 'mouse') return
         isHoveringRef.current = true
-        tween.timeScale(HOVER_TIME_SCALE)
+        applyTimeScale()
       }
       const handlePointerLeave = (e: PointerEvent) => {
         if (e.pointerType !== 'mouse') return
         isHoveringRef.current = false
-        if (!isDraggingRef.current) tween.timeScale(1)
+        applyTimeScale()
       }
       const row = rowRef.current
       row?.addEventListener('pointerenter', handlePointerEnter)
       row?.addEventListener('pointerleave', handlePointerLeave)
 
       // ── Drag override — capture only AFTER the threshold is crossed ──
+      // Pointer Events cover touch too, so this also drives mobile swipe/drag.
       const handlePointerDown = (e: PointerEvent) => {
         isPointerDownRef.current = true
         isDraggingRef.current = false
@@ -135,11 +188,11 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
         if (!isDraggingRef.current) {
           if (Math.abs(e.clientX - dragStartXRef.current) < DRAG_THRESHOLD_PX) return
           // Threshold crossed → this is a drag, not a click. NOW take over.
-          // Re-anchor to the live position (after kill, so getProperty reads the
-          // settled x) so the track doesn't jump by however far it auto-scrolled
-          // between pointerdown and the threshold being crossed.
+          // Re-anchor to the live position (after pause, so getProperty reads
+          // the settled x) so the track doesn't jump by however far it
+          // auto-scrolled between pointerdown and the threshold being crossed.
           isDraggingRef.current = true
-          tween.kill()
+          pauseAutoplay()
           trackStartXRef.current = gsap.getProperty(track, 'x') as number
           dragStartXRef.current = e.clientX
           try {
@@ -162,13 +215,11 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
           } catch {
             /* already released */
           }
-          tween = createTween()
-          tweenRef.current = tween
-          tween.timeScale(isHoveringRef.current ? HOVER_TIME_SCALE : 1)
           // Swallow the synthetic click that ends a drag so it doesn't flip a card.
           suppressNextClickRef.current = true
+          resumeAutoplay()
         }
-        // Pure click (no drag): tween keeps running, click reaches the card → flip.
+        // Pure click/tap (no drag): tween keeps running, click reaches the card → flip.
       }
       const handleClickCapture = (e: MouseEvent) => {
         if (suppressNextClickRef.current) {
@@ -185,7 +236,9 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
 
       // ── Arrow-nav ──────────────────────────────────────────────────────
       const nudge = (navDir: -1 | 1) => {
-        tween.kill()
+        // Ignore arrows while a card is open (the row is frozen for reading).
+        if (pausedByFlip) return
+        pauseAutoplay()
         const currentX = gsap.getProperty(track, 'x') as number
         const step = navDir * direction * cardStep
         const targetX = gsap.utils.wrap(min, max, currentX + step)
@@ -193,11 +246,7 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
           x: targetX,
           duration: 0.5,
           ease: 'power2.out',
-          onComplete: () => {
-            tween = createTween()
-            tweenRef.current = tween
-            tween.timeScale(isHoveringRef.current ? HOVER_TIME_SCALE : 1)
-          },
+          onComplete: resumeAutoplay,
         })
       }
       const prevBtn = prevBtnRef.current
@@ -208,6 +257,7 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
       nextBtn?.addEventListener('click', handleNextClick)
 
       innerCleanup = () => {
+        setPausedByFlipRef.current = undefined
         row?.removeEventListener('pointerenter', handlePointerEnter)
         row?.removeEventListener('pointerleave', handlePointerLeave)
         track.removeEventListener('pointerdown', handlePointerDown)
@@ -227,13 +277,19 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // React to the section-wide open-card state without re-running the mount
+  // effect above (which would rebuild listeners and reset track geometry).
+  useEffect(() => {
+    setPausedByFlipRef.current?.(isPaused)
+  }, [isPaused])
+
   return (
     <div ref={rowRef} className="group relative flex items-center gap-3">
       <button
         ref={prevBtnRef}
         type="button"
         aria-label="Previous"
-        className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute left-2 z-10"
+        className="service-marquee-arrow w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute left-2 z-10"
         style={arrowBtn}
       >
         ‹
@@ -250,6 +306,8 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
               categorySlug={item.categorySlug}
               categoryName={item.categoryName}
               className="service-card-desktop"
+              isFlipped={openCardKey === item.loopKey}
+              onToggle={() => onCardToggle(item.loopKey)}
             />
           ))}
         </div>
@@ -259,7 +317,7 @@ export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRo
         ref={nextBtnRef}
         type="button"
         aria-label="Next"
-        className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute right-2 z-10"
+        className="service-marquee-arrow w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute right-2 z-10"
         style={arrowBtn}
       >
         ›

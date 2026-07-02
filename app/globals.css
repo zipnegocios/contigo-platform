@@ -1164,27 +1164,55 @@
   .service-flip-face--back { transform: rotateY(180deg); }
 
   /* Rectangular, viewport-adaptive card sizing (aspect 1.8, like the
-     original parallax-work strip). Desktop scales with viewport height;
-     mobile scales with viewport width. */
+     original parallax-work strip). Same GSAP marquee runs at every viewport
+     width now, so one clamp (scales with viewport height) covers both. */
   .service-card-desktop {
     height: clamp(150px, 20vh, 230px);
     aspect-ratio: 1.8;
     flex-shrink: 0;
   }
-  .service-card-mobile {
-    width: min(82vw, 360px);
-    aspect-ratio: 1.8;
-    flex-shrink: 0;
-  }
 
   /* Soft fade on the left/right edges of each marquee row (the "edge cards
-     fade" look). Applied to the clipping viewport, not the arrows. */
+     fade" look). Applied to the clipping viewport, not the arrows.
+     touch-action: pan-y lets the page still scroll vertically by touch while
+     JS (pointer events) owns horizontal drag — without this, a touch drag on
+     the track fights the browser's native scroll gesture. */
   .service-marquee-viewport {
     -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
     mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+    touch-action: pan-y;
+  }
+
+  /* Arrow-nav buttons default to hover-reveal (desktop mouse). Touch/coarse
+     pointers have no reliable hover state, so keep them always visible there —
+     otherwise they'd be permanently undiscoverable on mobile. */
+  @media (hover: none) {
+    .service-marquee-arrow {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  }
+
+  /* "View All Services" CTA — brand-gold pill with an ambient glow that
+     intensifies on hover (the sweep + lift live in the component's classes). */
+  .service-cta-gold {
+    box-shadow:
+      0 6px 18px -6px rgba(226, 192, 99, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+  .service-cta-gold:hover {
+    box-shadow:
+      0 12px 30px -6px rgba(226, 192, 99, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  }
+  .service-cta-gold:focus-visible {
+    --tw-ring-color: var(--gold-600, #C9A04E);
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .service-cta-gold { transition: none; }
+    .service-cta-gold:hover { transform: none; }
+    .service-cta-sweep { display: none; }
     .service-flip-inner { transition: none; }
     .service-flip-inner, .service-flip-inner.is-flipped { transform: none !important; }
     .service-flip-face--back {

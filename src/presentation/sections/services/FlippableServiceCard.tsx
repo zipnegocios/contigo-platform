@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
+import { type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
@@ -14,6 +14,12 @@ interface FlippableServiceCardProps {
   loopKey?: string
   className?: string
   style?: CSSProperties
+  /** Controlled flip state — only one card section-wide is ever flipped, so
+   *  the parent (not local state) owns which card is open. */
+  isFlipped: boolean
+  /** Toggles this card open/closed. The parent decides what that means
+   *  globally (opening this one closes whichever other card was open). */
+  onToggle: () => void
 }
 
 export default function FlippableServiceCard({
@@ -24,12 +30,12 @@ export default function FlippableServiceCard({
   categoryName,
   className,
   style,
+  isFlipped,
+  onToggle,
 }: FlippableServiceCardProps) {
-  const [isFlipped, setIsFlipped] = useState(false)
-
   const handleFrontClick = () => {
     if (!isFlipped) {
-      setIsFlipped(true)
+      onToggle()
     }
   }
 
@@ -39,7 +45,7 @@ export default function FlippableServiceCard({
       return
     }
     event.stopPropagation()
-    setIsFlipped(false)
+    onToggle()
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -49,7 +55,7 @@ export default function FlippableServiceCard({
       return
     }
     event.preventDefault()
-    setIsFlipped((prev) => !prev)
+    onToggle()
   }
 
   return (
