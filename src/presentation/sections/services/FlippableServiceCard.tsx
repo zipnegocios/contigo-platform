@@ -75,6 +75,7 @@ export default function FlippableServiceCard({
             src={imageUrl}
             alt={name}
             fill
+            draggable={false}
             sizes="(max-width: 1024px) 82vw, 420px"
             style={{ objectFit: 'cover' }}
           />

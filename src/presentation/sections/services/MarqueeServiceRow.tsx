@@ -7,9 +7,12 @@ import { getServiceRowDuplicationCount, buildLoopItems } from './marqueeGeometry
 import FlippableServiceCard from './FlippableServiceCard'
 import type { ServiceCardData } from '../ServicesSection'
 
-// Marquee travel speed. Deliberately brisk (the previous 40 felt sleepy) but
-// still slow enough to read a card as it passes.
-const PIXELS_PER_SECOND = 85
+// Marquee travel speed. Deliberately brisk on desktop (the previous 40 felt
+// sleepy); slower on mobile, where cards fill more of the narrow viewport and
+// a fast sweep is harder to read while swiping.
+const DESKTOP_PIXELS_PER_SECOND = 85
+const MOBILE_PIXELS_PER_SECOND = 45
+const DESKTOP_BREAKPOINT_PX = 1024
 const GAP_PX = 16
 const HOVER_TIME_SCALE = 0.28
 // A pointer must move at least this far before it counts as a drag. Below the
@@ -42,6 +45,11 @@ function estimateCardWidthPx(): number {
   if (typeof window === 'undefined') return 340
   const h = Math.min(Math.max(window.innerHeight * 0.2, 150), 230)
   return h * 1.8 + GAP_PX
+}
+
+function getPixelsPerSecond(): number {
+  if (typeof window === 'undefined') return DESKTOP_PIXELS_PER_SECOND
+  return window.innerWidth >= DESKTOP_BREAKPOINT_PX ? DESKTOP_PIXELS_PER_SECOND : MOBILE_PIXELS_PER_SECOND
 }
 
 export default function MarqueeServiceRow({
@@ -94,6 +102,7 @@ export default function MarqueeServiceRow({
       const oneSetWidth = track.scrollWidth / duplicationCount
       const firstCard = track.children[0] as HTMLElement | undefined
       const cardStep = firstCard ? firstCard.offsetWidth + GAP_PX : estimateCardWidthPx()
+      const pixelsPerSecond = getPixelsPerSecond()
 
       // Both directions wrap into the SAME window [-oneSetWidth, 0]. The
       // modifier maps any raw x into this window, and the track holds enough
@@ -116,7 +125,7 @@ export default function MarqueeServiceRow({
         const target = direction === -1 ? currentX - oneSetWidth : currentX + oneSetWidth
         return gsap.to(track, {
           x: target,
-          duration: oneSetWidth / PIXELS_PER_SECOND,
+          duration: oneSetWidth / pixelsPerSecond,
           ease: 'none',
           repeat: -1,
           modifiers: {
@@ -196,6 +205,7 @@ export default function MarqueeServiceRow({
           // the settled x) so the track doesn't jump by however far it
           // auto-scrolled between pointerdown and the threshold being crossed.
           isDraggingRef.current = true
+          track.classList.add('is-dragging')
           pauseAutoplay()
           trackStartXRef.current = gsap.getProperty(track, 'x') as number
           dragStartXRef.current = e.clientX
@@ -214,6 +224,7 @@ export default function MarqueeServiceRow({
         const wasDrag = isDraggingRef.current
         isDraggingRef.current = false
         if (wasDrag) {
+          track.classList.remove('is-dragging')
           try {
             track.releasePointerCapture(e.pointerId)
           } catch {
@@ -300,7 +311,7 @@ export default function MarqueeServiceRow({
       </button>
 
       <div className="service-marquee-viewport flex-1 overflow-hidden">
-        <div ref={trackRef} className="flex gap-4">
+        <div ref={trackRef} className="service-marquee-track flex gap-4">
           {loopItems.map((item) => (
             <FlippableServiceCard
               key={item.loopKey}

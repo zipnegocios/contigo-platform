@@ -1183,6 +1183,27 @@
     touch-action: pan-y;
   }
 
+  /* Drag affordance + no accidental text/image selection while dragging.
+     `cursor: grab` is INHERITED down to child cards, but `.service-flip-inner`
+     sets its own `cursor: pointer` directly on itself — a direct rule always
+     wins over an inherited value, so cards still show the click cursor while
+     the surrounding track shows the drag cursor. `user-select: none` stops
+     the "text selection" shading artifact a mousedown+drag over card text
+     would otherwise trigger; `-webkit-user-drag: none` on images stops
+     Chrome/Safari's native image ghost-drag, the other source of that look. */
+  .service-marquee-track {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .service-marquee-track.is-dragging {
+    cursor: grabbing;
+  }
+  .service-marquee-track img {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
   /* Arrow-nav buttons default to hover-reveal (desktop mouse). Touch/coarse
      pointers have no reliable hover state, so keep them always visible there —
      otherwise they'd be permanently undiscoverable on mobile. */
