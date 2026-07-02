@@ -12,10 +12,8 @@
  * @returns The duplication count (minimum 2 for seamless loop, maximum driven by viewport fill)
  *
  * Example: 4 items at 336px each = 1344px per set.
- * At 1440px viewport: ceil(1440/1344) + 1 = 1 + 1 = 2 ... wait, that's wrong
- * Let me recalculate: singleSetWidth = 4 * 336 = 1344
- * setsToFillViewport = ceil(1440 / 1344) = ceil(1.071) = 2
- * return max(2, 2 + 1) = 3 ✓
+ * At a 1440px viewport: setsToFillViewport = ceil(1440 / 1344) = 2.
+ * return max(2, 2 + 1) = 3
  */
 export function getServiceRowDuplicationCount(
   itemCount: number,

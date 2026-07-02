@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type CSSProperties, type MouseEvent } from 'react'
+import { useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
@@ -40,11 +40,26 @@ export default function FlippableServiceCard({
     setIsFlipped(false)
   }
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    const target = event.target
+    if (target instanceof Element && target.closest('a')) {
+      return
+    }
+    event.preventDefault()
+    setIsFlipped((prev) => !prev)
+  }
+
   return (
     <div className="service-flip-perspective" style={style}>
       <div
         className={`service-flip-inner ${isFlipped ? 'is-flipped' : ''}`}
         onClick={isFlipped ? handleBackClick : handleFrontClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-pressed={isFlipped}
+        aria-label={isFlipped ? `Show ${name} image` : `Show details for ${name}`}
       >
         {/* Front face */}
         <div className="service-flip-face service-flip-face--front">
