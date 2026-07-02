@@ -30,10 +30,15 @@ export default function ServicesSection({ services }: ServicesSectionProps) {
 
   // Section-wide "which card is open" — only one card (across all 3 rows,
   // desktop and mobile alike) may be flipped at a time, so opening a new one
-  // implicitly closes whatever was open. All rows pause while any card is open.
-  const [openCardKey, setOpenCardKey] = useState<string | null>(null);
-  const handleCardToggle = (loopKey: string) => {
-    setOpenCardKey((prev) => (prev === loopKey ? null : loopKey));
+  // implicitly closes whatever was open. Tracked as (rowIndex, loopKey) so
+  // only the row that actually owns the open card pauses — the other two
+  // keep scrolling. loopKey alone isn't enough to identify the owning row
+  // without re-deriving it from the string, so we keep rowIndex alongside it.
+  const [openCard, setOpenCard] = useState<{ rowIndex: number; loopKey: string } | null>(null);
+  const handleCardToggle = (rowIndex: number, loopKey: string) => {
+    setOpenCard((prev) =>
+      prev && prev.rowIndex === rowIndex && prev.loopKey === loopKey ? null : { rowIndex, loopKey },
+    );
   };
 
   return (
@@ -56,8 +61,9 @@ export default function ServicesSection({ services }: ServicesSectionProps) {
             key={idx}
             items={rowItems}
             direction={idx % 2 === 0 ? -1 : 1}
-            openCardKey={openCardKey}
-            onCardToggle={handleCardToggle}
+            openCardKey={openCard?.rowIndex === idx ? openCard.loopKey : null}
+            onCardToggle={(loopKey) => handleCardToggle(idx, loopKey)}
+            isPaused={openCard?.rowIndex === idx}
           />
         ))}
       </div>

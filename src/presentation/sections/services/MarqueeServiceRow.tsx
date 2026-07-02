@@ -20,9 +20,13 @@ const DRAG_THRESHOLD_PX = 6
 interface MarqueeServiceRowProps {
   items: ServiceCardData[]
   direction: -1 | 1
-  /** Section-wide "which card is open" key (a loopKey), or null if none. */
+  /** The open card's loopKey, scoped to THIS row by the parent — null unless
+   *  the currently open card (section-wide, only one at a time) belongs here. */
   openCardKey: string | null
   onCardToggle: (loopKey: string) => void
+  /** True only when the open card belongs to THIS row, so opening a card in
+   *  one row never stops the other rows from scrolling. */
+  isPaused: boolean
 }
 
 const arrowBtn: React.CSSProperties = {
@@ -45,6 +49,7 @@ export default function MarqueeServiceRow({
   direction,
   openCardKey,
   onCardToggle,
+  isPaused,
 }: MarqueeServiceRowProps) {
   const rowRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -52,7 +57,7 @@ export default function MarqueeServiceRow({
   const nextBtnRef = useRef<HTMLButtonElement>(null)
   const tweenRef = useRef<gsap.core.Tween | null>(null)
   const suppressNextClickRef = useRef(false)
-  // Bridge from the section-wide "is any card open" state (render scope) into
+  // Bridge from the `isPaused` prop (does THIS row own the open card?) into
   // the tween controls that live inside the mount-once effect closure.
   const setPausedByFlipRef = useRef<((paused: boolean) => void) | undefined>(undefined)
 
@@ -68,7 +73,6 @@ export default function MarqueeServiceRow({
     estimateCardWidthPx(),
   )
   const loopItems = buildLoopItems(items, duplicationCount)
-  const isPaused = openCardKey !== null
 
   useEffect(() => {
     // gsap.context()'s callback return value is NOT invoked by GSAP itself —
@@ -125,8 +129,8 @@ export default function MarqueeServiceRow({
       }
 
       // ── Centralised play/pause ───────────────────────────────────────
-      // `tween` is null whenever autoplay is intentionally stopped (a card is
-      // open anywhere in the section, or a drag is in progress here).
+      // `tween` is null whenever autoplay is intentionally stopped (this row's
+      // own card is open for reading, or a drag is in progress here).
       let tween: gsap.core.Tween | null = createTween()
       tweenRef.current = tween
       let pausedByFlip = false
@@ -151,13 +155,13 @@ export default function MarqueeServiceRow({
         applyTimeScale()
       }
 
-      // Driven by the `isPaused` prop (section-wide, one open card at a time).
+      // Driven by the `isPaused` prop (true only when THIS row's own card is open).
       setPausedByFlipRef.current = (paused: boolean) => {
         pausedByFlip = paused
         if (paused) pauseAutoplay()
         else resumeAutoplay()
       }
-      // Sync initial state (in case this row mounts while a card elsewhere is open).
+      // Sync initial state (in case this row mounts with its own card already open).
       setPausedByFlipRef.current(isPaused)
 
       // ── Hover slowdown (mouse only) ──────────────────────────────────
