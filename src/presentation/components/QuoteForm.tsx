@@ -114,7 +114,7 @@ function ConsentFieldOverride({ field, register, error }: FieldComponentProps) {
           id={`cf-${field.id}`}
           type="checkbox"
           aria-invalid={!!error}
-          className="mt-0.5"
+          className="consent-checkbox mt-0.5"
           {...register(field.id)}
         />
         <span>{field.label}</span>
@@ -265,7 +265,7 @@ export function QuoteForm({ layout = 'section' }: QuoteFormProps) {
             schema={schema}
             onSubmit={onSubmit}
             fieldComponents={fieldComponents}
-            className="contact-form flex flex-col gap-4"
+            className="contact-form flex flex-col gap-3.5"
             beforeFields={<span className="form-overline">Request a Quote</span>}
           >
             {({ isSubmitting }) => (

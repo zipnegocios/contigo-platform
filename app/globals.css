@@ -398,7 +398,6 @@
     position: relative;
     width: 100%;
     max-width: 560px;
-    height: 588px;
     margin: 0 auto;
     overflow: visible;
   }
@@ -477,12 +476,10 @@
   .form-overlay {
     position: relative;
     z-index: 2;
-    padding: 2.75rem;
-    height: 100%;
+    padding: clamp(1.75rem, 3.5vw, 2.25rem);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 1.25rem;
+    gap: 1rem;
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.45);
     border-radius: 20px;
@@ -509,15 +506,17 @@
     background: rgba(255, 255, 255, 0.55);
   }
 
-  /* Overline técnico dentro del panel */
+  /* Overline — matches the site's shared eyebrow recipe (.label: Alegreya
+     Sans, fluid-xs, 0.1em tracking) instead of a one-off Space Grotesk
+     treatment, so it reads as the same UI element as "GET IN TOUCH" right
+     next to it rather than a different, disconnected typeface. */
   .form-overline {
-    font-family: var(--font-space-grotesk), sans-serif;
-    font-size: 0.7rem;
+    @apply text-fluid-xs;
+    font-family: var(--font-sans, sans-serif);
     font-weight: 600;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--contigo-primary);
-    margin-bottom: 0.25rem;
   }
 
   /* Floating-label field */
@@ -541,7 +540,7 @@
 
   .ff-field textarea {
     resize: vertical;
-    min-height: 96px;
+    min-height: 80px;
     padding-top: 1.3rem;
   }
 
@@ -678,16 +677,33 @@
   .attach-remove-btn {
     display: flex;
     align-items: center;
-    padding: 2px;
+    justify-content: center;
+    /* 8px padding around a ~13px icon = a ~29px box; combined with the row's
+       own 6px vertical padding this comfortably clears touch-target minimums
+       without the file-item row itself growing much taller. */
+    padding: 8px;
+    margin: -8px -4px -8px 0;
     flex-shrink: 0;
     color: var(--neutral-500);
     background: none;
     border: none;
+    border-radius: 6px;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color 0.2s, background-color 0.2s;
   }
   .attach-remove-btn:hover {
     color: #c0392b;
+    background: rgba(192, 57, 43, 0.08);
+  }
+
+  /* Gold-themed consent checkbox — replaces the default browser blue/black
+     accent so it reads as part of the brand rather than an unstyled control.
+     Sized up slightly (18px) for a comfortable mobile tap target. */
+  .consent-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--contigo-primary);
+    flex-shrink: 0;
   }
 
   /* Navigation */

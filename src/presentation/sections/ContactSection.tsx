@@ -50,13 +50,15 @@ export default function ContactSection() {
     >
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-          {/* Left Column - Gooey Form */}
-          <div ref={leftColRef} className="lg:w-1/2">
+          {/* Left Column - Gooey Form. Ordered second on mobile/tablet so
+              visitors read what this section is for before meeting the form
+              — the two-column desktop arrangement (form left) is unchanged. */}
+          <div ref={leftColRef} className="order-2 lg:order-1 lg:w-1/2">
             <QuoteForm />
           </div>
 
           {/* Right Column - Contact Info */}
-          <div ref={rightColRef} className="lg:w-1/2 flex flex-col justify-center">
+          <div ref={rightColRef} className="order-1 lg:order-2 lg:w-1/2 flex flex-col justify-center">
             <span
               className="label block mb-4"
               style={{ color: 'var(--contigo-primary)' }}
