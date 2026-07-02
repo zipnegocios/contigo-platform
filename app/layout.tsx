@@ -32,6 +32,9 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'Contigo Constructions | Luxury Home Builders Adelaide',
   description: 'Premium construction, extensions, and renovations in Adelaide. Award-winning builders specializing in luxury homes.',
+  icons: {
+    icon: '/icon.svg',
+  },
   openGraph: {
     title: 'Contigo Constructions',
     description: 'Premium construction services Adelaide',
