@@ -27,7 +27,7 @@ function scrollTo(id: string) {
 
 function CTAButtons({ buttons, onOpenForm }: { buttons: HeroButton[]; onOpenForm: (slug: string, name?: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-4 mt-8" style={{ opacity: 0, transform: 'translateY(20px)' }} data-hero-cta>
+    <div className="flex flex-wrap gap-4 mt-8" data-hero-cta>
       {buttons.map((btn) => {
         const handleClick =
           btn.linkType === 'scroll'
