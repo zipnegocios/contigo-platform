@@ -50,6 +50,13 @@ export default function MarqueeServiceRow({
   const loopItems = buildLoopItems(items, duplicationCount)
 
   useEffect(() => {
+    // gsap.context()'s callback return value is NOT invoked by GSAP itself —
+    // only animations/selectors created inside the callback are tracked for
+    // ctx.revert(). Plain addEventListener cleanup must be captured here and
+    // called explicitly, or it silently never runs (leaking listeners on
+    // every remount, e.g. React StrictMode's dev-only double-invoke).
+    let innerCleanup: (() => void) | undefined
+
     const ctx = gsap.context(() => {
       const track = trackRef.current
       if (!track) return
@@ -65,15 +72,32 @@ export default function MarqueeServiceRow({
       const min = direction === -1 ? -oneSetWidth : 0
       const max = direction === -1 ? 0 : oneSetWidth
 
-      const tween = gsap.to(track, {
-        x: direction === -1 ? -oneSetWidth : oneSetWidth,
-        duration: oneSetWidth / PIXELS_PER_SECOND,
-        ease: 'none',
-        repeat: -1,
-        modifiers: {
-          x: gsap.utils.wrap(min, max),
-        },
-      })
+      // A fresh tween with no explicit `x` starting value animates FROM the
+      // element's current computed position — this is what lets drag-release
+      // and arrow-nudge resume seamlessly from wherever the track visually
+      // sits. `tween.pause()` + `tween.resume()` would NOT work for that:
+      // resume() continues the tween's own frozen internal playhead/timeline,
+      // which is unaware of any manual `gsap.set()`/separate-tween writes
+      // made to the DOM while paused, causing a visible snap back to the
+      // tween's own expected position on resume. Killing and recreating the
+      // tween avoids that entirely by always starting fresh from "now".
+      const createTween = () =>
+        gsap.to(track, {
+          x: direction === -1 ? -oneSetWidth : oneSetWidth,
+          duration: oneSetWidth / PIXELS_PER_SECOND,
+          ease: 'none',
+          repeat: -1,
+          modifiers: {
+            // gsap.utils.wrap() alone receives the raw value as a unit-suffixed
+            // string (e.g. "-42.1px") when animating x/y via the CSS `translate`
+            // property, breaking its internal modulo arithmetic (NaN). unitize()
+            // strips the unit before wrapping and re-appends it after — GSAP's
+            // documented fix for modifiers on transform properties.
+            x: gsap.utils.unitize(gsap.utils.wrap(min, max)),
+          },
+        })
+
+      let tween = createTween()
       tweenRef.current = tween
 
       // ── Hover slowdown (mouse only) ──────────────────────────────────
@@ -101,7 +125,7 @@ export default function MarqueeServiceRow({
         trackStartXRef.current = gsap.getProperty(track, 'x') as number
         totalMovementRef.current = 0
         pointerDownTimeRef.current = Date.now()
-        tween.pause()
+        tween.kill()
         track.setPointerCapture(e.pointerId)
       }
 
@@ -119,11 +143,12 @@ export default function MarqueeServiceRow({
         isDraggingRef.current = false
         const wasClick =
           totalMovementRef.current < 7 && Date.now() - pointerDownTimeRef.current < 300
-        tween.resume()
+        tween = createTween()
+        tweenRef.current = tween
+        tween.timeScale(isHoveringRef.current ? 0.28 : 1)
         if (!wasClick) {
           suppressNextClickRef.current = true
         }
-        tween.timeScale(isHoveringRef.current ? 0.28 : 1)
       }
 
       const handleClickCapture = (e: MouseEvent) => {
@@ -144,7 +169,7 @@ export default function MarqueeServiceRow({
       // "next" continues one card-width further in the row's own autoplay
       // direction; "prev" steps one card-width the opposite way.
       const nudge = (navDir: -1 | 1) => {
-        tween.pause()
+        tween.kill()
         const currentX = gsap.getProperty(track, 'x') as number
         const step = navDir * direction * CARD_WIDTH_PX
         const targetX = gsap.utils.wrap(min, max, currentX + step)
@@ -152,7 +177,11 @@ export default function MarqueeServiceRow({
           x: targetX,
           duration: 0.5,
           ease: 'power2.out',
-          onComplete: () => tween.resume(),
+          onComplete: () => {
+            tween = createTween()
+            tweenRef.current = tween
+            tween.timeScale(isHoveringRef.current ? 0.28 : 1)
+          },
         })
       }
 
@@ -163,7 +192,7 @@ export default function MarqueeServiceRow({
       prevBtn?.addEventListener('click', handlePrevClick)
       nextBtn?.addEventListener('click', handleNextClick)
 
-      return () => {
+      innerCleanup = () => {
         row?.removeEventListener('pointerenter', handlePointerEnter)
         row?.removeEventListener('pointerleave', handlePointerLeave)
         track.removeEventListener('pointerdown', handlePointerDown)
@@ -176,7 +205,10 @@ export default function MarqueeServiceRow({
       }
     }, rowRef)
 
-    return () => ctx.revert()
+    return () => {
+      innerCleanup?.()
+      ctx.revert()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
