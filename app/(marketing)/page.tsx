@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import nextDynamic from 'next/dynamic'
 import { SimpleHeader } from '@/presentation/components/SimpleHeader'
 import HeroSection from '@/presentation/sections/HeroSection'
@@ -48,6 +49,27 @@ const ContactSection = nextDynamic(
 )
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Contigo Constructions | Carpentry & Renovations Adelaide',
+  description:
+    'Licensed Carpentry & Joinery contractor in Adelaide specialising in renovations, home extensions, pergolas, decking, framing and cladding. Request a free quote today.',
+  keywords: [
+    'Carpentry & Renovations Adelaide',
+    'Home Renovations Adelaide',
+    'Home Extensions Adelaide',
+    'Carpentry Services Adelaide',
+  ],
+  alternates: {
+    canonical: 'https://contigoconstructions.com.au',
+  },
+  openGraph: {
+    title: 'Contigo Constructions | Carpentry & Renovations Adelaide',
+    description:
+      'Licensed Carpentry & Joinery contractor in Adelaide specialising in renovations, home extensions, pergolas, decking, framing and cladding. Request a free quote today.',
+    url: 'https://contigoconstructions.com.au',
+  },
+}
 
 export default async function HomePage() {
   // Fetch featured projects server-side — always fresh, no client fetch needed

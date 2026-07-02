@@ -8,12 +8,23 @@ import MasterBuildersSection from '@/presentation/sections/MasterBuildersSection
 import AboutClosingCTA from '@/presentation/sections/AboutClosingCTA'
 
 export const metadata: Metadata = {
-  title: 'About | Contigo Constructions',
-  description: 'Contigo Constructions Pty Ltd — mission, vision, and the values that shape every project we build with our clients across Adelaide.',
+  title: 'About Contigo Constructions | Licensed Carpentry & Joinery Adelaide',
+  description:
+    'Learn more about Contigo Constructions, a licensed Carpentry & Joinery contractor in Adelaide specialising in renovations, home extensions, framing, pergolas, decking and cladding.',
+  keywords: [
+    'Carpentry & Joinery Adelaide',
+    'Licensed Carpentry Contractor Adelaide',
+    'Home Renovations Adelaide',
+    'Master Builders South Australia',
+  ],
+  alternates: {
+    canonical: 'https://contigoconstructions.com.au/about',
+  },
   openGraph: {
-    title: 'About Contigo Constructions',
-    description: 'Contigo Constructions Pty Ltd — mission, vision, and the values that shape every project we build with our clients across Adelaide.',
-    type: 'website',
+    title: 'About Contigo Constructions | Licensed Carpentry & Joinery Adelaide',
+    description:
+      'Learn more about Contigo Constructions, a licensed Carpentry & Joinery contractor in Adelaide specialising in renovations, home extensions, framing, pergolas, decking and cladding.',
+    url: 'https://contigoconstructions.com.au/about',
   },
 }
 

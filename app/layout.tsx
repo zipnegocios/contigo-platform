@@ -30,25 +30,92 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: 'Contigo Constructions | Luxury Home Builders Adelaide',
-  description: 'Premium construction, extensions, and renovations in Adelaide. Award-winning builders specializing in luxury homes.',
+  // ── Títulos ──────────────────────────────────────────────────────────────
+  title: {
+    default: 'Contigo Constructions | Carpentry & Renovations Adelaide',
+    template: '%s | Contigo Constructions',
+  },
+
+  // ── Descripción ──────────────────────────────────────────────────────────
+  description:
+    'Licensed Carpentry & Joinery contractor in Adelaide specialising in renovations, home extensions, pergolas, decking, framing and cladding. Request a free quote today.',
+
+  // ── Keywords ─────────────────────────────────────────────────────────────
+  keywords: [
+    'carpentry Adelaide',
+    'carpentry services Adelaide',
+    'home renovations Adelaide',
+    'home extensions Adelaide',
+    'cladding Adelaide',
+    'gyprock Adelaide',
+    'licensed builder Adelaide',
+    'licensed carpentry contractor Adelaide',
+    'BLD licence 357596',
+    'Contigo Constructions',
+  ],
+
+  // ── Icons ────────────────────────────────────────────────────────────────
   icons: {
     icon: '/icon.svg',
   },
+
+  // ── Open Graph ───────────────────────────────────────────────────────────
   openGraph: {
-    title: 'Contigo Constructions',
-    description: 'Premium construction services Adelaide',
-    url: 'https://contigo-constructions.com.au',
+    type: 'website',
+    locale: 'en_AU',
+    url: 'https://contigoconstructions.com.au',
     siteName: 'Contigo Constructions',
+    title: 'Contigo Constructions | Carpentry & Renovations Adelaide',
+    description:
+      'Licensed Carpentry & Joinery contractor in Adelaide. BLD Licence 357596. Master Builders member. Specialising in renovations, extensions, carpentry, cladding and gyprock.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: 'https://contigoconstructions.com.au/og-image.jpg',
         width: 1200,
         height: 630,
+        alt: 'Contigo Constructions — Carpentry & Renovations Adelaide',
       },
     ],
-    type: 'website',
   },
+
+  // ── Twitter / X Card ─────────────────────────────────────────────────────
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contigo Constructions | Carpentry & Renovations Adelaide',
+    description:
+      'Licensed Carpentry & Joinery contractor in Adelaide. BLD Licence 357596. Master Builders member.',
+    images: ['https://contigoconstructions.com.au/og-image.jpg'],
+  },
+
+  // ── Robots ───────────────────────────────────────────────────────────────
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+
+  // ── Canonical ────────────────────────────────────────────────────────────
+  alternates: {
+    canonical: 'https://contigoconstructions.com.au',
+  },
+
+  // ── Verificación ─────────────────────────────────────────────────────────
+  // Agregar si se tiene el código de Google Search Console
+  // verification: {
+  //   google: 'GOOGLE_VERIFICATION_CODE',
+  // },
+
+  // ── Metadatos de aplicación ──────────────────────────────────────────────
+  applicationName: 'Contigo Constructions',
+  authors: [{ name: 'Contigo Constructions', url: 'https://contigoconstructions.com.au' }],
+  creator: 'Contigo Constructions Pty Ltd',
+  publisher: 'Contigo Constructions Pty Ltd',
 }
 
 export default function RootLayout({
@@ -58,7 +125,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="en-AU"
       className={`${alegreya.variable} ${alegreyaSans.variable} ${spaceGrotesk.variable}`}
       suppressHydrationWarning
     >
