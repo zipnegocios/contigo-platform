@@ -69,7 +69,7 @@ export default function ContactSection() {
               className="mb-6"
               style={{ color: 'var(--contigo-foreground)' }}
             >
-              Start Your Project
+              Let&apos;s Build Together
             </h2>
             <p
               className="mb-8 text-fluid-base"
