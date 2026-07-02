@@ -12,6 +12,7 @@ interface FlippableServiceCardProps {
   categorySlug: string
   categoryName: string
   loopKey?: string
+  className?: string
   style?: CSSProperties
 }
 
@@ -21,6 +22,7 @@ export default function FlippableServiceCard({
   imageUrl,
   categorySlug,
   categoryName,
+  className,
   style,
 }: FlippableServiceCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
@@ -51,7 +53,7 @@ export default function FlippableServiceCard({
   }
 
   return (
-    <div className="service-flip-perspective" style={style}>
+    <div className={`service-flip-perspective ${className ?? ''}`} style={style}>
       <div
         className={`service-flip-inner ${isFlipped ? 'is-flipped' : ''}`}
         onClick={isFlipped ? handleBackClick : handleFrontClick}
@@ -67,17 +69,17 @@ export default function FlippableServiceCard({
             src={imageUrl}
             alt={name}
             fill
-            sizes="320px"
+            sizes="(max-width: 1024px) 82vw, 420px"
             style={{ objectFit: 'cover' }}
           />
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(to top, rgba(5,30,39,0.75), transparent 55%)',
+              background: 'linear-gradient(to top, rgba(5,30,39,0.78), transparent 60%)',
             }}
           />
           <span
-            className="absolute bottom-4 left-4 right-4 text-white font-medium"
+            className="absolute bottom-3 left-4 right-4 text-white font-medium text-fluid-sm leading-snug"
             style={{ fontFamily: 'var(--font-alegreya-sans)' }}
           >
             {name}
@@ -86,23 +88,26 @@ export default function FlippableServiceCard({
 
         {/* Back face */}
         <div
-          className="service-flip-face service-flip-face--back"
+          className="service-flip-face service-flip-face--back flex flex-col justify-center gap-1.5 px-5 py-4"
           style={{
-            background: `linear-gradient(rgba(5,30,39,0.85), rgba(9,43,56,0.85)), url(${imageUrl}) center/cover`,
+            background: `linear-gradient(rgba(5,30,39,0.86), rgba(9,43,56,0.86)), url(${imageUrl}) center/cover`,
           }}
         >
           <span
-            className="label block mb-2"
+            className="label"
             style={{ color: 'var(--contigo-primary)' }}
           >
             {categoryName}
           </span>
-          <h3 style={{ fontFamily: 'var(--font-alegreya)', color: 'var(--neutral-50)' }}>
+          <h3
+            className="text-fluid-base leading-tight"
+            style={{ fontFamily: 'var(--font-alegreya)', color: 'var(--neutral-50)' }}
+          >
             {name}
           </h3>
           <Link
             href={`/services/${categorySlug}/${slug}`}
-            className="inline-flex items-center gap-2 mt-4"
+            className="inline-flex items-center gap-2 mt-1 text-fluid-sm font-medium"
             style={{ color: 'var(--contigo-primary)' }}
           >
             View Details

@@ -1163,6 +1163,27 @@
   }
   .service-flip-face--back { transform: rotateY(180deg); }
 
+  /* Rectangular, viewport-adaptive card sizing (aspect 1.8, like the
+     original parallax-work strip). Desktop scales with viewport height;
+     mobile scales with viewport width. */
+  .service-card-desktop {
+    height: clamp(150px, 20vh, 230px);
+    aspect-ratio: 1.8;
+    flex-shrink: 0;
+  }
+  .service-card-mobile {
+    width: min(82vw, 360px);
+    aspect-ratio: 1.8;
+    flex-shrink: 0;
+  }
+
+  /* Soft fade on the left/right edges of each marquee row (the "edge cards
+     fade" look). Applied to the clipping viewport, not the arrows. */
+  .service-marquee-viewport {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .service-flip-inner { transition: none; }
     .service-flip-inner, .service-flip-inner.is-flipped { transform: none !important; }

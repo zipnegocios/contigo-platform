@@ -40,9 +40,30 @@ export function buildLoopItems<T extends { slug: string }>(
 ): (T & { loopKey: string })[] {
   const out: (T & { loopKey: string })[] = []
   for (let set = 0; set < duplicationCount; set++) {
-    for (const item of items) {
-      out.push({ ...item, loopKey: `${item.slug}__set${set}` })
-    }
+    // Include the item's index so the key stays unique even if two services in
+    // the same row happen to share a slug (slugs are only unique per category).
+    items.forEach((item, i) => {
+      out.push({ ...item, loopKey: `${item.slug}__${i}__set${set}` })
+    })
   }
   return out
+}
+
+/**
+ * Deal a flat list of items round-robin into `rowCount` rows so counts stay
+ * balanced (row lengths differ by at most 1) even when the total isn't
+ * divisible by `rowCount`.
+ *
+ * @param items - Flat, already-ordered (e.g. pre-shuffled) list
+ * @param rowCount - Number of rows to produce (always returns exactly this many)
+ * @returns Array of `rowCount` sub-arrays; trailing rows may be empty if items < rowCount
+ *
+ * Example: 8 items into 3 rows → [3, 3, 2] items (indices 0,3,6 / 1,4,7 / 2,5).
+ */
+export function splitIntoRows<T>(items: T[], rowCount: number): T[][] {
+  const rows: T[][] = Array.from({ length: rowCount }, () => [])
+  items.forEach((item, idx) => {
+    rows[idx % rowCount].push(item)
+  })
+  return rows
 }

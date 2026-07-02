@@ -5,14 +5,20 @@ import { gsap } from 'gsap'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 import { getServiceRowDuplicationCount, buildLoopItems } from './marqueeGeometry'
 import FlippableServiceCard from './FlippableServiceCard'
+import type { ServiceCardData } from '../ServicesSection'
 
-const PIXELS_PER_SECOND = 40
-const CARD_WIDTH_PX = 336
+// Marquee travel speed. Deliberately brisk (the previous 40 felt sleepy) but
+// still slow enough to read a card as it passes.
+const PIXELS_PER_SECOND = 85
+const GAP_PX = 16
+const HOVER_TIME_SCALE = 0.28
+// A pointer must move at least this far before it counts as a drag. Below the
+// threshold we NEVER call setPointerCapture, so a genuine click always reaches
+// the card's own onClick — this is what makes the 3D flip fire reliably.
+const DRAG_THRESHOLD_PX = 6
 
 interface MarqueeServiceRowProps {
-  categorySlug: string
-  categoryName: string
-  items: { slug: string; name: string; imageUrl: string }[]
+  items: ServiceCardData[]
   direction: -1 | 1
 }
 
@@ -22,12 +28,16 @@ const arrowBtn: React.CSSProperties = {
   border: '1px solid var(--gold-a30)',
 }
 
-export default function MarqueeServiceRow({
-  categorySlug,
-  categoryName,
-  items,
-  direction,
-}: MarqueeServiceRowProps) {
+/** Estimate a card's on-screen width (matches the `.service-card-desktop`
+ *  clamp in globals.css) so the duplication count can be picked before the
+ *  DOM is measured. The tween itself uses the real measured width. */
+function estimateCardWidthPx(): number {
+  if (typeof window === 'undefined') return 340
+  const h = Math.min(Math.max(window.innerHeight * 0.2, 150), 230)
+  return h * 1.8 + GAP_PX
+}
+
+export default function MarqueeServiceRow({ items, direction }: MarqueeServiceRowProps) {
   const rowRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const prevBtnRef = useRef<HTMLButtonElement>(null)
@@ -35,26 +45,23 @@ export default function MarqueeServiceRow({
   const tweenRef = useRef<gsap.core.Tween | null>(null)
   const suppressNextClickRef = useRef(false)
 
+  const isPointerDownRef = useRef(false)
   const isDraggingRef = useRef(false)
   const dragStartXRef = useRef(0)
   const trackStartXRef = useRef(0)
-  const totalMovementRef = useRef(0)
-  const pointerDownTimeRef = useRef(0)
   const isHoveringRef = useRef(false)
 
   const duplicationCount = getServiceRowDuplicationCount(
     items.length,
     typeof window !== 'undefined' ? window.innerWidth : 1440,
-    CARD_WIDTH_PX,
+    estimateCardWidthPx(),
   )
   const loopItems = buildLoopItems(items, duplicationCount)
 
   useEffect(() => {
     // gsap.context()'s callback return value is NOT invoked by GSAP itself —
-    // only animations/selectors created inside the callback are tracked for
-    // ctx.revert(). Plain addEventListener cleanup must be captured here and
-    // called explicitly, or it silently never runs (leaking listeners on
-    // every remount, e.g. React StrictMode's dev-only double-invoke).
+    // only animations/selectors created inside are tracked for ctx.revert().
+    // Capture the listener cleanup here and call it explicitly.
     let innerCleanup: (() => void) | undefined
 
     const ctx = gsap.context(() => {
@@ -68,19 +75,22 @@ export default function MarqueeServiceRow({
       }
 
       const oneSetWidth = track.scrollWidth / duplicationCount
+      const firstCard = track.children[0] as HTMLElement | undefined
+      const cardStep = firstCard ? firstCard.offsetWidth + GAP_PX : estimateCardWidthPx()
 
-      const min = direction === -1 ? -oneSetWidth : 0
-      const max = direction === -1 ? 0 : oneSetWidth
+      // Both directions wrap into the SAME window [-oneSetWidth, 0]. The
+      // modifier maps any raw x into this window, and the track holds enough
+      // duplicated sets that this window is always fully covered — so the
+      // viewport never shows an empty gap, whichever way the row travels.
+      // (A [0, oneSetWidth] window for rightward rows leaves a growing empty
+      // strip on the left, since the cards only extend rightward from x=0.)
+      const min = -oneSetWidth
+      const max = 0
 
-      // A fresh tween with no explicit `x` starting value animates FROM the
-      // element's current computed position — this is what lets drag-release
-      // and arrow-nudge resume seamlessly from wherever the track visually
-      // sits. `tween.pause()` + `tween.resume()` would NOT work for that:
-      // resume() continues the tween's own frozen internal playhead/timeline,
-      // which is unaware of any manual `gsap.set()`/separate-tween writes
-      // made to the DOM while paused, causing a visible snap back to the
-      // tween's own expected position on resume. Killing and recreating the
-      // tween avoids that entirely by always starting fresh from "now".
+      // A fresh tween with no explicit `x` start animates FROM the element's
+      // current computed position, so drag-release and arrow-nudge resume
+      // seamlessly. We kill + recreate (never pause/resume) to avoid the
+      // tween's frozen playhead snapping back to its own expected position.
       const createTween = () =>
         gsap.to(track, {
           x: direction === -1 ? -oneSetWidth : oneSetWidth,
@@ -88,11 +98,9 @@ export default function MarqueeServiceRow({
           ease: 'none',
           repeat: -1,
           modifiers: {
-            // gsap.utils.wrap() alone receives the raw value as a unit-suffixed
-            // string (e.g. "-42.1px") when animating x/y via the CSS `translate`
-            // property, breaking its internal modulo arithmetic (NaN). unitize()
-            // strips the unit before wrapping and re-appends it after — GSAP's
-            // documented fix for modifiers on transform properties.
+            // unitize() strips the "px" GSAP writes via the CSS `translate`
+            // property before wrap()'s modulo, then re-appends it. Without it
+            // wrap() receives a string and returns NaN every tick.
             x: gsap.utils.unitize(gsap.utils.wrap(min, max)),
           },
         })
@@ -104,53 +112,64 @@ export default function MarqueeServiceRow({
       const handlePointerEnter = (e: PointerEvent) => {
         if (e.pointerType !== 'mouse') return
         isHoveringRef.current = true
-        tween.timeScale(0.28)
+        tween.timeScale(HOVER_TIME_SCALE)
       }
       const handlePointerLeave = (e: PointerEvent) => {
         if (e.pointerType !== 'mouse') return
         isHoveringRef.current = false
-        if (!isDraggingRef.current) {
-          tween.timeScale(1)
-        }
+        if (!isDraggingRef.current) tween.timeScale(1)
       }
-
       const row = rowRef.current
       row?.addEventListener('pointerenter', handlePointerEnter)
       row?.addEventListener('pointerleave', handlePointerLeave)
 
-      // ── Drag override (Pointer Events on the track) ──────────────────
+      // ── Drag override — capture only AFTER the threshold is crossed ──
       const handlePointerDown = (e: PointerEvent) => {
-        isDraggingRef.current = true
+        isPointerDownRef.current = true
+        isDraggingRef.current = false
         dragStartXRef.current = e.clientX
         trackStartXRef.current = gsap.getProperty(track, 'x') as number
-        totalMovementRef.current = 0
-        pointerDownTimeRef.current = Date.now()
-        tween.kill()
-        track.setPointerCapture(e.pointerId)
       }
-
       const handlePointerMove = (e: PointerEvent) => {
-        if (!isDraggingRef.current) return
+        if (!isPointerDownRef.current) return
+        if (!isDraggingRef.current) {
+          if (Math.abs(e.clientX - dragStartXRef.current) < DRAG_THRESHOLD_PX) return
+          // Threshold crossed → this is a drag, not a click. NOW take over.
+          // Re-anchor to the live position (after kill, so getProperty reads the
+          // settled x) so the track doesn't jump by however far it auto-scrolled
+          // between pointerdown and the threshold being crossed.
+          isDraggingRef.current = true
+          tween.kill()
+          trackStartXRef.current = gsap.getProperty(track, 'x') as number
+          dragStartXRef.current = e.clientX
+          try {
+            track.setPointerCapture(e.pointerId)
+          } catch {
+            /* pointer may already be released */
+          }
+        }
         const delta = e.clientX - dragStartXRef.current
-        totalMovementRef.current = Math.max(totalMovementRef.current, Math.abs(delta))
-        gsap.set(track, {
-          x: gsap.utils.wrap(min, max, trackStartXRef.current + delta),
-        })
+        gsap.set(track, { x: gsap.utils.wrap(min, max, trackStartXRef.current + delta) })
       }
-
-      const handlePointerUp = () => {
-        if (!isDraggingRef.current) return
+      const handlePointerUp = (e: PointerEvent) => {
+        if (!isPointerDownRef.current) return
+        isPointerDownRef.current = false
+        const wasDrag = isDraggingRef.current
         isDraggingRef.current = false
-        const wasClick =
-          totalMovementRef.current < 7 && Date.now() - pointerDownTimeRef.current < 300
-        tween = createTween()
-        tweenRef.current = tween
-        tween.timeScale(isHoveringRef.current ? 0.28 : 1)
-        if (!wasClick) {
+        if (wasDrag) {
+          try {
+            track.releasePointerCapture(e.pointerId)
+          } catch {
+            /* already released */
+          }
+          tween = createTween()
+          tweenRef.current = tween
+          tween.timeScale(isHoveringRef.current ? HOVER_TIME_SCALE : 1)
+          // Swallow the synthetic click that ends a drag so it doesn't flip a card.
           suppressNextClickRef.current = true
         }
+        // Pure click (no drag): tween keeps running, click reaches the card → flip.
       }
-
       const handleClickCapture = (e: MouseEvent) => {
         if (suppressNextClickRef.current) {
           e.stopPropagation()
@@ -158,7 +177,6 @@ export default function MarqueeServiceRow({
           suppressNextClickRef.current = false
         }
       }
-
       track.addEventListener('pointerdown', handlePointerDown)
       track.addEventListener('pointermove', handlePointerMove)
       track.addEventListener('pointerup', handlePointerUp)
@@ -166,12 +184,10 @@ export default function MarqueeServiceRow({
       track.addEventListener('click', handleClickCapture, { capture: true })
 
       // ── Arrow-nav ──────────────────────────────────────────────────────
-      // "next" continues one card-width further in the row's own autoplay
-      // direction; "prev" steps one card-width the opposite way.
       const nudge = (navDir: -1 | 1) => {
         tween.kill()
         const currentX = gsap.getProperty(track, 'x') as number
-        const step = navDir * direction * CARD_WIDTH_PX
+        const step = navDir * direction * cardStep
         const targetX = gsap.utils.wrap(min, max, currentX + step)
         gsap.to(track, {
           x: targetX,
@@ -180,11 +196,10 @@ export default function MarqueeServiceRow({
           onComplete: () => {
             tween = createTween()
             tweenRef.current = tween
-            tween.timeScale(isHoveringRef.current ? 0.28 : 1)
+            tween.timeScale(isHoveringRef.current ? HOVER_TIME_SCALE : 1)
           },
         })
       }
-
       const prevBtn = prevBtnRef.current
       const nextBtn = nextBtnRef.current
       const handlePrevClick = () => nudge(-1)
@@ -218,23 +233,23 @@ export default function MarqueeServiceRow({
         ref={prevBtnRef}
         type="button"
         aria-label="Previous"
-        className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute left-0 z-10"
+        className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute left-2 z-10"
         style={arrowBtn}
       >
         ‹
       </button>
 
-      <div className="flex-1 overflow-hidden">
-        <div ref={trackRef} className="marquee-row-track flex gap-4">
+      <div className="service-marquee-viewport flex-1 overflow-hidden">
+        <div ref={trackRef} className="flex gap-4">
           {loopItems.map((item) => (
             <FlippableServiceCard
               key={item.loopKey}
               slug={item.slug}
               name={item.name}
               imageUrl={item.imageUrl}
-              categorySlug={categorySlug}
-              categoryName={categoryName}
-              style={{ width: 320, height: 400, flexShrink: 0 }}
+              categorySlug={item.categorySlug}
+              categoryName={item.categoryName}
+              className="service-card-desktop"
             />
           ))}
         </div>
@@ -244,7 +259,7 @@ export default function MarqueeServiceRow({
         ref={nextBtnRef}
         type="button"
         aria-label="Next"
-        className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute right-0 z-10"
+        className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 absolute right-2 z-10"
         style={arrowBtn}
       >
         ›

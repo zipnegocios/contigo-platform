@@ -1,21 +1,16 @@
 'use client'
 
 import FlippableServiceCard from './FlippableServiceCard'
+import type { ServiceCardData } from '../ServicesSection'
 
 interface ServiceRowMobileProps {
-  categorySlug: string
-  categoryName: string
-  items: { slug: string; name: string; imageUrl: string }[]
+  items: ServiceCardData[]
 }
 
-export default function ServiceRowMobile({
-  categorySlug,
-  categoryName,
-  items,
-}: ServiceRowMobileProps) {
+export default function ServiceRowMobile({ items }: ServiceRowMobileProps) {
   return (
     <div
-      className="flex gap-4 overflow-x-auto px-4"
+      className="flex gap-4 overflow-x-auto px-4 pb-1"
       style={{
         scrollSnapType: 'x proximity',
         WebkitOverflowScrolling: 'touch',
@@ -23,24 +18,16 @@ export default function ServiceRowMobile({
       }}
     >
       {items.map((item) => (
-        <div
+        <FlippableServiceCard
           key={item.slug}
-          className="shrink-0"
-          style={{
-            scrollSnapAlign: 'start',
-            width: 'min(78vw, 320px)',
-            aspectRatio: '4 / 5',
-          }}
-        >
-          <FlippableServiceCard
-            slug={item.slug}
-            name={item.name}
-            imageUrl={item.imageUrl}
-            categorySlug={categorySlug}
-            categoryName={categoryName}
-            style={{ width: '100%', height: '100%' }}
-          />
-        </div>
+          slug={item.slug}
+          name={item.name}
+          imageUrl={item.imageUrl}
+          categorySlug={item.categorySlug}
+          categoryName={item.categoryName}
+          className="service-card-mobile"
+          style={{ scrollSnapAlign: 'start' }}
+        />
       ))}
     </div>
   )
