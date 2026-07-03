@@ -151,7 +151,12 @@ export function CategoryFormModal({
               placeholder="Category name"
               autoFocus
             />
-            {name && (
+            {name && editTarget?.isSystem && (
+              <p className="text-[10px] mt-1" style={{ color: 'var(--neutral-600)' }}>
+                Slug: <span className="font-mono">{editTarget.slug}</span> (fixed — system category URLs stay stable)
+              </p>
+            )}
+            {name && !editTarget?.isSystem && (
               <p className="text-[10px] mt-1" style={{ color: 'var(--neutral-600)' }}>
                 Slug: <span className="font-mono">{slugPreview}</span>
               </p>
