@@ -109,7 +109,7 @@ export async function PATCH(
       location: body.location || project.location,
       completedDate: body.completedDate ? new Date(body.completedDate) : project.completedDate,
       featured: body.featured !== undefined ? body.featured : project.featured,
-      published: body.published !== undefined ? body.published : project.published,
+      status: body.status !== undefined ? body.status : project.status,
       coverImageUrl: newCoverImageUrl,
       coverPosterUrl: newCoverPosterUrl,
       galleryItems: newGalleryItems,

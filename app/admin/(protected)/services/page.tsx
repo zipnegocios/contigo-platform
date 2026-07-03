@@ -26,7 +26,7 @@ export default async function ServicesPage() {
           name: s.name,
           shortDescription: s.shortDescription,
           orderIndex: s.orderIndex,
-          published: s.published,
+          status: s.status,
           imageUrl: s.imageUrl,
           categoryId: s.categoryId,
         })),

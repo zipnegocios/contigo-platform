@@ -27,7 +27,7 @@ export class DrizzleProjectRepository {
         location: project.location,
         completedDate: project.completedDate,
         featured: project.featured,
-        published: project.published,
+        status: project.status,
         coverImageUrl: project.coverImageUrl,
         coverPosterUrl: project.coverPosterUrl,
         galleryUrls: project.galleryItems,
@@ -66,7 +66,7 @@ export class DrizzleProjectRepository {
     const rows = await db
       .select()
       .from(projects)
-      .where(eq(projects.published, true))
+      .where(eq(projects.status, 'active'))
       .orderBy(desc(projects.createdAt))
       .limit(limit)
       .offset(offset)
@@ -78,7 +78,7 @@ export class DrizzleProjectRepository {
     const rows = await db
       .select()
       .from(projects)
-      .where(and(eq(projects.published, true), eq(projects.featured, true)))
+      .where(and(eq(projects.status, 'active'), eq(projects.featured, true)))
       .orderBy(desc(projects.createdAt))
 
     return rows.map((row) => this.mapRowToProject(row))
@@ -95,7 +95,7 @@ export class DrizzleProjectRepository {
         location: project.location,
         completedDate: project.completedDate,
         featured: project.featured,
-        published: project.published,
+        status: project.status,
         coverImageUrl: project.coverImageUrl,
         coverPosterUrl: project.coverPosterUrl,
         galleryUrls: project.galleryItems,
@@ -129,7 +129,7 @@ export class DrizzleProjectRepository {
       location: row.location as string,
       completedDate: row.completedDate as Date,
       featured: row.featured as boolean,
-      published: row.published as boolean,
+      status: row.status as Project['status'],
       coverImageUrl: row.coverImageUrl as string,
       coverPosterUrl: (row.coverPosterUrl as string | null) ?? null,
       galleryItems: normaliseGalleryRow(row.galleryUrls),

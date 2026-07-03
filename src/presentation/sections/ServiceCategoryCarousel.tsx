@@ -14,7 +14,6 @@ export interface ServiceCategoryCarouselItem {
   shortDescription: string
   iconKey: string
   imageUrl: string | null
-  published: boolean
 }
 
 interface Props {

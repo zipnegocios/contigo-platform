@@ -27,7 +27,7 @@ export async function generateMetadata({
   const { slug } = await params
   const repo = new DrizzleProjectRepository()
   const project = await repo.findBySlug(slug)
-  if (!project || !project.published) return { title: 'Project not found' }
+  if (!project || project.status !== 'active') return { title: 'Project not found' }
   return {
     title: `${project.title} | Contigo Constructions`,
     description: project.description,
@@ -52,7 +52,7 @@ export default async function ProjectDetailPage({
   const repo = new DrizzleProjectRepository()
   const project = await repo.findBySlug(slug)
 
-  if (!project || !project.published) notFound()
+  if (!project || project.status !== 'active') notFound()
 
   const completedLabel = new Date(project.completedDate).toLocaleDateString('en-AU', {
     year: 'numeric',

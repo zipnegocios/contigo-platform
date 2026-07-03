@@ -27,9 +27,11 @@ export const quoteStatusEnum = pgEnum('quote_status', [
 
 export const projectStatusEnum = pgEnum('project_status', [
   'draft',
-  'published',
-  'archived',
+  'active',
+  'inactive',
 ])
+
+export const serviceStatusEnum = pgEnum('service_status', ['draft', 'active', 'inactive'])
 
 export const leadStageEnum = pgEnum('lead_stage', [
   'prospect',
@@ -218,7 +220,7 @@ export const projects = pgTable(
     location: varchar('location', { length: 255 }).notNull(),
     completedDate: timestamp('completed_date', { withTimezone: true }).notNull(),
     featured: boolean('featured').notNull().default(false),
-    published: boolean('published').notNull().default(false),
+    status: projectStatusEnum('status').notNull().default('draft'),
     coverImageUrl: text('cover_image_url').notNull(),
     coverPosterUrl: text('cover_poster_url'),
     galleryUrls: jsonb('gallery_urls').$type<GalleryItem[]>().notNull().default(sql`'[]'::jsonb`),
@@ -228,7 +230,7 @@ export const projects = pgTable(
   },
   (table) => [
     index('idx_projects_slug').on(table.slug),
-    index('idx_projects_status').on(table.published),
+    index('idx_projects_status').on(table.status),
     index('idx_projects_featured').on(table.featured),
     index('idx_projects_created_at').on(table.createdAt),
     index('idx_projects_category_id').on(table.categoryId),
@@ -250,7 +252,7 @@ export const services = pgTable(
     pageBlocks: jsonb('page_blocks').$type<PageBlock[]>(),
     orderIndex: integer('order_index').notNull().default(0),
     categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
-    published: boolean('published').notNull().default(true),
+    status: serviceStatusEnum('status').notNull().default('active'),
     // Form Builder hook (Fase 6 - work order CRM en curso); se conecta cuando ese módulo esté listo, sin lógica todavía.
     requestFormId: uuid('request_form_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

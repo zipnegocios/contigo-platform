@@ -60,7 +60,6 @@ export default async function ServiceCategoryPage({
     shortDescription: f.shortDescription,
     iconKey: f.iconKey,
     imageUrl: null,
-    published: false,
   }))
   let usedFallback = true
   let rootInactiveOrMissing = false
@@ -94,7 +93,6 @@ export default async function ServiceCategoryPage({
           iconKey:
             fallback.find((f) => f.slug === s.slug)?.iconKey ?? 'new-home',
           imageUrl: s.imageUrl,
-          published: s.published,
         }))
         usedFallback = false
       }

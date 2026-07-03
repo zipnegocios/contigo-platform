@@ -169,6 +169,20 @@
       "when": 1783072497432,
       "tag": "20260703095457_drop-category-is-active",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1783076634723,
+      "tag": "20260703110354_add-service-project-status",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1783078213679,
+      "tag": "20260703113013_drop-service-project-published",
+      "breakpoints": true
     }
   ]
 }

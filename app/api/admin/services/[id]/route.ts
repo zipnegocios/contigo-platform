@@ -91,7 +91,7 @@ export async function PATCH(
       galleryItems: newGalleryItems,
       orderIndex: service.orderIndex,
       categoryId: body.categoryId !== undefined ? body.categoryId : service.categoryId,
-      published: body.published !== undefined ? Boolean(body.published) : service.published,
+      status: body.status !== undefined ? body.status : service.status,
       pageBlocks: body.pageBlocks !== undefined ? (body.pageBlocks as PageBlock[] | null) : service.pageBlocks,
       createdAt: service.createdAt,
       updatedAt: new Date(),

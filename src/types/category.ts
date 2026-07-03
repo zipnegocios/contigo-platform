@@ -1,5 +1,7 @@
+import type { ContentStatus } from '@/types/status'
+
 export type CategoryType = 'shared'
-export type CategoryStatus = 'draft' | 'active' | 'inactive'
+export type CategoryStatus = ContentStatus
 
 export interface FlatCategory {
   id: string

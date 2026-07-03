@@ -11,6 +11,7 @@ import { CoverMediaSelector } from '@/presentation/components/admin/CoverMediaSe
 import { GalleryManagerModal } from '@/presentation/components/admin/GalleryManagerModal'
 import { HierarchicalCategorySelect } from '@/presentation/components/admin/HierarchicalCategorySelect'
 import type { GalleryItem } from '@/types/media'
+import type { ContentStatus } from '@/types/status'
 
 interface ProjectFormProps {
   project?: {
@@ -23,7 +24,7 @@ interface ProjectFormProps {
     location: string
     completedDate: string
     featured: boolean
-    published: boolean
+    status: ContentStatus
     coverImageUrl: string
     coverPosterUrl?: string | null
     galleryItems?: GalleryItem[]
@@ -46,7 +47,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
     location: project?.location || '',
     completedDate: project?.completedDate || '',
     featured: project?.featured || false,
-    published: project?.published || false,
+    status: project?.status ?? 'draft' as ContentStatus,
     coverImageUrl: project?.coverImageUrl || '',
     coverPosterUrl: project?.coverPosterUrl || null as string | null,
     galleryItems: project?.galleryItems || [] as GalleryItem[],
@@ -76,7 +77,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
           location: formData.location,
           completedDate: formData.completedDate,
           featured: formData.featured,
-          published: formData.published,
+          status: formData.status,
           coverImageUrl: formData.coverImageUrl,
           coverPosterUrl: formData.coverPosterUrl,
           galleryItems: formData.galleryItems,
@@ -207,26 +208,28 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   />
                 </div>
 
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2">
-                    <Checkbox
-                      checked={formData.featured}
-                      onCheckedChange={(checked) =>
-                        setFormData({ ...formData, featured: checked as boolean })
-                      }
-                    />
-                    <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Featured Project</span>
-                  </label>
+                <label className="flex items-center gap-2">
+                  <Checkbox
+                    checked={formData.featured}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, featured: checked as boolean })
+                    }
+                  />
+                  <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Featured Project</span>
+                </label>
 
-                  <label className="flex items-center gap-2">
-                    <Checkbox
-                      checked={formData.published}
-                      onCheckedChange={(checked) =>
-                        setFormData({ ...formData, published: checked as boolean })
-                      }
-                    />
-                    <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Published</span>
-                  </label>
+                <div>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as ContentStatus })}
+                    className="mt-2 w-full px-3 py-2 rounded-lg text-fluid-sm outline-none"
+                    style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
+                  >
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
                 </div>
               </>
             )}

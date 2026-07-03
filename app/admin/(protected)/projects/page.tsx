@@ -35,7 +35,7 @@ export default async function ProjectsPage() {
         slug: p.slug,
         category: p.categoryId ? (catMap.get(p.categoryId) ?? p.category) : p.category,
         featured: p.featured,
-        published: p.published,
+        status: p.status,
       }))} />
     </div>
   )

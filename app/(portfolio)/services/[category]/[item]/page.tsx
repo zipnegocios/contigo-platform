@@ -36,7 +36,7 @@ async function resolveServiceForCategory(category: string, item: string) {
   ])
 
   if (!root || root.status !== 'active') return null
-  if (!service || !service.published) return null
+  if (!service || service.status !== 'active') return null
   if (!service.categoryId) return null
 
   if (service.categoryId !== root.id) return null

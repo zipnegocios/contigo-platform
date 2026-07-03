@@ -29,7 +29,7 @@ export class DrizzleServiceRepository {
         galleryItems: service.galleryItems,
         orderIndex: service.orderIndex,
         categoryId: service.categoryId,
-        published: service.published,
+        status: service.status,
         pageBlocks: service.pageBlocks,
       })
       .onConflictDoNothing()
@@ -66,7 +66,7 @@ export class DrizzleServiceRepository {
     const rows = await db
       .select()
       .from(services)
-      .where(eq(services.published, true))
+      .where(eq(services.status, 'active'))
       .orderBy(asc(services.orderIndex))
 
     return rows.map((row) => this.mapRowToService(row))
@@ -84,7 +84,7 @@ export class DrizzleServiceRepository {
         galleryItems: service.galleryItems,
         orderIndex: service.orderIndex,
         categoryId: service.categoryId,
-        published: service.published,
+        status: service.status,
         pageBlocks: service.pageBlocks,
         updatedAt: new Date(),
       })
@@ -116,7 +116,7 @@ export class DrizzleServiceRepository {
       galleryItems: normaliseGalleryRow(row.galleryItems),
       orderIndex: row.orderIndex as number,
       categoryId: (row.categoryId as string | null) ?? null,
-      published: row.published as boolean,
+      status: row.status as Service['status'],
       pageBlocks: (row.pageBlocks as PageBlock[] | null) ?? null,
       createdAt: row.createdAt as Date,
       updatedAt: row.updatedAt as Date,

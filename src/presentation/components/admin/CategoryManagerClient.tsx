@@ -1,37 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/presentation/components/ui/dropdown-menu'
+import { StatusMenu } from './StatusMenu'
+import { CONTENT_STATUS_LABEL } from '@/types/status'
 import type { CategoryStatus, FlatCategory } from '@/types/category'
 import { CategoryFormModal } from './CategoryFormModal'
 
 interface CategoryManagerClientProps {
   categories: FlatCategory[]
 }
-
-const STATUS_LABEL: Record<CategoryStatus, string> = {
-  active: 'Active',
-  draft: 'Draft',
-  inactive: 'Inactive',
-}
-
-const STATUS_STYLE: Record<CategoryStatus, CSSProperties> = {
-  active: { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' },
-  draft: { backgroundColor: 'rgba(226,192,99,0.15)', color: '#A07B2A', border: '1px dashed #E2C063' },
-  inactive: { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' },
-}
-
-const STATUS_OPTIONS: CategoryStatus[] = ['active', 'draft', 'inactive']
 
 export function CategoryManagerClient({ categories }: CategoryManagerClientProps) {
   const router = useRouter()
@@ -57,7 +38,7 @@ export function CategoryManagerClient({ categories }: CategoryManagerClientProps
         body: JSON.stringify({ status }),
       })
       if (!res.ok) throw new Error('Failed to update status')
-      toast.success(`"${cat.name}" set to ${STATUS_LABEL[status]}`)
+      toast.success(`"${cat.name}" set to ${CONTENT_STATUS_LABEL[status]}`)
       router.refresh()
     } catch {
       setItems(previous)
@@ -130,29 +111,10 @@ export function CategoryManagerClient({ categories }: CategoryManagerClientProps
                     <p className="text-fluid-xs truncate" style={{ color: '#9C8F83' }}>{cat.slug}</p>
                   </div>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide flex-shrink-0 transition-opacity duration-150 hover:opacity-75 cursor-pointer"
-                        style={STATUS_STYLE[cat.status]}
-                      >
-                        {STATUS_LABEL[cat.status]}
-                        <ChevronDown className="w-3 h-3" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      {STATUS_OPTIONS.map((status) => (
-                        <DropdownMenuItem
-                          key={status}
-                          disabled={status === cat.status}
-                          onSelect={() => handleStatusChange(cat, status)}
-                        >
-                          {STATUS_LABEL[status]}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <StatusMenu
+                    status={cat.status}
+                    onChange={(status) => handleStatusChange(cat, status)}
+                  />
                 </div>
 
                 {/* Right: actions */}

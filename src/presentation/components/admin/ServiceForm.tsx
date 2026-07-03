@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Input } from '@/presentation/components/ui/input'
 import { Textarea } from '@/presentation/components/ui/textarea'
-import { Checkbox } from '@/presentation/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { CoverMediaSelector } from '@/presentation/components/admin/CoverMediaSelector'
 import { GalleryManagerModal } from '@/presentation/components/admin/GalleryManagerModal'
 import { HierarchicalCategorySelect } from '@/presentation/components/admin/HierarchicalCategorySelect'
 import type { GalleryItem } from '@/types/media'
+import type { ContentStatus } from '@/types/status'
 
 interface ServiceFormProps {
   service?: {
@@ -23,7 +23,7 @@ interface ServiceFormProps {
     posterUrl?: string | null
     galleryItems?: GalleryItem[]
     categoryId?: string | null
-    published: boolean
+    status: ContentStatus
   }
 }
 
@@ -53,7 +53,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
     posterUrl: service?.posterUrl || null as string | null,
     galleryItems: service?.galleryItems || [] as GalleryItem[],
     categoryId: service?.categoryId || null as string | null,
-    published: service?.published ?? true,
+    status: service?.status ?? 'active' as ContentStatus,
   })
 
   // Auto-generate slug when name changes (create mode only)
@@ -93,7 +93,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
           posterUrl: formData.posterUrl,
           galleryItems: formData.galleryItems,
           categoryId: formData.categoryId,
-          published: formData.published,
+          status: formData.status,
         }),
       })
 
@@ -222,15 +222,19 @@ export function ServiceForm({ service }: ServiceFormProps) {
                   label="Category"
                 />
 
-                <label className="flex items-center gap-2">
-                  <Checkbox
-                    checked={formData.published}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, published: checked as boolean })
-                    }
-                  />
-                  <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Published</span>
-                </label>
+                <div>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as ContentStatus })}
+                    className="mt-2 w-full px-3 py-2 rounded-lg text-fluid-sm outline-none"
+                    style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
+                  >
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
               </>
             )}
 

@@ -28,7 +28,7 @@ export default async function EditProjectPage({ params }: { params: { id: string
           location: project.location,
           completedDate: project.completedDate.toISOString().split('T')[0],
           featured: project.featured,
-          published: project.published,
+          status: project.status,
           coverImageUrl: project.coverImageUrl,
           coverPosterUrl: project.coverPosterUrl,
           galleryItems: project.galleryItems,

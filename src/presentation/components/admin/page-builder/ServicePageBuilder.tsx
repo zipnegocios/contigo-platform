@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 import type { PageBlock } from '@/types/pageBlocks'
 import { BLOCK_DEFAULTS, BLOCK_LABELS } from '@/types/pageBlocks'
+import type { ContentStatus } from '@/types/status'
+import { StatusMenu } from '@/presentation/components/admin/StatusMenu'
 import { BLOCK_ICONS, ELEMENT_CATEGORIES } from './blockMeta'
 import { BlockList } from './BlockList'
 import { BlockEditorPanel } from './BlockEditorPanel'
@@ -27,7 +29,7 @@ interface ServicePageBuilderProps {
     name: string
     shortDescription: string
     imageUrl: string
-    published: boolean
+    status: ContentStatus
     pageBlocks: PageBlock[] | null
     categoryId: string | null
     slug: string
@@ -171,7 +173,7 @@ export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilder
   const router = useRouter()
   const [blocks, setBlocks] = useState<PageBlock[]>(() => initBlocks(service))
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null)
-  const [published, setPublished] = useState(service.published)
+  const [status, setStatus] = useState<ContentStatus>(service.status)
   const [saving, setSaving] = useState(false)
   const [panelOpen, setPanelOpen] = useState(true)
   const [panelTab, setPanelTab] = useState<PanelTab>('elements')
@@ -216,7 +218,7 @@ export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilder
       const res = await fetch(`/api/admin/services/${service.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pageBlocks: blocks, published }),
+        body: JSON.stringify({ pageBlocks: blocks, status }),
       })
       if (!res.ok) throw new Error('Save failed')
       toast.success('Page saved')
@@ -228,18 +230,18 @@ export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilder
     }
   }
 
-  const togglePublished = async () => {
-    const next = !published
-    setPublished(next)
+  const handleStatusChange = async (next: ContentStatus) => {
+    const previous = status
+    setStatus(next)
     try {
       await fetch(`/api/admin/services/${service.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ published: next }),
+        body: JSON.stringify({ status: next }),
       })
-      toast.success(next ? 'Published' : 'Set to Draft')
+      toast.success(`Set to ${next}`)
     } catch {
-      setPublished(!next)
+      setStatus(previous)
       toast.error('Failed to update status')
     }
   }
@@ -352,19 +354,7 @@ export function ServicePageBuilder({ service, categorySlug }: ServicePageBuilder
             Visit
           </a>
 
-          <button
-            onClick={togglePublished}
-            style={{
-              padding: '5px 11px', borderRadius: 7,
-              fontSize: '0.72rem', fontWeight: 600,
-              border: 'none', cursor: 'pointer', transition: 'all 140ms',
-              ...(published
-                ? { backgroundColor: 'rgba(74,222,128,0.12)', color: '#4ade80' }
-                : { backgroundColor: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.45)' }),
-            }}
-          >
-            {published ? '● Published' : '○ Draft'}
-          </button>
+          <StatusMenu status={status} onChange={handleStatusChange} theme="dark" />
 
           <button
             onClick={handleSave}

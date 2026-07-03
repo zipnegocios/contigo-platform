@@ -1,6 +1,7 @@
 import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 import type { GalleryItem } from '@/types/media'
 import type { PageBlock } from '@/types/pageBlocks'
+import type { ContentStatus } from '@/types/status'
 
 export interface CreateServiceInput {
   name: string
@@ -25,7 +26,7 @@ export class Service {
   readonly galleryItems: GalleryItem[]
   readonly orderIndex: number
   readonly categoryId: string | null
-  readonly published: boolean
+  readonly status: ContentStatus
   readonly pageBlocks: PageBlock[] | null
   readonly createdAt: Date
   readonly updatedAt: Date
@@ -41,7 +42,7 @@ export class Service {
     galleryItems: GalleryItem[]
     orderIndex: number
     categoryId: string | null
-    published: boolean
+    status: ContentStatus
     pageBlocks: PageBlock[] | null
     createdAt: Date
     updatedAt: Date
@@ -56,7 +57,7 @@ export class Service {
     this.galleryItems = props.galleryItems
     this.orderIndex = props.orderIndex
     this.categoryId = props.categoryId
-    this.published = props.published
+    this.status = props.status
     this.pageBlocks = props.pageBlocks
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
@@ -78,7 +79,7 @@ export class Service {
       galleryItems: input.galleryItems || [],
       orderIndex: input.orderIndex || 0,
       categoryId: input.categoryId ?? null,
-      published: true,
+      status: 'active',
       pageBlocks: input.pageBlocks ?? null,
       createdAt: now,
       updatedAt: now,
@@ -97,7 +98,7 @@ export class Service {
       galleryItems: this.galleryItems,
       orderIndex,
       categoryId: this.categoryId,
-      published: this.published,
+      status: this.status,
       pageBlocks: this.pageBlocks,
       createdAt: this.createdAt,
       updatedAt: new Date(),
@@ -115,7 +116,7 @@ export class Service {
     galleryItems: GalleryItem[]
     orderIndex: number
     categoryId?: string | null
-    published: boolean
+    status: ContentStatus
     pageBlocks: PageBlock[] | null
     createdAt: Date
     updatedAt: Date

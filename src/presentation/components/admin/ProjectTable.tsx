@@ -14,6 +14,8 @@ import { Trash2, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { StatusMenu } from './StatusMenu'
+import type { ContentStatus } from '@/types/status'
 
 interface Project {
   id: string
@@ -21,15 +23,16 @@ interface Project {
   slug: string
   category: string
   featured: boolean
-  published: boolean
+  status: ContentStatus
 }
 
 interface ProjectTableProps {
   projects: Project[]
 }
 
-export function ProjectTable({ projects }: ProjectTableProps) {
+export function ProjectTable({ projects: initialProjects }: ProjectTableProps) {
   const router = useRouter()
+  const [projects, setProjects] = useState(initialProjects)
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
@@ -39,6 +42,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
     try {
       const response = await fetch(`/api/admin/projects/${id}`, { method: 'DELETE' })
       if (!response.ok) throw new Error('Failed to delete')
+      setProjects((prev) => prev.filter((p) => p.id !== id))
       toast.success('Project deleted')
       router.refresh()
     } catch (error) {
@@ -46,6 +50,24 @@ export function ProjectTable({ projects }: ProjectTableProps) {
       console.error(error)
     } finally {
       setDeleting(null)
+    }
+  }
+
+  const handleStatusChange = async (id: string, status: ContentStatus) => {
+    const previous = projects
+    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)))
+    try {
+      const response = await fetch(`/api/admin/projects/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!response.ok) throw new Error('Failed to update status')
+      toast.success(`Set to ${status}`)
+      router.refresh()
+    } catch {
+      setProjects(previous)
+      toast.error('Failed to update status')
     }
   }
 
@@ -89,16 +111,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                   {project.category}
                 </TableCell>
                 <TableCell className="py-3.5">
-                  <span
-                    className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide"
-                    style={
-                      project.published
-                        ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' }
-                        : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
-                    }
-                  >
-                    {project.published ? 'Published' : 'Draft'}
-                  </span>
+                  <StatusMenu status={project.status} onChange={(status) => handleStatusChange(project.id, status)} />
                 </TableCell>
                 <TableCell className="py-3.5">
                   {project.featured ? (

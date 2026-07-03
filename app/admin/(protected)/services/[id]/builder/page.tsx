@@ -30,7 +30,7 @@ export default async function BuilderPage({ params }: BuilderPageProps) {
         name: service.name,
         shortDescription: service.shortDescription,
         imageUrl: service.imageUrl,
-        published: service.published,
+        status: service.status,
         pageBlocks: service.pageBlocks,
         categoryId: service.categoryId,
         slug: service.slug,

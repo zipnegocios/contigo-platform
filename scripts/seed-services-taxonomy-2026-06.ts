@@ -232,7 +232,7 @@ async function upsertService(params: {
     galleryItems: [],
     orderIndex: params.orderIndex,
     categoryId: params.categoryId,
-    published: false,
+    status: 'draft',
     createdAt: now,
     updatedAt: now,
   })

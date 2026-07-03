@@ -185,7 +185,7 @@ async function main() {
       location: proj.location,
       completedDate: proj.completedDate,
       featured: true,
-      published: true,
+      status: 'active',
       coverImageUrl,
       galleryUrls: [],
     })

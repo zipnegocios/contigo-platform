@@ -6,13 +6,15 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import { Trash2, GripVertical, Pencil, Settings2 } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
+import { StatusMenu } from './StatusMenu'
+import type { ContentStatus } from '@/types/status'
 
 export interface ServiceGroupItem {
   id: string
   name: string
   shortDescription: string
   orderIndex: number
-  published: boolean
+  status: ContentStatus
   imageUrl: string
   categoryId: string | null
 }
@@ -90,19 +92,19 @@ function CategorySection({ group }: { group: ServiceGroup }) {
     }
   }
 
-  const handleTogglePublished = async (id: string, nextPublished: boolean) => {
-    // Optimistic update, rolled back on failure.
-    setItems((prev) => prev.map((s) => (s.id === id ? { ...s, published: nextPublished } : s)))
+  const handleStatusChange = async (id: string, status: ContentStatus) => {
+    const previous = items
+    setItems((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)))
     try {
       const res = await fetch(`/api/admin/services/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ published: nextPublished }),
+        body: JSON.stringify({ status }),
       })
       if (!res.ok) throw new Error('Failed to update status')
-      toast.success(nextPublished ? 'Service activated' : 'Service deactivated')
+      toast.success(`Set to ${status}`)
     } catch {
-      setItems((prev) => prev.map((s) => (s.id === id ? { ...s, published: !nextPublished } : s)))
+      setItems(previous)
       toast.error('Failed to update status')
     }
   }
@@ -183,20 +185,8 @@ function CategorySection({ group }: { group: ServiceGroup }) {
                   <p className="text-fluid-xs truncate" style={{ color: '#9C8F83' }}>{svc.shortDescription}</p>
                 </div>
 
-                {/* Status toggle */}
-                <button
-                  type="button"
-                  onClick={() => handleTogglePublished(svc.id, !svc.published)}
-                  title={svc.published ? 'Click to deactivate' : 'Click to activate'}
-                  className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide flex-shrink-0 min-h-[28px] transition-opacity duration-150 hover:opacity-75 cursor-pointer"
-                  style={
-                    svc.published
-                      ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d', border: 'none' }
-                      : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560', border: 'none' }
-                  }
-                >
-                  {svc.published ? 'Active' : 'Draft'}
-                </button>
+                {/* Status */}
+                <StatusMenu status={svc.status} onChange={(status) => handleStatusChange(svc.id, status)} />
 
                 {/* Actions */}
                 <div className="flex gap-1 flex-shrink-0">
