@@ -1,21 +1,89 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Pencil, Plus } from 'lucide-react'
+import { ChevronDown, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
-import type { FlatCategory } from '@/types/category'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/presentation/components/ui/dropdown-menu'
+import type { CategoryStatus, FlatCategory } from '@/types/category'
 import { CategoryFormModal } from './CategoryFormModal'
 
 interface CategoryManagerClientProps {
   categories: FlatCategory[]
 }
 
+const STATUS_LABEL: Record<CategoryStatus, string> = {
+  active: 'Active',
+  draft: 'Draft',
+  inactive: 'Inactive',
+}
+
+const STATUS_STYLE: Record<CategoryStatus, CSSProperties> = {
+  active: { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' },
+  draft: { backgroundColor: 'rgba(226,192,99,0.15)', color: '#A07B2A', border: '1px dashed #E2C063' },
+  inactive: { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' },
+}
+
+const STATUS_OPTIONS: CategoryStatus[] = ['active', 'draft', 'inactive']
+
 export function CategoryManagerClient({ categories }: CategoryManagerClientProps) {
   const router = useRouter()
+  const [items, setItems] = useState(categories)
   const [editTarget, setEditTarget] = useState<FlatCategory | null>(null)
   const [creating, setCreating] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // Re-sync whenever the server provides fresh data (after router.refresh()
+  // following a status change, edit, or delete).
+  useEffect(() => {
+    setItems(categories)
+  }, [categories])
+
+  async function handleStatusChange(cat: FlatCategory, status: CategoryStatus) {
+    if (status === cat.status) return
+    const previous = items
+    setItems((prev) => prev.map((c) => (c.id === cat.id ? { ...c, status } : c)))
+    try {
+      const res = await fetch(`/api/admin/categories/${cat.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) throw new Error('Failed to update status')
+      toast.success(`"${cat.name}" set to ${STATUS_LABEL[status]}`)
+      router.refresh()
+    } catch {
+      setItems(previous)
+      toast.error('Failed to update status')
+    }
+  }
+
+  async function handleDelete(cat: FlatCategory) {
+    if (cat.isSystem) return
+    if (!confirm(`Delete "${cat.name}"? This cannot be undone.`)) return
+    setDeletingId(cat.id)
+    try {
+      const res = await fetch(`/api/admin/categories/${cat.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to delete category')
+      }
+      setItems((prev) => prev.filter((c) => c.id !== cat.id))
+      toast.success('Category deleted')
+      router.refresh()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete category')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <div>
@@ -36,18 +104,18 @@ export function CategoryManagerClient({ categories }: CategoryManagerClientProps
         className="rounded-lg overflow-hidden bg-white"
         style={{ border: '1px solid #E5DDD0', boxShadow: '0 2px 8px rgba(45,41,36,0.06)' }}
       >
-        {categories.length === 0 ? (
+        {items.length === 0 ? (
           <div className="py-16 text-center text-fluid-sm" style={{ color: '#6B6560' }}>
             No categories found. Run the migration script first.
           </div>
         ) : (
           <ul>
-            {categories.map((cat, idx) => (
+            {items.map((cat, idx) => (
               <li
                 key={cat.id}
                 className="flex items-center justify-between px-6 py-4 gap-4"
                 style={{
-                  borderBottom: idx < categories.length - 1 ? '1px solid #F0E8DC' : 'none',
+                  borderBottom: idx < items.length - 1 ? '1px solid #F0E8DC' : 'none',
                 }}
               >
                 {/* Left: name + slug + status */}
@@ -61,36 +129,73 @@ export function CategoryManagerClient({ categories }: CategoryManagerClientProps
                     <p className="text-fluid-sm font-semibold truncate" style={{ color: '#2D2924' }}>{cat.name}</p>
                     <p className="text-fluid-xs truncate" style={{ color: '#9C8F83' }}>{cat.slug}</p>
                   </div>
-                  <span
-                    className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide flex-shrink-0"
-                    style={
-                      cat.isActive
-                        ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' }
-                        : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
-                    }
-                  >
-                    {cat.isActive ? 'Active' : 'Inactive'}
-                  </span>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide flex-shrink-0 transition-opacity duration-150 hover:opacity-75 cursor-pointer"
+                        style={STATUS_STYLE[cat.status]}
+                      >
+                        {STATUS_LABEL[cat.status]}
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      {STATUS_OPTIONS.map((status) => (
+                        <DropdownMenuItem
+                          key={status}
+                          disabled={status === cat.status}
+                          onSelect={() => handleStatusChange(cat, status)}
+                        >
+                          {STATUS_LABEL[status]}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
 
-                {/* Right: Edit button */}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="min-h-[44px] min-w-[44px] p-0 flex-shrink-0 transition-all duration-150"
-                  style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
-                  onClick={() => setEditTarget(cat)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--contigo-primary)'
-                    e.currentTarget.style.color = 'var(--contigo-primary)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#E5DDD0'
-                    e.currentTarget.style.color = '#6B6560'
-                  }}
-                >
-                  <Pencil className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
-                </Button>
+                {/* Right: actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="min-h-[44px] min-w-[44px] p-0 transition-all duration-150"
+                    style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                    onClick={() => setEditTarget(cat)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--contigo-primary)'
+                      e.currentTarget.style.color = 'var(--contigo-primary)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#E5DDD0'
+                      e.currentTarget.style.color = '#6B6560'
+                    }}
+                  >
+                    <Pencil className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={cat.isSystem || deletingId === cat.id}
+                    title={cat.isSystem ? 'System categories cannot be deleted' : 'Delete category'}
+                    className="min-h-[44px] min-w-[44px] p-0 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ borderColor: '#E5DDD0', color: cat.isSystem ? '#6B6560' : '#e87070' }}
+                    onClick={() => handleDelete(cat)}
+                    onMouseEnter={(e) => {
+                      if (cat.isSystem) return
+                      e.currentTarget.style.borderColor = '#e87070'
+                      e.currentTarget.style.backgroundColor = 'rgba(232,112,112,0.08)'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (cat.isSystem) return
+                      e.currentTarget.style.borderColor = '#E5DDD0'
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <Trash2 className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
@@ -102,7 +207,7 @@ export function CategoryManagerClient({ categories }: CategoryManagerClientProps
         <CategoryFormModal
           mode="create"
           type="shared"
-          allFlat={categories}
+          allFlat={items}
           onClose={() => {
             setCreating(false)
             router.refresh()
@@ -115,7 +220,7 @@ export function CategoryManagerClient({ categories }: CategoryManagerClientProps
         <CategoryFormModal
           mode="edit"
           type="shared"
-          allFlat={categories}
+          allFlat={items}
           editTarget={editTarget}
           onClose={() => {
             setEditTarget(null)

@@ -17,7 +17,7 @@ function mapToFlat(row: CategoryRow): FlatCategory {
     description: row.description ?? null,
     icon: row.icon ?? null,
     orderIndex: row.orderIndex,
-    isActive: row.isActive,
+    status: row.status,
     isSystem: row.isSystem,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -34,7 +34,7 @@ function mapToEntity(row: CategoryRow): Category {
     description: row.description ?? null,
     icon: row.icon ?? null,
     orderIndex: row.orderIndex,
-    isActive: row.isActive,
+    status: row.status,
     isSystem: row.isSystem,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -51,7 +51,7 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
       : undefined
     const conditions = [
       typeCondition,
-      activeOnly ? eq(categories.isActive, true) : undefined,
+      activeOnly ? eq(categories.status, 'active') : undefined,
     ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
     const rows = await db
@@ -69,7 +69,7 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
       : or(eq(categories.type, type), eq(categories.type, 'shared'))
     const conditions = [
       typeCondition,
-      activeOnly ? eq(categories.isActive, true) : undefined,
+      activeOnly ? eq(categories.status, 'active') : undefined,
     ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
     const rows = await db
@@ -106,7 +106,7 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
         description: category.description,
         icon: category.icon,
         orderIndex: category.orderIndex,
-        isActive: category.isActive,
+        status: category.status,
         isSystem: category.isSystem,
         createdAt: category.createdAt,
         updatedAt: category.updatedAt,
@@ -124,7 +124,7 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
         description: category.description,
         icon: category.icon,
         orderIndex: category.orderIndex,
-        isActive: category.isActive,
+        status: category.status,
         updatedAt: category.updatedAt,
       })
       .where(eq(categories.id, category.id))

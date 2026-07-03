@@ -58,7 +58,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       }))
 
       allCategories = flatCats
-        .filter((c) => c.isActive && c.parentId === null)
+        .filter((c) => c.status === 'active' && c.parentId === null)
         .map((c) => ({ name: c.name, slug: c.slug }))
     }
   } catch (error) {

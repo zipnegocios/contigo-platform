@@ -58,7 +58,7 @@ async function run() {
   // 2. Deactivate legacy project-type root categories
   const deactivated = await db
     .update(schema.categories)
-    .set({ isActive: false, updatedAt: new Date() })
+    .set({ status: 'inactive', updatedAt: new Date() })
     .where(
       and(
         inArray(schema.categories.slug, LEGACY_PROJECT_ROOT_SLUGS),

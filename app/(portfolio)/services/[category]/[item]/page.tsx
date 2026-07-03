@@ -35,7 +35,7 @@ async function resolveServiceForCategory(category: string, item: string) {
     serviceRepo.findBySlug(item),
   ])
 
-  if (!root || !root.isActive) return null
+  if (!root || root.status !== 'active') return null
   if (!service || !service.published) return null
   if (!service.categoryId) return null
 
@@ -59,7 +59,7 @@ export async function generateStaticParams() {
 
     for (const category of SERVICE_ROOT_SLUGS) {
       const root = flatCats.find((c) => c.parentId === null && c.slug === category)
-      if (!root || !root.isActive) continue
+      if (!root || root.status !== 'active') continue
 
       for (const service of services) {
         if (service.categoryId === root.id) {

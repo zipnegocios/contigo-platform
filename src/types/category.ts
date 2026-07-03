@@ -1,4 +1,5 @@
 export type CategoryType = 'shared'
+export type CategoryStatus = 'draft' | 'active' | 'inactive'
 
 export interface FlatCategory {
   id: string
@@ -9,7 +10,7 @@ export interface FlatCategory {
   description: string | null
   icon: string | null
   orderIndex: number
-  isActive: boolean
+  status: CategoryStatus
   isSystem: boolean
   createdAt: string
   updatedAt: string
@@ -31,7 +32,7 @@ export interface UpdateCategoryInput {
   parentId?: string | null
   description?: string | null
   icon?: string | null
-  isActive?: boolean
+  status?: CategoryStatus
 }
 
 export interface ReorderItem {

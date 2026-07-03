@@ -67,7 +67,7 @@ async function upsertCategory(params: {
     description: params.description ?? null,
     icon: null,
     orderIndex: params.orderIndex ?? 0,
-    isActive: true,
+    status: 'active',
     isSystem: params.isSystem ?? false,
     createdAt: now,
     updatedAt: now,

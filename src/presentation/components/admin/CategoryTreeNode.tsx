@@ -53,7 +53,7 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0, showTypeChip 
       await fetch(`/api/admin/categories/${node.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !node.isActive }),
+        body: JSON.stringify({ status: node.status === 'active' ? 'inactive' : 'active' }),
       })
       router.refresh()
     } finally {
@@ -68,7 +68,7 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0, showTypeChip 
         style={{
           marginLeft: indentPx,
           backgroundColor: isDragging ? 'rgba(226,192,99,0.08)' : undefined,
-          opacity: node.isActive ? 1 : 0.5,
+          opacity: node.status === 'active' ? 1 : 0.5,
         }}
       >
         {/* Drag handle */}
@@ -124,10 +124,10 @@ export function CategoryTreeNode({ node, allFlat, type, depth = 0, showTypeChip 
             onClick={handleToggleActive}
             disabled={togglingActive}
             className="p-1 rounded hover:bg-black/5 transition-colors"
-            style={{ color: node.isActive ? '#52B788' : 'var(--neutral-600)' }}
-            title={node.isActive ? 'Deactivate' : 'Activate'}
+            style={{ color: node.status === 'active' ? '#52B788' : 'var(--neutral-600)' }}
+            title={node.status === 'active' ? 'Deactivate' : 'Activate'}
           >
-            {node.isActive ? <ToggleRight className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <ToggleLeft className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
+            {node.status === 'active' ? <ToggleRight className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" /> : <ToggleLeft className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />}
           </button>
           <button
             type="button"

@@ -72,7 +72,7 @@ let servicesUpdated = 0
 
 /**
  * Upsert a category by slug+type. Unlike scripts/seed-categories.ts, this
- * DOES update parentId/orderIndex/isActive/description on an existing row —
+ * DOES update parentId/orderIndex/status/description on an existing row —
  * required to promote Carpentry/Cladding/Gyprock Fixing & Flushing to root
  * and to reparent Demolition/Grouting/Timber Framing/Decking-split nodes.
  */
@@ -82,7 +82,7 @@ async function upsertCategory(params: {
   parentId: string | null
   description?: string | null
   orderIndex: number
-  isActive: boolean
+  status: 'draft' | 'active' | 'inactive'
   isSystem?: boolean
 }): Promise<string> {
   const slug = makeSlug(params.name)
@@ -100,7 +100,7 @@ async function upsertCategory(params: {
     const needsUpdate =
       row.parentId !== params.parentId ||
       row.orderIndex !== params.orderIndex ||
-      row.isActive !== params.isActive ||
+      row.status !== params.status ||
       (params.description !== undefined && row.description !== params.description)
 
     if (needsUpdate) {
@@ -109,7 +109,7 @@ async function upsertCategory(params: {
         .set({
           parentId: params.parentId,
           orderIndex: params.orderIndex,
-          isActive: params.isActive,
+          status: params.status,
           ...(params.description !== undefined ? { description: params.description } : {}),
           updatedAt: now,
         })
@@ -132,7 +132,7 @@ async function upsertCategory(params: {
     description: params.description ?? null,
     icon: null,
     orderIndex: params.orderIndex,
-    isActive: params.isActive,
+    status: params.status,
     isSystem: params.isSystem ?? false,
     createdAt: now,
     updatedAt: now,
@@ -149,10 +149,10 @@ async function deactivateCategoryById(id: string): Promise<void> {
     console.warn(`  ! Category id ${id} not found — skipping deactivation`)
     return
   }
-  if (rows[0].isActive) {
+  if (rows[0].status === 'active') {
     await db
       .update(schema.categories)
-      .set({ isActive: false, updatedAt: new Date() })
+      .set({ status: 'inactive', updatedAt: new Date() })
       .where(eq(schema.categories.id, id))
     categoriesUpdated++
   } else {
@@ -172,10 +172,10 @@ async function deactivateCategoryBySlug(name: string, type: 'service' | 'project
     console.warn(`  ! Category "${name}" (slug ${slug}) not found — skipping deactivation`)
     return
   }
-  if (rows[0].isActive) {
+  if (rows[0].status === 'active') {
     await db
       .update(schema.categories)
-      .set({ isActive: false, updatedAt: new Date() })
+      .set({ status: 'inactive', updatedAt: new Date() })
       .where(eq(schema.categories.id, rows[0].id))
     categoriesUpdated++
   } else {
@@ -508,7 +508,7 @@ async function main() {
     description:
       'Decking, pergolas, staircases and fine interior joinery, in timber chosen to thrive in South Australian conditions.',
     orderIndex: 0,
-    isActive: true,
+    status: 'active',
   })
   const claddingId = await upsertCategory({
     name: 'Cladding',
@@ -517,7 +517,7 @@ async function main() {
     description:
       'Weather-tight, thermally sharp and visually striking, with Hebel, Axon and Weatherboard detailed to the millimetre.',
     orderIndex: 1,
-    isActive: true,
+    status: 'active',
   })
   const gyprockId = await upsertCategory({
     name: 'Gyprock Fixing & Flushing',
@@ -526,7 +526,7 @@ async function main() {
     description:
       'Expert plasterboard for new builds and luxury renovations: raked ceilings, bulkheads and fire-rated systems with tight, true lines.',
     orderIndex: 2,
-    isActive: true,
+    status: 'active',
   })
 
   if (carpentryId !== CARPENTRY_ID) {
@@ -548,7 +548,7 @@ async function main() {
     description:
       'From design and engineering to the final coat of paint, the specialist trades that complete a Contigo build — coordinated, vetted and held to the same standard as our core craft.',
     orderIndex: 3,
-    isActive: true,
+    status: 'active',
   })
 
   // --- Paso 3: Carpentry sub-items (caso especial Decking & Pergolas) ---
@@ -564,7 +564,7 @@ async function main() {
       type: 'service',
       parentId: carpentryId,
       orderIndex: i,
-      isActive: true,
+      status: 'active',
     })
     carpentryLeafIds[item.name] = leafId
     console.log(`  - ${item.name}`)
@@ -582,7 +582,7 @@ async function main() {
       type: 'service',
       parentId: claddingId,
       orderIndex: i,
-      isActive: true,
+      status: 'active',
     })
     claddingLeafIds[item.name] = leafId
     console.log(`  - ${item.name}`)
@@ -602,7 +602,7 @@ async function main() {
       type: 'service',
       parentId: gyprockId,
       orderIndex: i,
-      isActive: true,
+      status: 'active',
     })
     gyprockLeafIds[item.name] = leafId
     console.log(`  - ${item.name}`)
@@ -626,7 +626,7 @@ async function main() {
       type: 'service',
       parentId: additionalServicesId,
       orderIndex: i,
-      isActive: true,
+      status: 'active',
     })
     additionalServicesLeafIds[item.name] = leafId
     console.log(`  - ${item.name}`)

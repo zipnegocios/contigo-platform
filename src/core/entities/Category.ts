@@ -1,4 +1,4 @@
-import type { CategoryType, CreateCategoryInput, UpdateCategoryInput } from '@/types/category'
+import type { CategoryType, CategoryStatus, CreateCategoryInput, UpdateCategoryInput } from '@/types/category'
 
 function makeSlug(name: string): string {
   return name
@@ -17,7 +17,7 @@ export class Category {
   readonly description: string | null
   readonly icon: string | null
   readonly orderIndex: number
-  readonly isActive: boolean
+  readonly status: CategoryStatus
   readonly isSystem: boolean
   readonly createdAt: Date
   readonly updatedAt: Date
@@ -31,7 +31,7 @@ export class Category {
     description: string | null
     icon: string | null
     orderIndex: number
-    isActive: boolean
+    status: CategoryStatus
     isSystem: boolean
     createdAt: Date
     updatedAt: Date
@@ -44,7 +44,7 @@ export class Category {
     this.description = props.description
     this.icon = props.icon
     this.orderIndex = props.orderIndex
-    this.isActive = props.isActive
+    this.status = props.status
     this.isSystem = props.isSystem
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
@@ -61,7 +61,7 @@ export class Category {
       description: input.description ?? null,
       icon: input.icon ?? null,
       orderIndex: 0,
-      isActive: true,
+      status: 'active',
       isSystem: false,
       createdAt: now,
       updatedAt: now,
@@ -85,7 +85,7 @@ export class Category {
       description: partial.description !== undefined ? partial.description : this.description,
       icon: partial.icon !== undefined ? partial.icon : this.icon,
       orderIndex: this.orderIndex,
-      isActive: partial.isActive !== undefined ? partial.isActive : this.isActive,
+      status: partial.status !== undefined ? partial.status : this.status,
       isSystem: this.isSystem,
       createdAt: this.createdAt,
       updatedAt: new Date(),
@@ -101,7 +101,7 @@ export class Category {
     description: string | null
     icon: string | null
     orderIndex: number
-    isActive: boolean
+    status: CategoryStatus
     isSystem: boolean
     createdAt: Date
     updatedAt: Date

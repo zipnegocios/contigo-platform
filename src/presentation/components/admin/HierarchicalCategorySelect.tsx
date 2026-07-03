@@ -22,7 +22,7 @@ function buildIndentedOptions(flat: FlatCategory[]): IndentedOption[] {
   const result: IndentedOption[] = []
   function walk(parentId: string | null, depth: number) {
     const children = flat
-      .filter((c) => c.parentId === parentId && c.isActive)
+      .filter((c) => c.parentId === parentId && c.status === 'active')
       .sort((a, b) => a.orderIndex - b.orderIndex)
     for (const child of children) {
       result.push({ id: child.id, label: child.name, depth })

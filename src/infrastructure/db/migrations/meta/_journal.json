@@ -155,6 +155,20 @@
       "when": 1782950400000,
       "tag": "20260702000000_add_hero_config",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1783071816666,
+      "tag": "20260703094336_add-category-status",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1783072497432,
+      "tag": "20260703095457_drop-category-is-active",
+      "breakpoints": true
     }
   ]
 }

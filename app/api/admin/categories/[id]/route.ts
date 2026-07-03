@@ -8,7 +8,7 @@ const UpdateSchema = z.object({
   parentId: z.string().uuid().nullable().optional(),
   description: z.string().nullable().optional(),
   icon: z.string().max(100).nullable().optional(),
-  isActive: z.boolean().optional(),
+  status: z.enum(['draft', 'active', 'inactive']).optional(),
 })
 
 export async function PATCH(

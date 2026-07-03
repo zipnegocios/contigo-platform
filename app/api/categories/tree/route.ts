@@ -5,7 +5,7 @@ export async function GET(_request: Request) {
   try {
     const repo = new DrizzleCategoryRepository()
     const flat = await repo.findFlat('shared')
-    const activeFlat = flat.filter((c) => c.isActive)
+    const activeFlat = flat.filter((c) => c.status === 'active')
     const tree = buildCategoryTree(activeFlat)
 
     return Response.json({ tree, flat: activeFlat })

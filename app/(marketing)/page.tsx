@@ -131,7 +131,7 @@ export default async function HomePage() {
       )
       const rootById = new Map<string, { slug: (typeof SERVICE_ROOT_SLUGS)[number]; name: string }>()
       roots.forEach((root, i) => {
-        if (root && root.isActive) {
+        if (root && root.status === 'active') {
           rootById.set(root.id, { slug: SERVICE_ROOT_SLUGS[i], name: root.name })
         }
       })

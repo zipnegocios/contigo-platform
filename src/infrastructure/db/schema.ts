@@ -91,6 +91,8 @@ export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
 
 export const taskStatusEnum = pgEnum('task_status', ['open', 'in_progress', 'done'])
 
+export const categoryStatusEnum = pgEnum('category_status', ['draft', 'active', 'inactive'])
+
 // ============ LEAD CONTACT ROLES TABLE ============
 // Replaces leadContactRoleEnum: a real table lets admins add new roles from
 // the UI (combobox "create new") without an ALTER TYPE on a Postgres enum.
@@ -131,7 +133,7 @@ export const categories = pgTable(
     description: text('description'),
     icon: varchar('icon', { length: 100 }),
     orderIndex: integer('order_index').notNull().default(0),
-    isActive: boolean('is_active').notNull().default(true),
+    status: categoryStatusEnum('status').notNull().default('active'),
     isSystem: boolean('is_system').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -142,6 +144,7 @@ export const categories = pgTable(
     index('idx_categories_parent_id').on(table.parentId),
     index('idx_categories_type').on(table.type),
     index('idx_categories_order').on(table.orderIndex),
+    index('idx_categories_status').on(table.status),
   ],
 )
 

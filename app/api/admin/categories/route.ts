@@ -21,7 +21,7 @@ function serializeCategory(c: Category) {
     description: c.description,
     icon: c.icon,
     orderIndex: c.orderIndex,
-    isActive: c.isActive,
+    status: c.status,
     isSystem: c.isSystem,
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,

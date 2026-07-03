@@ -55,7 +55,7 @@ async function run() {
     for (const root of roots) {
       await tx
         .update(schema.categories)
-        .set({ type: 'shared', isActive: true, isSystem: true, updatedAt: new Date() })
+        .set({ type: 'shared', status: 'active', isSystem: true, updatedAt: new Date() })
         .where(eq(schema.categories.id, root.id))
       console.log(`✓ Root updated: ${root.slug} → type=shared`)
     }

@@ -14,7 +14,7 @@ export default async function CategoriesPage() {
     description: c.description,
     icon: c.icon,
     orderIndex: c.orderIndex,
-    isActive: c.isActive,
+    status: c.status,
     isSystem: c.isSystem,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
