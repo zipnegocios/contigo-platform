@@ -18,6 +18,13 @@
 
   html {
     scroll-behavior: auto;
+    /* overflow-x: hidden lives here only. Per the CSS Overflow spec, once
+       either axis is non-visible the other axis is forced to "auto" (you
+       can't declare it back to visible) — so html is always the one true
+       scroll container. Repeating overflow-x: hidden on body too used to
+       make body ALSO auto-compute overflow-y: auto, turning it into a
+       second, independently scrollable box nested inside html — the two
+       stacked scrollbars bug. body must have no overflow rule of its own. */
     overflow-x: hidden;
   }
 
@@ -25,7 +32,6 @@
     font-family: var(--font-sans, sans-serif);
     color: var(--neutral-800);
     background-color: var(--neutral-50);
-    overflow-x: hidden;
   }
 
   /* Typography */

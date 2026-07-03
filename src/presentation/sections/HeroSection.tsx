@@ -2,6 +2,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { HeroConfig, HeroButton } from '@/core/entities/HeroConfig'
 import { DynamicFormModal } from '@/presentation/components/DynamicFormModal'
+import { QuoteFormModal } from '@/presentation/components/QuoteFormModal'
+
+// The "Request a Quote" form gets the bespoke modal used everywhere else in
+// the site (Navigation's "Request a Quote" button) instead of the generic
+// form-builder-driven DynamicFormModal, so a Hero CTA wired to this specific
+// form looks and behaves identically no matter which button opens it. Any
+// other form linked to a Hero button still goes through DynamicFormModal.
+const QUOTE_FORM_SLUG = 'request-a-quote'
 
 const FALLBACK_CONFIG: HeroConfig = {
   id: 'fallback',
@@ -298,10 +306,15 @@ export default function HeroSection({ config }: Props) {
         </div>
       )}
 
+      <QuoteFormModal
+        open={formModal?.slug === QUOTE_FORM_SLUG}
+        onOpenChange={(open) => { if (!open) setFormModal(null) }}
+      />
+
       <DynamicFormModal
-        slug={formModal?.slug ?? null}
+        slug={formModal && formModal.slug !== QUOTE_FORM_SLUG ? formModal.slug : null}
         formName={formModal?.name}
-        open={formModal !== null}
+        open={formModal !== null && formModal.slug !== QUOTE_FORM_SLUG}
         onClose={() => setFormModal(null)}
       />
     </section>
