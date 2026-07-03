@@ -54,18 +54,22 @@ export default function ServicesSection({ services }: ServicesSectionProps) {
         <h2 style={{ color: 'var(--neutral-800)' }}>Our Services</h2>
       </div>
 
-      {/* 3 service rows — same autonomous marquee behavior at every viewport size */}
+      {/* 3 service rows — same autonomous marquee behavior at every viewport size.
+          Rows with no items are skipped: an empty row has nothing to loop and
+          would otherwise render a marquee with no content. */}
       <div className="flex flex-col gap-4 md:gap-6">
-        {rows.map((rowItems, idx) => (
-          <MarqueeServiceRow
-            key={idx}
-            items={rowItems}
-            direction={idx % 2 === 0 ? -1 : 1}
-            openCardKey={openCard?.rowIndex === idx ? openCard.loopKey : null}
-            onCardToggle={(loopKey) => handleCardToggle(idx, loopKey)}
-            isPaused={openCard?.rowIndex === idx}
-          />
-        ))}
+        {rows.map((rowItems, idx) =>
+          rowItems.length === 0 ? null : (
+            <MarqueeServiceRow
+              key={idx}
+              items={rowItems}
+              direction={idx % 2 === 0 ? -1 : 1}
+              openCardKey={openCard?.rowIndex === idx ? openCard.loopKey : null}
+              onCardToggle={(loopKey) => handleCardToggle(idx, loopKey)}
+              isPaused={openCard?.rowIndex === idx}
+            />
+          ),
+        )}
       </div>
 
       {/* CTA — brand-gold button with a light sweep + lift on hover */}

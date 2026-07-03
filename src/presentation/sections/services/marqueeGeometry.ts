@@ -20,6 +20,10 @@ export function getServiceRowDuplicationCount(
   viewportWidthPx: number,
   cardWidthPx: number,
 ): number {
+  // A row with no items has nothing to duplicate — without this guard,
+  // singleSetWidth is 0 and Math.ceil(viewportWidthPx / 0) is Infinity,
+  // which then drives buildLoopItems() into a loop that never terminates.
+  if (itemCount <= 0) return 0
   const singleSetWidth = itemCount * cardWidthPx
   const setsToFillViewport = Math.ceil(viewportWidthPx / singleSetWidth)
   return Math.max(2, setsToFillViewport + 1)
@@ -38,6 +42,10 @@ export function buildLoopItems<T extends { slug: string }>(
   items: T[],
   duplicationCount: number,
 ): (T & { loopKey: string })[] {
+  // Nothing to loop — bail out before the for-loop below, which otherwise
+  // never terminates if duplicationCount is Infinity/non-finite (items.forEach
+  // on an empty array never advances any exit condition).
+  if (items.length === 0) return []
   const out: (T & { loopKey: string })[] = []
   for (let set = 0; set < duplicationCount; set++) {
     // Include the item's index so the key stays unique even if two services in
