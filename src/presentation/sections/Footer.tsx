@@ -150,30 +150,13 @@ export default function Footer() {
               className="text-fluid-xs"
               style={{ color: 'var(--neutral-600)' }}
             >
-              ABN:{' '}
-              <a
-                href="https://abr.business.gov.au/ABN/View?id=25698028394"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-                style={{ color: 'inherit' }}
-              >
-                25 698 028 394
-              </a>
+              ABN: 25 698 028 394
             </p>
             <p
               className="text-fluid-xs"
               style={{ color: 'var(--neutral-600)' }}
             >
-              <a
-                href="https://secure.cbs.sa.gov.au/OccLicPubReg/LicenceDetails.php?LicClassCode=BLD&LicNum=357596"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-                style={{ color: 'inherit' }}
-              >
-                BLD Licence No. 357596
-              </a>
+              BLD Licence No. 357596
             </p>
           </div>
         </div>
