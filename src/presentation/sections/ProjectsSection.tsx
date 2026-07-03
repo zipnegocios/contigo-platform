@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ArrowRight } from 'lucide-react'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 
 export interface ProjectItem {
@@ -14,83 +15,6 @@ export interface ProjectItem {
   completedDate?: string | null
   coverImageUrl: string
   coverPosterUrl: string | null
-}
-
-// ── Rotating location labels ──────────────────────────────────────────────────
-
-function formatLocationLabel(location: string, date?: string | null): string {
-  if (!date) return location
-  try {
-    const d = new Date(date)
-    const month = d.toLocaleDateString('en-AU', { month: 'long' })
-    return `${location} — ${month} ${d.getFullYear()}`
-  } catch {
-    return location
-  }
-}
-
-function RotatingText({ items, externalPaused }: { items: string[]; externalPaused: boolean }) {
-  const outerRef   = useRef<HTMLSpanElement>(null)
-  const innerRef   = useRef<HTMLSpanElement>(null)
-  const idxRef     = useRef(0)
-  const hoverRef   = useRef(false)
-
-  useEffect(() => {
-    if (items.length === 0) return
-    // seed initial text
-    if (innerRef.current) innerRef.current.textContent = items[0]
-  }, [items])
-
-  useEffect(() => {
-    if (items.length <= 1) return
-
-    // Visible hold: 1500 ms fixed + 0–1000 ms random jitter, then 0.7 s of animation
-    const holdDelay = () => 1500 + Math.random() * 1000
-
-    let timer: ReturnType<typeof setTimeout>
-
-    const schedule = () => {
-      timer = setTimeout(tick, holdDelay())
-    }
-
-    const tick = () => {
-      if (externalPaused || hoverRef.current || !innerRef.current) {
-        // paused — check again after a short poll so we don't lose the beat
-        timer = setTimeout(tick, 300)
-        return
-      }
-      // pick random index ≠ current
-      let next = idxRef.current
-      while (next === idxRef.current) next = Math.floor(Math.random() * items.length)
-
-      const el = innerRef.current
-      // onComplete schedules the next hold immediately after entrance finishes
-      const tl = gsap.timeline({ onComplete: schedule })
-      tl.to(el, { y: -22, opacity: 0, duration: 0.35, ease: 'power2.in' })
-      tl.call(() => {
-        el.textContent = items[next]
-        idxRef.current = next
-        gsap.set(el, { y: 22, opacity: 0 })
-      })
-      tl.to(el, { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' })
-    }
-
-    schedule()
-    return () => clearTimeout(timer)
-  }, [items, externalPaused])
-
-  if (items.length === 0) return <span>—</span>
-
-  return (
-    <span
-      ref={outerRef}
-      style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom', height: '1.35em' }}
-      onMouseEnter={() => { hoverRef.current = true }}
-      onMouseLeave={() => { hoverRef.current = false }}
-    >
-      <span ref={innerRef} style={{ display: 'inline-block' }} />
-    </span>
-  )
 }
 
 interface Props {
@@ -356,29 +280,25 @@ export default function ProjectsSection({ projects }: Props) {
         </div>
       )}
 
-      {/* Footer row */}
-      <div
-        ref={metaRef}
-        className="flex items-center justify-between mt-8 text-fluid-sm"
-        style={{ color: 'var(--neutral-600)' }}
-      >
-        <span className="data-text flex items-center gap-1 flex-wrap">
-          <span>Project count: {projects.length}</span>
-          <span style={{ opacity: 0.4 }}>|</span>
-          <span>
-            Project Location:{' '}
-            <RotatingText
-              items={projects.map((p) => formatLocationLabel(p.location, p.completedDate))}
-              externalPaused={isPaused}
-            />
-          </span>
-        </span>
+      {/* Footer CTA — brand-gold button with a light sweep + lift on hover,
+          matching the "View All Services" CTA for a consistent look and feel */}
+      <div ref={metaRef} className="text-center mt-14">
         <a
           href="/projects"
-          className="text-fluid-sm font-medium transition-opacity hover:opacity-70"
-          style={{ color: 'var(--neutral-800)' }}
+          className="service-cta-gold group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-9 py-4 text-fluid-sm font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style={{
+            background: 'linear-gradient(135deg, var(--gold-400, #E2C063) 0%, var(--gold-600, #C9A04E) 100%)',
+            color: 'var(--petrol-950, #051E27)',
+            fontFamily: 'var(--font-alegreya-sans)',
+          }}
         >
-          View all →
+          {/* Light sweep */}
+          <span
+            aria-hidden
+            className="service-cta-sweep pointer-events-none absolute inset-y-0 -left-full w-1/2 skew-x-[-20deg] bg-white/35 blur-md transition-[left] duration-700 ease-out group-hover:left-[140%]"
+          />
+          <span className="relative z-10">View All Projects</span>
+          <ArrowRight className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </a>
       </div>
     </section>
