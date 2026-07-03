@@ -29,28 +29,32 @@ WORKDIR /app
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
+# Create non-root user primero para poder usarlo en las operaciones de copiado
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
 # Copy package files
 COPY package*.json ./
 
 # Install only production dependencies
 RUN npm ci --omit=dev
 
-# Copy built app from builder
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# 🚨 CORRECCIÓN CLAVE: Copiar los assets asignando la propiedad al usuario no-root
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Copy scripts and source for runtime operations
-COPY scripts ./scripts
-COPY src ./src
-COPY entrypoint.sh ./
+# Copy scripts and source for runtime operations (también con chown por si acaso)
+COPY --chown=nextjs:nodejs scripts ./scripts
+COPY --chown=nextjs:nodejs src ./src
+COPY --chown=nextjs:nodejs entrypoint.sh ./
 
-# Make entrypoint executable
+# Asegurar que la caché de imágenes tenga la estructura y permisos correctos antes del runtime
+RUN mkdir -p /app/.next/cache/images && chown -R nextjs:nodejs /app/.next
+
+# Make entrypoint executable (todavía como root para garantizar permisos del sistema)
 RUN chmod +x /app/entrypoint.sh
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
-
+# Cambiar definitivamente al usuario seguro
 USER nextjs
 
 EXPOSE 3000
