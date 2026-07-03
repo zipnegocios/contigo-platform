@@ -27,6 +27,26 @@ export async function GET() {
   }
 }
 
+export async function PATCH(request: Request) {
+  try {
+    const session = await auth()
+    if (!session) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { updates } = body
+
+    const projectRepo = new DrizzleProjectRepository()
+    await projectRepo.updateOrder(updates)
+
+    return Response.json({ success: true })
+  } catch (error) {
+    console.error(error)
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = await auth()

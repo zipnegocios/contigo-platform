@@ -110,11 +110,13 @@ export async function PATCH(
       completedDate: body.completedDate ? new Date(body.completedDate) : project.completedDate,
       featured: body.featured !== undefined ? body.featured : project.featured,
       status: body.status !== undefined ? body.status : project.status,
+      orderIndex: project.orderIndex,
       coverImageUrl: newCoverImageUrl,
       coverPosterUrl: newCoverPosterUrl,
       galleryItems: newGalleryItems,
       createdAt: project.createdAt,
       updatedAt: new Date(),
+      trashedAt: project.trashedAt,
     })
 
     await projectRepo.update(updatedProject)
@@ -144,7 +146,7 @@ export async function DELETE(
       return Response.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    await projectRepo.delete(id)
+    await projectRepo.trash(id)
 
     return Response.json({ success: true })
   } catch (error) {

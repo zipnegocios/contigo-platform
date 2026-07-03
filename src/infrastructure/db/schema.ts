@@ -139,6 +139,7 @@ export const categories = pgTable(
     isSystem: boolean('is_system').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    trashedAt: timestamp('trashed_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_categories_slug').on(table.slug),
@@ -147,6 +148,7 @@ export const categories = pgTable(
     index('idx_categories_type').on(table.type),
     index('idx_categories_order').on(table.orderIndex),
     index('idx_categories_status').on(table.status),
+    index('idx_categories_trashed_at').on(table.trashedAt),
   ],
 )
 
@@ -225,8 +227,10 @@ export const projects = pgTable(
     coverPosterUrl: text('cover_poster_url'),
     galleryUrls: jsonb('gallery_urls').$type<GalleryItem[]>().notNull().default(sql`'[]'::jsonb`),
     descriptionVector: jsonb('description_vector').$type<number[]>(),
+    orderIndex: integer('order_index').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    trashedAt: timestamp('trashed_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_projects_slug').on(table.slug),
@@ -234,6 +238,8 @@ export const projects = pgTable(
     index('idx_projects_featured').on(table.featured),
     index('idx_projects_created_at').on(table.createdAt),
     index('idx_projects_category_id').on(table.categoryId),
+    index('idx_projects_order').on(table.orderIndex),
+    index('idx_projects_trashed_at').on(table.trashedAt),
   ],
 )
 
@@ -257,10 +263,12 @@ export const services = pgTable(
     requestFormId: uuid('request_form_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    trashedAt: timestamp('trashed_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_services_order').on(table.orderIndex),
     index('idx_services_category_id').on(table.categoryId),
+    index('idx_services_trashed_at').on(table.trashedAt),
   ],
 )
 

@@ -95,6 +95,7 @@ export async function PATCH(
       pageBlocks: body.pageBlocks !== undefined ? (body.pageBlocks as PageBlock[] | null) : service.pageBlocks,
       createdAt: service.createdAt,
       updatedAt: new Date(),
+      trashedAt: service.trashedAt,
     })
 
     await serviceRepo.update(updated)
@@ -117,7 +118,7 @@ export async function DELETE(
 
     const { id } = await params
     const serviceRepo = new DrizzleServiceRepository()
-    await serviceRepo.delete(id)
+    await serviceRepo.trash(id)
 
     return Response.json({ success: true })
   } catch (error) {

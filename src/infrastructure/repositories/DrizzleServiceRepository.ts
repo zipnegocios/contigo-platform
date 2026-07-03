@@ -1,4 +1,4 @@
-import { eq, asc } from 'drizzle-orm'
+import { eq, asc, and, isNull, isNotNull } from 'drizzle-orm'
 import { db } from '../db/client'
 import { services } from '../db/schema'
 import { Service } from '@/core/entities/Service'
@@ -55,6 +55,7 @@ export class DrizzleServiceRepository {
     const rows = await db
       .select()
       .from(services)
+      .where(isNull(services.trashedAt))
       .orderBy(asc(services.orderIndex))
       .limit(limit)
       .offset(offset)
@@ -66,8 +67,18 @@ export class DrizzleServiceRepository {
     const rows = await db
       .select()
       .from(services)
-      .where(eq(services.status, 'active'))
+      .where(and(eq(services.status, 'active'), isNull(services.trashedAt)))
       .orderBy(asc(services.orderIndex))
+
+    return rows.map((row) => this.mapRowToService(row))
+  }
+
+  async findTrashed(): Promise<Service[]> {
+    const rows = await db
+      .select()
+      .from(services)
+      .where(isNotNull(services.trashedAt))
+      .orderBy(asc(services.name))
 
     return rows.map((row) => this.mapRowToService(row))
   }
@@ -100,6 +111,14 @@ export class DrizzleServiceRepository {
     }
   }
 
+  async trash(id: string): Promise<void> {
+    await db.update(services).set({ trashedAt: new Date() }).where(eq(services.id, id))
+  }
+
+  async restore(id: string): Promise<void> {
+    await db.update(services).set({ trashedAt: null }).where(eq(services.id, id))
+  }
+
   async delete(id: string): Promise<void> {
     await db.delete(services).where(eq(services.id, id))
   }
@@ -120,6 +139,7 @@ export class DrizzleServiceRepository {
       pageBlocks: (row.pageBlocks as PageBlock[] | null) ?? null,
       createdAt: row.createdAt as Date,
       updatedAt: row.updatedAt as Date,
+      trashedAt: (row.trashedAt as Date | null) ?? null,
     })
   }
 }

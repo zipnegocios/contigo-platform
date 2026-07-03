@@ -25,11 +25,13 @@ export class Project {
   readonly completedDate: Date
   readonly featured: boolean
   readonly status: ContentStatus
+  readonly orderIndex: number
   readonly coverImageUrl: string
   readonly coverPosterUrl: string | null
   readonly galleryItems: GalleryItem[]
   readonly createdAt: Date
   readonly updatedAt: Date
+  readonly trashedAt: Date | null
 
   private constructor(props: {
     id: string
@@ -42,11 +44,13 @@ export class Project {
     completedDate: Date
     featured: boolean
     status: ContentStatus
+    orderIndex: number
     coverImageUrl: string
     coverPosterUrl: string | null
     galleryItems: GalleryItem[]
     createdAt: Date
     updatedAt: Date
+    trashedAt: Date | null
   }) {
     this.id = props.id
     this.slug = props.slug
@@ -58,11 +62,13 @@ export class Project {
     this.completedDate = props.completedDate
     this.featured = props.featured
     this.status = props.status
+    this.orderIndex = props.orderIndex
     this.coverImageUrl = props.coverImageUrl
     this.coverPosterUrl = props.coverPosterUrl
     this.galleryItems = props.galleryItems
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
+    this.trashedAt = props.trashedAt
   }
 
   static create(input: CreateProjectInput): Project {
@@ -81,11 +87,13 @@ export class Project {
       completedDate: input.completedDate,
       featured: false,
       status: 'draft',
+      orderIndex: 0,
       coverImageUrl: input.coverImageUrl.trim(),
       coverPosterUrl: input.coverPosterUrl ?? null,
       galleryItems: input.galleryItems || [],
       createdAt: now,
       updatedAt: now,
+      trashedAt: null,
     })
   }
 
@@ -101,11 +109,13 @@ export class Project {
       completedDate: this.completedDate,
       featured: this.featured,
       status,
+      orderIndex: this.orderIndex,
       coverImageUrl: this.coverImageUrl,
       coverPosterUrl: this.coverPosterUrl,
       galleryItems: this.galleryItems,
       createdAt: this.createdAt,
       updatedAt: new Date(),
+      trashedAt: this.trashedAt,
     })
   }
 
@@ -121,11 +131,13 @@ export class Project {
       completedDate: this.completedDate,
       featured,
       status: this.status,
+      orderIndex: this.orderIndex,
       coverImageUrl: this.coverImageUrl,
       coverPosterUrl: this.coverPosterUrl,
       galleryItems: this.galleryItems,
       createdAt: this.createdAt,
       updatedAt: new Date(),
+      trashedAt: this.trashedAt,
     })
   }
 
@@ -140,11 +152,13 @@ export class Project {
     completedDate: Date
     featured: boolean
     status: ContentStatus
+    orderIndex: number
     coverImageUrl: string
     coverPosterUrl: string | null
     galleryItems: GalleryItem[]
     createdAt: Date
     updatedAt: Date
+    trashedAt: Date | null
   }): Project {
     return new Project({ ...props, categoryId: props.categoryId ?? null })
   }

@@ -35,8 +35,8 @@ async function resolveServiceForCategory(category: string, item: string) {
     serviceRepo.findBySlug(item),
   ])
 
-  if (!root || root.status !== 'active') return null
-  if (!service || service.status !== 'active') return null
+  if (!root || root.status !== 'active' || root.trashedAt) return null
+  if (!service || service.status !== 'active' || service.trashedAt) return null
   if (!service.categoryId) return null
 
   if (service.categoryId !== root.id) return null

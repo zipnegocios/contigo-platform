@@ -30,6 +30,7 @@ export class Service {
   readonly pageBlocks: PageBlock[] | null
   readonly createdAt: Date
   readonly updatedAt: Date
+  readonly trashedAt: Date | null
 
   private constructor(props: {
     id: string
@@ -46,6 +47,7 @@ export class Service {
     pageBlocks: PageBlock[] | null
     createdAt: Date
     updatedAt: Date
+    trashedAt: Date | null
   }) {
     this.id = props.id
     this.slug = props.slug
@@ -61,6 +63,7 @@ export class Service {
     this.pageBlocks = props.pageBlocks
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
+    this.trashedAt = props.trashedAt
   }
 
   static create(input: CreateServiceInput): Service {
@@ -83,6 +86,7 @@ export class Service {
       pageBlocks: input.pageBlocks ?? null,
       createdAt: now,
       updatedAt: now,
+      trashedAt: null,
     })
   }
 
@@ -102,6 +106,7 @@ export class Service {
       pageBlocks: this.pageBlocks,
       createdAt: this.createdAt,
       updatedAt: new Date(),
+      trashedAt: this.trashedAt,
     })
   }
 
@@ -120,6 +125,7 @@ export class Service {
     pageBlocks: PageBlock[] | null
     createdAt: Date
     updatedAt: Date
+    trashedAt: Date | null
   }): Service {
     return new Service({ ...props, categoryId: props.categoryId ?? null })
   }

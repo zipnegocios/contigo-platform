@@ -82,7 +82,7 @@ export async function DELETE(
       return Response.json({ error: 'Cannot delete system category' }, { status: 403 })
     }
 
-    await repo.delete(id)
+    await repo.trash(id)
     return Response.json({ success: true })
   } catch (error) {
     console.error(error)

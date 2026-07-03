@@ -73,7 +73,7 @@ export default async function ServiceCategoryPage({
       // categoryId pointing directly to the root category.
       const root = await categoryRepo.findBySlug(category, 'shared')
 
-      if (!root || root.status !== 'active') {
+      if (!root || root.status !== 'active' || root.trashedAt) {
         rootInactiveOrMissing = true
       } else {
         categoryName = root.name

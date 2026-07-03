@@ -1,4 +1,4 @@
-import { eq, asc, and, or } from 'drizzle-orm'
+import { eq, asc, and, or, isNull, isNotNull } from 'drizzle-orm'
 import { db } from '../db/client'
 import { categories } from '../db/schema'
 import { Category } from '@/core/entities/Category'
@@ -38,6 +38,7 @@ function mapToEntity(row: CategoryRow): Category {
     isSystem: row.isSystem,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    trashedAt: row.trashedAt,
   })
 }
 
@@ -51,13 +52,14 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
       : undefined
     const conditions = [
       typeCondition,
+      isNull(categories.trashedAt),
       activeOnly ? eq(categories.status, 'active') : undefined,
     ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
     const rows = await db
       .select()
       .from(categories)
-      .where(conditions.length ? and(...conditions) : undefined)
+      .where(and(...conditions))
       .orderBy(asc(categories.orderIndex), asc(categories.name))
     return rows.map(mapToEntity)
   }
@@ -69,6 +71,7 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
       : or(eq(categories.type, type), eq(categories.type, 'shared'))
     const conditions = [
       typeCondition,
+      isNull(categories.trashedAt),
       activeOnly ? eq(categories.status, 'active') : undefined,
     ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
@@ -78,6 +81,23 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
       .where(and(...conditions))
       .orderBy(asc(categories.orderIndex), asc(categories.name))
     return rows.map(mapToFlat)
+  }
+
+  async findTrashed(type?: CategoryType): Promise<Category[]> {
+    const typeCondition = type
+      ? type === 'shared'
+        ? eq(categories.type, 'shared')
+        : or(eq(categories.type, type), eq(categories.type, 'shared'))
+      : undefined
+    const conditions = [typeCondition, isNotNull(categories.trashedAt)]
+      .filter((c): c is NonNullable<typeof c> => c !== undefined)
+
+    const rows = await db
+      .select()
+      .from(categories)
+      .where(and(...conditions))
+      .orderBy(asc(categories.name))
+    return rows.map(mapToEntity)
   }
 
   async findById(id: string): Promise<Category | null> {
@@ -143,6 +163,14 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
           .where(eq(categories.id, item.id))
       }
     })
+  }
+
+  async trash(id: string): Promise<void> {
+    await db.update(categories).set({ trashedAt: new Date() }).where(eq(categories.id, id))
+  }
+
+  async restore(id: string): Promise<void> {
+    await db.update(categories).set({ trashedAt: null }).where(eq(categories.id, id))
   }
 
   async delete(id: string): Promise<void> {

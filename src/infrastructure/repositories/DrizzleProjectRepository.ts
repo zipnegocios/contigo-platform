@@ -1,4 +1,4 @@
-import { eq, desc, and } from 'drizzle-orm'
+import { eq, asc, and, isNull, isNotNull } from 'drizzle-orm'
 import { db } from '../db/client'
 import { projects } from '../db/schema'
 import { Project } from '@/core/entities/Project'
@@ -28,6 +28,7 @@ export class DrizzleProjectRepository {
         completedDate: project.completedDate,
         featured: project.featured,
         status: project.status,
+        orderIndex: project.orderIndex,
         coverImageUrl: project.coverImageUrl,
         coverPosterUrl: project.coverPosterUrl,
         galleryUrls: project.galleryItems,
@@ -55,7 +56,8 @@ export class DrizzleProjectRepository {
     const rows = await db
       .select()
       .from(projects)
-      .orderBy(desc(projects.createdAt))
+      .where(isNull(projects.trashedAt))
+      .orderBy(asc(projects.orderIndex))
       .limit(limit)
       .offset(offset)
 
@@ -66,8 +68,8 @@ export class DrizzleProjectRepository {
     const rows = await db
       .select()
       .from(projects)
-      .where(eq(projects.status, 'active'))
-      .orderBy(desc(projects.createdAt))
+      .where(and(eq(projects.status, 'active'), isNull(projects.trashedAt)))
+      .orderBy(asc(projects.orderIndex))
       .limit(limit)
       .offset(offset)
 
@@ -78,8 +80,18 @@ export class DrizzleProjectRepository {
     const rows = await db
       .select()
       .from(projects)
-      .where(and(eq(projects.status, 'active'), eq(projects.featured, true)))
-      .orderBy(desc(projects.createdAt))
+      .where(and(eq(projects.status, 'active'), eq(projects.featured, true), isNull(projects.trashedAt)))
+      .orderBy(asc(projects.orderIndex))
+
+    return rows.map((row) => this.mapRowToProject(row))
+  }
+
+  async findTrashed(): Promise<Project[]> {
+    const rows = await db
+      .select()
+      .from(projects)
+      .where(isNotNull(projects.trashedAt))
+      .orderBy(asc(projects.title))
 
     return rows.map((row) => this.mapRowToProject(row))
   }
@@ -102,6 +114,23 @@ export class DrizzleProjectRepository {
         updatedAt: new Date(),
       })
       .where(eq(projects.id, project.id))
+  }
+
+  async updateOrder(updates: Array<{ id: string; orderIndex: number }>): Promise<void> {
+    for (const { id, orderIndex } of updates) {
+      await db
+        .update(projects)
+        .set({ orderIndex, updatedAt: new Date() })
+        .where(eq(projects.id, id))
+    }
+  }
+
+  async trash(id: string): Promise<void> {
+    await db.update(projects).set({ trashedAt: new Date() }).where(eq(projects.id, id))
+  }
+
+  async restore(id: string): Promise<void> {
+    await db.update(projects).set({ trashedAt: null }).where(eq(projects.id, id))
   }
 
   async delete(id: string): Promise<void> {
@@ -130,11 +159,13 @@ export class DrizzleProjectRepository {
       completedDate: row.completedDate as Date,
       featured: row.featured as boolean,
       status: row.status as Project['status'],
+      orderIndex: row.orderIndex as number,
       coverImageUrl: row.coverImageUrl as string,
       coverPosterUrl: (row.coverPosterUrl as string | null) ?? null,
       galleryItems: normaliseGalleryRow(row.galleryUrls),
       createdAt: row.createdAt as Date,
       updatedAt: row.updatedAt as Date,
+      trashedAt: (row.trashedAt as Date | null) ?? null,
     })
   }
 }

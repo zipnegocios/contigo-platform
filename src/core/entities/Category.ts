@@ -21,6 +21,7 @@ export class Category {
   readonly isSystem: boolean
   readonly createdAt: Date
   readonly updatedAt: Date
+  readonly trashedAt: Date | null
 
   private constructor(props: {
     id: string
@@ -35,6 +36,7 @@ export class Category {
     isSystem: boolean
     createdAt: Date
     updatedAt: Date
+    trashedAt: Date | null
   }) {
     this.id = props.id
     this.name = props.name
@@ -48,6 +50,7 @@ export class Category {
     this.isSystem = props.isSystem
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
+    this.trashedAt = props.trashedAt
   }
 
   static create(input: CreateCategoryInput): Category {
@@ -65,6 +68,7 @@ export class Category {
       isSystem: false,
       createdAt: now,
       updatedAt: now,
+      trashedAt: null,
     })
   }
 
@@ -89,6 +93,7 @@ export class Category {
       isSystem: this.isSystem,
       createdAt: this.createdAt,
       updatedAt: new Date(),
+      trashedAt: this.trashedAt,
     })
   }
 
@@ -105,6 +110,7 @@ export class Category {
     isSystem: boolean
     createdAt: Date
     updatedAt: Date
+    trashedAt: Date | null
   }): Category {
     return new Category(props)
   }
