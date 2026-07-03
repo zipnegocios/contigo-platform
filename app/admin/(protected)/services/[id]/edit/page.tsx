@@ -40,7 +40,6 @@ export default async function EditServicePage({ params }: PageProps) {
           posterUrl: service.posterUrl,
           galleryItems: service.galleryItems,
           published: service.published,
-          categoryId: service.categoryId,
         }}
       />
     </div>

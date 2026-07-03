@@ -32,10 +32,9 @@ export async function PATCH(
       return Response.json({ error: 'Category not found' }, { status: 404 })
     }
 
-    // System categories may have their display name edited freely — their
-    // slug is frozen by Category.withUpdates() regardless of name changes,
-    // so renaming here can never break the hardcoded public route slugs
-    // (SERVICE_ROOT_SLUGS) or the sitemap/fallback catalogue that key off them.
+    if (category.isSystem && input.name && input.name !== category.name) {
+      return Response.json({ error: 'Cannot rename system category' }, { status: 403 })
+    }
 
     // Prevent circular reference: new parentId must not be self or a descendant.
     // Must include inactive categories too, otherwise an inactive descendant

@@ -90,23 +90,6 @@ function CategorySection({ group }: { group: ServiceGroup }) {
     }
   }
 
-  const handleTogglePublished = async (id: string, nextPublished: boolean) => {
-    // Optimistic update, rolled back on failure.
-    setItems((prev) => prev.map((s) => (s.id === id ? { ...s, published: nextPublished } : s)))
-    try {
-      const res = await fetch(`/api/admin/services/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ published: nextPublished }),
-      })
-      if (!res.ok) throw new Error('Failed to update status')
-      toast.success(nextPublished ? 'Service activated' : 'Service deactivated')
-    } catch {
-      setItems((prev) => prev.map((s) => (s.id === id ? { ...s, published: !nextPublished } : s)))
-      toast.error('Failed to update status')
-    }
-  }
-
   return (
     <div className="space-y-3">
       {/* Category header */}
@@ -183,20 +166,17 @@ function CategorySection({ group }: { group: ServiceGroup }) {
                   <p className="text-fluid-xs truncate" style={{ color: '#9C8F83' }}>{svc.shortDescription}</p>
                 </div>
 
-                {/* Status toggle */}
-                <button
-                  type="button"
-                  onClick={() => handleTogglePublished(svc.id, !svc.published)}
-                  title={svc.published ? 'Click to deactivate' : 'Click to activate'}
-                  className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide flex-shrink-0 min-h-[28px] transition-opacity duration-150 hover:opacity-75 cursor-pointer"
+                {/* Status badge */}
+                <span
+                  className="inline-block px-2.5 py-0.5 rounded-full text-fluid-xs font-medium uppercase tracking-wide flex-shrink-0"
                   style={
                     svc.published
-                      ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d', border: 'none' }
-                      : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560', border: 'none' }
+                      ? { backgroundColor: 'rgba(34,197,94,0.12)', color: '#15803d' }
+                      : { backgroundColor: 'rgba(107,101,96,0.1)', color: '#6B6560' }
                   }
                 >
                   {svc.published ? 'Active' : 'Draft'}
-                </button>
+                </span>
 
                 {/* Actions */}
                 <div className="flex gap-1 flex-shrink-0">

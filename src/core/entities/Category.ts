@@ -70,16 +70,10 @@ export class Category {
 
   withUpdates(partial: UpdateCategoryInput): Category {
     const newName = partial.name !== undefined ? partial.name.trim() : this.name
-    // System categories (the 4 fixed service/project roots) keep their slug
-    // frozen even when the display name changes — the slug is hardcoded
-    // across public route matching, the sitemap, and the fallback catalogue
-    // (see serviceCategoryMeta.ts's SERVICE_ROOT_SLUGS), so regenerating it
-    // here would silently 404 every page under that category.
-    const shouldRegenerateSlug = partial.name !== undefined && !this.isSystem
     return new Category({
       id: this.id,
       name: newName,
-      slug: shouldRegenerateSlug ? makeSlug(partial.name!) : this.slug,
+      slug: partial.name !== undefined ? makeSlug(partial.name) : this.slug,
       parentId: partial.parentId !== undefined ? partial.parentId : this.parentId,
       type: this.type,
       description: partial.description !== undefined ? partial.description : this.description,
