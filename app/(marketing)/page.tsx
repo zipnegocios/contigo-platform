@@ -51,7 +51,12 @@ const ContactSection = nextDynamic(
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Contigo Constructions | Carpentry & Renovations Adelaide',
+  // No `title` here on purpose: the root layout's title.template ('%s |
+  // Contigo Constructions') appends the brand suffix to ANY string title a
+  // page sets, even one identical to the layout's own `default`. Setting a
+  // string title here duplicated the brand ("... Adelaide | Contigo
+  // Constructions"). Omitting `title` makes Next.js fall back to the root's
+  // `default` untouched, which already IS the exact string we want.
   description:
     'Licensed Carpentry & Joinery contractor in Adelaide specialising in renovations, home extensions, pergolas, decking, framing and cladding. Request a free quote today.',
   keywords: [
