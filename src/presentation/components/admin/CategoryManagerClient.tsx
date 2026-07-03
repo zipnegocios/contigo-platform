@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Pencil } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
 import type { FlatCategory } from '@/types/category'
 import { CategoryFormModal } from './CategoryFormModal'
@@ -15,9 +15,22 @@ interface CategoryManagerClientProps {
 export function CategoryManagerClient({ categories }: CategoryManagerClientProps) {
   const router = useRouter()
   const [editTarget, setEditTarget] = useState<FlatCategory | null>(null)
+  const [creating, setCreating] = useState(false)
 
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <button
+          type="button"
+          onClick={() => setCreating(true)}
+          className="px-4 py-2 rounded-lg text-fluid-xs font-semibold inline-flex items-center gap-1.5 transition-all duration-150 min-h-[44px]"
+          style={{ border: '1.5px solid #E2C063', color: '#A07B2A' }}
+        >
+          <Plus className="w-[clamp(0.75rem,1.5vw,1rem)] h-[clamp(0.75rem,1.5vw,1rem)]" />
+          Add category
+        </button>
+      </div>
+
       {/* Category list — simple flat grid of the 4 shared categories */}
       <div
         className="rounded-lg overflow-hidden bg-white"
@@ -83,6 +96,19 @@ export function CategoryManagerClient({ categories }: CategoryManagerClientProps
           </ul>
         )}
       </div>
+
+      {/* Create modal */}
+      {creating && (
+        <CategoryFormModal
+          mode="create"
+          type="shared"
+          allFlat={categories}
+          onClose={() => {
+            setCreating(false)
+            router.refresh()
+          }}
+        />
+      )}
 
       {/* Edit modal */}
       {editTarget && (
