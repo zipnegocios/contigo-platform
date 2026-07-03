@@ -175,6 +175,23 @@ export default function ProjectsSection({ projects }: Props) {
     border: '1px solid var(--gold-a30)',
   }
 
+  const dotButtons = hasNav
+    ? Array.from({ length: totalPositions }).map((_, i) => (
+        <button
+          key={i}
+          onClick={() => goTo(i)}
+          aria-label={`Position ${i + 1}`}
+          style={{
+            width: i === startIndex ? 22 : 8,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: i === startIndex ? 'var(--contigo-primary)' : 'var(--neutral-800-28)',
+            transition: 'all 0.3s ease',
+          }}
+        />
+      ))
+    : null
+
   return (
     <section
       id="projects"
@@ -196,12 +213,13 @@ export default function ProjectsSection({ projects }: Props) {
         </p>
       ) : (
         <div className="relative mt-8 flex items-center gap-3">
-          {/* Prev arrow */}
+          {/* Prev arrow — hidden on mobile so the card can take the full viewport width;
+              reappears beside the track from sm: up */}
           {hasNav && (
             <button
               onClick={prev}
               aria-label="Previous"
-              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
+              className="hidden sm:flex w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 items-center justify-center text-fluid-xl"
               style={arrowBtn}
             >‹</button>
           )}
@@ -248,35 +266,42 @@ export default function ProjectsSection({ projects }: Props) {
             </ul>
           </div>
 
-          {/* Next arrow */}
+          {/* Next arrow — same mobile/desktop treatment as the prev arrow above */}
           {hasNav && (
             <button
               onClick={next}
               aria-label="Next"
-              className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
+              className="hidden sm:flex w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 items-center justify-center text-fluid-xl"
               style={arrowBtn}
             >›</button>
           )}
         </div>
       )}
 
-      {/* Dot indicators */}
+      {/* Mobile nav row — arrows pinned to the corners, dots centered between them,
+          so the card above stays undivided and full-width on small screens */}
       {hasNav && (
-        <div className="flex justify-center gap-2 mt-4">
-          {Array.from({ length: totalPositions }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              aria-label={`Position ${i + 1}`}
-              style={{
-                width: i === startIndex ? 22 : 8,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: i === startIndex ? 'var(--contigo-primary)' : 'var(--neutral-800-28)',
-                transition: 'all 0.3s ease',
-              }}
-            />
-          ))}
+        <div className="flex sm:hidden items-center justify-between mt-4">
+          <button
+            onClick={prev}
+            aria-label="Previous"
+            className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
+            style={arrowBtn}
+          >‹</button>
+          <div className="flex gap-2">{dotButtons}</div>
+          <button
+            onClick={next}
+            aria-label="Next"
+            className="w-[clamp(2.75rem,4vw,3rem)] h-[clamp(2.75rem,4vw,3rem)] rounded-full flex-shrink-0 flex items-center justify-center text-fluid-xl"
+            style={arrowBtn}
+          >›</button>
+        </div>
+      )}
+
+      {/* Desktop dot indicators — mobile shows dots inline in the row above instead */}
+      {hasNav && (
+        <div className="hidden sm:flex justify-center gap-2 mt-4">
+          {dotButtons}
         </div>
       )}
 
