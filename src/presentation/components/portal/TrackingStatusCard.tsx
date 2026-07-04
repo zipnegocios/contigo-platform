@@ -38,11 +38,11 @@ export function TrackingStatusCard({ clientStage, stages }: TrackingStatusCardPr
     >
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <h2 className="text-fluid-2xl font-bold" style={{ color: 'var(--heritage-charcoal)' }}>
-          {clientStage.label}
+          Project Status
         </h2>
         <span
           className="px-4 py-2 rounded-full text-white text-fluid-sm font-medium"
-          style={{ background: isClosed ? '#333333' : '#E2C063' }}
+          style={{ background: isClosed ? 'var(--heritage-charcoal)' : '#E2C063' }}
         >
           {clientStage.label}
         </span>
