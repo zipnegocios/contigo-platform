@@ -1,5 +1,11 @@
 export type LeadDocumentDirection = 'client_upload' | 'admin_sent' | 'internal'
-export type LeadDocumentCategory = 'reference_photo' | 'site_photo' | 'quote_pdf' | 'contract' | 'other'
+export type LeadDocumentCategory =
+  | 'reference_photo'
+  | 'site_photo'
+  | 'quote_pdf'
+  | 'contract'
+  | 'other'
+  | 'invoice'
 
 export interface CreateLeadDocumentInput {
   leadId: string

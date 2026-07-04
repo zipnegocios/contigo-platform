@@ -190,6 +190,13 @@
       "when": 1783081699896,
       "tag": "20260703122819_add-trash-and-project-order",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1783161414606,
+      "tag": "20260704103654_sticky_tinkerer",
+      "breakpoints": true
     }
   ]
 }

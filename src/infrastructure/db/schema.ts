@@ -64,6 +64,7 @@ export const leadDocumentCategoryEnum = pgEnum('lead_document_category', [
   'quote_pdf',
   'contract',
   'other',
+  'invoice',
 ])
 
 export const leadContactRoleEnum = pgEnum('lead_contact_role', [

@@ -45,6 +45,7 @@ const CATEGORY_LABELS: Record<LeadDocumentCategory, string> = {
   quote_pdf: 'Quote PDF',
   contract: 'Contract',
   other: 'Other',
+  invoice: 'Invoice',
 }
 
 export function LeadDocumentsPanel({

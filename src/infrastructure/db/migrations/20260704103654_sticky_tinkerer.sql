@@ -1,0 +1,1 @@
+ALTER TYPE "public"."lead_document_category" ADD VALUE 'invoice';
