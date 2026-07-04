@@ -6,9 +6,16 @@ import { useSSE } from '@/presentation/hooks/useSSE'
 export interface AdminMessagesSnapshot {
   total: number
   byLead: Record<string, number>
+  /**
+   * Whether the shared SSE stream has ever delivered at least one live
+   * snapshot for this mount. `EventSource` auto-reconnects on transient
+   * drops, so this is a one-way flip: false -> true on the first real
+   * `onMessage`, and it never goes back to false afterwards.
+   */
+  connected: boolean
 }
 
-const DEFAULT_SNAPSHOT: AdminMessagesSnapshot = { total: 0, byLead: {} }
+const DEFAULT_SNAPSHOT: AdminMessagesSnapshot = { total: 0, byLead: {}, connected: false }
 
 const AdminRealtimeContext = createContext<AdminMessagesSnapshot>(DEFAULT_SNAPSHOT)
 
@@ -24,8 +31,8 @@ const AdminRealtimeContext = createContext<AdminMessagesSnapshot>(DEFAULT_SNAPSH
 export function AdminRealtimeProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<AdminMessagesSnapshot>(DEFAULT_SNAPSHOT)
 
-  useSSE<AdminMessagesSnapshot>('/api/admin/messages/stream', (data) => {
-    setSnapshot(data)
+  useSSE<Omit<AdminMessagesSnapshot, 'connected'>>('/api/admin/messages/stream', (data) => {
+    setSnapshot({ ...data, connected: true })
   })
 
   return <AdminRealtimeContext.Provider value={snapshot}>{children}</AdminRealtimeContext.Provider>

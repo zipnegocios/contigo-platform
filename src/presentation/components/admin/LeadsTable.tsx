@@ -69,12 +69,16 @@ function StageBadge({ stage }: { stage: PipelineStageDTO | undefined }) {
 export function LeadsTable({ leads, pipelineStages, unreadByLead = {} }: LeadsTableProps) {
   const searchParams = useSearchParams()
 
-  // Live overlay: SSR-provided unreadByLead is only as fresh as the last page
-  // load/navigation. Live values from the shared admin SSE stream, once they
-  // arrive, win over the stale SSR value for that same lead. Pure client-side
-  // state — no router.refresh() here.
-  const { byLead: liveByLead } = useAdminRealtimeMessages()
-  const effectiveUnreadByLead = { ...unreadByLead, ...liveByLead }
+  // Live source of truth: SSR-provided unreadByLead is only as fresh as the
+  // last page load/navigation, and is shown only until the shared admin SSE
+  // stream delivers its first snapshot. From then on the live byLead map is
+  // a complete sparse map ("absent = 0 unread"), so it fully replaces the
+  // SSR prop rather than being spread-merged with it — a spread-merge can
+  // only add/override keys, never remove a stale nonzero SSR entry once a
+  // lead's unread count drops to zero. Pure client-side state — no
+  // router.refresh() here.
+  const { byLead: liveByLead, connected } = useAdminRealtimeMessages()
+  const effectiveUnreadByLead = connected ? liveByLead : unreadByLead
 
   const buildHref = (leadId: string) => {
     const params = new URLSearchParams(searchParams?.toString())
