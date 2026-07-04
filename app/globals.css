@@ -1527,7 +1527,12 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  flex: 0 1 clamp(6rem, 22vh, 9rem);
+  /* Reserved space is vw-based (not vh) because the logo's own size (90vw
+     huge, ~45vw resting -- see MobileNavPanel.tsx's LOGO_REST_SCALE) is
+     width-relative; a vh-based reservation wouldn't track it. This keeps the
+     nav list positioned with room for the larger resting logo instead of
+     visually colliding with it. */
+  flex: 0 1 clamp(7rem, 40vw, 12rem);
 }
 
 /* 90vw is the logo's INTRINSIC (huge, intro-state) size -- never exceeds 90%
@@ -1573,6 +1578,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.6rem;
   min-height: 44px;
   font-size: clamp(1.25rem, 5vw, 1.75rem);
   font-weight: 500;
@@ -1583,6 +1589,12 @@
 .mnp-nav-link:hover,
 .mnp-nav-link:focus-visible {
   color: var(--contigo-primary, #E2C063);
+}
+
+.mnp-home-icon {
+  width: clamp(1.1rem, 4.5vw, 1.5rem);
+  height: clamp(1.1rem, 4.5vw, 1.5rem);
+  flex-shrink: 0;
 }
 
 .mnp-nav-item--cta {
@@ -1622,7 +1634,7 @@
     padding-bottom: clamp(1rem, 3vh, 1.5rem);
   }
   .mnp-logo-stage {
-    flex-basis: clamp(4.5rem, 16vh, 7rem);
+    flex-basis: clamp(5.5rem, 32vw, 9rem);
   }
   .mnp-nav-list {
     gap: clamp(0.5rem, 1.8vh, 1rem);

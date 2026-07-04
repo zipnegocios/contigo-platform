@@ -12,14 +12,36 @@ import { NAV_LINKS } from './nav-links'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 
 // .mnp-logo-flip is 90vw wide (its huge, intro-state size). The vertical
-// lockup's viewBox (1024x920) is far closer to square than the header's
-// horizontal one (1024x354), so shrinking to the same 1/3 fraction used
-// previously would leave a resting logo nearly as TALL as it is wide --
-// crowding the nav list below it. 1/8 targets roughly the same resting
-// HEIGHT (~10vw) as the old horizontal logo had at 1/3, keeping the
-// "small, compact, out of the way" resting footprint while still only
-// ever scaling DOWN (never up) from the 90vw intrinsic size.
-const LOGO_REST_SCALE = 1 / 8
+// lockup packs three tiers of detail (icon, wordmark, tagline) -- at the
+// smaller 1/8 rest scale tried first, that fine text became illegible.
+// 0.5 (-> ~45vw resting width) keeps the wordmark readable at rest, while
+// still only ever scaling DOWN (never up) from the 90vw intrinsic size, so
+// the crispness fix stays intact. .mnp-logo-stage's reserved height in
+// globals.css was widened to match, so this larger resting logo doesn't
+// visually collide with the nav list below it.
+const LOGO_REST_SCALE = 0.5
+
+// A minimal, single-stroke roofline glyph -- rather than a generic filled
+// house icon -- to match the site's thin gold-rule/hairline accent language
+// (.gold-rule, the nav underline hovers) instead of a stock icon-pack look.
+function HomeGlyph({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6.5 9.5V20h11V9.5" />
+      <path d="M10 20v-6h4v6" />
+    </svg>
+  )
+}
 
 interface MobileNavPanelProps {
   open: boolean
@@ -196,6 +218,12 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
 
         <nav aria-label="Mobile">
           <ul ref={navListRef} className="mnp-nav-list">
+            <li className="mnp-nav-item">
+              <Link href="/" onClick={onClose} className="mnp-nav-link" aria-label="Go to home page">
+                <HomeGlyph className="mnp-home-icon" />
+                <span>Home</span>
+              </Link>
+            </li>
             {NAV_LINKS.map((item) => (
               <li key={item.href} className="mnp-nav-item">
                 <Link href={item.href} onClick={onClose} className="mnp-nav-link">
