@@ -6,15 +6,20 @@ import { X } from 'lucide-react'
 import { gsap } from 'gsap'
 import { Button } from '@/presentation/design-system/components/atoms'
 import { IconLogo } from './IconLogo'
-import { logoPaths, LOGO_VIEWBOX } from './logo-paths'
+import { logoPathsVertical, LOGO_VERTICAL_VIEWBOX } from './logo-paths-vertical'
 import { SOCIAL_LINKS } from './social-links'
 import { NAV_LINKS } from './nav-links'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 
-// .mnp-logo-flip is 90vw wide (its huge, intro-state size). Shrinking to this
-// fraction lands the resting logo at ~30vw -- comparable to the header's own
-// compact logo footprint -- while keeping the scale animation strictly <= 1.
-const LOGO_REST_SCALE = 1 / 3
+// .mnp-logo-flip is 90vw wide (its huge, intro-state size). The vertical
+// lockup's viewBox (1024x920) is far closer to square than the header's
+// horizontal one (1024x354), so shrinking to the same 1/3 fraction used
+// previously would leave a resting logo nearly as TALL as it is wide --
+// crowding the nav list below it. 1/8 targets roughly the same resting
+// HEIGHT (~10vw) as the old horizontal logo had at 1/3, keeping the
+// "small, compact, out of the way" resting footprint while still only
+// ever scaling DOWN (never up) from the 90vw intrinsic size.
+const LOGO_REST_SCALE = 1 / 8
 
 interface MobileNavPanelProps {
   open: boolean
@@ -181,8 +186,8 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
       <div className="mnp-content">
         <div ref={logoStageRef} className="mnp-logo-stage">
           <div ref={logoFlipRef} className="mnp-logo-flip">
-            <svg viewBox={LOGO_VIEWBOX} className="mnp-logo-svg" style={{ color: 'var(--contigo-primary)' }}>
-              <g fill="currentColor">{logoPaths}</g>
+            <svg viewBox={LOGO_VERTICAL_VIEWBOX} className="mnp-logo-svg" style={{ color: 'var(--contigo-primary)' }}>
+              <g fill="currentColor">{logoPathsVertical}</g>
             </svg>
           </div>
         </div>

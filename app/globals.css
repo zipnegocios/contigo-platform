@@ -436,11 +436,13 @@
   }
   @media (max-width: 479px) {
     .accordion-item {
-      /* aspect-ratio (not a fixed height) keeps the card landscape-rectangular
-         at any phone width, instead of a px height that happened to land
-         close to a square on some screens */
+      /* aspect-ratio (not a fixed height) keeps the card the same width it
+         already has at this breakpoint while making it a tall, portrait
+         rectangle -- taller than it is wide -- at any phone width, instead
+         of a px height that happened to land close to a square on some
+         screens. */
       height: auto;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: 3 / 4;
     }
     /* Disable expand effect on mobile-sm (single card, nothing to expand against) */
     .accordion-list .accordion-item:hover {
