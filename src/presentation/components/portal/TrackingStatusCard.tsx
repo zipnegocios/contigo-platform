@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PipelineStage } from '@/core/entities/PipelineStage'
+import { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 import { getClientStageLabel } from '@/presentation/lib/clientStageLabels'
 import { useSSE } from '@/presentation/hooks/useSSE'
 
@@ -14,7 +14,7 @@ interface ClientStage {
 interface TrackingStatusCardProps {
   token: string
   clientStage: ClientStage
-  stages: PipelineStage[]
+  stages: PipelineStageDTO[]
 }
 
 /**

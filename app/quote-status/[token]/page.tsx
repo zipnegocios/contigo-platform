@@ -7,6 +7,7 @@ import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/Dr
 import { DrizzleLeadDocumentRepository } from '@/infrastructure/repositories/DrizzleLeadDocumentRepository'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
+import { toPipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 import { TrackingStatusCard } from '@/presentation/components/portal/TrackingStatusCard'
 import { TrackingDocumentsList } from '@/presentation/components/portal/TrackingDocumentsList'
 import { TrackingScheduleList } from '@/presentation/components/portal/TrackingScheduleList'
@@ -45,7 +46,7 @@ export default async function QuoteStatusPage({
     notFound()
   }
 
-  const stages = await new DrizzlePipelineStageRepository().findAll()
+  const stages = (await new DrizzlePipelineStageRepository().findAll()).map(toPipelineStageDTO)
 
   const { quote, clientStage, documents, events, messages } = panelData
 
