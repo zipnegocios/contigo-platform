@@ -1445,3 +1445,188 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   Mobile off-canvas menu (MobileNavPanel) -- full-screen bicolor panel with
+   a staggered-reveal choreography inspired by (not ported from) the
+   React Bits "StaggeredMenu" pattern. Prefix: .mnp-* (Mobile Nav Panel).
+   ========================================================================== */
+
+.mnp-panel {
+  position: fixed;
+  inset: 0;
+  width: 100dvw;
+  height: 100dvh;
+  z-index: 150; /* above header (100) and the old drawer's 105/110 -- this
+                   panel supplies its own in-content close button, so it
+                   doesn't need to stay below the header's toggle button. */
+  overflow: hidden; /* never scroll internally -- fluid clamp() sizing below
+                        is responsible for making all content fit. */
+  pointer-events: none;
+}
+
+.mnp-panel[aria-hidden='false'] {
+  pointer-events: auto;
+}
+
+.mnp-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 0%, var(--petrol-800, #0D3C4C) 0%, var(--petrol-950, #051E27) 65%);
+  z-index: 0;
+}
+
+.mnp-watermark {
+  position: absolute;
+  right: clamp(-2rem, -4vw, -1rem);
+  bottom: clamp(-2rem, -4vw, -1rem);
+  width: clamp(10rem, 45vw, 22rem);
+  height: auto;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mnp-close {
+  position: absolute;
+  top: clamp(1rem, 3vh, 1.75rem);
+  right: clamp(1rem, 4vw, 2rem);
+  z-index: 3;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-400, #E2C063);
+}
+
+.mnp-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(3.5rem, 9vh, 5rem) clamp(1.25rem, 6vw, 3rem) clamp(1.25rem, 4vh, 2rem);
+  box-sizing: border-box;
+}
+
+/* Perspective wrapper for the 3D flip -- same convention as
+   .service-flip-perspective / .service-flip-inner (FlippableServiceCard.tsx):
+   perspective on the outer wrapper, preserve-3d + the rotating transform on
+   the inner. .mnp-logo-stage reserves layout space but does NOT clip -- the
+   scale-transform "enormous" state is meant to visually bleed past this small
+   box; only .mnp-panel's own overflow:hidden (the true screen edge) clips it. */
+.mnp-logo-stage {
+  perspective: 1600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 0 1 clamp(6rem, 22vh, 9rem);
+}
+
+.mnp-logo-flip {
+  transform-style: preserve-3d;
+  width: clamp(11rem, 32vw, 16rem);
+}
+
+.mnp-logo-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.mnp-rule {
+  width: 56px;
+  height: 1px;
+  background-color: var(--gold-400, #E2C063);
+  opacity: 0.7;
+}
+
+.mnp-nav-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 2.5vh, 1.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mnp-nav-item {
+  opacity: 0; /* GSAP-driven; avoids a flash of visible content before the
+                 useLayoutEffect's initial gsap.set runs */
+}
+
+.mnp-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  font-weight: 500;
+  color: var(--neutral-50, #FAF6F0);
+  transition: color 0.25s ease;
+}
+
+.mnp-nav-link:hover,
+.mnp-nav-link:focus-visible {
+  color: var(--contigo-primary, #E2C063);
+}
+
+.mnp-nav-item--cta {
+  margin-top: clamp(0.5rem, 1.5vh, 1rem);
+}
+
+.mnp-cta-btn {
+  width: clamp(12rem, 60vw, 16rem);
+}
+
+.mnp-socials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 3vw, 1.25rem);
+  opacity: 0; /* GSAP-driven, same FOUC guard as .mnp-nav-item */
+}
+
+.mnp-social-link {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+/* Short-viewport safety net (iPhone SE class, ~568-667px tall): tighten the
+   clamp() PREFERRED values further so five nav rows + footer socials + top
+   padding never approach 100dvh. Floors/ceilings above already guard against
+   overflow; this only nudges the middle values down on genuinely short screens. */
+@media (max-height: 700px) {
+  .mnp-content {
+    padding-top: clamp(2.5rem, 6vh, 3.5rem);
+    padding-bottom: clamp(1rem, 3vh, 1.5rem);
+  }
+  .mnp-logo-stage {
+    flex-basis: clamp(4.5rem, 16vh, 7rem);
+  }
+  .mnp-nav-list {
+    gap: clamp(0.5rem, 1.8vh, 1rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mnp-nav-item,
+  .mnp-socials {
+    opacity: 1; /* belt-and-suspenders CSS fallback matching the pattern
+                   already used in the .service-flip-inner reduced-motion block */
+  }
+}

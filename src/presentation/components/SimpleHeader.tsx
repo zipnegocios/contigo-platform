@@ -7,12 +7,8 @@ import { Button } from '@/presentation/design-system/components/atoms'
 import { logoPaths, LOGO_VIEWBOX } from './logo-paths'
 import { ContactInfoModal } from './ContactInfoModal'
 import { QuoteFormModal } from './QuoteFormModal'
-
-const NAV_LINKS = [
-  { label: 'Services', href: '/services' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'About', href: '/about' },
-]
+import { MobileNavPanel } from './MobileNavPanel'
+import { NAV_LINKS } from './nav-links'
 
 export function SimpleHeader() {
   const [scrolled, setScrolled] = useState(false)
@@ -129,60 +125,18 @@ export function SimpleHeader() {
         </div>
       </header>
 
-      {/* Mobile drawer */}
-      <div
-        className={`fixed inset-y-0 right-0 z-[110] w-80 transition-transform duration-500 lg:hidden ${
-          mobileOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        style={{
-          backgroundColor: 'var(--contigo-background)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
+      <MobileNavPanel
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        onContactClick={() => {
+          setMobileOpen(false)
+          setContactModalOpen(true)
         }}
-      >
-        <div className="flex flex-col pt-32 px-8 gap-6 sm:pt-24">
-          {NAV_LINKS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className="text-left min-h-[44px] flex items-center text-fluid-lg font-medium transition-colors hover:text-contigo-primary"
-              style={{ color: 'var(--contigo-foreground)' }}
-            >
-              {item.label}
-            </Link>
-          ))}
-          <button
-            onClick={() => {
-              setMobileOpen(false)
-              setContactModalOpen(true)
-            }}
-            className="text-left min-h-[44px] flex items-center text-fluid-lg font-medium transition-colors hover:text-contigo-primary"
-            style={{ color: 'var(--contigo-foreground)' }}
-          >
-            Contact
-          </button>
-          <Button
-            onClick={() => {
-              setMobileOpen(false)
-              setQuoteModalOpen(true)
-            }}
-            variant="primary"
-            className="mt-4"
-            style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
-          >
-            Request a Quote
-          </Button>
-        </div>
-      </div>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-[105] bg-black/40 lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+        onQuoteClick={() => {
+          setMobileOpen(false)
+          setQuoteModalOpen(true)
+        }}
+      />
 
       <ContactInfoModal open={contactModalOpen} onOpenChange={setContactModalOpen} />
       <QuoteFormModal open={quoteModalOpen} onOpenChange={setQuoteModalOpen} />
