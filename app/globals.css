@@ -415,11 +415,13 @@
     overflow: visible;
   }
 
-  /* Mobile: blobs más pequeños y sutiles (CSS blur es barato en GPU) */
+  /* Mobile: blobs más tenues (el tamaño ya es fluido vía clamp() en cada .blob-N,
+     así que aquí solo se ajusta la opacidad — ya no depende de un breakpoint fijo
+     que pudiera desincronizarse con el tamaño real del viewport) */
   @media (max-width: 768px) {
-    .blob-1 { width: 260px; height: 260px; opacity: 0.75; }
-    .blob-2 { width: 190px; height: 190px; opacity: 0.65; }
-    .blob-3 { width: 160px; height: 160px; opacity: 0.55; }
+    .blob-1 { opacity: 0.75; }
+    .blob-2 { opacity: 0.65; }
+    .blob-3 { opacity: 0.55; }
   }
 
   /*
@@ -453,8 +455,8 @@
   }
 
   .blob-1 {
-    width: 400px;
-    height: 400px;
+    width: clamp(220px, 55vw, 400px);
+    height: clamp(220px, 55vw, 400px);
     background: var(--gold-400);
     top: -40px;
     left: -40px;
@@ -462,8 +464,8 @@
   }
 
   .blob-2 {
-    width: 300px;
-    height: 300px;
+    width: clamp(160px, 40vw, 300px);
+    height: clamp(160px, 40vw, 300px);
     background: var(--gold-500);
     top: 20%;
     right: -30px;
@@ -471,8 +473,8 @@
   }
 
   .blob-3 {
-    width: 250px;
-    height: 250px;
+    width: clamp(140px, 35vw, 250px);
+    height: clamp(140px, 35vw, 250px);
     background: var(--gold-700);
     bottom: 10%;
     left: 10%;
