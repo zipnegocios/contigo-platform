@@ -1,36 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Bell } from 'lucide-react'
-
-const POLL_INTERVAL_MS = 60_000
+import { useAdminRealtimeMessages } from '@/presentation/providers/AdminRealtimeProvider'
 
 export function AdminMessagesBell() {
-  const [total, setTotal] = useState(0)
-
-  useEffect(() => {
-    let cancelled = false
-
-    const loadUnread = () => {
-      fetch('/api/admin/messages/unread')
-        .then((res) => res.json())
-        .then((json) => {
-          if (!cancelled) setTotal(json.total ?? 0)
-        })
-        .catch(() => {
-          // Silent — the bell just won't update this cycle.
-        })
-    }
-
-    loadUnread()
-    const interval = setInterval(loadUnread, POLL_INTERVAL_MS)
-
-    return () => {
-      cancelled = true
-      clearInterval(interval)
-    }
-  }, [])
+  const { total } = useAdminRealtimeMessages()
 
   return (
     <Link

@@ -23,6 +23,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
+import { useAdminRealtimeMessages } from '@/presentation/providers/AdminRealtimeProvider'
 
 type LeadRow = {
   id: string
@@ -400,6 +401,13 @@ export function LeadsKanban({ leads, onLeadsChange, pipelineStages, unreadByLead
   const [stages, setStages] = useState<PipelineStageDTO[]>(pipelineStages)
   const [showAddModal, setShowAddModal] = useState(false)
 
+  // Live overlay: SSR-provided unreadByLead is only as fresh as the last page
+  // load/navigation. Live values from the shared admin SSE stream, once they
+  // arrive, win over the stale SSR value for that same lead. Pure client-side
+  // state — no router.refresh() here, so in-progress drags are never disrupted.
+  const { byLead: liveByLead } = useAdminRealtimeMessages()
+  const effectiveUnreadByLead = { ...unreadByLead, ...liveByLead }
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -549,7 +557,7 @@ export function LeadsKanban({ leads, onLeadsChange, pipelineStages, unreadByLead
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onRename={handleRename}
-                unreadByLead={unreadByLead}
+                unreadByLead={effectiveUnreadByLead}
               />
             ))}
 

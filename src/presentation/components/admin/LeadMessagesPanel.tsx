@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
 import { Badge } from '@/presentation/components/ui/badge'
+import { useSSE } from '@/presentation/hooks/useSSE'
 import type { LeadMessageDTO } from '@/presentation/types/LeadMessageDTO'
 
 interface LeadMessagesPanelProps {
@@ -43,6 +44,13 @@ export function LeadMessagesPanel({ leadId }: LeadMessagesPanelProps) {
     loadMessages()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leadId])
+
+  // Dedicated per-lead SSE connection: purely an additional live-update path
+  // layered on top of the manual loadMessages() calls above/below — it just
+  // silently updates `messages`, no loading spinner, no toast.
+  useSSE<{ messages: any[] }>(`/api/admin/leads/${leadId}/messages/stream`, (data) => {
+    setMessages((data.messages ?? []).map(mapMessage))
+  })
 
   const sendMessage = async () => {
     const body = draft.trim()

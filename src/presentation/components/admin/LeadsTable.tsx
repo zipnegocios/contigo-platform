@@ -13,6 +13,7 @@ import {
 } from '@/presentation/components/ui/table'
 import { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
+import { useAdminRealtimeMessages } from '@/presentation/providers/AdminRealtimeProvider'
 
 interface LeadsTableProps {
   leads: Array<{
@@ -68,6 +69,13 @@ function StageBadge({ stage }: { stage: PipelineStageDTO | undefined }) {
 export function LeadsTable({ leads, pipelineStages, unreadByLead = {} }: LeadsTableProps) {
   const searchParams = useSearchParams()
 
+  // Live overlay: SSR-provided unreadByLead is only as fresh as the last page
+  // load/navigation. Live values from the shared admin SSE stream, once they
+  // arrive, win over the stale SSR value for that same lead. Pure client-side
+  // state — no router.refresh() here.
+  const { byLead: liveByLead } = useAdminRealtimeMessages()
+  const effectiveUnreadByLead = { ...unreadByLead, ...liveByLead }
+
   const buildHref = (leadId: string) => {
     const params = new URLSearchParams(searchParams?.toString())
     params.set('leadId', leadId)
@@ -109,7 +117,7 @@ export function LeadsTable({ leads, pipelineStages, unreadByLead = {} }: LeadsTa
                 <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>
                   <div className="flex items-center gap-1.5">
                     <span>{lead.quote?.name || 'Unknown'}</span>
-                    {unreadByLead[lead.id] > 0 && (
+                    {effectiveUnreadByLead[lead.id] > 0 && (
                       <span
                         className="flex-shrink-0 flex items-center justify-center rounded-full text-[10px] font-bold px-1.5"
                         style={{
@@ -118,9 +126,9 @@ export function LeadsTable({ leads, pipelineStages, unreadByLead = {} }: LeadsTa
                           backgroundColor: 'rgba(226,192,99,0.2)',
                           color: '#A08040',
                         }}
-                        title={`${unreadByLead[lead.id]} unread message${unreadByLead[lead.id] === 1 ? '' : 's'}`}
+                        title={`${effectiveUnreadByLead[lead.id]} unread message${effectiveUnreadByLead[lead.id] === 1 ? '' : 's'}`}
                       >
-                        {unreadByLead[lead.id]}
+                        {effectiveUnreadByLead[lead.id]}
                       </span>
                     )}
                   </div>
