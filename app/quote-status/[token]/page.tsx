@@ -11,7 +11,6 @@ import { TrackingStatusCard } from '@/presentation/components/portal/TrackingSta
 import { TrackingDocumentsList } from '@/presentation/components/portal/TrackingDocumentsList'
 import { TrackingScheduleList } from '@/presentation/components/portal/TrackingScheduleList'
 import { TrackingMessages } from '@/presentation/components/portal/TrackingMessages'
-import { TrackingBell } from '@/presentation/components/portal/TrackingBell'
 
 // Token URLs are capability links shared privately (e.g. via email) — never
 // index them in search engines.
@@ -48,7 +47,7 @@ export default async function QuoteStatusPage({
 
   const stages = await new DrizzlePipelineStageRepository().findAll()
 
-  const { quote, clientStage, documents, events, messages, unreadStaffMessages } = panelData
+  const { quote, clientStage, documents, events, messages } = panelData
 
   return (
     <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
@@ -67,7 +66,6 @@ export default async function QuoteStatusPage({
           >
             Tracking
           </span>
-          <TrackingBell token={token} initialCount={unreadStaffMessages} />
         </div>
         <h1
           className="text-fluid-5xl font-semibold leading-none mb-4"
@@ -128,13 +126,13 @@ export default async function QuoteStatusPage({
         </div>
 
         {/* Status + timeline */}
-        <TrackingStatusCard clientStage={clientStage} stages={stages} />
+        <TrackingStatusCard token={token} clientStage={clientStage} stages={stages} />
 
         {/* Documents */}
         <TrackingDocumentsList token={token} documents={documents} attachmentUrls={quote.attachmentUrls} />
 
         {/* Schedule */}
-        <TrackingScheduleList events={events} />
+        <TrackingScheduleList token={token} events={events} />
 
         {/* Messages */}
         <TrackingMessages token={token} messages={messages} />

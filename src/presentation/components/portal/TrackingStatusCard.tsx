@@ -1,12 +1,19 @@
+'use client'
+
+import { useState } from 'react'
 import { PipelineStage } from '@/core/entities/PipelineStage'
 import { getClientStageLabel } from '@/presentation/lib/clientStageLabels'
+import { useSSE } from '@/presentation/hooks/useSSE'
+
+interface ClientStage {
+  key: string
+  label: string
+  description: string
+}
 
 interface TrackingStatusCardProps {
-  clientStage: {
-    key: string
-    label: string
-    description: string
-  }
+  token: string
+  clientStage: ClientStage
   stages: PipelineStage[]
 }
 
@@ -17,8 +24,18 @@ interface TrackingStatusCardProps {
  *
  * If the lead's current stage IS the `lost` stage, the happy-path timeline
  * doesn't apply, so we render a simpler "closed" state instead.
+ *
+ * `clientStage` is only the SSR-provided initial value — the component
+ * reconciles it live via SSE (`status/stream`). `stages` is static and does
+ * not come from the stream.
  */
-export function TrackingStatusCard({ clientStage, stages }: TrackingStatusCardProps) {
+export function TrackingStatusCard({ token, clientStage: initialClientStage, stages }: TrackingStatusCardProps) {
+  const [clientStage, setClientStage] = useState<ClientStage>(initialClientStage)
+
+  useSSE<ClientStage>(`/api/quote-status/${token}/status/stream`, (data) => {
+    setClientStage(data)
+  })
+
   const currentStage = stages.find((stage) => stage.key === clientStage.key) ?? null
   const isClosed = currentStage?.terminalKind === 'lost'
 

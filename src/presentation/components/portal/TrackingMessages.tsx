@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useSSE } from '@/presentation/hooks/useSSE'
 
 interface MessageItem {
   id: string
@@ -91,6 +92,37 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
+
+  // Passive live updates. Unlike the mount-time fetch above, an SSE snapshot
+  // must NEVER trigger the read-marking side effect — only an explicit
+  // "user opened the thread" action does that.
+  //
+  // Race to guard against: a temp-id optimistic message can be appended
+  // locally (in handleSend) before its POST request's INSERT has actually
+  // committed to the database. If an SSE snapshot lands in that narrow
+  // window, it won't yet include the just-sent message. Wholesale-replacing
+  // `messages` with that snapshot would make the user's own message
+  // disappear until the next tick catches up. To avoid that, we treat the
+  // incoming snapshot as authoritative EXCEPT for any locally pending
+  // `temp-` message that isn't yet represented in it (matched by body, since
+  // a temp message has no real id to match on) — those are preserved by
+  // appending them back on top of the snapshot.
+  useSSE<{ messages: MessageItem[]; unreadStaffMessages: number }>(
+    `/api/quote-status/${token}/messages/stream`,
+    (data) => {
+      setMessages((prev) => {
+        const incoming = data.messages
+        const pendingTemp = prev.filter((m) => m.id.startsWith('temp-'))
+        if (pendingTemp.length === 0) {
+          return incoming
+        }
+        const stillPending = pendingTemp.filter(
+          (temp) => !incoming.some((m) => m.authorType === 'client' && m.body === temp.body),
+        )
+        return stillPending.length > 0 ? [...incoming, ...stillPending] : incoming
+      })
+    },
+  )
 
   useEffect(() => {
     return () => {

@@ -1,4 +1,8 @@
+'use client'
+
+import { useState } from 'react'
 import { LeadEventType } from '@/core/entities/LeadEvent'
+import { useSSE } from '@/presentation/hooks/useSSE'
 
 interface EventItem {
   id: string
@@ -8,7 +12,13 @@ interface EventItem {
   location: string | null
 }
 
+// The schedule/stream SSE payload includes an extra `updatedAt` field used
+// internally for server-side diffing — it isn't part of the component's own
+// EventItem shape and is dropped on receipt.
+type SSEEventItem = EventItem & { updatedAt: string }
+
 interface TrackingScheduleListProps {
+  token: string
   events: EventItem[]
 }
 
@@ -48,7 +58,13 @@ function EventRow({ event }: { event: EventItem }) {
   )
 }
 
-export function TrackingScheduleList({ events }: TrackingScheduleListProps) {
+export function TrackingScheduleList({ token, events: initialEvents }: TrackingScheduleListProps) {
+  const [events, setEvents] = useState<EventItem[]>(initialEvents)
+
+  useSSE<SSEEventItem[]>(`/api/quote-status/${token}/schedule/stream`, (data) => {
+    setEvents(data.map(({ updatedAt, ...rest }) => rest))
+  })
+
   const now = Date.now()
   const upcoming = events
     .filter((e) => new Date(e.scheduledAt).getTime() >= now)
