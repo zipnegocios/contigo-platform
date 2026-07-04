@@ -137,7 +137,7 @@ export default async function QuoteStatusPage({
         <div className="text-center pb-12">
           <p className="mb-6" style={{ color: 'var(--atelier-ink)' }}>
             Questions? Contact us directly at{' '}
-            <strong>+61 406 274 096/strong> or <strong>contact@contigoconstructions.com.au</strong>
+            <strong>+61 406 274 096</strong> or <strong>contact@contigoconstructions.com.au</strong>
           </p>
           <a href="/" className="inline-flex btn-primary">
             Back to Home

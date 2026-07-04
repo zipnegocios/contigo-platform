@@ -26,6 +26,7 @@ export function LeadMessagesPanel({ leadId }: LeadMessagesPanelProps) {
   const [sending, setSending] = useState(false)
 
   const loadMessages = async () => {
+    setLoading(true)
     try {
       const res = await fetch(`/api/admin/leads/${leadId}/messages`)
       if (!res.ok) throw new Error()
@@ -33,26 +34,14 @@ export function LeadMessagesPanel({ leadId }: LeadMessagesPanelProps) {
       setMessages((json.messages ?? []).map(mapMessage))
     } catch {
       toast.error('Could not load messages')
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    fetch(`/api/admin/leads/${leadId}/messages`)
-      .then((res) => res.json())
-      .then((json) => {
-        if (!cancelled) setMessages((json.messages ?? []).map(mapMessage))
-      })
-      .catch(() => {
-        if (!cancelled) toast.error('Could not load messages')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
+    loadMessages()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leadId])
 
   const sendMessage = async () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { Phone, MapPin, FileText, ArrowRight, Mail, StickyNote, CalendarClock, type LucideIcon } from 'lucide-react'
+import { Phone, MapPin, FileText, ArrowRight, Mail, StickyNote, CalendarClock, MessageSquare, type LucideIcon } from 'lucide-react'
 import type { LeadActivityDTO } from '@/presentation/types/LeadActivityDTO'
 
 const ICONS: Record<string, LucideIcon> = {
@@ -17,6 +17,8 @@ const ICONS: Record<string, LucideIcon> = {
   document_uploaded: FileText,
   document_sent: FileText,
   email_sent: Mail,
+  message_received: MessageSquare,
+  message_sent: MessageSquare,
   note: StickyNote,
 }
 
@@ -33,6 +35,8 @@ const LABELS: Record<string, (payload: Record<string, unknown>) => string> = {
   event_cancelled: () => 'Event cancelled',
   document_uploaded: (p) => `Document received: ${p.fileName}`,
   document_sent: (p) => `Document sent to client: ${p.fileName}`,
+  message_received: () => 'Client sent a message',
+  message_sent: () => 'Staff replied to client',
   note: (p) => (p.text as string) ?? 'Note added',
 }
 

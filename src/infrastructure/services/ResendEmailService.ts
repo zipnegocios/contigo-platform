@@ -104,7 +104,7 @@ export class ResendEmailService implements IEmailService {
 
   async sendAdminNotification(quote: Quote): Promise<void> {
     const resend = getResend()
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@contigo-constructions.com.au'
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@contigoconstructions.com.au'
 
     // EMAIL TEMPLATE — hardcoded colors for email client compatibility
     // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
@@ -162,7 +162,7 @@ export class ResendEmailService implements IEmailService {
 
   async sendNewMessageNotificationToAdmin(lead: Lead, quote: Quote): Promise<void> {
     const resend = getResend()
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@contigo-constructions.com.au'
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@contigoconstructions.com.au'
     const leadUrl = `${this.siteUrl}/admin/leads/${lead.id}`
 
     // EMAIL TEMPLATE — hardcoded colors for email client compatibility
