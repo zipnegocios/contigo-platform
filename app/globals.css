@@ -458,7 +458,7 @@
     background: var(--gold-400);
     top: -40px;
     left: -40px;
-    animation-duration: 20s;
+    animation-duration: 14s;
   }
 
   .blob-2 {
@@ -467,7 +467,7 @@
     background: var(--gold-500);
     top: 20%;
     right: -30px;
-    animation-duration: 25s;
+    animation-duration: 17s;
   }
 
   .blob-3 {
@@ -476,7 +476,7 @@
     background: var(--gold-700);
     bottom: 10%;
     left: 10%;
-    animation-duration: 22s;
+    animation-duration: 15s;
   }
 
   .form-overlay {
