@@ -37,6 +37,10 @@ function getResend(): Resend {
 export class ResendEmailService implements IEmailService {
   private siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
+  private getFromAddress(): string {
+    return process.env.RESEND_FROM_EMAIL || 'noreply@contigoconstructions.com.au'
+  }
+
   async sendQuoteConfirmation(quote: Quote): Promise<void> {
     const resend = getResend()
     const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
@@ -90,7 +94,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: 'noreply@contigo-constructions.com.au',
+      from: this.getFromAddress(),
       to: quote.email.toString(),
       subject: 'Your Quote Request - Contigo Constructions',
       html: htmlContent,
@@ -148,7 +152,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: 'noreply@contigo-constructions.com.au',
+      from: this.getFromAddress(),
       to: adminEmail,
       subject: `[New Quote] ${quote.service} - ${quote.name}`,
       html: htmlContent,
