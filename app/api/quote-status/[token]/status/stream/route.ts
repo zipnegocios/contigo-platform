@@ -2,7 +2,8 @@ import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuo
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { createSSEStream } from '@/infrastructure/realtime/createSSEStream'
-import { GetLeadClientStageUseCase, ClientStageDTO } from '@/application/use-cases/portal/GetLeadClientStageUseCase'
+import { ClientStageDTO } from '@/application/use-cases/portal/GetLeadClientStageUseCase'
+import { getClientStageLabel } from '@/presentation/lib/clientStageLabels'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,23 +17,34 @@ export async function GET(
   try {
     const { token } = await params
 
-    const getLeadClientStageUseCase = new GetLeadClientStageUseCase(
-      new DrizzleQuoteRepository(),
-      new DrizzleLeadRepository(),
-      new DrizzlePipelineStageRepository(),
-    )
-
-    const clientStage = await getLeadClientStageUseCase.execute(token)
-    if (!clientStage) {
+    const quote = await new DrizzleQuoteRepository().findByToken(token)
+    if (!quote) {
       return Response.json({ error: 'Not found' }, { status: 404 })
     }
 
+    const lead = await new DrizzleLeadRepository().findByQuoteId(quote.id)
+    if (!lead) {
+      return Response.json({ error: 'Not found' }, { status: 404 })
+    }
+
+    const pipelineStageRepository = new DrizzlePipelineStageRepository()
+
+    // Quote and lead are resolved once above and never re-fetched. Only the
+    // pipeline stage can change over the life of a connection (an admin may
+    // move the lead while the SSE connection is open), so this is the only
+    // lookup `fetchSnapshot` repeats per tick.
+    const getStageSnapshot = async (): Promise<ClientStageDTO> => {
+      const stage = await pipelineStageRepository.findById(lead.stageId)
+      const clientStageMeta = getClientStageLabel(stage?.key ?? '')
+      return {
+        key: stage?.key ?? '',
+        label: clientStageMeta.label,
+        description: clientStageMeta.description,
+      }
+    }
+
     return createSSEStream<ClientStageDTO>(request, {
-      // The use case re-resolves the token every tick here — that's the entire
-      // point of this route existing separately from the full panel use case,
-      // to keep each tick cheap: just quote+lead+stage lookups, no
-      // documents/events/messages.
-      fetchSnapshot: () => getLeadClientStageUseCase.execute(token) as Promise<ClientStageDTO>,
+      fetchSnapshot: getStageSnapshot,
       hasChanged: (prev, next) => !prev || prev.key !== next.key || prev.label !== next.label,
       serialize: (data) => JSON.stringify(data),
     })

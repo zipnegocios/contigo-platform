@@ -43,8 +43,8 @@ export async function GET(
         if (!prev) return true // shouldn't happen (createSSEStream always sends the first snapshot unconditionally) but keep this defensive
         if (prev.messages.length !== next.messages.length) return true
         if (prev.unreadStaffMessages !== next.unreadStaffMessages) return true
-        const prevLast = prev.messages[prev.messages.length - 1]
-        const nextLast = next.messages[next.messages.length - 1]
+        const prevLast = prev.messages[0]
+        const nextLast = next.messages[0]
         return prevLast?.id !== nextLast?.id
       },
       serialize: (data) => JSON.stringify(data),
