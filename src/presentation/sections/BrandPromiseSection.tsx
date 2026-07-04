@@ -23,6 +23,16 @@ export default function BrandPromiseSection() {
       return;
     }
 
+    // Narrow viewports: .flip-text-block already sits close to the section's
+    // padded edge (see globals.css .flip-section padding: 10vh 4vw), and this
+    // timeline is scrubbed to scroll position — not a one-off transient — so
+    // the full -50/+50 desktop travel held a real horizontal overflow for as
+    // long as the user scrolled through the section's enter/exit range. Use a
+    // smaller travel distance on mobile so the block never leaves the viewport.
+    const isNarrow = window.matchMedia('(max-width: 640px)').matches;
+    const enterX = isNarrow ? 20 : 50;
+    const exitX = isNarrow ? 12 : 20;
+
     const ctx = gsap.context(() => {
       // Symmetric in/out: the trigger spans exactly one section-height of
       // scroll (top-at-center -> bottom-at-center), so the section is fully
@@ -47,8 +57,8 @@ export default function BrandPromiseSection() {
       // construction narrative, not just a generic reveal. Letters lift +
       // sharpen into focus rather than flip, with each one's own stagger
       // window fitted inside HALF so it fully resolves before exit begins. ──
-      tl.from('.flip-text-block.left', { x: -50, opacity: 0, filter: 'blur(6px)', duration: HALF, ease: 'power3.out' }, 0);
-      tl.from('.flip-text-block.right', { x: 50, opacity: 0, filter: 'blur(6px)', duration: HALF, ease: 'power3.out' }, 0);
+      tl.from('.flip-text-block.left', { x: -enterX, opacity: 0, filter: 'blur(6px)', duration: HALF, ease: 'power3.out' }, 0);
+      tl.from('.flip-text-block.right', { x: enterX, opacity: 0, filter: 'blur(6px)', duration: HALF, ease: 'power3.out' }, 0);
 
       tl.to(leftBar, { clipPath: OPEN_CLIP, duration: 1, ease: 'power2.out' }, 0);
       tl.to(rightBar, { clipPath: OPEN_CLIP, duration: 1, ease: 'power2.out' }, 0);
@@ -69,8 +79,8 @@ export default function BrandPromiseSection() {
 
       // ── Exit: deliberately subtler than the entrance — smaller lift,
       // lighter blur, faster — the section is leaving, not re-arriving. ──
-      tl.to('.flip-text-block.left', { x: -20, opacity: 0, filter: 'blur(4px)', duration: 1.2, ease: 'power2.in' }, HALF);
-      tl.to('.flip-text-block.right', { x: 20, opacity: 0, filter: 'blur(4px)', duration: 1.2, ease: 'power2.in' }, HALF);
+      tl.to('.flip-text-block.left', { x: -exitX, opacity: 0, filter: 'blur(4px)', duration: 1.2, ease: 'power2.in' }, HALF);
+      tl.to('.flip-text-block.right', { x: exitX, opacity: 0, filter: 'blur(4px)', duration: 1.2, ease: 'power2.in' }, HALF);
 
       tl.to(
         letters,
