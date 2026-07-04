@@ -4,9 +4,9 @@ import { IPipelineStageRepository } from '@/core/repositories/IPipelineStageRepo
 import { ILeadDocumentRepository } from '@/core/repositories/ILeadDocumentRepository'
 import { ILeadEventRepository } from '@/core/repositories/ILeadEventRepository'
 import { ILeadMessageRepository } from '@/core/repositories/ILeadMessageRepository'
-import { getClientStageLabel } from '@/presentation/lib/clientStageLabels'
 import { LeadDocumentCategory } from '@/core/entities/LeadDocument'
 import { LeadEventType } from '@/core/entities/LeadEvent'
+import { GetLeadClientStageUseCase } from '@/application/use-cases/portal/GetLeadClientStageUseCase'
 
 export interface TrackingPanelDTO {
   quote: {
@@ -60,17 +60,18 @@ export class GetTrackingPanelDataUseCase {
     private leadDocumentRepository: ILeadDocumentRepository,
     private leadEventRepository: ILeadEventRepository,
     private leadMessageRepository: ILeadMessageRepository,
+    private getLeadClientStageUseCase: GetLeadClientStageUseCase,
   ) {}
 
   async execute(token: string): Promise<TrackingPanelDTO | null> {
+    const clientStage = await this.getLeadClientStageUseCase.execute(token)
+    if (!clientStage) return null
+
     const quote = await this.quoteRepository.findByToken(token)
     if (!quote) return null
 
     const lead = await this.leadRepository.findByQuoteId(quote.id)
     if (!lead) return null
-
-    const stage = await this.pipelineStageRepository.findById(lead.stageId)
-    const clientStageMeta = getClientStageLabel(stage?.key ?? '')
 
     const [allDocuments, allEvents, allMessages, unreadStaffMessages] = await Promise.all([
       this.leadDocumentRepository.findByLeadId(lead.id),
@@ -117,11 +118,7 @@ export class GetTrackingPanelDataUseCase {
         createdAt: quote.createdAt,
         attachmentUrls: quote.attachmentUrls,
       },
-      clientStage: {
-        key: stage?.key ?? '',
-        label: clientStageMeta.label,
-        description: clientStageMeta.description,
-      },
+      clientStage,
       documents,
       events,
       messages,

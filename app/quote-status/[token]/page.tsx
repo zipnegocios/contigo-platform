@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { GetTrackingPanelDataUseCase } from '@/application/use-cases/portal/GetTrackingPanelDataUseCase'
+import { GetLeadClientStageUseCase } from '@/application/use-cases/portal/GetLeadClientStageUseCase'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
@@ -32,6 +33,11 @@ export default async function QuoteStatusPage({
     new DrizzleLeadDocumentRepository(),
     new DrizzleLeadEventRepository(),
     new DrizzleLeadMessageRepository(),
+    new GetLeadClientStageUseCase(
+      new DrizzleQuoteRepository(),
+      new DrizzleLeadRepository(),
+      new DrizzlePipelineStageRepository(),
+    ),
   )
 
   const panelData = await useCase.execute(token)

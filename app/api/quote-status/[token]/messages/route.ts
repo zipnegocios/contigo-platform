@@ -5,20 +5,11 @@ import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/Driz
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
 import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
 import { PostClientMessageUseCase } from '@/application/use-cases/portal/PostClientMessageUseCase'
-import { LeadMessage } from '@/core/entities/LeadMessage'
+import { toPublicMessageDTO } from '@/presentation/types/PublicMessageDTO'
 
 const PostMessageSchema = z.object({
   body: z.string(),
 })
-
-function toPublicMessageDTO(message: LeadMessage) {
-  return {
-    id: message.id,
-    authorType: message.authorType,
-    body: message.body,
-    createdAt: message.createdAt,
-  }
-}
 
 // Public, unauthenticated endpoint reached via a capability URL (tracking token).
 // Every failure case below returns 404 — never 403 — so an attacker probing
