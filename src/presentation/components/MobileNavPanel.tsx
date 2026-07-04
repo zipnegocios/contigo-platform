@@ -11,6 +11,11 @@ import { SOCIAL_LINKS } from './social-links'
 import { NAV_LINKS } from './nav-links'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 
+// .mnp-logo-flip is 90vw wide (its huge, intro-state size). Shrinking to this
+// fraction lands the resting logo at ~30vw -- comparable to the header's own
+// compact logo footprint -- while keeping the scale animation strictly <= 1.
+const LOGO_REST_SCALE = 1 / 3
+
 interface MobileNavPanelProps {
   open: boolean
   onClose: () => void
@@ -25,22 +30,44 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
   const navListRef = useRef<HTMLUListElement>(null)
   const socialsRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
-  const prevBodyOverflowRef = useRef('')
+  const prevBodyStyleRef = useRef({ position: '', top: '', width: '', overflow: '' })
+  const scrollYRef = useRef(0)
 
   // NOTE: this is a TRANSIENT inline style toggle on `document.body`, scoped to this
   // component's open/close lifecycle -- NOT a global CSS rule. It is unrelated to, and must
   // never be merged with, the permanent `overflow-x: hidden` rule that lives on `html` in
   // app/globals.css (~line 28). That comment documents a real double-scrollbar bug caused by
   // stacking `overflow-x: hidden` on BOTH html and body permanently in the stylesheet. This
-  // effect only ever sets `overflow` on `body`, only while this full-screen panel is open, and
-  // always restores body's prior inline value on cleanup -- it cannot recreate that bug
-  // because it's temporary, inline, and undoes itself.
+  // effect only ever touches `body`'s inline styles, only while this full-screen panel is open,
+  // and always restores body's prior values on cleanup -- it cannot recreate that bug because
+  // it's temporary and undoes itself.
+  //
+  // Plain `overflow: hidden` on body doesn't reliably stop touch-driven scrolling of the
+  // content behind a full-screen overlay on mobile Safari (a well-known platform quirk), so
+  // this freezes body in place with `position: fixed` at the current scroll offset -- nothing
+  // behind the panel can move no matter the input (touch, wheel, keyboard) -- and restores the
+  // exact scroll position on close.
   useEffect(() => {
     if (!open) return
-    prevBodyOverflowRef.current = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const body = document.body
+    scrollYRef.current = window.scrollY
+    prevBodyStyleRef.current = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    }
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollYRef.current}px`
+    body.style.width = '100%'
+    body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = prevBodyOverflowRef.current
+      const prev = prevBodyStyleRef.current
+      body.style.position = prev.position
+      body.style.top = prev.top
+      body.style.width = prev.width
+      body.style.overflow = prev.overflow
+      window.scrollTo(0, scrollYRef.current)
     }
   }, [open])
 
@@ -63,8 +90,8 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
             // Reset every animatable prop so the NEXT open replays the full intro
             // from scratch (huge/unrotated/invisible logo, hidden nav/socials).
             gsap.set(panelRef.current, { opacity: 1 })
-            gsap.set(logoStageRef.current, { opacity: 0, scale: 3.4 })
-            gsap.set(logoFlipRef.current, { rotateY: 0 })
+            gsap.set(logoStageRef.current, { opacity: 0 })
+            gsap.set(logoFlipRef.current, { scale: 1, rotateY: 0 })
             gsap.set(navItems, { opacity: 0, y: 28 })
             gsap.set(socialsRef.current, { opacity: 0, y: 16 })
           },
@@ -77,17 +104,25 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
         // Same pattern as BrandPromiseSection.tsx: skip the elaborate intro,
         // jump straight to end-state.
         gsap.set(panelRef.current, { opacity: 1 })
-        gsap.set(logoStageRef.current, { opacity: 1, scale: 1 })
-        gsap.set(logoFlipRef.current, { rotateY: 0 })
+        gsap.set(logoStageRef.current, { opacity: 1 })
+        gsap.set(logoFlipRef.current, { scale: LOGO_REST_SCALE, rotateY: 0 })
         gsap.set(navItems, { opacity: 1, y: 0 })
         gsap.set(socialsRef.current, { opacity: 1, y: 0 })
         return
       }
 
       // Start state (also covers the very first-ever open, before any close has run).
+      // `.mnp-logo-flip`'s own CSS width IS the "huge, dominating" 90vw size (see
+      // globals.css) -- scale starts at 1 (its natural, already-huge size) and only
+      // ever animates DOWN to LOGO_REST_SCALE. A vector SVG under a 3D transform
+      // (perspective + preserve-3d) gets composited on its own GPU layer, which
+      // browsers rasterize at the element's current size; scaling that layer UP
+      // past 1 (the old approach: small intrinsic size -> scale up to 3.4) stretches
+      // an already-rasterized texture and pixelates. Only ever scaling DOWN from an
+      // intrinsically-huge element is never blurry.
       gsap.set(panelRef.current, { opacity: 1 })
-      gsap.set(logoStageRef.current, { opacity: 0, scale: 3.4 })
-      gsap.set(logoFlipRef.current, { rotateY: 0 })
+      gsap.set(logoStageRef.current, { opacity: 0 })
+      gsap.set(logoFlipRef.current, { scale: 1, rotateY: 0 })
       gsap.set(navItems, { opacity: 0, y: 28 })
       gsap.set(socialsRef.current, { opacity: 0, y: 16 })
 
@@ -109,8 +144,10 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
       tl.to(logoFlipRef.current, { rotateY: 1080, duration: 0.65, ease: 'back.out(1.7)' }, 1.25)
 
       // PHASE 4 -- shrink + reposition: huge centered logo -> small top-center
-      // resting size, matching the header's own logo footprint.
-      tl.to(logoStageRef.current, { scale: 1, duration: 0.55, ease: 'power3.inOut' }, 1.75)
+      // resting size, matching the header's own logo footprint. Scaling DOWN
+      // (never up) keeps the rasterized 3D layer crisp -- see the comment on
+      // LOGO_REST_SCALE above.
+      tl.to(logoFlipRef.current, { scale: LOGO_REST_SCALE, duration: 0.55, ease: 'power3.inOut' }, 1.75)
 
       // PHASE 5 -- nav items stagger in, starting only once the shrink (phase 4,
       // ending at 1.75+0.55=2.30) has fully resolved -- sequential, not overlapped.
@@ -167,7 +204,13 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
               </button>
             </li>
             <li className="mnp-nav-item mnp-nav-item--cta">
-              <Button onClick={onQuoteClick} variant="primary" size="lg" className="mnp-cta-btn">
+              <Button
+                onClick={onQuoteClick}
+                variant="primary"
+                size="md"
+                className="mnp-cta-btn"
+                style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+              >
                 Request a Quote
               </Button>
             </li>

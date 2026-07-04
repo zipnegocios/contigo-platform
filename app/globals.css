@@ -1517,8 +1517,8 @@
    .service-flip-perspective / .service-flip-inner (FlippableServiceCard.tsx):
    perspective on the outer wrapper, preserve-3d + the rotating transform on
    the inner. .mnp-logo-stage reserves layout space but does NOT clip -- the
-   scale-transform "enormous" state is meant to visually bleed past this small
-   box; only .mnp-panel's own overflow:hidden (the true screen edge) clips it. */
+   logo is meant to visually bleed past this small box; only .mnp-panel's own
+   overflow:hidden (the true screen edge) clips it. */
 .mnp-logo-stage {
   perspective: 1600px;
   display: flex;
@@ -1528,17 +1528,21 @@
   flex: 0 1 clamp(6rem, 22vh, 9rem);
 }
 
+/* 90vw is the logo's INTRINSIC (huge, intro-state) size -- never exceeds 90%
+   of the screen width, and is never scaled UP past this via GSAP (see
+   MobileNavPanel.tsx's LOGO_REST_SCALE comment): scaling a 3D-transformed
+   element (preserve-3d forces GPU layer compositing) up past its own
+   rasterized size is what caused the pixelation; only scaling DOWN from an
+   already-huge intrinsic size stays crisp. */
 .mnp-logo-flip {
   transform-style: preserve-3d;
-  width: clamp(11rem, 32vw, 16rem);
+  width: 90vw;
 }
 
 .mnp-logo-svg {
   width: 100%;
   height: auto;
   display: block;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .mnp-rule {
