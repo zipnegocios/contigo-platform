@@ -8,6 +8,7 @@ import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/Dri
 import { DrizzleLeadNoteRepository } from '@/infrastructure/repositories/DrizzleLeadNoteRepository'
 import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/DrizzleLeadContactRepository'
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
+import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
 import { ChangeLeadStageUseCase } from '@/application/use-cases/leads/ChangeLeadStageUseCase'
 import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 import { toLeadDTO } from '@/presentation/types/LeadDTO'
@@ -31,13 +32,14 @@ export async function GET(
     const lead = await leadRepo.findById(params.id)
     if (!lead) return Response.json({ error: 'Lead not found' }, { status: 404 })
 
-    const [quote, events, documents, activities, notes, contacts] = await Promise.all([
+    const [quote, events, documents, activities, notes, contacts, unreadMessageCount] = await Promise.all([
       new DrizzleQuoteRepository().findById(lead.quoteId),
       new DrizzleLeadEventRepository().findByLeadId(lead.id),
       new DrizzleLeadDocumentRepository().findByLeadId(lead.id),
       new DrizzleLeadActivityRepository().findByLeadId(lead.id),
       new DrizzleLeadNoteRepository().findByLeadId(lead.id),
       new DrizzleLeadContactRepository().findByLeadId(lead.id),
+      new DrizzleLeadMessageRepository().countUnread(lead.id, 'client'),
     ])
 
     if (!quote) return Response.json({ error: 'Quote not found' }, { status: 404 })
@@ -50,6 +52,7 @@ export async function GET(
       activities: activities.map(toLeadActivityDTO),
       notes: notes.map(toLeadNoteDTO),
       contacts: contacts.map(toLeadContactDTO),
+      unreadMessageCount,
     })
   } catch (error) {
     console.error('Error fetching lead detail:', error)

@@ -15,6 +15,7 @@ import { LeadActivityTimeline } from './LeadActivityTimeline'
 import { LeadEventsPanel } from './LeadEventsPanel'
 import { LeadDocumentsPanel } from './LeadDocumentsPanel'
 import { LeadTasksPanel } from './LeadTasksPanel'
+import { LeadMessagesPanel } from './LeadMessagesPanel'
 
 interface LeadDetailTabsProps {
   lead: LeadDTO
@@ -25,6 +26,7 @@ interface LeadDetailTabsProps {
   notes: LeadNoteDTO[]
   contacts: LeadContactDTO[]
   pipelineStages: PipelineStageDTO[]
+  unreadMessageCount: number
   onStageChange?: (newStage: string) => void
   onMutated?: () => void
   onArchived?: () => void
@@ -40,6 +42,7 @@ export function LeadDetailTabs({
   notes,
   contacts: initialContacts,
   pipelineStages,
+  unreadMessageCount,
   onStageChange,
   onMutated,
   onArchived,
@@ -55,6 +58,7 @@ export function LeadDetailTabs({
         <TabsTrigger value="calls-visits">Calls & Visits ({events.length})</TabsTrigger>
         <TabsTrigger value="documents">Documents ({documents.length})</TabsTrigger>
         <TabsTrigger value="tasks">Tasks</TabsTrigger>
+        <TabsTrigger value="messages">Messages ({unreadMessageCount})</TabsTrigger>
       </TabsList>
 
       <TabsContent value="summary">
@@ -98,6 +102,10 @@ export function LeadDetailTabs({
 
       <TabsContent value="tasks">
         <LeadTasksPanel leadId={lead.id} />
+      </TabsContent>
+
+      <TabsContent value="messages">
+        <LeadMessagesPanel leadId={lead.id} />
       </TabsContent>
     </Tabs>
   )

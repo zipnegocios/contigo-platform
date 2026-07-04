@@ -20,9 +20,10 @@ interface LeadsBoardProps {
   view: string
   leads: LeadRow[]
   pipelineStages: PipelineStageDTO[]
+  unreadByLead?: Record<string, number>
 }
 
-export function LeadsBoard({ view, leads: initialLeads, pipelineStages }: LeadsBoardProps) {
+export function LeadsBoard({ view, leads: initialLeads, pipelineStages, unreadByLead = {} }: LeadsBoardProps) {
   const [leads, setLeads] = useState<LeadRow[]>(initialLeads)
 
   const handleStageChange = (leadId: string, newStageId: string) => {
@@ -38,9 +39,9 @@ export function LeadsBoard({ view, leads: initialLeads, pipelineStages }: LeadsB
   return (
     <>
       {view === 'table' ? (
-        <LeadsTable leads={leads} pipelineStages={pipelineStages} />
+        <LeadsTable leads={leads} pipelineStages={pipelineStages} unreadByLead={unreadByLead} />
       ) : (
-        <LeadsKanban leads={leads} onLeadsChange={setLeads} pipelineStages={pipelineStages} />
+        <LeadsKanban leads={leads} onLeadsChange={setLeads} pipelineStages={pipelineStages} unreadByLead={unreadByLead} />
       )}
       <LeadDetailModal
         pipelineStages={pipelineStages}

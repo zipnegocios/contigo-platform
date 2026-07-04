@@ -24,6 +24,7 @@ interface LeadsTableProps {
     quote: QuoteDTO | null
   }>
   pipelineStages: PipelineStageDTO[]
+  unreadByLead?: Record<string, number>
 }
 
 /** Derives a readable text color + soft background tint from the stage's stored hex color. */
@@ -64,7 +65,7 @@ function StageBadge({ stage }: { stage: PipelineStageDTO | undefined }) {
   )
 }
 
-export function LeadsTable({ leads, pipelineStages }: LeadsTableProps) {
+export function LeadsTable({ leads, pipelineStages, unreadByLead = {} }: LeadsTableProps) {
   const searchParams = useSearchParams()
 
   const buildHref = (leadId: string) => {
@@ -105,7 +106,25 @@ export function LeadsTable({ leads, pipelineStages }: LeadsTableProps) {
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--neutral-50)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
               >
-                <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>{lead.quote?.name || 'Unknown'}</TableCell>
+                <TableCell className="font-medium py-3.5" style={{ color: 'var(--neutral-800)' }}>
+                  <div className="flex items-center gap-1.5">
+                    <span>{lead.quote?.name || 'Unknown'}</span>
+                    {unreadByLead[lead.id] > 0 && (
+                      <span
+                        className="flex-shrink-0 flex items-center justify-center rounded-full text-[10px] font-bold px-1.5"
+                        style={{
+                          minWidth: '18px',
+                          height: '18px',
+                          backgroundColor: 'rgba(226,192,99,0.2)',
+                          color: '#A08040',
+                        }}
+                        title={`${unreadByLead[lead.id]} unread message${unreadByLead[lead.id] === 1 ? '' : 's'}`}
+                      >
+                        {unreadByLead[lead.id]}
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.email ?? '—'}</TableCell>
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>{lead.quote?.service ?? '—'}</TableCell>
                 <TableCell className="py-3.5">

@@ -6,6 +6,7 @@ import { LeadsViewToggle } from '@/presentation/components/admin/LeadsViewToggle
 import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
 import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
+import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
 import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 import { toPipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 
@@ -23,6 +24,7 @@ export default async function LeadsPage({
   const pipelineStageRepo = new DrizzlePipelineStageRepository()
 
   const pipelineStages = (await pipelineStageRepo.findAll()).map(toPipelineStageDTO)
+  const unreadByLead = await new DrizzleLeadMessageRepository().countUnreadGroupedByLead('client')
 
   const allLeads = isTrash
     ? await leadRepo.findAllFiltered({ onlyTrashed: true })
@@ -71,7 +73,7 @@ export default async function LeadsPage({
       ) : isArchived ? (
         <LeadsArchiveView leads={leads} pipelineStages={pipelineStages} />
       ) : (
-        <LeadsBoard view={view} leads={leads} pipelineStages={pipelineStages} />
+        <LeadsBoard view={view} leads={leads} pipelineStages={pipelineStages} unreadByLead={unreadByLead} />
       )}
     </div>
   )

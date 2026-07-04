@@ -19,6 +19,7 @@ import {
   LayoutPanelTop,
 } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
+import { AdminMessagesBell } from './AdminMessagesBell'
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -40,31 +41,34 @@ export default function AdminSidebar() {
     <aside className="w-64 flex flex-col h-screen" style={{ backgroundColor: 'var(--petrol-800)' }}>
       {/* Header / Logo */}
       <div
-        className="p-6 flex items-center gap-3"
+        className="p-6 flex items-center justify-between gap-3"
         style={{ borderBottom: '1px solid var(--gold-a12)' }}
       >
-        <Image
-          src="/assets/isotipo.png"
-          alt="Contigo"
-          width={32}
-          height={32}
-          className="object-contain"
-        />
-        <div>
-          <span
-            className="text-fluid-xl font-semibold tracking-wide"
-            style={{
-              fontFamily: 'var(--contigo-font-display)',
-              color: 'var(--neutral-50)',
-              letterSpacing: '0.04em',
-            }}
-          >
-            Contigo
-          </span>
-          <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--neutral-600)' }}>
-            Admin Portal
-          </p>
+        <div className="flex items-center gap-3 min-w-0">
+          <Image
+            src="/assets/isotipo.png"
+            alt="Contigo"
+            width={32}
+            height={32}
+            className="object-contain"
+          />
+          <div>
+            <span
+              className="text-fluid-xl font-semibold tracking-wide"
+              style={{
+                fontFamily: 'var(--contigo-font-display)',
+                color: 'var(--neutral-50)',
+                letterSpacing: '0.04em',
+              }}
+            >
+              Contigo
+            </span>
+            <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--neutral-600)' }}>
+              Admin Portal
+            </p>
+          </div>
         </div>
+        <AdminMessagesBell />
       </div>
 
       {/* Nav Items */}

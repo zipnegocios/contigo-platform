@@ -112,6 +112,7 @@ export function LeadDetailModal({ pipelineStages, onStageChange, onLeadArchived 
           updatedAt: new Date(c.updatedAt),
           archivedAt: c.archivedAt ? new Date(c.archivedAt) : null,
         })),
+        unreadMessageCount: data.unreadMessageCount ?? 0,
       }
     : null
 
@@ -154,6 +155,7 @@ export function LeadDetailModal({ pipelineStages, onStageChange, onLeadArchived 
               notes={mapped.notes}
               contacts={mapped.contacts}
               pipelineStages={pipelineStages}
+              unreadMessageCount={mapped.unreadMessageCount}
               onStageChange={handleStageChange}
               onMutated={refetch}
               onArchived={handleArchived}

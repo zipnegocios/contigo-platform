@@ -37,6 +37,7 @@ interface LeadsKanbanProps {
   leads: LeadRow[]
   onLeadsChange: (updater: (prev: LeadRow[]) => LeadRow[]) => void
   pipelineStages: PipelineStageDTO[]
+  unreadByLead?: Record<string, number>
 }
 
 /** Derives a soft column background + border tint from the stage's stored hex color. */
@@ -196,6 +197,7 @@ interface KanbanColumnProps {
   onDragOver: (e: React.DragEvent) => void
   onDrop: (e: React.DragEvent, targetStageId: string) => void
   onRename: (stageId: string, newLabel: string) => Promise<void>
+  unreadByLead: Record<string, number>
 }
 
 function KanbanColumn({
@@ -207,6 +209,7 @@ function KanbanColumn({
   onDragOver,
   onDrop,
   onRename,
+  unreadByLead,
 }: KanbanColumnProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: stage.id })
   const [isEditing, setIsEditing] = useState(false)
@@ -333,9 +336,25 @@ function KanbanColumn({
             >
               <Link href={buildHref(lead.id)} className="block space-y-2">
                 <div>
-                  <p className="font-semibold text-fluid-sm truncate" style={{ color: 'var(--neutral-800)' }}>
-                    {lead.quote?.name || 'Unknown'}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-semibold text-fluid-sm truncate" style={{ color: 'var(--neutral-800)' }}>
+                      {lead.quote?.name || 'Unknown'}
+                    </p>
+                    {unreadByLead[lead.id] > 0 && (
+                      <span
+                        className="flex-shrink-0 flex items-center justify-center rounded-full text-[10px] font-bold px-1.5"
+                        style={{
+                          minWidth: '18px',
+                          height: '18px',
+                          backgroundColor: 'rgba(226,192,99,0.2)',
+                          color: '#A08040',
+                        }}
+                        title={`${unreadByLead[lead.id]} unread message${unreadByLead[lead.id] === 1 ? '' : 's'}`}
+                      >
+                        {unreadByLead[lead.id]}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-fluid-xs truncate" style={{ color: 'var(--neutral-600)' }}>
                     {lead.quote?.email ?? '—'}
                   </p>
@@ -373,7 +392,7 @@ function KanbanColumn({
   )
 }
 
-export function LeadsKanban({ leads, onLeadsChange, pipelineStages }: LeadsKanbanProps) {
+export function LeadsKanban({ leads, onLeadsChange, pipelineStages, unreadByLead = {} }: LeadsKanbanProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [draggedId, setDraggedId] = useState<string | null>(null)
@@ -530,6 +549,7 @@ export function LeadsKanban({ leads, onLeadsChange, pipelineStages }: LeadsKanba
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onRename={handleRename}
+                unreadByLead={unreadByLead}
               />
             ))}
 
