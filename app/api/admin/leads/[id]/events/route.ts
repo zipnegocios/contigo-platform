@@ -3,6 +3,9 @@ import { auth } from '@/infrastructure/auth/auth.config'
 import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
+import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
+import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
+import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
 import { ScheduleLeadEventUseCase } from '@/application/use-cases/leads/ScheduleLeadEventUseCase'
 import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
 
@@ -49,6 +52,9 @@ export async function POST(
     const useCase = new ScheduleLeadEventUseCase(
       new DrizzleLeadEventRepository(),
       new DrizzleLeadActivityRepository(),
+      new DrizzleLeadRepository(),
+      new DrizzleQuoteRepository(),
+      new ResendEmailService(),
     )
 
     const event = await useCase.execute({

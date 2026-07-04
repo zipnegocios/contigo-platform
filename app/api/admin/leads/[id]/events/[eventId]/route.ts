@@ -3,6 +3,9 @@ import { auth } from '@/infrastructure/auth/auth.config'
 import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadActivityRepository } from '@/infrastructure/repositories/DrizzleLeadActivityRepository'
+import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLeadRepository'
+import { DrizzleQuoteRepository } from '@/infrastructure/repositories/DrizzleQuoteRepository'
+import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
 import { UpdateLeadEventStatusUseCase } from '@/application/use-cases/leads/UpdateLeadEventStatusUseCase'
 import { UpdateLeadEventUseCase } from '@/application/use-cases/leads/UpdateLeadEventUseCase'
 import { LeadEventMetadataSchema } from '../route'
@@ -34,6 +37,9 @@ export async function PATCH(
       const useCase = new UpdateLeadEventStatusUseCase(
         new DrizzleLeadEventRepository(),
         new DrizzleLeadActivityRepository(),
+        new DrizzleLeadRepository(),
+        new DrizzleQuoteRepository(),
+        new ResendEmailService(),
       )
       await useCase.execute(eventId, status, (session.user as any)?.id)
 
@@ -43,7 +49,12 @@ export async function PATCH(
     const { scheduledAt, durationMinutes, notes, metadata } = body
     const parsedMetadata = metadata ? LeadEventMetadataSchema.parse(metadata) : undefined
 
-    const useCase = new UpdateLeadEventUseCase(new DrizzleLeadEventRepository())
+    const useCase = new UpdateLeadEventUseCase(
+      new DrizzleLeadEventRepository(),
+      new DrizzleLeadRepository(),
+      new DrizzleQuoteRepository(),
+      new ResendEmailService(),
+    )
     const event = await useCase.execute(eventId, {
       scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined,
       durationMinutes,
