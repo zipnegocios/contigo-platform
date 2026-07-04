@@ -39,7 +39,11 @@ export class ResendEmailService implements IEmailService {
   private siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   private getFromAddress(): string {
-    return process.env.RESEND_FROM_EMAIL || 'noreply@contigoconstructions.com.au'
+    // Fallback must match a domain actually verified in Resend — currently
+    // only the `updates.` subdomain is verified there (the apex domain isn't
+    // yet), so this cannot be `noreply@contigoconstructions.com.au` without
+    // the sends silently failing.
+    return process.env.RESEND_FROM_EMAIL || 'noreply@updates.contigoconstructions.com.au'
   }
 
   async sendQuoteConfirmation(quote: Quote): Promise<void> {
