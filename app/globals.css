@@ -418,13 +418,20 @@
   }
 
   /* Capa de blobs: sin filtro SVG — los blobs usan CSS blur (GPU).
-     inset: -60px agranda el escenario más allá del wrapper (para dejar espacio
-     al glow del blur + la traslación de blobRotate/blobRotateAlt) y overflow:
-     hidden contiene ese movimiento localmente, sin depender de recortar a nivel
-     html/body ni de calcular anchos exactos por dispositivo. */
+     inset agranda el escenario más allá del wrapper (para dejar espacio al
+     glow del blur + la traslación de blobRotate/blobRotateAlt) y overflow:
+     hidden contiene ese movimiento localmente. El valor se limita a 20px
+     (en vez de los 60px probados antes) porque .contact-form-wrapper vive
+     dentro de .page-padding, cuyo clamp(1.5rem, 4vw, 4rem) nunca baja de
+     24px en ningún viewport — a 60px, esta caja posicionada en absoluto
+     quedaba 36px más ancha que ese margen mínimo garantizado y esa sobra
+     de geometría (aunque nada se pintara ahí) sí contaba para el ancho de
+     scroll de la página. Con 20px queda siempre por debajo del piso de
+     24px, así que nunca aporta overflow horizontal real, sin depender de
+     tocar overflow en body/html. */
   .gooey-blobs-layer {
     position: absolute;
-    inset: -60px;
+    inset: -20px;
     overflow: hidden;
   }
 
