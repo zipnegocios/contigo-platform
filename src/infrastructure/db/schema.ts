@@ -90,6 +90,8 @@ export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
   'document_sent',
   'email_sent',
   'quote_status_changed',
+  'message_received',
+  'message_sent',
 ])
 
 export const taskStatusEnum = pgEnum('task_status', ['open', 'in_progress', 'done'])

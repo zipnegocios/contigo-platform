@@ -204,6 +204,13 @@
       "when": 1783166199353,
       "tag": "20260704115639_whole_hammerhead",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1783167076219,
+      "tag": "20260704121116_square_omega_red",
+      "breakpoints": true
     }
   ]
 }

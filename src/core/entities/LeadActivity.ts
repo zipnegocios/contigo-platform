@@ -14,6 +14,8 @@ export type LeadActivityType =
   | 'document_sent'
   | 'email_sent'
   | 'quote_status_changed'
+  | 'message_received'
+  | 'message_sent'
 
 export interface CreateLeadActivityInput {
   leadId: string
