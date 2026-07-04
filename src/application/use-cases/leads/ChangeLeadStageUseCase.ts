@@ -3,6 +3,9 @@ import { LeadActivity } from '@/core/entities/LeadActivity'
 import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 import { ILeadActivityRepository } from '@/core/repositories/ILeadActivityRepository'
 import { IPipelineStageRepository } from '@/core/repositories/IPipelineStageRepository'
+import { IQuoteRepository } from '@/core/repositories/IQuoteRepository'
+import { IEmailService } from '@/core/services/IEmailService'
+import { getClientStageLabel } from '@/presentation/lib/clientStageLabels'
 
 // NOTE: terminal-stage side effects (e.g. auto-closing related records when
 // landing on a 'won'/'lost' stage) are intentionally out of scope here — this
@@ -12,6 +15,8 @@ export class ChangeLeadStageUseCase {
     private leadRepository: ILeadRepository,
     private leadActivityRepository: ILeadActivityRepository,
     private pipelineStageRepository: IPipelineStageRepository,
+    private quoteRepository: IQuoteRepository,
+    private emailService: IEmailService,
   ) {}
 
   async execute(leadId: string, newStageId: string, createdBy?: string): Promise<Lead> {
@@ -33,6 +38,28 @@ export class ChangeLeadStageUseCase {
         createdBy,
       })
       await this.leadActivityRepository.save(activity)
+
+      const quote = await this.quoteRepository.findById(lead.quoteId)
+
+      if (quote) {
+        const previousStage = await this.pipelineStageRepository.findById(previousStageId)
+        const fromLabel = getClientStageLabel(previousStage?.key ?? '').label
+        const toLabel = getClientStageLabel(targetStage.key).label
+
+        try {
+          await this.emailService.sendStageChangeNotificationToClient(quote, toLabel)
+        } catch (error) {
+          console.error(`Failed to send stage-change client notification for lead ${leadId}:`, error)
+        }
+
+        try {
+          await this.emailService.sendStageChangeNotificationToAdmin(updated, quote, fromLabel, toLabel)
+        } catch (error) {
+          console.error(`Failed to send stage-change admin notification for lead ${leadId}:`, error)
+        }
+      } else {
+        console.warn(`No quote found for lead ${leadId} (quoteId ${lead.quoteId}) — skipping stage-change emails`)
+      }
     }
 
     return updated

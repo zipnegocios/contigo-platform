@@ -10,6 +10,7 @@ import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/Driz
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
 import { ChangeLeadStageUseCase } from '@/application/use-cases/leads/ChangeLeadStageUseCase'
+import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
 import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 import { toLeadDTO } from '@/presentation/types/LeadDTO'
 import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
@@ -96,6 +97,8 @@ export async function PATCH(
       leadRepo,
       new DrizzleLeadActivityRepository(),
       new DrizzlePipelineStageRepository(),
+      new DrizzleQuoteRepository(),
+      new ResendEmailService(),
     )
 
     const updatedLead = await changeLeadStageUseCase.execute(
