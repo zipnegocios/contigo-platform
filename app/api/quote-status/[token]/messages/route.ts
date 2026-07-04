@@ -50,7 +50,7 @@ export async function GET(
     return Response.json({ messages: messages.map(toPublicMessageDTO) })
   } catch (error) {
     console.error('Error fetching tracking panel messages:', error)
-    return Response.json({ error: 'Not found' }, { status: 404 })
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 

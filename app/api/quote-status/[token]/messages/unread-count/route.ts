@@ -32,6 +32,6 @@ export async function GET(
     return Response.json({ count })
   } catch (error) {
     console.error('Error fetching tracking panel unread message count:', error)
-    return Response.json({ error: 'Not found' }, { status: 404 })
+    return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
