@@ -3,6 +3,7 @@ import { ILeadRepository } from '@/core/repositories/ILeadRepository'
 import { IPipelineStageRepository } from '@/core/repositories/IPipelineStageRepository'
 import { ILeadDocumentRepository } from '@/core/repositories/ILeadDocumentRepository'
 import { ILeadEventRepository } from '@/core/repositories/ILeadEventRepository'
+import { ILeadMessageRepository } from '@/core/repositories/ILeadMessageRepository'
 import { getClientStageLabel } from '@/presentation/lib/clientStageLabels'
 import { LeadDocumentCategory } from '@/core/entities/LeadDocument'
 import { LeadEventType } from '@/core/entities/LeadEvent'
@@ -58,6 +59,7 @@ export class GetTrackingPanelDataUseCase {
     private pipelineStageRepository: IPipelineStageRepository,
     private leadDocumentRepository: ILeadDocumentRepository,
     private leadEventRepository: ILeadEventRepository,
+    private leadMessageRepository: ILeadMessageRepository,
   ) {}
 
   async execute(token: string): Promise<TrackingPanelDTO | null> {
@@ -70,9 +72,11 @@ export class GetTrackingPanelDataUseCase {
     const stage = await this.pipelineStageRepository.findById(lead.stageId)
     const clientStageMeta = getClientStageLabel(stage?.key ?? '')
 
-    const [allDocuments, allEvents] = await Promise.all([
+    const [allDocuments, allEvents, allMessages, unreadStaffMessages] = await Promise.all([
       this.leadDocumentRepository.findByLeadId(lead.id),
       this.leadEventRepository.findByLeadId(lead.id),
+      this.leadMessageRepository.findByLeadId(lead.id),
+      this.leadMessageRepository.countUnread(lead.id, 'staff'),
     ])
 
     const documents = allDocuments
@@ -94,6 +98,17 @@ export class GetTrackingPanelDataUseCase {
         location: event.location,
       }))
 
+    // Chronological (oldest first) for a thread reading top-to-bottom; the repository
+    // returns newest-first, so reverse. Never leak authorId to the client.
+    const messages = [...allMessages]
+      .reverse()
+      .map((message) => ({
+        id: message.id,
+        authorType: message.authorType,
+        body: message.body,
+        createdAt: message.createdAt,
+      }))
+
     return {
       quote: {
         name: quote.name,
@@ -109,8 +124,8 @@ export class GetTrackingPanelDataUseCase {
       },
       documents,
       events,
-      messages: [],
-      unreadStaffMessages: 0,
+      messages,
+      unreadStaffMessages,
     }
   }
 }

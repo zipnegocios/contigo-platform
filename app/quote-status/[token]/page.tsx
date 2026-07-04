@@ -5,9 +5,12 @@ import { DrizzleLeadRepository } from '@/infrastructure/repositories/DrizzleLead
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { DrizzleLeadDocumentRepository } from '@/infrastructure/repositories/DrizzleLeadDocumentRepository'
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
+import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
 import { TrackingStatusCard } from '@/presentation/components/portal/TrackingStatusCard'
 import { TrackingDocumentsList } from '@/presentation/components/portal/TrackingDocumentsList'
 import { TrackingScheduleList } from '@/presentation/components/portal/TrackingScheduleList'
+import { TrackingMessages } from '@/presentation/components/portal/TrackingMessages'
+import { TrackingBell } from '@/presentation/components/portal/TrackingBell'
 
 // Token URLs are capability links shared privately (e.g. via email) — never
 // index them in search engines.
@@ -28,6 +31,7 @@ export default async function QuoteStatusPage({
     new DrizzlePipelineStageRepository(),
     new DrizzleLeadDocumentRepository(),
     new DrizzleLeadEventRepository(),
+    new DrizzleLeadMessageRepository(),
   )
 
   const panelData = await useCase.execute(token)
@@ -38,7 +42,7 @@ export default async function QuoteStatusPage({
 
   const stages = await new DrizzlePipelineStageRepository().findAll()
 
-  const { quote, clientStage, documents, events } = panelData
+  const { quote, clientStage, documents, events, messages, unreadStaffMessages } = panelData
 
   return (
     <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
@@ -50,12 +54,15 @@ export default async function QuoteStatusPage({
           borderBottom: '1px solid rgba(226,192,99,0.15)',
         }}
       >
-        <span
-          className="block text-fluid-xs uppercase tracking-widest mb-4"
-          style={{ color: '#E2C063' }}
-        >
-          Tracking
-        </span>
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <span
+            className="block text-fluid-xs uppercase tracking-widest"
+            style={{ color: '#E2C063' }}
+          >
+            Tracking
+          </span>
+          <TrackingBell token={token} initialCount={unreadStaffMessages} />
+        </div>
         <h1
           className="text-fluid-5xl font-semibold leading-none mb-4"
           style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
@@ -122,6 +129,9 @@ export default async function QuoteStatusPage({
 
         {/* Schedule */}
         <TrackingScheduleList events={events} />
+
+        {/* Messages */}
+        <TrackingMessages token={token} messages={messages} />
 
         {/* CTA */}
         <div className="text-center pb-12">
