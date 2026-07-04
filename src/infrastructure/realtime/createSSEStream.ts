@@ -54,28 +54,32 @@ export function createSSEStream<T>(
   const encoder = new TextEncoder();
 
   let lastSent: T | null = null;
+  let hasSentInitial = false;
   let ticksSinceHeartbeat = 0;
   // Roughly every 6th tick at the default 2500ms interval == ~15s.
   const ticksPerHeartbeat = Math.max(1, Math.round(HEARTBEAT_INTERVAL_MS / intervalMs));
 
+  let closed = false;
+  let intervalId: ReturnType<typeof setInterval> | undefined;
+  let controllerRef: ReadableStreamDefaultController<Uint8Array> | undefined;
+
+  const safeClose = () => {
+    if (closed) return;
+    closed = true;
+    if (intervalId !== undefined) {
+      clearInterval(intervalId);
+      intervalId = undefined;
+    }
+    try {
+      controllerRef?.close();
+    } catch {
+      // Controller may already be closed/errored; ignore.
+    }
+  };
+
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
-      let closed = false;
-      let intervalId: ReturnType<typeof setInterval> | undefined;
-
-      const safeClose = () => {
-        if (closed) return;
-        closed = true;
-        if (intervalId !== undefined) {
-          clearInterval(intervalId);
-          intervalId = undefined;
-        }
-        try {
-          controller.close();
-        } catch {
-          // Controller may already be closed/errored; ignore.
-        }
-      };
+      controllerRef = controller;
 
       const enqueue = (chunk: string) => {
         if (closed) return;
@@ -91,6 +95,7 @@ export function createSSEStream<T>(
       const sendSnapshot = (data: T) => {
         enqueue(`data: ${serialize(data)}\n\n`);
         lastSent = data;
+        hasSentInitial = true;
       };
 
       const tick = async () => {
@@ -100,7 +105,7 @@ export function createSSEStream<T>(
           const next = await fetchSnapshot(signal);
           if (closed) return;
 
-          if (lastSent === null || hasChanged(lastSent, next)) {
+          if (!hasSentInitial || hasChanged(lastSent, next)) {
             sendSnapshot(next);
           }
         } catch (error) {
@@ -144,6 +149,13 @@ export function createSSEStream<T>(
       } else {
         signal.addEventListener('abort', onAbort, { once: true });
       }
+    },
+    cancel() {
+      // Defense-in-depth backstop: invoked when the stream's consumer stops
+      // reading, which can in principle be a distinct signal from
+      // `request.signal` aborting depending on runtime wiring. Route through
+      // the same cleanup path regardless of which signal fires first.
+      safeClose();
     },
   });
 
