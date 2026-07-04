@@ -195,6 +195,15 @@
     flex-shrink: 0;
   }
 
+  /* Pantallas muy angostas: acota el ancho para que la traslación de entrada/salida
+     (GSAP x:-50/+50 en BrandPromiseSection) tenga menos recorrido relativo al
+     viewport durante esa animación de medio segundo. */
+  @media (max-width: 480px) {
+    .flip-text-block {
+      max-width: min(320px, 85vw);
+    }
+  }
+
   .flip-text-block h2 {
     font-family: var(--font-display, Georgia, serif);
     font-size: clamp(2rem, 4vw, 3.5rem);
@@ -408,11 +417,15 @@
     overflow: visible;
   }
 
-  /* Capa de blobs: sin filtro SVG — los blobs usan CSS blur (GPU) */
+  /* Capa de blobs: sin filtro SVG — los blobs usan CSS blur (GPU).
+     inset: -60px agranda el escenario más allá del wrapper (para dejar espacio
+     al glow del blur + la traslación de blobRotate/blobRotateAlt) y overflow:
+     hidden contiene ese movimiento localmente, sin depender de recortar a nivel
+     html/body ni de calcular anchos exactos por dispositivo. */
   .gooey-blobs-layer {
     position: absolute;
-    inset: 0;
-    overflow: visible;
+    inset: -60px;
+    overflow: hidden;
   }
 
   /* Mobile: blobs más tenues (el tamaño ya es fluido vía clamp() en cada .blob-N,
@@ -444,14 +457,18 @@
   }
 
   @keyframes blobRotate {
-    0% {
-      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-      transform: rotate(0deg);
-    }
-    100% {
-      border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-      transform: rotate(360deg);
-    }
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    25%  { transform: translate(18px, -14px) rotate(90deg); }
+    50%  { transform: translate(-10px, 16px) rotate(180deg); }
+    75%  { transform: translate(-20px, -8px) rotate(270deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+  }
+
+  @keyframes blobRotateAlt {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    30%  { transform: translate(-16px, 20px) rotate(120deg); }
+    60%  { transform: translate(20px, -12px) rotate(240deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
   }
 
   .blob-1 {
@@ -460,6 +477,7 @@
     background: var(--gold-400);
     top: -40px;
     left: -40px;
+    animation-name: blobRotate;
     animation-duration: 14s;
   }
 
@@ -469,6 +487,7 @@
     background: var(--gold-500);
     top: 20%;
     right: -30px;
+    animation-name: blobRotateAlt;
     animation-duration: 17s;
   }
 
@@ -478,6 +497,7 @@
     background: var(--gold-700);
     bottom: 10%;
     left: 10%;
+    animation-name: blobRotate;
     animation-duration: 15s;
   }
 
