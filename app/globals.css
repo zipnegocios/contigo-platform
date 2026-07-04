@@ -1510,8 +1510,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: clamp(3.5rem, 9vh, 5rem) clamp(1.25rem, 6vw, 3rem) clamp(1.25rem, 4vh, 2rem);
+  /* Was justify-content: space-between, which distributed ALL leftover
+     vertical space evenly between logo/rule/nav/socials -- on shorter
+     viewports that pushed the social row past the visible fold. Now the
+     logo/rule/nav sit close together with a small explicit gap, and only
+     .mnp-socials (margin-top: auto below) claims the remaining space,
+     anchoring it to the bottom edge so it's always visible. */
+  gap: clamp(0.5rem, 2vh, 1rem);
+  padding: clamp(1.5rem, 4vh, 2.25rem) clamp(1.25rem, 6vw, 3rem) clamp(1.25rem, 4vh, 2rem);
   box-sizing: border-box;
 }
 
@@ -1529,10 +1535,13 @@
   width: 100%;
   /* Reserved space is vw-based (not vh) because the logo's own size (90vw
      huge, ~45vw resting -- see MobileNavPanel.tsx's LOGO_REST_SCALE) is
-     width-relative; a vh-based reservation wouldn't track it. This keeps the
-     nav list positioned with room for the larger resting logo instead of
-     visually colliding with it. */
-  flex: 0 1 clamp(7rem, 40vw, 12rem);
+     width-relative; a vh-based reservation wouldn't track it. Deliberately
+     tighter than the logo's full ~40vw resting height -- the logo is meant
+     to sit close to the nav list below it (its bottom tier, the small
+     tagline text, may bleed slightly into this gap), trading a bit of
+     breathing room for a more compact panel that leaves the social row
+     visible without scrolling. */
+  flex: 0 1 clamp(5rem, 30vw, 8rem);
 }
 
 /* 90vw is the logo's INTRINSIC (huge, intro-state) size -- never exceeds 90%
@@ -1611,6 +1620,11 @@
   justify-content: center;
   gap: clamp(0.75rem, 3vw, 1.25rem);
   opacity: 0; /* GSAP-driven, same FOUC guard as .mnp-nav-item */
+  /* Claims whatever vertical space is left after logo/rule/nav (which now
+     sit close together via .mnp-content's small explicit gap) -- anchors
+     the social row to the bottom edge so it's always visible instead of
+     depending on space-between's leftover-space distribution. */
+  margin-top: auto;
 }
 
 .mnp-social-link {
@@ -1630,11 +1644,12 @@
    overflow; this only nudges the middle values down on genuinely short screens. */
 @media (max-height: 700px) {
   .mnp-content {
-    padding-top: clamp(2.5rem, 6vh, 3.5rem);
+    padding-top: clamp(1rem, 3vh, 1.5rem);
     padding-bottom: clamp(1rem, 3vh, 1.5rem);
+    gap: clamp(0.35rem, 1.4vh, 0.75rem);
   }
   .mnp-logo-stage {
-    flex-basis: clamp(5.5rem, 32vw, 9rem);
+    flex-basis: clamp(4rem, 24vw, 6.5rem);
   }
   .mnp-nav-list {
     gap: clamp(0.5rem, 1.8vh, 1rem);
