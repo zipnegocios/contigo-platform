@@ -375,6 +375,28 @@ export const leadNotes = pgTable(
   ],
 )
 
+// ============ LEAD MESSAGES TABLE (chat entre client y staff) ============
+export const leadMessageAuthorEnum = pgEnum('lead_message_author', ['client', 'staff'])
+
+export const leadMessages = pgTable(
+  'lead_messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    leadId: uuid('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    authorType: leadMessageAuthorEnum('author_type').notNull(),
+    authorId: uuid('author_id').references(() => adminUsers.id, { onDelete: 'set null' }), // null cuando client
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    readAt: timestamp('read_at', { withTimezone: true }), // leído por la contraparte
+  },
+  (table) => [
+    index('idx_lead_messages_lead_id').on(table.leadId),
+    index('idx_lead_messages_unread').on(table.leadId, table.authorType, table.readAt),
+  ],
+)
+
 // ============ LEAD CONTACTS TABLE ============
 export const leadContacts = pgTable(
   'lead_contacts',
