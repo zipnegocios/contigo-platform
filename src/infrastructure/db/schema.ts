@@ -294,6 +294,7 @@ export const leads = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
     trashedAt: timestamp('trashed_at', { withTimezone: true }),
+    notificationsViewedAt: timestamp('notifications_viewed_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_leads_stage').on(table.stage),

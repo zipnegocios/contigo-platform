@@ -115,6 +115,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
         updatedAt: lead.updatedAt,
         archivedAt: lead.archivedAt,
         trashedAt: lead.trashedAt,
+        notificationsViewedAt: lead.notificationsViewedAt,
       })
       .where(eq(leads.id, lead.id))
   }
@@ -128,6 +129,7 @@ export class DrizzleLeadRepository implements ILeadRepository {
       updatedAt: row.updatedAt,
       archivedAt: row.archivedAt,
       trashedAt: row.trashedAt,
+      notificationsViewedAt: row.notificationsViewedAt,
     })
   }
 }

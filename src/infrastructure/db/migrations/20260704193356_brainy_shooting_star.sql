@@ -1,0 +1,1 @@
+ALTER TABLE "leads" ADD COLUMN "notifications_viewed_at" timestamp with time zone;

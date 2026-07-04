@@ -11,6 +11,7 @@ export class Lead {
   readonly updatedAt: Date
   readonly archivedAt: Date | null
   readonly trashedAt: Date | null
+  readonly notificationsViewedAt: Date | null
 
   private constructor(props: {
     id: string
@@ -20,6 +21,7 @@ export class Lead {
     updatedAt: Date
     archivedAt: Date | null
     trashedAt: Date | null
+    notificationsViewedAt: Date | null
   }) {
     this.id = props.id
     this.quoteId = props.quoteId
@@ -28,6 +30,7 @@ export class Lead {
     this.updatedAt = props.updatedAt
     this.archivedAt = props.archivedAt
     this.trashedAt = props.trashedAt
+    this.notificationsViewedAt = props.notificationsViewedAt
   }
 
   static create(input: CreateLeadInput): Lead {
@@ -41,6 +44,7 @@ export class Lead {
       updatedAt: new Date(),
       archivedAt: null,
       trashedAt: null,
+      notificationsViewedAt: null,
     })
   }
 
@@ -53,6 +57,7 @@ export class Lead {
       updatedAt: new Date(),
       archivedAt: this.archivedAt,
       trashedAt: this.trashedAt,
+      notificationsViewedAt: this.notificationsViewedAt,
     })
   }
 
@@ -65,6 +70,7 @@ export class Lead {
       updatedAt: new Date(),
       archivedAt: this.archivedAt,
       trashedAt: this.trashedAt,
+      notificationsViewedAt: this.notificationsViewedAt,
     })
   }
 
@@ -88,6 +94,26 @@ export class Lead {
     return new Lead({ ...this, archivedAt: null })
   }
 
+  /**
+   * Records the client-facing notification checkpoint (last time the client viewed
+   * the notifications dropdown). Deliberately does NOT bump `updatedAt` — updatedAt
+   * drives admin kanban/table sort order, and viewing notifications is not admin-side
+   * lead activity. Bumping it here would silently reorder the admin's lead list as a
+   * side effect of an unrelated client action.
+   */
+  withNotificationsViewedAt(date: Date): Lead {
+    return new Lead({
+      id: this.id,
+      quoteId: this.quoteId,
+      stageId: this.stageId,
+      estimatedValue: this.estimatedValue,
+      updatedAt: this.updatedAt,
+      archivedAt: this.archivedAt,
+      trashedAt: this.trashedAt,
+      notificationsViewedAt: date,
+    })
+  }
+
   static reconstruct(props: {
     id: string
     quoteId: string
@@ -96,6 +122,7 @@ export class Lead {
     updatedAt: Date
     archivedAt: Date | null
     trashedAt: Date | null
+    notificationsViewedAt: Date | null
   }): Lead {
     return new Lead(props)
   }
