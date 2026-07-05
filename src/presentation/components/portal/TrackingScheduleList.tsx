@@ -62,21 +62,21 @@ function EventRow({ event }: { event: EventItem }) {
   const Icon = EVENT_TYPE_ICONS[event.type]
 
   return (
-    <div className="py-3 border-b last:border-b-0" style={{ borderColor: 'var(--atelier-border)' }}>
+    <div className="py-3 border-b last:border-b-0" style={{ borderColor: 'var(--petrol-100)' }}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <p className="flex items-center gap-2 text-fluid-sm font-medium" style={{ color: 'var(--heritage-charcoal)' }}>
-          <Icon className="h-4 w-4 shrink-0" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }} />
+        <p className="flex items-center gap-2 text-fluid-sm font-medium" style={{ color: 'var(--petrol-900)' }}>
+          <Icon className="h-4 w-4 shrink-0" style={{ color: 'var(--petrol-600)', opacity: 0.7 }} />
           {EVENT_TYPE_LABELS[event.type]}
         </p>
-        <p className="text-fluid-xs" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+        <p className="text-fluid-xs" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           {formatDateTime(event.scheduledAt)}
         </p>
       </div>
-      <p className="text-fluid-xs mt-1" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+      <p className="text-fluid-xs mt-1" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
         {event.durationMinutes} min{event.location ? ` · ${event.location}` : ''}
       </p>
       {event.meetingDetails && (
-        <p className="text-fluid-xs mt-1" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+        <p className="text-fluid-xs mt-1" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           Join via {CHANNEL_LABELS[event.meetingDetails.channel as keyof typeof CHANNEL_LABELS] ?? event.meetingDetails.channel}
           {event.meetingDetails.link && (
             <>
@@ -86,7 +86,7 @@ function EventRow({ event }: { event: EventItem }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
-                style={{ color: 'var(--heritage-charcoal)' }}
+                style={{ color: 'var(--petrol-900)' }}
               >
                 Join meeting
               </a>
@@ -95,7 +95,7 @@ function EventRow({ event }: { event: EventItem }) {
         </p>
       )}
       {event.siteVisitDetails && (
-        <div className="text-fluid-xs mt-1" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+        <div className="text-fluid-xs mt-1" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           {event.siteVisitDetails.address && <p>{event.siteVisitDetails.address}</p>}
           {event.siteVisitDetails.mapsLink && (
             <p>
@@ -104,7 +104,7 @@ function EventRow({ event }: { event: EventItem }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
-                style={{ color: 'var(--heritage-charcoal)' }}
+                style={{ color: 'var(--petrol-900)' }}
               >
                 View on Maps
               </a>
@@ -135,11 +135,11 @@ export function TrackingScheduleList({ token, events: initialEvents }: TrackingS
   if (events.length === 0) {
     return (
       <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-        <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-2" style={{ color: 'var(--heritage-charcoal)' }}>
+        <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-2" style={{ color: 'var(--petrol-900)' }}>
           <CalendarClock className="h-5 w-5" />
           Schedule
         </h3>
-        <p className="text-fluid-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+        <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           Nothing scheduled yet — we&apos;ll let you know as soon as a call or visit is arranged.
         </p>
       </div>
@@ -148,19 +148,19 @@ export function TrackingScheduleList({ token, events: initialEvents }: TrackingS
 
   return (
     <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--petrol-900)' }}>
         <CalendarClock className="h-5 w-5" />
         Schedule
       </h3>
 
       <div className="mb-6">
-        <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+        <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--petrol-600)' }}>
           Upcoming
         </h4>
         {upcoming.length > 0 ? (
           upcoming.map((event) => <EventRow key={event.id} event={event} />)
         ) : (
-          <p className="text-fluid-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+          <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
             Nothing on the calendar right now.
           </p>
         )}
@@ -168,7 +168,7 @@ export function TrackingScheduleList({ token, events: initialEvents }: TrackingS
 
       {past.length > 0 && (
         <div>
-          <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--petrol-600)' }}>
             Past
           </h4>
           {past.map((event) => (

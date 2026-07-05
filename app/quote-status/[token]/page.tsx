@@ -51,12 +51,12 @@ export default async function QuoteStatusPage({
   const { quote, clientStage, documents, events, messages } = panelData
 
   return (
-    <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--petrol-50)', minHeight: '100vh' }}>
       {/* Header band */}
       <div
         className="relative py-24 px-6 md:px-16"
         style={{
-          backgroundColor: '#1E1A16',
+          backgroundColor: 'var(--petrol-900)',
           borderBottom: '1px solid rgba(226,192,99,0.15)',
         }}
       >
@@ -70,7 +70,7 @@ export default async function QuoteStatusPage({
         </div>
         <h1
           className="text-fluid-5xl font-semibold leading-none mb-4"
-          style={{ fontFamily: 'var(--font-cormorant)', color: '#FAF6F0' }}
+          style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--petrol-50)' }}
         >
           Your Quote Status
         </h1>
@@ -88,31 +88,31 @@ export default async function QuoteStatusPage({
             borderTopColor: '#E2C063',
           }}
         >
-          <h2 className="text-fluid-2xl font-bold mb-8" style={{ color: 'var(--heritage-charcoal)' }}>
+          <h2 className="text-fluid-2xl font-bold mb-8" style={{ color: 'var(--petrol-900)' }}>
             {quote.name}
           </h2>
 
           <div className="space-y-6">
             <div>
-              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
+              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--petrol-600)' }}>
                 Service Requested
               </label>
-              <p className="mt-2 text-fluid-lg font-semibold" style={{ color: 'var(--heritage-charcoal)' }}>
+              <p className="mt-2 text-fluid-lg font-semibold" style={{ color: 'var(--petrol-900)' }}>
                 {quote.service}
               </p>
             </div>
 
             <div>
-              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--atelier-ink)' }}>
+              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--petrol-600)' }}>
                 Your Message
               </label>
-              <p className="mt-2 p-4 rounded bg-gray-50" style={{ color: 'var(--heritage-charcoal)' }}>
+              <p className="mt-2 p-4 rounded bg-gray-50" style={{ color: 'var(--petrol-900)' }}>
                 {quote.message}
               </p>
             </div>
 
-            <div className="pt-4 border-t" style={{ borderColor: 'var(--atelier-border)' }}>
-              <p className="text-fluid-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+            <div className="pt-4 border-t" style={{ borderColor: 'var(--petrol-100)' }}>
+              <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
                 Submitted on{' '}
                 {quote.createdAt.toLocaleDateString('en-AU', {
                   year: 'numeric',
@@ -140,7 +140,7 @@ export default async function QuoteStatusPage({
 
         {/* CTA */}
         <div className="text-center pb-12">
-          <p className="mb-6" style={{ color: 'var(--atelier-ink)' }}>
+          <p className="mb-6" style={{ color: 'var(--petrol-600)' }}>
             Questions? Contact us directly at{' '}
             <strong>+61 406 274 096</strong> or <strong>contact@contigoconstructions.com.au</strong>
           </p>

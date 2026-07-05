@@ -56,25 +56,25 @@ export function TrackingStatusCard({ token, clientStage: initialClientStage, sta
     >
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-6 h-6" style={{ color: 'var(--heritage-charcoal)' }} />
-          <h2 className="text-fluid-2xl font-bold" style={{ color: 'var(--heritage-charcoal)' }}>
+          <TrendingUp className="w-6 h-6" style={{ color: 'var(--petrol-900)' }} />
+          <h2 className="text-fluid-2xl font-bold" style={{ color: 'var(--petrol-900)' }}>
             Project Status
           </h2>
         </div>
         <span
           className="px-4 py-2 rounded-full text-white text-fluid-sm font-medium"
-          style={{ background: isClosed ? 'var(--heritage-charcoal)' : '#E2C063' }}
+          style={{ background: isClosed ? 'var(--petrol-900)' : '#E2C063' }}
         >
           {clientStage.label}
         </span>
       </div>
 
-      <p className="text-fluid-base mb-8" style={{ color: 'var(--atelier-ink)' }}>
+      <p className="text-fluid-base mb-8" style={{ color: 'var(--petrol-600)' }}>
         {clientStage.description}
       </p>
 
       {isClosed ? (
-        <p className="text-fluid-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+        <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           {getClientStageLabel('lost').description}
         </p>
       ) : (
@@ -97,7 +97,7 @@ export function TrackingStatusCard({ token, clientStage: initialClientStage, sta
                   <p
                     className="text-fluid-sm font-medium"
                     style={{
-                      color: isReached ? 'var(--heritage-charcoal)' : 'var(--atelier-ink)',
+                      color: isReached ? 'var(--petrol-900)' : 'var(--petrol-600)',
                       opacity: isReached ? 1 : 0.5,
                     }}
                   >

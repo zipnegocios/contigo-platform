@@ -68,19 +68,19 @@ function DocumentRow({
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 py-3 border-b last:border-b-0" style={{ borderColor: 'var(--atelier-border)' }}>
+    <div className="flex items-center justify-between gap-3 py-3 border-b last:border-b-0" style={{ borderColor: 'var(--petrol-100)' }}>
       <div className="min-w-0">
         <button
           type="button"
           onClick={handleClick}
           disabled={loading}
           className="text-fluid-sm font-medium underline underline-offset-2 break-all text-left disabled:opacity-50"
-          style={{ color: 'var(--heritage-charcoal)' }}
+          style={{ color: 'var(--petrol-900)' }}
         >
           {loading ? 'Opening…' : label}
         </button>
         {dateLabel && (
-          <p className="text-fluid-xs mt-1" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+          <p className="text-fluid-xs mt-1" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
             {dateLabel}
           </p>
         )}
@@ -113,11 +113,11 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
   if (!hasAnyDocuments && !hasAttachments) {
     return (
       <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-        <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-2" style={{ color: 'var(--heritage-charcoal)' }}>
+        <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-2" style={{ color: 'var(--petrol-900)' }}>
           <FileText className="w-5 h-5" />
           Documents
         </h3>
-        <p className="text-fluid-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+        <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           No documents yet — we&apos;ll notify you by email when your quote is ready.
         </p>
       </div>
@@ -126,14 +126,14 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
 
   return (
     <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--petrol-900)' }}>
         <FileText className="w-5 h-5" />
         Documents
       </h3>
 
       {quotes.length > 0 && (
         <div className="mb-6">
-          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--petrol-600)' }}>
             <FileText className="w-4 h-4" />
             Quotes
           </h4>
@@ -150,7 +150,7 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
 
       {invoices.length > 0 && (
         <div className="mb-6">
-          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--petrol-600)' }}>
             <Receipt className="w-4 h-4" />
             Invoices
           </h4>
@@ -167,7 +167,7 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
 
       {other.length > 0 && (
         <div className="mb-6">
-          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--petrol-600)' }}>
             <Paperclip className="w-4 h-4" />
             Other
           </h4>
@@ -184,7 +184,7 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
 
       {hasAttachments && (
         <div>
-          <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--petrol-600)' }}>
             Your attachments
           </h4>
           {attachmentUrls.map((key) => (

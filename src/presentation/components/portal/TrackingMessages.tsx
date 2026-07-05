@@ -37,20 +37,20 @@ function MessageBubble({ message }: { message: MessageItem }) {
       <div
         className="max-w-[80%] rounded-lg px-4 py-3"
         style={{
-          background: isClient ? 'rgba(226,192,99,0.18)' : '#FAF6F0',
-          border: `1px solid ${isClient ? 'rgba(226,192,99,0.4)' : 'var(--atelier-border)'}`,
+          background: isClient ? 'rgba(226,192,99,0.18)' : 'var(--petrol-50)',
+          border: `1px solid ${isClient ? 'rgba(226,192,99,0.4)' : 'var(--petrol-100)'}`,
         }}
       >
         <p
           className="text-fluid-xs font-semibold uppercase tracking-wide mb-1"
-          style={{ color: 'var(--atelier-ink)', opacity: 0.6 }}
+          style={{ color: 'var(--petrol-600)', opacity: 0.6 }}
         >
           {isClient ? 'You' : 'Contigo Team'}
         </p>
-        <p className="text-fluid-sm whitespace-pre-wrap" style={{ color: 'var(--heritage-charcoal)' }}>
+        <p className="text-fluid-sm whitespace-pre-wrap" style={{ color: 'var(--petrol-900)' }}>
           {message.body}
         </p>
-        <p className="text-fluid-xs mt-2" style={{ color: 'var(--atelier-ink)', opacity: 0.6 }}>
+        <p className="text-fluid-xs mt-2" style={{ color: 'var(--petrol-600)', opacity: 0.6 }}>
           {formatDateTime(message.createdAt)}
         </p>
       </div>
@@ -188,13 +188,13 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
 
   return (
     <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--petrol-900)' }}>
         <MessageSquare className="w-5 h-5" />
         Messages
       </h3>
 
       {messages.length === 0 ? (
-        <p className="text-fluid-sm mb-6" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
+        <p className="text-fluid-sm mb-6" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           No messages yet — send us a note and we&apos;ll get back to you here.
         </p>
       ) : (
@@ -205,7 +205,7 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
         </div>
       )}
 
-      <div className="pt-4 border-t" style={{ borderColor: 'var(--atelier-border)' }}>
+      <div className="pt-4 border-t" style={{ borderColor: 'var(--petrol-100)' }}>
         <label htmlFor="tracking-message-draft" className="sr-only">
           Write a message
         </label>
@@ -218,9 +218,9 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
           maxLength={MAX_BODY_LENGTH}
           className="w-full rounded p-3 text-fluid-sm resize-none focus:outline-none"
           style={{
-            border: '1px solid var(--atelier-border)',
-            color: 'var(--heritage-charcoal)',
-            background: '#FAF6F0',
+            border: '1px solid var(--petrol-100)',
+            color: 'var(--petrol-900)',
+            background: 'var(--petrol-50)',
           }}
         />
 
