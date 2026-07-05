@@ -79,67 +79,82 @@ export default async function QuoteStatusPage({
         </p>
       </div>
 
-      <div className="page-padding max-w-2xl mx-auto pt-12">
-        {/* Quote summary card */}
-        <div
-          className="rounded-lg shadow-lg p-8 mb-12 border-t-4"
-          style={{
-            background: 'white',
-            borderTopColor: '#E2C063',
-          }}
-        >
-          <h2 className="text-fluid-2xl font-bold mb-8" style={{ color: 'var(--petrol-900)' }}>
-            {quote.name}
-          </h2>
+      <div className="page-padding max-w-6xl mx-auto pt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
+          {/* Left column — quote summary, status, documents, schedule */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Quote summary card */}
+            <div className="md:col-span-2 [&>div]:mb-0">
+              <div
+                className="rounded-lg shadow-lg p-8 mb-12 border-t-4"
+                style={{
+                  background: 'white',
+                  borderTopColor: '#E2C063',
+                }}
+              >
+                <h2 className="text-fluid-2xl font-bold mb-8" style={{ color: 'var(--petrol-900)' }}>
+                  {quote.name}
+                </h2>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--petrol-600)' }}>
-                Service Requested
-              </label>
-              <p className="mt-2 text-fluid-lg font-semibold" style={{ color: 'var(--petrol-900)' }}>
-                {quote.service}
-              </p>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-fluid-sm font-medium" style={{ color: 'var(--petrol-600)' }}>
+                      Service Requested
+                    </label>
+                    <p className="mt-2 text-fluid-lg font-semibold" style={{ color: 'var(--petrol-900)' }}>
+                      {quote.service}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-fluid-sm font-medium" style={{ color: 'var(--petrol-600)' }}>
+                      Your Message
+                    </label>
+                    <p className="mt-2 p-4 rounded bg-gray-50" style={{ color: 'var(--petrol-900)' }}>
+                      {quote.message}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t" style={{ borderColor: 'var(--petrol-100)' }}>
+                    <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
+                      Submitted on{' '}
+                      {quote.createdAt.toLocaleDateString('en-AU', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-fluid-sm font-medium" style={{ color: 'var(--petrol-600)' }}>
-                Your Message
-              </label>
-              <p className="mt-2 p-4 rounded bg-gray-50" style={{ color: 'var(--petrol-900)' }}>
-                {quote.message}
-              </p>
+            {/* Status + timeline */}
+            <div className="[&>div]:mb-0">
+              <TrackingStatusCard token={token} clientStage={clientStage} stages={stages} />
             </div>
 
-            <div className="pt-4 border-t" style={{ borderColor: 'var(--petrol-100)' }}>
-              <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
-                Submitted on{' '}
-                {quote.createdAt.toLocaleDateString('en-AU', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
+            {/* Documents */}
+            <div className="[&>div]:mb-0">
+              <TrackingDocumentsList token={token} documents={documents} attachmentUrls={quote.attachmentUrls} />
             </div>
+
+            {/* Schedule */}
+            <div className="md:col-span-2 [&>div]:mb-0">
+              <TrackingScheduleList token={token} events={events} />
+            </div>
+          </div>
+
+          {/* Right column — sticky messages rail */}
+          <div className="lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)] [&>div]:mb-0">
+            <TrackingMessages token={token} messages={messages} />
           </div>
         </div>
 
-        {/* Status + timeline */}
-        <TrackingStatusCard token={token} clientStage={clientStage} stages={stages} />
-
-        {/* Documents */}
-        <TrackingDocumentsList token={token} documents={documents} attachmentUrls={quote.attachmentUrls} />
-
-        {/* Schedule */}
-        <TrackingScheduleList token={token} events={events} />
-
-        {/* Messages */}
-        <TrackingMessages token={token} messages={messages} />
-
         {/* CTA */}
-        <div className="text-center pb-12">
+        <div className="text-center pb-12 pt-12">
           <p className="mb-6" style={{ color: 'var(--petrol-600)' }}>
             Questions? Contact us directly at{' '}
             <strong>+61 406 274 096</strong> or <strong>contact@contigoconstructions.com.au</strong>

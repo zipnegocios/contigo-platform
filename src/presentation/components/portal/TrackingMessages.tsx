@@ -187,25 +187,25 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
   const canSend = draft.trim().length > 0 && draft.trim().length <= MAX_BODY_LENGTH && !sending
 
   return (
-    <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
+    <div className="rounded-lg shadow-lg p-8 mb-12 h-full flex flex-col" style={{ background: 'white' }}>
       <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--petrol-900)' }}>
         <MessageSquare className="w-5 h-5" />
         Messages
       </h3>
 
       {messages.length === 0 ? (
-        <p className="text-fluid-sm mb-6" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
+        <p className="flex-1 text-fluid-sm mb-4" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>
           No messages yet — send us a note and we&apos;ll get back to you here.
         </p>
       ) : (
-        <div className="space-y-4 mb-6">
+        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
         </div>
       )}
 
-      <div className="pt-4 border-t" style={{ borderColor: 'var(--petrol-100)' }}>
+      <div className="flex-shrink-0 pt-4 border-t" style={{ borderColor: 'var(--petrol-100)' }}>
         <label htmlFor="tracking-message-draft" className="sr-only">
           Write a message
         </label>
