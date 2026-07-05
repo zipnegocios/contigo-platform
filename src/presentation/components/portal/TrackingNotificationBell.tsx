@@ -106,7 +106,7 @@ export function TrackingNotificationBell({ token }: TrackingNotificationBellProp
                 height: '1.1rem',
                 padding: '0 0.3rem',
                 backgroundColor: '#E2C063',
-                color: '#1E1A16',
+                color: 'var(--petrol-900)',
                 lineHeight: 1,
               }}
             >
