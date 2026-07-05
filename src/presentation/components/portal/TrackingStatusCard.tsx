@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { TrendingUp } from 'lucide-react'
 import { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 import { getClientStageLabel } from '@/presentation/lib/clientStageLabels'
 import { useSSE } from '@/presentation/hooks/useSSE'
@@ -54,9 +55,12 @@ export function TrackingStatusCard({ token, clientStage: initialClientStage, sta
       }}
     >
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
-        <h2 className="text-fluid-2xl font-bold" style={{ color: 'var(--heritage-charcoal)' }}>
-          Project Status
-        </h2>
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-6 h-6" style={{ color: 'var(--heritage-charcoal)' }} />
+          <h2 className="text-fluid-2xl font-bold" style={{ color: 'var(--heritage-charcoal)' }}>
+            Project Status
+          </h2>
+        </div>
         <span
           className="px-4 py-2 rounded-full text-white text-fluid-sm font-medium"
           style={{ background: isClosed ? 'var(--heritage-charcoal)' : '#E2C063' }}

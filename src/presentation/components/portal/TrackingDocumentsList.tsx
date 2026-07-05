@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FileText, Receipt, Paperclip } from 'lucide-react'
 import { LeadDocumentCategory } from '@/core/entities/LeadDocument'
 
 interface DocumentItem {
@@ -112,7 +113,8 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
   if (!hasAnyDocuments && !hasAttachments) {
     return (
       <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-        <h3 className="text-fluid-lg font-bold mb-2" style={{ color: 'var(--heritage-charcoal)' }}>
+        <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-2" style={{ color: 'var(--heritage-charcoal)' }}>
+          <FileText className="w-5 h-5" />
           Documents
         </h3>
         <p className="text-fluid-sm" style={{ color: 'var(--atelier-ink)', opacity: 0.7 }}>
@@ -124,13 +126,15 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
 
   return (
     <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-      <h3 className="text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+        <FileText className="w-5 h-5" />
         Documents
       </h3>
 
       {quotes.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+            <FileText className="w-4 h-4" />
             Quotes
           </h4>
           {quotes.map((doc) => (
@@ -146,7 +150,8 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
 
       {invoices.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+            <Receipt className="w-4 h-4" />
             Invoices
           </h4>
           {invoices.map((doc) => (
@@ -162,7 +167,8 @@ export function TrackingDocumentsList({ token, documents, attachmentUrls }: Trac
 
       {other.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+          <h4 className="flex items-center gap-1.5 text-fluid-sm font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--atelier-ink)' }}>
+            <Paperclip className="w-4 h-4" />
             Other
           </h4>
           {other.map((doc) => (

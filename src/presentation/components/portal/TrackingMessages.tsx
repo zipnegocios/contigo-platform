@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { MessageSquare } from 'lucide-react'
 import { useSSE } from '@/presentation/hooks/useSSE'
 
 interface MessageItem {
@@ -187,7 +188,8 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
 
   return (
     <div className="rounded-lg shadow-lg p-8 mb-12" style={{ background: 'white' }}>
-      <h3 className="text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+      <h3 className="flex items-center gap-2 text-fluid-lg font-bold mb-6" style={{ color: 'var(--heritage-charcoal)' }}>
+        <MessageSquare className="w-5 h-5" />
         Messages
       </h3>
 
