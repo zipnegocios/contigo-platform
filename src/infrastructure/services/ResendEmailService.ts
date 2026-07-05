@@ -7,13 +7,11 @@
  * Colors are mapped to design tokens below.
  *
  * Color Mapping:
- * - #D4AF37 → var(--gold-600) (header gradient, buttons)
- * - #C49A27 → gold-600 blend (header gradient end)
+ * - #0D3C4C → var(--petrol-800) (shared header/footer background, renderEmailShell)
+ * - #D4AF37 → var(--gold-600) (buttons, gold logo asset)
+ * - #E2C063 → var(--gold-400) (footer links)
  * - #e0e0e0 → neutral border
  * - #fafaf8 → var(--neutral-50) (body background)
- * - #2a2a2a → footer dark bg
- * - #ccc → footer text (gray)
- * - #1a1a1a → admin header dark
  *
  * See AUDIT_HARDCODED_COLORS.md (Bucket 3) for details.
  */
@@ -61,63 +59,81 @@ export class ResendEmailService implements IEmailService {
     return `Contigo Constructions | ${purpose} <${this.getFromEmail()}>`
   }
 
-  async sendQuoteConfirmation(quote: Quote): Promise<void> {
-    const resend = getResend()
-    const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+  private renderEmailShell(title: string, bodyHtml: string): string {
+    const mainLogoUrl = `${this.siteUrl}/assets/logos/email/logo-main-gold.png`
+    const iconLogoUrl = `${this.siteUrl}/assets/logos/email/logo-icon-white.png`
+    const year = new Date().getFullYear()
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
+    return `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
           <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; margin: 0; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .header { background: #0D3C4C; padding: 24px 20px; border-radius: 8px 8px 0 0; text-align: center; }
+            .header img { display: block; margin: 0 auto 12px; }
+            .header h1 { color: #ffffff; font-size: 20px; margin: 0; }
             .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
+            .footer { background: #0D3C4C; color: #cfd8db; padding: 20px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
+            .footer img { display: block; margin: 0 auto 12px; }
+            .footer a { color: #E2C063; }
+            .footer p { margin: 4px 0; }
             .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>Thank You for Your Inquiry</h1>
+              <img src="${mainLogoUrl}" width="200" height="180" alt="Contigo Constructions">
+              <h1>${title}</h1>
             </div>
             <div class="body">
-              <p>Dear ${quote.name},</p>
-              <p>We've received your quote request for <strong>${quote.service}</strong>. Our team will review your project details and get back to you shortly.</p>
-
-              <h3>Your Details:</h3>
-              <ul>
-                <li><strong>Service:</strong> ${quote.service}</li>
-                <li><strong>Email:</strong> ${quote.email.toString()}</li>
-                ${quote.phone ? `<li><strong>Phone:</strong> ${quote.phone.toString()}</li>` : ''}
-              </ul>
-
-              <p><strong>Tracking Your Quote:</strong></p>
-              <p>You can check the status of your quote at any time using the link below:</p>
-              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
-
-              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
-              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
+              ${bodyHtml}
             </div>
             <div class="footer">
-              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>76 Coorara Avenue, Payneham South SA 5070 |+61 406 274 096</p>
+              <img src="${iconLogoUrl}" width="140" height="97" alt="Contigo Constructions">
+              <p>This is an automated message — please don't reply directly to this email.</p>
+              <p>Need to get in touch? Email us at <a href="mailto:contact@contigoconstructions.com.au">contact@contigoconstructions.com.au</a> or WhatsApp us at <a href="https://wa.me/61406274096">+61 406 274 096</a>.</p>
+              <p>76 Coorara Avenue, Payneham South SA 5070</p>
+              <p>&copy; ${year} Contigo Constructions. All rights reserved.</p>
             </div>
           </div>
         </body>
       </html>
+    `
+  }
+
+  async sendQuoteConfirmation(quote: Quote): Promise<void> {
+    const resend = getResend()
+    const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+
+    const bodyHtml = `
+      <p>Dear ${quote.name},</p>
+      <p>We've received your quote request for <strong>${quote.service}</strong>. Our team will review your project details and get back to you shortly.</p>
+
+      <h3>Your Details:</h3>
+      <ul>
+        <li><strong>Service:</strong> ${quote.service}</li>
+        <li><strong>Email:</strong> ${quote.email.toString()}</li>
+        ${quote.phone ? `<li><strong>Phone:</strong> ${quote.phone.toString()}</li>` : ''}
+      </ul>
+
+      <p><strong>Tracking Your Quote:</strong></p>
+      <p>You can check the status of your quote at any time using the link below:</p>
+      <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+
+      <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+      <p>Best regards,<br><strong>Contigo Constructions</strong></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Quotes'),
       to: quote.email.toString(),
       subject: 'Your Quote Request - Contigo Constructions',
-      html: htmlContent,
+      html: this.renderEmailShell('Thank You for Your Inquiry', bodyHtml),
     })
   }
 
@@ -125,57 +141,33 @@ export class ResendEmailService implements IEmailService {
     const resend = getResend()
     const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>New Quote Request</h1>
-            </div>
-            <div class="body">
-              <p><strong>A new quote request has been submitted:</strong></p>
+    const bodyHtml = `
+      <p><strong>A new quote request has been submitted:</strong></p>
 
-              <div class="detail">
-                <p><strong>Name:</strong> ${quote.name}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Email:</strong> ${quote.email.toString()}</p>
-              </div>
-              ${quote.phone ? `<div class="detail"><p><strong>Phone:</strong> ${quote.phone.toString()}</p></div>` : ''}
-              <div class="detail">
-                <p><strong>Service:</strong> ${quote.service}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Message:</strong><br>${quote.message.replace(/\n/g, '<br>')}</p>
-              </div>
+      <div class="detail">
+        <p><strong>Name:</strong> ${quote.name}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Email:</strong> ${quote.email.toString()}</p>
+      </div>
+      ${quote.phone ? `<div class="detail"><p><strong>Phone:</strong> ${quote.phone.toString()}</p></div>` : ''}
+      <div class="detail">
+        <p><strong>Service:</strong> ${quote.service}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Message:</strong><br>${quote.message.replace(/\n/g, '<br>')}</p>
+      </div>
 
-              <p><strong>Tracking Token:</strong> ${quote.trackingToken}</p>
-              <p><strong>Quote ID:</strong> ${quote.id}</p>
-              <p><strong>Submitted:</strong> ${quote.createdAt.toLocaleString()}</p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p><strong>Tracking Token:</strong> ${quote.trackingToken}</p>
+      <p><strong>Quote ID:</strong> ${quote.id}</p>
+      <p><strong>Submitted:</strong> ${quote.createdAt.toLocaleString()}</p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('New Quotes'),
       to: adminEmail,
       subject: `[New Quote] ${quote.service} - ${quote.name}`,
-      html: htmlContent,
+      html: this.renderEmailShell('New Quote Request', bodyHtml),
     })
   }
 
@@ -184,50 +176,25 @@ export class ResendEmailService implements IEmailService {
     const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
     const leadUrl = `${this.siteUrl}/admin/leads/${lead.id}`
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>New Message from Client</h1>
-            </div>
-            <div class="body">
-              <p><strong>The client has sent a new message on this lead:</strong></p>
+    const bodyHtml = `
+      <p><strong>The client has sent a new message on this lead:</strong></p>
 
-              <div class="detail">
-                <p><strong>Name:</strong> ${quote.name}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Service:</strong> ${quote.service}</p>
-              </div>
+      <div class="detail">
+        <p><strong>Name:</strong> ${quote.name}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Service:</strong> ${quote.service}</p>
+      </div>
 
-              <p>Please log in to the admin panel to view the message and respond.</p>
-              <p><a href="${leadUrl}" class="button">View Lead</a></p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p>Please log in to the admin panel to view the message and respond.</p>
+      <p><a href="${leadUrl}" class="button">View Lead</a></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Messages'),
       to: adminEmail,
       subject: `[New Message] ${quote.service} — ${quote.name}`,
-      html: htmlContent,
+      html: this.renderEmailShell('New Message from Client', bodyHtml),
     })
   }
 
@@ -235,51 +202,22 @@ export class ResendEmailService implements IEmailService {
     const resend = getResend()
     const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>You Have a New Message</h1>
-            </div>
-            <div class="body">
-              <p>Dear ${quote.name},</p>
-              <p>Our team has sent you a new message regarding your <strong>${quote.service}</strong> project.</p>
+    const bodyHtml = `
+      <p>Dear ${quote.name},</p>
+      <p>Our team has sent you a new message regarding your <strong>${quote.service}</strong> project.</p>
 
-              <p>Please visit your tracking page to view the message and reply:</p>
-              <p><a href="${trackingUrl}" class="button">View Message</a></p>
+      <p>Please visit your tracking page to view the message and reply:</p>
+      <p><a href="${trackingUrl}" class="button">View Message</a></p>
 
-              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
-              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
-            </div>
-            <div class="footer">
-              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+      <p>Best regards,<br><strong>Contigo Constructions</strong></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Messages'),
       to: quote.email.toString(),
       subject: `New message about your ${quote.service} project`,
-      html: htmlContent,
+      html: this.renderEmailShell('You Have a New Message', bodyHtml),
     })
   }
 
@@ -287,51 +225,22 @@ export class ResendEmailService implements IEmailService {
     const resend = getResend()
     const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Your Project Has Been Updated</h1>
-            </div>
-            <div class="body">
-              <p>Dear ${quote.name},</p>
-              <p>Your <strong>${quote.service}</strong> project has moved to a new stage: <strong>${stageLabel}</strong>.</p>
+    const bodyHtml = `
+      <p>Dear ${quote.name},</p>
+      <p>Your <strong>${quote.service}</strong> project has moved to a new stage: <strong>${stageLabel}</strong>.</p>
 
-              <p>You can check the full status of your project at any time:</p>
-              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+      <p>You can check the full status of your project at any time:</p>
+      <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
 
-              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
-              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
-            </div>
-            <div class="footer">
-              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+      <p>Best regards,<br><strong>Contigo Constructions</strong></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Updates'),
       to: quote.email.toString(),
       subject: `Your ${quote.service} project is now: ${stageLabel}`,
-      html: htmlContent,
+      html: this.renderEmailShell('Your Project Has Been Updated', bodyHtml),
     })
   }
 
@@ -340,50 +249,25 @@ export class ResendEmailService implements IEmailService {
     const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
     const leadUrl = `${this.siteUrl}/admin/leads/${lead.id}`
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Lead Stage Changed</h1>
-            </div>
-            <div class="body">
-              <div class="detail">
-                <p><strong>Name:</strong> ${quote.name}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Service:</strong> ${quote.service}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Stage:</strong> ${fromLabel} &rarr; ${toLabel}</p>
-              </div>
+    const bodyHtml = `
+      <div class="detail">
+        <p><strong>Name:</strong> ${quote.name}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Service:</strong> ${quote.service}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Stage:</strong> ${fromLabel} &rarr; ${toLabel}</p>
+      </div>
 
-              <p><a href="${leadUrl}" class="button">View Lead</a></p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p><a href="${leadUrl}" class="button">View Lead</a></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Updates'),
       to: adminEmail,
       subject: `[Stage Change] ${quote.service} — ${quote.name}: ${fromLabel} → ${toLabel}`,
-      html: htmlContent,
+      html: this.renderEmailShell('Lead Stage Changed', bodyHtml),
     })
   }
 
@@ -393,57 +277,28 @@ export class ResendEmailService implements IEmailService {
     const typeLabel = EVENT_TYPE_LABELS[event.type]
     const when = this.formatEventDateTime(event)
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>${typeLabel} Scheduled</h1>
-            </div>
-            <div class="body">
-              <p>Dear ${quote.name},</p>
-              <p>We've scheduled a <strong>${typeLabel.toLowerCase()}</strong> for your <strong>${quote.service}</strong> project.</p>
+    const bodyHtml = `
+      <p>Dear ${quote.name},</p>
+      <p>We've scheduled a <strong>${typeLabel.toLowerCase()}</strong> for your <strong>${quote.service}</strong> project.</p>
 
-              <ul>
-                <li><strong>When:</strong> ${when}</li>
-                <li><strong>Duration:</strong> ${event.durationMinutes} minutes</li>
-                ${event.location ? `<li><strong>Location:</strong> ${event.location}</li>` : ''}
-              </ul>
+      <ul>
+        <li><strong>When:</strong> ${when}</li>
+        <li><strong>Duration:</strong> ${event.durationMinutes} minutes</li>
+        ${event.location ? `<li><strong>Location:</strong> ${event.location}</li>` : ''}
+      </ul>
 
-              <p>You can review your project status at any time:</p>
-              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+      <p>You can review your project status at any time:</p>
+      <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
 
-              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
-              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
-            </div>
-            <div class="footer">
-              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+      <p>Best regards,<br><strong>Contigo Constructions</strong></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Scheduling'),
       to: quote.email.toString(),
       subject: `${typeLabel} scheduled for your ${quote.service} project`,
-      html: htmlContent,
+      html: this.renderEmailShell(`${typeLabel} Scheduled`, bodyHtml),
     })
   }
 
@@ -454,51 +309,26 @@ export class ResendEmailService implements IEmailService {
     const typeLabel = EVENT_TYPE_LABELS[event.type]
     const when = this.formatEventDateTime(event)
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>${typeLabel} Scheduled</h1>
-            </div>
-            <div class="body">
-              <div class="detail">
-                <p><strong>Name:</strong> ${quote.name}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Service:</strong> ${quote.service}</p>
-              </div>
-              <div class="detail">
-                <p><strong>When:</strong> ${when} (${event.durationMinutes} min)</p>
-              </div>
-              ${event.location ? `<div class="detail"><p><strong>Location:</strong> ${event.location}</p></div>` : ''}
+    const bodyHtml = `
+      <div class="detail">
+        <p><strong>Name:</strong> ${quote.name}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Service:</strong> ${quote.service}</p>
+      </div>
+      <div class="detail">
+        <p><strong>When:</strong> ${when} (${event.durationMinutes} min)</p>
+      </div>
+      ${event.location ? `<div class="detail"><p><strong>Location:</strong> ${event.location}</p></div>` : ''}
 
-              <p><a href="${leadUrl}" class="button">View Lead</a></p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p><a href="${leadUrl}" class="button">View Lead</a></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Scheduling'),
       to: adminEmail,
       subject: `[${typeLabel} Scheduled] ${quote.service} — ${quote.name}`,
-      html: htmlContent,
+      html: this.renderEmailShell(`${typeLabel} Scheduled`, bodyHtml),
     })
   }
 
@@ -508,57 +338,28 @@ export class ResendEmailService implements IEmailService {
     const typeLabel = EVENT_TYPE_LABELS[event.type]
     const when = this.formatEventDateTime(event)
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>${typeLabel} Updated</h1>
-            </div>
-            <div class="body">
-              <p>Dear ${quote.name},</p>
-              <p>The <strong>${typeLabel.toLowerCase()}</strong> for your <strong>${quote.service}</strong> project has been updated.</p>
+    const bodyHtml = `
+      <p>Dear ${quote.name},</p>
+      <p>The <strong>${typeLabel.toLowerCase()}</strong> for your <strong>${quote.service}</strong> project has been updated.</p>
 
-              <ul>
-                <li><strong>New date/time:</strong> ${when}</li>
-                <li><strong>Duration:</strong> ${event.durationMinutes} minutes</li>
-                ${event.location ? `<li><strong>Location:</strong> ${event.location}</li>` : ''}
-              </ul>
+      <ul>
+        <li><strong>New date/time:</strong> ${when}</li>
+        <li><strong>Duration:</strong> ${event.durationMinutes} minutes</li>
+        ${event.location ? `<li><strong>Location:</strong> ${event.location}</li>` : ''}
+      </ul>
 
-              <p>You can review your project status at any time:</p>
-              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+      <p>You can review your project status at any time:</p>
+      <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
 
-              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
-              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
-            </div>
-            <div class="footer">
-              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+      <p>Best regards,<br><strong>Contigo Constructions</strong></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Scheduling'),
       to: quote.email.toString(),
       subject: `${typeLabel} updated for your ${quote.service} project`,
-      html: htmlContent,
+      html: this.renderEmailShell(`${typeLabel} Updated`, bodyHtml),
     })
   }
 
@@ -569,51 +370,26 @@ export class ResendEmailService implements IEmailService {
     const typeLabel = EVENT_TYPE_LABELS[event.type]
     const when = this.formatEventDateTime(event)
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>${typeLabel} Updated</h1>
-            </div>
-            <div class="body">
-              <div class="detail">
-                <p><strong>Name:</strong> ${quote.name}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Service:</strong> ${quote.service}</p>
-              </div>
-              <div class="detail">
-                <p><strong>New date/time:</strong> ${when} (${event.durationMinutes} min)</p>
-              </div>
-              ${event.location ? `<div class="detail"><p><strong>Location:</strong> ${event.location}</p></div>` : ''}
+    const bodyHtml = `
+      <div class="detail">
+        <p><strong>Name:</strong> ${quote.name}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Service:</strong> ${quote.service}</p>
+      </div>
+      <div class="detail">
+        <p><strong>New date/time:</strong> ${when} (${event.durationMinutes} min)</p>
+      </div>
+      ${event.location ? `<div class="detail"><p><strong>Location:</strong> ${event.location}</p></div>` : ''}
 
-              <p><a href="${leadUrl}" class="button">View Lead</a></p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p><a href="${leadUrl}" class="button">View Lead</a></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Scheduling'),
       to: adminEmail,
       subject: `[${typeLabel} Updated] ${quote.service} — ${quote.name}`,
-      html: htmlContent,
+      html: this.renderEmailShell(`${typeLabel} Updated`, bodyHtml),
     })
   }
 
@@ -623,50 +399,21 @@ export class ResendEmailService implements IEmailService {
     const typeLabel = EVENT_TYPE_LABELS[event.type]
     const when = this.formatEventDateTime(event)
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>${typeLabel} Cancelled</h1>
-            </div>
-            <div class="body">
-              <p>Dear ${quote.name},</p>
-              <p>The <strong>${typeLabel.toLowerCase()}</strong> previously scheduled for <strong>${when}</strong> regarding your <strong>${quote.service}</strong> project has been cancelled.</p>
+    const bodyHtml = `
+      <p>Dear ${quote.name},</p>
+      <p>The <strong>${typeLabel.toLowerCase()}</strong> previously scheduled for <strong>${when}</strong> regarding your <strong>${quote.service}</strong> project has been cancelled.</p>
 
-              <p>If you'd like to reschedule, please check your project status page or get in touch with us directly:</p>
-              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+      <p>If you'd like to reschedule, please check your project status page or get in touch with us directly:</p>
+      <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
 
-              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
-            </div>
-            <div class="footer">
-              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p>Best regards,<br><strong>Contigo Constructions</strong></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Scheduling'),
       to: quote.email.toString(),
       subject: `${typeLabel} cancelled for your ${quote.service} project`,
-      html: htmlContent,
+      html: this.renderEmailShell(`${typeLabel} Cancelled`, bodyHtml),
     })
   }
 
@@ -677,50 +424,25 @@ export class ResendEmailService implements IEmailService {
     const typeLabel = EVENT_TYPE_LABELS[event.type]
     const when = this.formatEventDateTime(event)
 
-    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
-    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
-            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
-            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
-            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>${typeLabel} Cancelled</h1>
-            </div>
-            <div class="body">
-              <div class="detail">
-                <p><strong>Name:</strong> ${quote.name}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Service:</strong> ${quote.service}</p>
-              </div>
-              <div class="detail">
-                <p><strong>Was scheduled for:</strong> ${when}</p>
-              </div>
+    const bodyHtml = `
+      <div class="detail">
+        <p><strong>Name:</strong> ${quote.name}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Service:</strong> ${quote.service}</p>
+      </div>
+      <div class="detail">
+        <p><strong>Was scheduled for:</strong> ${when}</p>
+      </div>
 
-              <p><a href="${leadUrl}" class="button">View Lead</a></p>
-            </div>
-          </div>
-        </body>
-      </html>
+      <p><a href="${leadUrl}" class="button">View Lead</a></p>
     `
 
     await resend.emails.send({
       from: this.getFromAddress('Scheduling'),
       to: adminEmail,
       subject: `[${typeLabel} Cancelled] ${quote.service} — ${quote.name}`,
-      html: htmlContent,
+      html: this.renderEmailShell(`${typeLabel} Cancelled`, bodyHtml),
     })
   }
 
