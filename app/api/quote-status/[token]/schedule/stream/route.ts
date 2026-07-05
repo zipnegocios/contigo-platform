@@ -12,6 +12,8 @@ interface ScheduleEventSnapshot {
   scheduledAt: Date
   durationMinutes: number
   location: string | null
+  meetingDetails: { channel: string; link: string | null } | null
+  siteVisitDetails: { address: string | null; mapsLink: string | null; referencePoint: string | null } | null
   // Internal diffing detail for this route only — not part of the client-facing
   // shape from GetTrackingPanelDataUseCase.
   updatedAt: Date
@@ -50,6 +52,18 @@ export async function GET(
             scheduledAt: e.scheduledAt,
             durationMinutes: e.durationMinutes,
             location: e.location,
+            meetingDetails:
+              e.metadata.kind === 'meeting'
+                ? { channel: e.metadata.channel, link: e.metadata.link }
+                : null,
+            siteVisitDetails:
+              e.metadata.kind === 'site_visit'
+                ? {
+                    address: e.metadata.address,
+                    mapsLink: e.metadata.mapsLink,
+                    referencePoint: e.metadata.referencePoint,
+                  }
+                : null,
             updatedAt: e.updatedAt,
           }))
       },

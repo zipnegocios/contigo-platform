@@ -33,6 +33,8 @@ export interface TrackingPanelDTO {
     scheduledAt: Date
     durationMinutes: number
     location: string | null
+    meetingDetails: { channel: string; link: string | null } | null
+    siteVisitDetails: { address: string | null; mapsLink: string | null; referencePoint: string | null } | null
   }>
   messages: Array<{
     id: string
@@ -97,6 +99,18 @@ export class GetTrackingPanelDataUseCase {
         scheduledAt: event.scheduledAt,
         durationMinutes: event.durationMinutes,
         location: event.location,
+        meetingDetails:
+          event.metadata.kind === 'meeting'
+            ? { channel: event.metadata.channel, link: event.metadata.link }
+            : null,
+        siteVisitDetails:
+          event.metadata.kind === 'site_visit'
+            ? {
+                address: event.metadata.address,
+                mapsLink: event.metadata.mapsLink,
+                referencePoint: event.metadata.referencePoint,
+              }
+            : null,
       }))
 
     // Chronological (oldest first) for a thread reading top-to-bottom; the repository
