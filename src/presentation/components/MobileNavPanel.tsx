@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { X } from 'lucide-react'
 import { gsap } from 'gsap'
 import { Button } from '@/presentation/design-system/components/atoms'
+import { TrackingNotificationBell } from '@/presentation/components/portal/TrackingNotificationBell'
 import { IconLogo } from './IconLogo'
 import { logoPathsVertical, LOGO_VERTICAL_VIEWBOX } from './logo-paths-vertical'
 import { SOCIAL_LINKS } from './social-links'
@@ -48,9 +49,10 @@ interface MobileNavPanelProps {
   onClose: () => void
   onContactClick: () => void
   onQuoteClick: () => void
+  trackingToken: string | null
 }
 
-export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: MobileNavPanelProps) {
+export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick, trackingToken }: MobileNavPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null)
   const logoStageRef = useRef<HTMLDivElement>(null)
   const logoFlipRef = useRef<HTMLDivElement>(null)
@@ -237,15 +239,21 @@ export function MobileNavPanel({ open, onClose, onContactClick, onQuoteClick }: 
               </button>
             </li>
             <li className="mnp-nav-item mnp-nav-item--cta">
-              <Button
-                onClick={onQuoteClick}
-                variant="primary"
-                size="md"
-                className="mnp-cta-btn"
-                style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
-              >
-                Request a Quote
-              </Button>
+              {trackingToken ? (
+                <div className="flex justify-center">
+                  <TrackingNotificationBell token={trackingToken} />
+                </div>
+              ) : (
+                <Button
+                  onClick={onQuoteClick}
+                  variant="primary"
+                  size="md"
+                  className="mnp-cta-btn"
+                  style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
+                >
+                  Request a Quote
+                </Button>
+              )}
             </li>
           </ul>
         </nav>

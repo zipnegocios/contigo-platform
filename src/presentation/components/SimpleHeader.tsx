@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
+import { TrackingNotificationBell } from '@/presentation/components/portal/TrackingNotificationBell'
 import { logoPaths, LOGO_VIEWBOX } from './logo-paths'
 import { ContactInfoModal } from './ContactInfoModal'
 import { QuoteFormModal } from './QuoteFormModal'
@@ -15,6 +17,12 @@ export function SimpleHeader() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [contactModalOpen, setContactModalOpen] = useState(false)
   const [quoteModalOpen, setQuoteModalOpen] = useState(false)
+
+  // A returning client on their tracking page already has a quote — the CTA
+  // is meaningless there, so it's swapped for a notification bell instead.
+  // Computed once here (not re-derived in MobileNavPanel) and passed down.
+  const pathname = usePathname()
+  const trackingToken = pathname?.match(/^\/quote-status\/([^/]+)/)?.[1] ?? null
 
   useEffect(() => {
     const handleScroll = () => {
@@ -99,15 +107,21 @@ export function SimpleHeader() {
 
           {/* Right actions */}
           <div className="flex items-center gap-4">
-            <Button
-              onClick={() => setQuoteModalOpen(true)}
-              variant="primary"
-              size="md"
-              className="hidden sm:inline-flex transition-all duration-500"
-              style={{ opacity: scrolled ? 1 : 0.9, backgroundColor: '#E2C063', color: '#1E1A16' }}
-            >
-              Request a Quote
-            </Button>
+            {trackingToken ? (
+              <div className="hidden sm:inline-flex">
+                <TrackingNotificationBell token={trackingToken} />
+              </div>
+            ) : (
+              <Button
+                onClick={() => setQuoteModalOpen(true)}
+                variant="primary"
+                size="md"
+                className="hidden sm:inline-flex transition-all duration-500"
+                style={{ opacity: scrolled ? 1 : 0.9, backgroundColor: '#E2C063', color: '#1E1A16' }}
+              >
+                Request a Quote
+              </Button>
+            )}
 
             {/* Mobile hamburger */}
             <button
@@ -136,6 +150,7 @@ export function SimpleHeader() {
           setMobileOpen(false)
           setQuoteModalOpen(true)
         }}
+        trackingToken={trackingToken}
       />
 
       <ContactInfoModal open={contactModalOpen} onOpenChange={setContactModalOpen} />
