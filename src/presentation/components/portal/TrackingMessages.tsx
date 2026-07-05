@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MessageSquare } from 'lucide-react'
 import { useSSE } from '@/presentation/hooks/useSSE'
+import { useNotificationSound } from '@/presentation/hooks/useNotificationSound'
 
 interface MessageItem {
   id: string
@@ -65,6 +66,25 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
   const [sendError, setSendError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState(false)
   const confirmationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { arm, play } = useNotificationSound('/assets/sounds/message.mp3')
+  const messagesRef = useRef<MessageItem[]>(initialMessages)
+
+  // Keep a ref in sync with the latest `messages` state so the SSE
+  // `onMessage` callback below can compare against "what we knew before
+  // this tick" without capturing a stale closure value.
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
+
+  // Arm the notification sound on the first user interaction with this
+  // page (browsers require a genuine gesture to unlock audio playback).
+  useEffect(() => {
+    document.addEventListener('click', arm, { once: true })
+    return () => {
+      document.removeEventListener('click', arm)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // On mount, fetch the authoritative thread — this also marks staff messages
   // as read server-side, so notify the bell once it succeeds.
@@ -111,6 +131,14 @@ export function TrackingMessages({ token, messages: initialMessages }: TrackingM
   useSSE<{ messages: MessageItem[]; unreadStaffMessages: number }>(
     `/api/quote-status/${token}/messages/stream`,
     (data) => {
+      const previous = messagesRef.current
+      const hasNewStaffMessage = data.messages.some(
+        (m) => m.authorType === 'staff' && !previous.some((p) => p.id === m.id),
+      )
+      if (hasNewStaffMessage) {
+        play()
+      }
+
       setMessages((prev) => {
         const incoming = data.messages
         const pendingTemp = prev.filter((m) => m.id.startsWith('temp-'))

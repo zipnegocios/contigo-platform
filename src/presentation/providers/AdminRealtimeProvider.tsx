@@ -1,7 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useSSE } from '@/presentation/hooks/useSSE'
+import { useNotificationSound } from '@/presentation/hooks/useNotificationSound'
 
 export interface AdminMessagesSnapshot {
   total: number
@@ -30,8 +31,35 @@ const AdminRealtimeContext = createContext<AdminMessagesSnapshot>(DEFAULT_SNAPSH
  */
 export function AdminRealtimeProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<AdminMessagesSnapshot>(DEFAULT_SNAPSHOT)
+  const { arm, play } = useNotificationSound('/assets/sounds/message-admin.mp3')
+  const snapshotRef = useRef<AdminMessagesSnapshot>(DEFAULT_SNAPSHOT)
+
+  // Keep a ref in sync with the latest snapshot so the SSE `onMessage`
+  // callback below can compare against "what we knew before this tick"
+  // without capturing a stale closure value.
+  useEffect(() => {
+    snapshotRef.current = snapshot
+  }, [snapshot])
+
+  // Arm the notification sound on the first click anywhere in the admin
+  // panel (browsers require a genuine gesture to unlock audio playback).
+  useEffect(() => {
+    document.addEventListener('click', arm, { once: true })
+    return () => {
+      document.removeEventListener('click', arm)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useSSE<Omit<AdminMessagesSnapshot, 'connected'>>('/api/admin/messages/stream', (data) => {
+    const previous = snapshotRef.current
+    // Only play once we already had a prior live snapshot — the very first
+    // snapshot after mount can jump from the default `total: 0` to some
+    // existing nonzero total that reflects pre-existing unread messages,
+    // not a newly-arrived one.
+    if (previous.connected && data.total > previous.total) {
+      play()
+    }
     setSnapshot({ ...data, connected: true })
   })
 
