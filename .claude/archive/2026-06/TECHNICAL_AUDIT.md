@@ -1363,9 +1363,9 @@ npm uninstall embla-carousel-react next-themes \
     // ...
   ],
   "contact": {
-    "phone": "(08) 8123 4567",
-    "email": "info@contigoconstructions.com.au",
-    "address": "25 Green Avenue, Seaton SA 5023",
+    "phone": "+61 406 274 096",
+    "email": "contact@contigoconstructions.com.au",
+    "address": "76 Coorara Avenue, Payneham South SA 5070 ,
     "hours": "Mon - Fri: 7:00 AM - 5:00 PM"
   }
 }

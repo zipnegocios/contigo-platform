@@ -99,7 +99,7 @@ export class ResendEmailService implements IEmailService {
             </div>
             <div class="footer">
               <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+              <p>76 Coorara Avenue, Payneham South SA 5070 |+61 406 274 096</p>
             </div>
           </div>
         </body>
@@ -261,7 +261,7 @@ export class ResendEmailService implements IEmailService {
             </div>
             <div class="footer">
               <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
             </div>
           </div>
         </body>
@@ -313,7 +313,7 @@ export class ResendEmailService implements IEmailService {
             </div>
             <div class="footer">
               <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
             </div>
           </div>
         </body>
@@ -425,7 +425,7 @@ export class ResendEmailService implements IEmailService {
             </div>
             <div class="footer">
               <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
             </div>
           </div>
         </body>
@@ -540,7 +540,7 @@ export class ResendEmailService implements IEmailService {
             </div>
             <div class="footer">
               <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
             </div>
           </div>
         </body>
@@ -648,7 +648,7 @@ export class ResendEmailService implements IEmailService {
             </div>
             <div class="footer">
               <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
-              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+              <p>76 Coorara Avenue, Payneham South SA 5070|+61 406 274 096</p>
             </div>
           </div>
         </body>
