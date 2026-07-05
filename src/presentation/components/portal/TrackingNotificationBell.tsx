@@ -120,7 +120,7 @@ export function TrackingNotificationBell({ token }: TrackingNotificationBellProp
           <DropdownMenuLabel>No notifications yet</DropdownMenuLabel>
         ) : (
           items.map((item) => (
-            <DropdownMenuItem key={item.id} disabled className="flex-col items-start gap-0.5 cursor-default">
+            <DropdownMenuItem key={item.id} onSelect={(e) => e.preventDefault()} className="flex-col items-start gap-0.5 cursor-default">
               <span className="text-sm">{item.label}</span>
               <span className="text-xs text-muted-foreground">{new Date(item.createdAt).toLocaleString()}</span>
             </DropdownMenuItem>
