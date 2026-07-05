@@ -74,7 +74,7 @@ export default async function QuoteStatusPage({
         >
           Your Quote Status
         </h1>
-        <p className="text-fluid-base max-w-xl" style={{ color: 'rgba(250,246,240,0.6)' }}>
+        <p className="text-fluid-base max-w-xl" style={{ color: 'rgba(236,245,248,0.6)' }}>
           Tracking reference: {token}
         </p>
       </div>
