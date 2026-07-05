@@ -46,12 +46,19 @@ function getResend(): Resend {
 export class ResendEmailService implements IEmailService {
   private siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-  private getFromAddress(): string {
+  private getFromEmail(): string {
     // Fallback must match a domain actually verified in Resend — currently
     // only the `updates.` subdomain is verified there (the apex domain isn't
     // yet), so this cannot be `noreply@contigoconstructions.com.au` without
     // the sends silently failing.
     return process.env.RESEND_FROM_EMAIL || 'noreply@updates.contigoconstructions.com.au'
+  }
+
+  // Purpose-specific sender display name so recipients see e.g. "Contigo
+  // Constructions | Quotes" instead of a bare address (which mail clients
+  // were rendering as just "Contact" with no display name set at all).
+  private getFromAddress(purpose: 'Quotes' | 'New Quotes' | 'Messages' | 'Updates' | 'Scheduling'): string {
+    return `Contigo Constructions | ${purpose} <${this.getFromEmail()}>`
   }
 
   async sendQuoteConfirmation(quote: Quote): Promise<void> {
@@ -107,7 +114,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Quotes'),
       to: quote.email.toString(),
       subject: 'Your Quote Request - Contigo Constructions',
       html: htmlContent,
@@ -165,7 +172,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('New Quotes'),
       to: adminEmail,
       subject: `[New Quote] ${quote.service} - ${quote.name}`,
       html: htmlContent,
@@ -217,7 +224,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Messages'),
       to: adminEmail,
       subject: `[New Message] ${quote.service} — ${quote.name}`,
       html: htmlContent,
@@ -269,7 +276,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Messages'),
       to: quote.email.toString(),
       subject: `New message about your ${quote.service} project`,
       html: htmlContent,
@@ -321,7 +328,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Updates'),
       to: quote.email.toString(),
       subject: `Your ${quote.service} project is now: ${stageLabel}`,
       html: htmlContent,
@@ -373,7 +380,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Updates'),
       to: adminEmail,
       subject: `[Stage Change] ${quote.service} — ${quote.name}: ${fromLabel} → ${toLabel}`,
       html: htmlContent,
@@ -433,7 +440,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Scheduling'),
       to: quote.email.toString(),
       subject: `${typeLabel} scheduled for your ${quote.service} project`,
       html: htmlContent,
@@ -488,7 +495,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Scheduling'),
       to: adminEmail,
       subject: `[${typeLabel} Scheduled] ${quote.service} — ${quote.name}`,
       html: htmlContent,
@@ -548,7 +555,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Scheduling'),
       to: quote.email.toString(),
       subject: `${typeLabel} updated for your ${quote.service} project`,
       html: htmlContent,
@@ -603,7 +610,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Scheduling'),
       to: adminEmail,
       subject: `[${typeLabel} Updated] ${quote.service} — ${quote.name}`,
       html: htmlContent,
@@ -656,7 +663,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Scheduling'),
       to: quote.email.toString(),
       subject: `${typeLabel} cancelled for your ${quote.service} project`,
       html: htmlContent,
@@ -710,7 +717,7 @@ export class ResendEmailService implements IEmailService {
     `
 
     await resend.emails.send({
-      from: this.getFromAddress(),
+      from: this.getFromAddress('Scheduling'),
       to: adminEmail,
       subject: `[${typeLabel} Cancelled] ${quote.service} — ${quote.name}`,
       html: htmlContent,
