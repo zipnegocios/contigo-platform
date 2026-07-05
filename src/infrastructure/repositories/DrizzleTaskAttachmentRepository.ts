@@ -1,6 +1,6 @@
 import { eq, desc } from 'drizzle-orm'
 import { db } from '../db/client'
-import { taskAttachments } from '../db/schema'
+import { taskAttachments, leadTasks } from '../db/schema'
 import { TaskAttachment } from '@/core/entities/TaskAttachment'
 import { ITaskAttachmentRepository } from '@/core/repositories/ITaskAttachmentRepository'
 
@@ -26,6 +26,21 @@ export class DrizzleTaskAttachmentRepository implements ITaskAttachmentRepositor
       .from(taskAttachments)
       .where(eq(taskAttachments.taskId, taskId))
       .orderBy(desc(taskAttachments.createdAt))
+    return rows.map((row) => this.mapRow(row))
+  }
+
+  async findByLeadId(leadId: string): Promise<TaskAttachment[]> {
+    const rows = await db
+      .select({
+        id: taskAttachments.id,
+        taskId: taskAttachments.taskId,
+        key: taskAttachments.key,
+        filename: taskAttachments.filename,
+        createdAt: taskAttachments.createdAt,
+      })
+      .from(taskAttachments)
+      .innerJoin(leadTasks, eq(taskAttachments.taskId, leadTasks.id))
+      .where(eq(leadTasks.leadId, leadId))
     return rows.map((row) => this.mapRow(row))
   }
 

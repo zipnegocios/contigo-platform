@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/presentation/components/ui/button'
+import { Input } from '@/presentation/components/ui/input'
 import {
   Table,
   TableBody,
@@ -12,6 +13,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/presentation/components/ui/table'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+} from '@/presentation/components/ui/alert-dialog'
 import type { QuoteDTO } from '@/presentation/types/QuoteDTO'
 import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
 
@@ -30,6 +40,9 @@ interface LeadsTrashViewProps {
 export function LeadsTrashView({ leads, pipelineStages }: LeadsTrashViewProps) {
   const router = useRouter()
   const [restoringId, setRestoringId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
+  const [confirmText, setConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const restoreLead = async (leadId: string) => {
     setRestoringId(leadId)
@@ -43,6 +56,28 @@ export function LeadsTrashView({ leads, pipelineStages }: LeadsTrashViewProps) {
     } finally {
       setRestoringId(null)
     }
+  }
+
+  const deleteForever = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/admin/leads/${deleteTarget.id}/delete-permanently`, { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to delete lead')
+      toast.success('Lead permanently deleted')
+      setDeleteTarget(null)
+      setConfirmText('')
+      router.refresh()
+    } catch {
+      toast.error('Could not delete lead')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const closeDialog = () => {
+    setDeleteTarget(null)
+    setConfirmText('')
   }
 
   return (
@@ -76,9 +111,16 @@ export function LeadsTrashView({ leads, pipelineStages }: LeadsTrashViewProps) {
                 <TableCell className="py-3.5 text-fluid-sm" style={{ color: '#6B6560' }}>
                   {pipelineStages.find((s) => s.id === lead.stageId)?.label ?? '—'}
                 </TableCell>
-                <TableCell className="py-3.5">
+                <TableCell className="py-3.5 flex gap-2">
                   <Button size="sm" variant="outline" disabled={restoringId === lead.id} onClick={() => restoreLead(lead.id)}>
                     Restore
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => setDeleteTarget({ id: lead.id, name: lead.quote?.name || 'this lead' })}
+                  >
+                    Delete Forever
                   </Button>
                 </TableCell>
               </TableRow>
@@ -86,6 +128,37 @@ export function LeadsTrashView({ leads, pipelineStages }: LeadsTrashViewProps) {
           )}
         </TableBody>
       </Table>
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => !open && closeDialog()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete lead permanently?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this lead, its quote, and all associated data
+              (documents, notes, messages, tasks, events). This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="text-fluid-sm" style={{ color: '#6B6560' }}>
+            Type <strong>{deleteTarget?.name}</strong> to confirm.
+          </div>
+          <Input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder={deleteTarget?.name}
+            autoFocus
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDialog}>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={deleting || confirmText !== deleteTarget?.name}
+              onClick={deleteForever}
+            >
+              Delete Forever
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

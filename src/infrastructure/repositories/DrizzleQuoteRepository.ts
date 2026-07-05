@@ -70,6 +70,10 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
       .where(eq(quotes.id, quote.id))
   }
 
+  async delete(id: string): Promise<void> {
+    await db.delete(quotes).where(eq(quotes.id, id))
+  }
+
   async count(): Promise<number> {
     const result = await db.select({ count: countFn() }).from(quotes)
     return result[0]?.count || 0

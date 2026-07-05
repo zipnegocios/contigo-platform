@@ -6,4 +6,5 @@ export interface IQuoteRepository {
   findByToken(token: string): Promise<Quote | null>
   findAll(limit?: number, offset?: number): Promise<Quote[]>
   update(quote: Quote): Promise<void>
+  delete(id: string): Promise<void>
 }

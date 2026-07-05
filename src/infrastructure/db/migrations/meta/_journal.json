@@ -218,6 +218,13 @@
       "when": 1783193636496,
       "tag": "20260704193356_brainy_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1783233027549,
+      "tag": "20260705063027_seed_leads_delete_permission",
+      "breakpoints": true
     }
   ]
 }

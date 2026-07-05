@@ -5,6 +5,7 @@ export const PERMISSION_OPTIONS: Array<{ key: string; label: string }> = [
   { key: 'leads.view', label: 'View Leads' },
   { key: 'leads.edit', label: 'Edit Leads' },
   { key: 'leads.archive', label: 'Archive Leads' },
+  { key: 'leads.delete', label: 'Delete Leads Permanently' },
   { key: 'pipeline.manage', label: 'Manage Pipeline' },
   { key: 'tasks.manage', label: 'Manage Tasks' },
   { key: 'form_builder.manage', label: 'Manage Form Builder' },
