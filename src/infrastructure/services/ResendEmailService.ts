@@ -21,7 +21,15 @@
 import { Resend } from 'resend'
 import { Quote } from '@/core/entities/Quote'
 import { Lead } from '@/core/entities/Lead'
+import { LeadEvent, LeadEventType } from '@/core/entities/LeadEvent'
 import { IEmailService } from '@/core/services/IEmailService'
+
+const EVENT_TYPE_LABELS: Record<LeadEventType, string> = {
+  call: 'Call',
+  site_visit: 'Site Visit',
+  meeting: 'Meeting',
+  follow_up: 'Follow-up',
+}
 
 let resendInstance: Resend | null = null
 
@@ -265,6 +273,458 @@ export class ResendEmailService implements IEmailService {
       to: quote.email.toString(),
       subject: `New message about your ${quote.service} project`,
       html: htmlContent,
+    })
+  }
+
+  async sendStageChangeNotificationToClient(quote: Quote, stageLabel: string): Promise<void> {
+    const resend = getResend()
+    const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Your Project Has Been Updated</h1>
+            </div>
+            <div class="body">
+              <p>Dear ${quote.name},</p>
+              <p>Your <strong>${quote.service}</strong> project has moved to a new stage: <strong>${stageLabel}</strong>.</p>
+
+              <p>You can check the full status of your project at any time:</p>
+              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+
+              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
+              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: quote.email.toString(),
+      subject: `Your ${quote.service} project is now: ${stageLabel}`,
+      html: htmlContent,
+    })
+  }
+
+  async sendStageChangeNotificationToAdmin(lead: Lead, quote: Quote, fromLabel: string, toLabel: string): Promise<void> {
+    const resend = getResend()
+    const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
+    const leadUrl = `${this.siteUrl}/admin/leads/${lead.id}`
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Lead Stage Changed</h1>
+            </div>
+            <div class="body">
+              <div class="detail">
+                <p><strong>Name:</strong> ${quote.name}</p>
+              </div>
+              <div class="detail">
+                <p><strong>Service:</strong> ${quote.service}</p>
+              </div>
+              <div class="detail">
+                <p><strong>Stage:</strong> ${fromLabel} &rarr; ${toLabel}</p>
+              </div>
+
+              <p><a href="${leadUrl}" class="button">View Lead</a></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: adminEmail,
+      subject: `[Stage Change] ${quote.service} — ${quote.name}: ${fromLabel} → ${toLabel}`,
+      html: htmlContent,
+    })
+  }
+
+  async sendEventScheduledNotificationToClient(quote: Quote, event: LeadEvent): Promise<void> {
+    const resend = getResend()
+    const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+    const typeLabel = EVENT_TYPE_LABELS[event.type]
+    const when = this.formatEventDateTime(event)
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${typeLabel} Scheduled</h1>
+            </div>
+            <div class="body">
+              <p>Dear ${quote.name},</p>
+              <p>We've scheduled a <strong>${typeLabel.toLowerCase()}</strong> for your <strong>${quote.service}</strong> project.</p>
+
+              <ul>
+                <li><strong>When:</strong> ${when}</li>
+                <li><strong>Duration:</strong> ${event.durationMinutes} minutes</li>
+                ${event.location ? `<li><strong>Location:</strong> ${event.location}</li>` : ''}
+              </ul>
+
+              <p>You can review your project status at any time:</p>
+              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+
+              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
+              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: quote.email.toString(),
+      subject: `${typeLabel} scheduled for your ${quote.service} project`,
+      html: htmlContent,
+    })
+  }
+
+  async sendEventScheduledNotificationToAdmin(lead: Lead, quote: Quote, event: LeadEvent): Promise<void> {
+    const resend = getResend()
+    const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
+    const leadUrl = `${this.siteUrl}/admin/leads/${lead.id}`
+    const typeLabel = EVENT_TYPE_LABELS[event.type]
+    const when = this.formatEventDateTime(event)
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${typeLabel} Scheduled</h1>
+            </div>
+            <div class="body">
+              <div class="detail">
+                <p><strong>Name:</strong> ${quote.name}</p>
+              </div>
+              <div class="detail">
+                <p><strong>Service:</strong> ${quote.service}</p>
+              </div>
+              <div class="detail">
+                <p><strong>When:</strong> ${when} (${event.durationMinutes} min)</p>
+              </div>
+              ${event.location ? `<div class="detail"><p><strong>Location:</strong> ${event.location}</p></div>` : ''}
+
+              <p><a href="${leadUrl}" class="button">View Lead</a></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: adminEmail,
+      subject: `[${typeLabel} Scheduled] ${quote.service} — ${quote.name}`,
+      html: htmlContent,
+    })
+  }
+
+  async sendEventUpdatedNotificationToClient(quote: Quote, event: LeadEvent): Promise<void> {
+    const resend = getResend()
+    const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+    const typeLabel = EVENT_TYPE_LABELS[event.type]
+    const when = this.formatEventDateTime(event)
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${typeLabel} Updated</h1>
+            </div>
+            <div class="body">
+              <p>Dear ${quote.name},</p>
+              <p>The <strong>${typeLabel.toLowerCase()}</strong> for your <strong>${quote.service}</strong> project has been updated.</p>
+
+              <ul>
+                <li><strong>New date/time:</strong> ${when}</li>
+                <li><strong>Duration:</strong> ${event.durationMinutes} minutes</li>
+                ${event.location ? `<li><strong>Location:</strong> ${event.location}</li>` : ''}
+              </ul>
+
+              <p>You can review your project status at any time:</p>
+              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+
+              <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
+              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: quote.email.toString(),
+      subject: `${typeLabel} updated for your ${quote.service} project`,
+      html: htmlContent,
+    })
+  }
+
+  async sendEventUpdatedNotificationToAdmin(lead: Lead, quote: Quote, event: LeadEvent): Promise<void> {
+    const resend = getResend()
+    const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
+    const leadUrl = `${this.siteUrl}/admin/leads/${lead.id}`
+    const typeLabel = EVENT_TYPE_LABELS[event.type]
+    const when = this.formatEventDateTime(event)
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${typeLabel} Updated</h1>
+            </div>
+            <div class="body">
+              <div class="detail">
+                <p><strong>Name:</strong> ${quote.name}</p>
+              </div>
+              <div class="detail">
+                <p><strong>Service:</strong> ${quote.service}</p>
+              </div>
+              <div class="detail">
+                <p><strong>New date/time:</strong> ${when} (${event.durationMinutes} min)</p>
+              </div>
+              ${event.location ? `<div class="detail"><p><strong>Location:</strong> ${event.location}</p></div>` : ''}
+
+              <p><a href="${leadUrl}" class="button">View Lead</a></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: adminEmail,
+      subject: `[${typeLabel} Updated] ${quote.service} — ${quote.name}`,
+      html: htmlContent,
+    })
+  }
+
+  async sendEventCancelledNotificationToClient(quote: Quote, event: LeadEvent): Promise<void> {
+    const resend = getResend()
+    const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+    const typeLabel = EVENT_TYPE_LABELS[event.type]
+    const when = this.formatEventDateTime(event)
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #D4AF37 = var(--gold-600) | #C49A27 = gold-600 blend | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #D4AF37 0%, #C49A27 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .footer { background: #2a2a2a; color: #ccc; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${typeLabel} Cancelled</h1>
+            </div>
+            <div class="body">
+              <p>Dear ${quote.name},</p>
+              <p>The <strong>${typeLabel.toLowerCase()}</strong> previously scheduled for <strong>${when}</strong> regarding your <strong>${quote.service}</strong> project has been cancelled.</p>
+
+              <p>If you'd like to reschedule, please check your project status page or get in touch with us directly:</p>
+              <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+
+              <p>Best regards,<br><strong>Contigo Constructions</strong></p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2025 Contigo Constructions. All rights reserved.</p>
+              <p>25 Green Avenue, Seaton SA 5023 | (08) 8123 4567</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: quote.email.toString(),
+      subject: `${typeLabel} cancelled for your ${quote.service} project`,
+      html: htmlContent,
+    })
+  }
+
+  async sendEventCancelledNotificationToAdmin(lead: Lead, quote: Quote, event: LeadEvent): Promise<void> {
+    const resend = getResend()
+    const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
+    const leadUrl = `${this.siteUrl}/admin/leads/${lead.id}`
+    const typeLabel = EVENT_TYPE_LABELS[event.type]
+    const when = this.formatEventDateTime(event)
+
+    // EMAIL TEMPLATE — hardcoded colors for email client compatibility
+    // #1a1a1a = admin header dark | #D4AF37 = var(--gold-600) | #fafaf8 = var(--neutral-50)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #1a1a1a; color: #D4AF37; padding: 20px; border-radius: 8px 8px 0 0; }
+            .body { border: 1px solid #e0e0e0; padding: 20px; background: #fafaf8; }
+            .detail { background: white; padding: 10px; margin: 10px 0; border-left: 4px solid #D4AF37; }
+            .button { display: inline-block; background: #D4AF37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${typeLabel} Cancelled</h1>
+            </div>
+            <div class="body">
+              <div class="detail">
+                <p><strong>Name:</strong> ${quote.name}</p>
+              </div>
+              <div class="detail">
+                <p><strong>Service:</strong> ${quote.service}</p>
+              </div>
+              <div class="detail">
+                <p><strong>Was scheduled for:</strong> ${when}</p>
+              </div>
+
+              <p><a href="${leadUrl}" class="button">View Lead</a></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    await resend.emails.send({
+      from: this.getFromAddress(),
+      to: adminEmail,
+      subject: `[${typeLabel} Cancelled] ${quote.service} — ${quote.name}`,
+      html: htmlContent,
+    })
+  }
+
+  private formatEventDateTime(event: LeadEvent): string {
+    return event.scheduledAt.toLocaleString('en-AU', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
     })
   }
 }
