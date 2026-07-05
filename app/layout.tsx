@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Alegreya, Alegreya_Sans, Space_Grotesk } from 'next/font/google'
 import { LenisProvider } from '@/presentation/providers/LenisProvider'
 import './globals.css'
@@ -130,6 +131,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-LY3HM4WSBD"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-LY3HM4WSBD');
+          `}
+        </Script>
         <LenisProvider>
           {children}
         </LenisProvider>
