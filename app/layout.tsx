@@ -143,6 +143,71 @@ export default function RootLayout({
             gtag('config', 'G-LY3HM4WSBD');
           `}
         </Script>
+        <Script
+          id="local-business-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'HomeAndConstructionBusiness',
+              name: 'Contigo Constructions Pty Ltd',
+              url: 'https://contigoconstructions.com.au',
+              telephone: '+61406274096',
+              email: 'contact@contigoconstructions.com.au',
+              address: {
+                '@type': 'PostalAddress',
+                streetAddress: '76 Coorara Avenue',
+                addressLocality: 'Payneham South',
+                addressRegion: 'SA',
+                postalCode: '5070',
+                addressCountry: 'AU',
+              },
+              areaServed: {
+                '@type': 'City',
+                name: 'Adelaide, South Australia',
+                sameAs: 'https://en.wikipedia.org/wiki/Adelaide',
+              },
+              image: 'https://contigoconstructions.com.au/og-image.jpg',
+              sameAs: [
+                'https://www.instagram.com/contigoconstructions',
+                'https://www.facebook.com/contigoconstructions',
+                'https://www.linkedin.com/company/contigo-constructions-pty-ltd',
+                'https://www.tiktok.com/@contigoconstructions',
+              ],
+              knowsAbout: [
+                'Carpentry',
+                'Cladding',
+                'Gyprock Fixing & Flushing',
+                'Home Renovations',
+                'Home Extensions',
+              ],
+              description:
+                'Licensed Carpentry & Joinery contractor in Adelaide specialising in renovations, home extensions, pergolas, decking, framing and cladding. Committed to delivering exceptional craftsmanship, honest communication and personalised service.',
+              foundingDate: '2026-05-13',
+              numberOfEmployees: {
+                '@type': 'QuantitativeValue',
+                value: 5,
+              },
+              identifier: {
+                '@type': 'PropertyValue',
+                propertyID: 'ABN',
+                value: '25698028394',
+              },
+              certification: {
+                '@type': 'Certification',
+                certificationId: '357596',
+                name: 'Master Builders South Australia - BLD Licence',
+              },
+              openingHoursSpecification: {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                opens: '07:00',
+                closes: '17:00',
+              },
+            }),
+          }}
+          strategy="beforeInteractive"
+        />
         <LenisProvider>
           {children}
         </LenisProvider>
