@@ -28,6 +28,10 @@ export class Service {
   readonly categoryId: string | null
   readonly status: ContentStatus
   readonly pageBlocks: PageBlock[] | null
+  readonly metaTitle: string | null
+  readonly metaDescription: string | null
+  readonly metaKeywords: string[] | null
+  readonly noIndex: boolean
   readonly createdAt: Date
   readonly updatedAt: Date
   readonly trashedAt: Date | null
@@ -45,6 +49,10 @@ export class Service {
     categoryId: string | null
     status: ContentStatus
     pageBlocks: PageBlock[] | null
+    metaTitle: string | null
+    metaDescription: string | null
+    metaKeywords: string[] | null
+    noIndex: boolean
     createdAt: Date
     updatedAt: Date
     trashedAt: Date | null
@@ -61,6 +69,10 @@ export class Service {
     this.categoryId = props.categoryId
     this.status = props.status
     this.pageBlocks = props.pageBlocks
+    this.metaTitle = props.metaTitle
+    this.metaDescription = props.metaDescription
+    this.metaKeywords = props.metaKeywords
+    this.noIndex = props.noIndex
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
     this.trashedAt = props.trashedAt
@@ -84,6 +96,10 @@ export class Service {
       categoryId: input.categoryId ?? null,
       status: 'active',
       pageBlocks: input.pageBlocks ?? null,
+      metaTitle: null,
+      metaDescription: null,
+      metaKeywords: null,
+      noIndex: false,
       createdAt: now,
       updatedAt: now,
       trashedAt: null,
@@ -104,6 +120,10 @@ export class Service {
       categoryId: this.categoryId,
       status: this.status,
       pageBlocks: this.pageBlocks,
+      metaTitle: this.metaTitle,
+      metaDescription: this.metaDescription,
+      metaKeywords: this.metaKeywords,
+      noIndex: this.noIndex,
       createdAt: this.createdAt,
       updatedAt: new Date(),
       trashedAt: this.trashedAt,
@@ -123,6 +143,10 @@ export class Service {
     categoryId?: string | null
     status: ContentStatus
     pageBlocks: PageBlock[] | null
+    metaTitle: string | null
+    metaDescription: string | null
+    metaKeywords: string[] | null
+    noIndex: boolean
     createdAt: Date
     updatedAt: Date
     trashedAt: Date | null

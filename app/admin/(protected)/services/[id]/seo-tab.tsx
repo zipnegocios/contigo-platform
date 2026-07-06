@@ -42,7 +42,7 @@ export function ServiceSeoTab({ service, onSave }: ServiceSeoTabProps) {
   const onSubmit = async (data: SeoMetadataFormData) => {
     setIsSaving(true)
     try {
-      const response = await fetch(\`/api/admin/services/\${service.id}/seo\`, {
+      const response = await fetch(`/api/admin/services/${service.id}/seo`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -65,9 +65,29 @@ export function ServiceSeoTab({ service, onSave }: ServiceSeoTabProps) {
 
   return (
     <div style={{ padding: 'var(--spacing-6)' }}>
-      <h3 style={{ marginBottom: 'var(--spacing-4)', fontWeight: 600 }}>SEO Metadata</h3>
+      <h3 style={{ marginBottom: 'var(--spacing-4)', fontSize: 'var(--text-fluid-base)', fontWeight: 600 }}>
+        SEO Metadata
+      </h3>
 
       <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gap: 'var(--spacing-6)' }}>
+        {/* noIndex Warning */}
+        {noIndex && (
+          <div
+            style={{
+              padding: 'var(--spacing-4)',
+              backgroundColor: '#fff3cd',
+              border: '1px solid #ffc107',
+              borderRadius: '0.375rem',
+              marginBottom: 'var(--spacing-4)',
+            }}
+          >
+            <p style={{ margin: 0, color: '#856404', fontWeight: 500, fontSize: 'var(--text-fluid-sm)' }}>
+              ⚠️ This service is marked as not indexable (noIndex=true). Search engines will not index this page.
+            </p>
+          </div>
+        )}
+
+        {/* Meta Title */}
         <div>
           <label style={{ display: 'block', marginBottom: 'var(--spacing-2)', fontWeight: 500 }}>
             Meta Title (60 chars max)
@@ -75,25 +95,30 @@ export function ServiceSeoTab({ service, onSave }: ServiceSeoTabProps) {
           <input
             {...register('metaTitle')}
             type="text"
+            placeholder={service.name}
             maxLength={60}
             style={{
               width: '100%',
               padding: 'var(--spacing-2)',
               border: '1px solid var(--neutral-300)',
               borderRadius: '0.375rem',
+              fontFamily: 'monospace',
+              fontSize: 'var(--text-fluid-sm)',
             }}
           />
-          <p style={{ fontSize: 'var(--text-fluid-xs)', color: 'var(--neutral-600)' }}>
+          <p style={{ fontSize: 'var(--text-fluid-xs)', color: 'var(--neutral-600)', marginTop: 'var(--spacing-1)' }}>
             {(metaTitle || '').length} / 60 chars
           </p>
         </div>
 
+        {/* Meta Description */}
         <div>
           <label style={{ display: 'block', marginBottom: 'var(--spacing-2)', fontWeight: 500 }}>
             Meta Description (155 chars max)
           </label>
           <textarea
             {...register('metaDescription')}
+            placeholder={service.shortDescription}
             maxLength={155}
             rows={4}
             style={{
@@ -101,52 +126,83 @@ export function ServiceSeoTab({ service, onSave }: ServiceSeoTabProps) {
               padding: 'var(--spacing-2)',
               border: '1px solid var(--neutral-300)',
               borderRadius: '0.375rem',
+              fontFamily: 'monospace',
+              fontSize: 'var(--text-fluid-sm)',
+              resize: 'vertical',
             }}
           />
-          <p style={{ fontSize: 'var(--text-fluid-xs)', color: 'var(--neutral-600)' }}>
+          <p style={{ fontSize: 'var(--text-fluid-xs)', color: 'var(--neutral-600)', marginTop: 'var(--spacing-1)' }}>
             {(metaDescription || '').length} / 155 chars
           </p>
         </div>
 
-        <div style={{ padding: 'var(--spacing-4)', backgroundColor: 'var(--orange-50)', border: '1px solid var(--orange-200)', borderRadius: '0.375rem' }}>
+        {/* Meta Keywords */}
+        <div>
+          <label style={{ display: 'block', marginBottom: 'var(--spacing-2)', fontWeight: 500 }}>
+            Meta Keywords (up to 5)
+          </label>
+          <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
+            <input
+              type="text"
+              placeholder="Add keyword and press Enter"
+              style={{
+                flex: 1,
+                padding: 'var(--spacing-2)',
+                border: '1px solid var(--neutral-300)',
+                borderRadius: '0.375rem',
+                fontFamily: 'monospace',
+                fontSize: 'var(--text-fluid-sm)',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* noIndex Toggle */}
+        <div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', cursor: 'pointer' }}>
             <input
               {...register('noIndex')}
               type="checkbox"
-              style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer' }}
+              style={{ width: '20px', height: '20px', cursor: 'pointer' }}
             />
-            <span style={{ fontWeight: 500 }}>🚫 Don't index this page</span>
+            <span style={{ fontWeight: 500 }}>
+              Prevent search engines from indexing this service
+            </span>
           </label>
-          {noIndex && (
-            <p style={{ marginTop: 'var(--spacing-2)', fontSize: 'var(--text-fluid-sm)', color: 'var(--neutral-700)' }}>
-              This page will not appear in search results.
-            </p>
-          )}
         </div>
 
-        <div style={{ padding: 'var(--spacing-4)', backgroundColor: 'var(--neutral-100)', border: '1px solid var(--neutral-300)', borderRadius: '0.375rem', opacity: noIndex ? 0.6 : 1 }}>
+        {/* Live SERP Preview */}
+        <div
+          style={{
+            padding: 'var(--spacing-4)',
+            backgroundColor: 'var(--neutral-100)',
+            border: '1px solid var(--neutral-300)',
+            borderRadius: '0.375rem',
+          }}
+        >
           <p style={{ fontSize: 'var(--text-fluid-xs)', fontWeight: 600, marginBottom: 'var(--spacing-2)', color: 'var(--neutral-600)' }}>
-            {noIndex ? '🚫 Live SERP Preview (not indexed)' : 'Live SERP Preview'}
+            Live SERP Preview
           </p>
           <p style={{ fontSize: 'var(--text-fluid-sm)', color: 'var(--blue-600)', marginBottom: 'var(--spacing-1)' }}>
             {metaTitle}
           </p>
-          <p style={{ fontSize: 'var(--text-fluid-sm)', color: 'var(--neutral-700)' }}>
+          <p style={{ fontSize: 'var(--text-fluid-sm)', color: 'var(--neutral-700)', lineHeight: 1.4 }}>
             {metaDescription.substring(0, 155)}
             {metaDescription.length > 155 ? '...' : ''}
           </p>
         </div>
 
+        {/* Save Button */}
         <button
           type="submit"
           disabled={isSaving}
           style={{
             padding: 'var(--spacing-2) var(--spacing-4)',
-            backgroundColor: isSaving ? 'var(--neutral-400)' : 'var(--neutral-800)',
+            backgroundColor: !isSaving ? 'var(--neutral-800)' : 'var(--neutral-400)',
             color: 'white',
             borderRadius: '0.375rem',
             border: 'none',
-            cursor: isSaving ? 'not-allowed' : 'pointer',
+            cursor: !isSaving ? 'pointer' : 'not-allowed',
             fontSize: 'var(--text-fluid-sm)',
             fontWeight: 500,
           }}
@@ -154,6 +210,10 @@ export function ServiceSeoTab({ service, onSave }: ServiceSeoTabProps) {
           {isSaving ? 'Saving...' : 'Save SEO Metadata'}
         </button>
       </form>
+
+      <p style={{ marginTop: 'var(--spacing-4)', fontSize: 'var(--text-fluid-xs)', color: 'var(--neutral-600)' }}>
+        Leave fields empty to use the service name/description as defaults. Mark as noIndex to exclude from search results.
+      </p>
     </div>
   )
 }

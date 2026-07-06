@@ -19,6 +19,9 @@ export class Category {
   readonly orderIndex: number
   readonly status: CategoryStatus
   readonly isSystem: boolean
+  readonly metaTitle: string | null
+  readonly metaDescription: string | null
+  readonly metaKeywords: string[] | null
   readonly createdAt: Date
   readonly updatedAt: Date
   readonly trashedAt: Date | null
@@ -34,6 +37,9 @@ export class Category {
     orderIndex: number
     status: CategoryStatus
     isSystem: boolean
+    metaTitle: string | null
+    metaDescription: string | null
+    metaKeywords: string[] | null
     createdAt: Date
     updatedAt: Date
     trashedAt: Date | null
@@ -48,6 +54,9 @@ export class Category {
     this.orderIndex = props.orderIndex
     this.status = props.status
     this.isSystem = props.isSystem
+    this.metaTitle = props.metaTitle
+    this.metaDescription = props.metaDescription
+    this.metaKeywords = props.metaKeywords
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
     this.trashedAt = props.trashedAt
@@ -66,6 +75,9 @@ export class Category {
       orderIndex: 0,
       status: 'active',
       isSystem: false,
+      metaTitle: null,
+      metaDescription: null,
+      metaKeywords: null,
       createdAt: now,
       updatedAt: now,
       trashedAt: null,
@@ -91,6 +103,9 @@ export class Category {
       orderIndex: this.orderIndex,
       status: partial.status !== undefined ? partial.status : this.status,
       isSystem: this.isSystem,
+      metaTitle: this.metaTitle,
+      metaDescription: this.metaDescription,
+      metaKeywords: this.metaKeywords,
       createdAt: this.createdAt,
       updatedAt: new Date(),
       trashedAt: this.trashedAt,
@@ -108,6 +123,9 @@ export class Category {
     orderIndex: number
     status: CategoryStatus
     isSystem: boolean
+    metaTitle: string | null
+    metaDescription: string | null
+    metaKeywords: string[] | null
     createdAt: Date
     updatedAt: Date
     trashedAt: Date | null
