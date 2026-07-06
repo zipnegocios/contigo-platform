@@ -68,6 +68,8 @@ export default async function ServicesPage({
           status: s.status,
           imageUrl: s.imageUrl,
           categoryId: s.categoryId,
+          metaTitle: s.metaTitle,
+          noIndex: s.noIndex,
         })),
     }))
 
@@ -87,6 +89,8 @@ export default async function ServicesPage({
           status: s.status,
           imageUrl: s.imageUrl,
           categoryId: s.categoryId,
+          metaTitle: s.metaTitle,
+          noIndex: s.noIndex,
         })),
     })
   }
