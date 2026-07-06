@@ -96,7 +96,8 @@ export class ResendEmailService implements IEmailService {
             <div class="footer">
               <img src="${iconLogoUrl}" width="140" height="97" alt="Contigo Constructions">
               <p>This is an automated message — please don't reply directly to this email.</p>
-              <p>Need to get in touch? Email us at <a href="mailto:contact@contigoconstructions.com.au">contact@contigoconstructions.com.au</a> or WhatsApp us at <a href="https://wa.me/61406274096">+61 406 274 096</a>.</p>
+              <p>Need to get in touch? Email us at <a href="mailto:contact@contigoconstructions.com.au">contact@contigoconstructions.com.au</a> </p>
+              <p>or WhatsApp us at <a href="https://wa.me/61406274096">+61 406 274 096</a>.</p>
               <p>76 Coorara Avenue, Payneham South SA 5070</p>
               <p>&copy; ${year} Contigo Constructions. All rights reserved.</p>
             </div>
