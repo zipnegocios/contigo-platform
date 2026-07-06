@@ -82,7 +82,7 @@ export function ServiceSeoTab({ service, onSave }: ServiceSeoTabProps) {
             }}
           >
             <p style={{ margin: 0, color: '#856404', fontWeight: 500, fontSize: 'var(--text-fluid-sm)' }}>
-              ⚠️ This service is marked as not indexable (noIndex=true). Search engines will not index this page.
+              Warning: This service is marked as not indexable. Search engines will not index this page.
             </p>
           </div>
         )}
@@ -134,27 +134,6 @@ export function ServiceSeoTab({ service, onSave }: ServiceSeoTabProps) {
           <p style={{ fontSize: 'var(--text-fluid-xs)', color: 'var(--neutral-600)', marginTop: 'var(--spacing-1)' }}>
             {(metaDescription || '').length} / 155 chars
           </p>
-        </div>
-
-        {/* Meta Keywords */}
-        <div>
-          <label style={{ display: 'block', marginBottom: 'var(--spacing-2)', fontWeight: 500 }}>
-            Meta Keywords (up to 5)
-          </label>
-          <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-2)' }}>
-            <input
-              type="text"
-              placeholder="Add keyword and press Enter"
-              style={{
-                flex: 1,
-                padding: 'var(--spacing-2)',
-                border: '1px solid var(--neutral-300)',
-                borderRadius: '0.375rem',
-                fontFamily: 'monospace',
-                fontSize: 'var(--text-fluid-sm)',
-              }}
-            />
-          </div>
         </div>
 
         {/* noIndex Toggle */}
