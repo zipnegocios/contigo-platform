@@ -14,58 +14,12 @@ export default function AboutAuthoritySection() {
           padding: '0 var(--spacing-4)',
         }}
       >
-        <h2
-          style={{
-            fontSize: 'var(--text-fluid-lg)',
-            fontFamily: 'var(--font-cormorant)',
-            fontWeight: 600,
-            marginBottom: 'var(--spacing-4)',
-            color: 'var(--neutral-900)',
-          }}
-        >
-        </h2>
-
-        <p
-          style={{
-            fontSize: 'var(--text-fluid-base)',
-            lineHeight: 1.8,
-            color: 'var(--neutral-700)',
-            marginBottom: 'var(--spacing-4)',
-          }}
-        >
-
-        </p>
-
-        <p
-          style={{
-            fontSize: 'var(--text-fluid-base)',
-            lineHeight: 1.8,
-            color: 'var(--neutral-700)',
-            marginBottom: 'var(--spacing-4)',
-          }}
-        >
-
-        </p>
-
-        <p
-          style={{
-            fontSize: 'var(--text-fluid-base)',
-            lineHeight: 1.8,
-            color: 'var(--neutral-700)',
-            marginBottom: 'var(--spacing-4)',
-          }}
-        >
 
 
-          <p
-            style={{
-              fontSize: 'var(--text-fluid-base)',
-              lineHeight: 1.8,
-              color: 'var(--neutral-700)',
-            }}
-          >
 
-          </p>
+
+
+
       </div>
     </section>
   )
