@@ -28,15 +28,39 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category } = await params
   if (!isServiceRootSlug(category)) return { title: 'Services not found' }
-  const name = SERVICE_ROOT_NAMES[category]
-  return {
-    title: `${name} | Contigo Constructions`,
-    description: SERVICE_ROOT_TAGLINES[category],
-    openGraph: {
-      title: `${name} | Contigo Constructions`,
-      description: SERVICE_ROOT_TAGLINES[category],
-      type: 'website',
-    },
+
+  try {
+    const categoryRepo = new DrizzleCategoryRepository()
+    const cat = await categoryRepo.findBySlug(category, 'shared')
+
+    if (!cat || cat.status !== 'active' || cat.trashedAt) {
+      return { title: 'Services not found' }
+    }
+
+    // Use metaTitle from DB, fallback to name
+    const title = cat.metaTitle || `${cat.name} | Contigo Constructions`
+    // Use metaDescription from DB, fallback to tagline
+    const description = cat.metaDescription || SERVICE_ROOT_TAGLINES[category]
+    // Use metaKeywords from DB, fallback to empty array
+    const keywords = cat.metaKeywords || []
+
+    return {
+      title,
+      description,
+      keywords,
+      alternates: {
+        canonical: `https://contigoconstructions.com.au/services/${category}`,
+      },
+      openGraph: {
+        title,
+        description,
+        url: `https://contigoconstructions.com.au/services/${category}`,
+        type: 'website',
+      },
+    }
+  } catch (error) {
+    console.error(`generateMetadata error for category ${category}:`, error)
+    return { title: 'Services not found' }
   }
 }
 
