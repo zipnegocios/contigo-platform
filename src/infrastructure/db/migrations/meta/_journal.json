@@ -225,6 +225,13 @@
       "when": 1783233027549,
       "tag": "20260705063027_seed_leads_delete_permission",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1783307019420,
+      "tag": "20260706030339_elite_smasher",
+      "breakpoints": true
     }
   ]
 }
