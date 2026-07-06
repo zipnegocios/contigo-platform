@@ -14,7 +14,8 @@
     "db:studio": "drizzle-kit studio",
     "db:test": "node scripts/test-db.mjs",
     "seed": "node scripts/seed-admin.mjs",
-    "seed:portfolio": "npx tsx scripts/seed-portfolio.ts"
+    "seed:portfolio": "npx tsx scripts/seed-portfolio.ts",
+    "seed:seo-meta": "tsx scripts/seed-service-seo-meta-2026-07.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",
