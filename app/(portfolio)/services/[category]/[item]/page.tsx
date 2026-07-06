@@ -84,16 +84,46 @@ export async function generateMetadata({
   if (!resolved) return { title: 'Service not found' }
 
   const { service } = resolved
-  return {
-    title: `${service.name} | Contigo Constructions`,
-    description: service.shortDescription,
+
+  // Use metaTitle from DB, fallback to service.name
+  const title = service.metaTitle || service.name
+  // Use metaDescription from DB, fallback to shortDescription
+  const description = service.metaDescription || service.shortDescription
+  // Use metaKeywords from DB, fallback to empty array
+  const keywords = service.metaKeywords || []
+
+  const metadata: Metadata = {
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical: `https://contigoconstructions.com.au/services/${category}/${item}`,
+    },
     openGraph: {
-      title: `${service.name} | Contigo Constructions`,
-      description: service.shortDescription,
+      title,
+      description,
+      url: `https://contigoconstructions.com.au/services/${category}/${item}`,
       type: 'website',
-      images: [{ url: service.imageUrl, width: 1200, height: 630, alt: service.name }],
+      images: [
+        {
+          url: service.imageUrl,
+          width: 1200,
+          height: 630,
+          alt: service.name,
+        },
+      ],
     },
   }
+
+  // Apply noIndex if service is marked as hidden
+  if (service.noIndex) {
+    metadata.robots = {
+      index: false,
+      follow: true,
+    }
+  }
+
+  return metadata
 }
 
 export const dynamicParams = true
