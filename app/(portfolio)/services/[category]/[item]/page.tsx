@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Script from 'next/script'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { ProjectGallery } from '@/presentation/components/ProjectGallery'
@@ -145,6 +146,29 @@ export default async function ServiceItemPage({
   if (service.pageBlocks && service.pageBlocks.length > 0) {
     return (
       <main>
+        {!service.noIndex && (
+          <Script
+            id={`service-schema-${service.id}`}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Service',
+                name: service.name,
+                provider: {
+                  '@type': 'HomeAndConstructionBusiness',
+                  name: 'Contigo Constructions Pty Ltd',
+                  url: 'https://contigoconstructions.com.au',
+                },
+                description: service.shortDescription,
+                areaServed: 'Adelaide, South Australia',
+                url: `https://contigoconstructions.com.au/services/${category}/${item}`,
+                image: service.imageUrl,
+              }),
+            }}
+            strategy="beforeInteractive"
+          />
+        )}
         <PageBlockRenderer blocks={service.pageBlocks} />
       </main>
     )
@@ -152,6 +176,29 @@ export default async function ServiceItemPage({
 
   return (
     <main>
+      {!service.noIndex && (
+        <Script
+          id={`service-schema-${service.id}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Service',
+              name: service.name,
+              provider: {
+                '@type': 'HomeAndConstructionBusiness',
+                name: 'Contigo Constructions Pty Ltd',
+                url: 'https://contigoconstructions.com.au',
+              },
+              description: service.shortDescription,
+              areaServed: 'Adelaide, South Australia',
+              url: `https://contigoconstructions.com.au/services/${category}/${item}`,
+              image: service.imageUrl,
+            }),
+          }}
+          strategy="beforeInteractive"
+        />
+      )}
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <div className="relative" style={{ height: '70vh', maxHeight: 600, minHeight: 400 }}>
         {isVideo(service.imageUrl) ? (
