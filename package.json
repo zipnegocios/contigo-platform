@@ -15,7 +15,8 @@
     "db:test": "node scripts/test-db.mjs",
     "seed": "node scripts/seed-admin.mjs",
     "seed:portfolio": "npx tsx scripts/seed-portfolio.ts",
-    "seed:seo-meta": "tsx scripts/seed-service-seo-meta-2026-07.ts"
+    "seed:seo-meta": "tsx scripts/seed-service-seo-meta-2026-07.ts",
+    "seed:legal": "tsx scripts/seed-legal.ts"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",
