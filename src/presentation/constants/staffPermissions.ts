@@ -17,4 +17,5 @@ export const PERMISSION_OPTIONS: Array<{ key: string; label: string }> = [
   { key: 'reviews.reply', label: 'Reply to Reviews' },
   { key: 'reviews.requests', label: 'Manage Review Requests' },
   { key: 'reviews.settings', label: 'Manage Review Settings' },
+  { key: 'legal.manage', label: 'Manage Legal Documents' },
 ]

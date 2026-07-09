@@ -10,6 +10,7 @@ import {
   jsonb,
   pgEnum,
   index,
+  uniqueIndex,
   primaryKey,
 } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -114,6 +115,15 @@ export const reviewRequestStatusEnum = pgEnum('review_request_status', [
 export const reviewSyncTriggerEnum = pgEnum('review_sync_trigger', ['manual', 'scheduled'])
 
 export const reviewSyncStatusEnum = pgEnum('review_sync_status', ['success', 'partial', 'failed'])
+
+export const legalDocumentStatusEnum = pgEnum('legal_document_status', [
+  'draft',
+  'in_review',
+  'published',
+  'archived',
+])
+
+export const legalDomainEnum = pgEnum('legal_domain', ['website', 'service', 'general'])
 
 // ============ LEAD CONTACT ROLES TABLE ============
 // Replaces leadContactRoleEnum: a real table lets admins add new roles from
@@ -761,3 +771,51 @@ export const reviewRequestSuppressions = pgTable('review_request_suppressions', 
   email: varchar('email', { length: 255 }).notNull().unique(),
   suppressedAt: timestamp('suppressed_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ============ LEGAL_DOCUMENTS TABLE ============
+// Immutable version history for compliance pages (Website/Service domains).
+// published/archived rows are never updated in place — the repository guard
+// only allows UPDATE on draft/in_review, and on in_review only reviewNote/status.
+export const legalDocuments = pgTable(
+  'legal_documents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: varchar('slug', { length: 100 }).notNull(),
+    domain: legalDomainEnum('domain').notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    content: text('content').notNull(), // Markdown, no raw HTML
+    contentHash: varchar('content_hash', { length: 64 }), // SHA-256, set on publish
+    version: integer('version').notNull().default(1),
+    status: legalDocumentStatusEnum('status').notNull().default('draft'),
+    effectiveDate: timestamp('effective_date', { withTimezone: true }),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    publishedBy: uuid('published_by').references(() => adminUsers.id, { onDelete: 'set null' }),
+    createdBy: uuid('created_by').references(() => adminUsers.id, { onDelete: 'set null' }),
+    reviewNote: text('review_note'), // e.g. "Approved by [consultant] 2026-07-20"
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('idx_legal_slug_version').on(table.slug, table.version),
+    index('idx_legal_slug_status').on(table.slug, table.status),
+  ],
+)
+
+// ============ SECURITY_EVENTS TABLE ============
+// Minimal append-only audit log. Introduced alongside the legal compliance
+// module (no prior auth-hardening merge existed to reuse) — generic enough
+// to log other sensitive admin actions later without a schema change.
+export const securityEvents = pgTable(
+  'security_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    eventType: varchar('event_type', { length: 100 }).notNull(),
+    payload: jsonb('payload').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    actorId: uuid('actor_id').references(() => adminUsers.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_security_events_event_type').on(table.eventType),
+    index('idx_security_events_created_at').on(table.createdAt),
+  ],
+)
