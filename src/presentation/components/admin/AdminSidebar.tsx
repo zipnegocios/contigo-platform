@@ -18,6 +18,7 @@ import {
   LayoutTemplate,
   LayoutPanelTop,
   Star,
+  Scale,
 } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 import { AdminMessagesBell } from './AdminMessagesBell'
@@ -33,6 +34,7 @@ const navItems = [
   { label: 'Leads Management', href: '/admin/leads/management/staff', icon: UserCog },
   { label: 'Google Business', href: '/admin/reviews', icon: Star },
   { label: 'Form Builder', href: '/admin/leads/management/form-builder', icon: LayoutTemplate },
+  { label: 'Legal', href: '/admin/legal', icon: Scale },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
