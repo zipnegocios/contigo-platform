@@ -8,6 +8,7 @@ import { Input } from '@/presentation/components/ui/input'
 import { Label } from '@/presentation/components/ui/label'
 import { Switch } from '@/presentation/components/ui/switch'
 import { Badge } from '@/presentation/components/ui/badge'
+import { ReviewsPreviewPanel } from './ReviewsPreviewPanel'
 import type { ReviewWebsiteVisibilityFlags, ReviewAutomationRule } from '@/core/entities/ReviewSettings'
 
 interface SettingsFormValues {
@@ -164,6 +165,12 @@ export function ReviewsSettingsForm({
           ))}
         </div>
       </section>
+
+      <ReviewsPreviewPanel
+        minStarsPublic={values.minStarsPublic}
+        defaultDisplayMode={values.defaultDisplayMode}
+        websiteVisibilityFlags={values.websiteVisibilityFlags}
+      />
 
       <section className="space-y-4">
         <h2 className="text-fluid-lg font-semibold" style={{ color: 'var(--neutral-800)' }}>

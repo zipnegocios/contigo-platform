@@ -1,0 +1,118 @@
+import type { PublicReviewDTO } from '@/application/use-cases/reviews/GetPublicReviewsUseCase'
+
+/**
+ * Fabricated reviews for the admin settings live preview only — never sent
+ * to or read from the database. Deliberately spans all five star ratings so
+ * toggling `minStarsPublic` in the settings form visibly changes what's
+ * shown.
+ */
+export const SAMPLE_REVIEWS_PREVIEW: (PublicReviewDTO & { reviewerName: string; reviewerAvatarUrl: string | null; reviewCreatedAt: string; tags: string[] })[] = [
+  {
+    id: 'sample-1',
+    rating: 5,
+    comment: 'Contigo built our deck and pergola in under three weeks. Communication was excellent the whole way through — no surprises on the invoice either.',
+    reviewerName: 'Marcus Webb',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-06-14T00:00:00.000Z',
+    tags: ['Decking', 'Pergola'],
+  },
+  {
+    id: 'sample-2',
+    rating: 5,
+    comment: 'Second time using them, this time for a full kitchen renovation. The carpentry finish on the cabinetry is honestly better than the display home we looked at.',
+    reviewerName: 'Priya Nair',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-05-22T00:00:00.000Z',
+    tags: ['Renovation'],
+  },
+  {
+    id: 'sample-3',
+    rating: 4,
+    comment: 'Solid work on our cladding replacement. Took a few extra days due to weather but they kept us updated the whole time.',
+    reviewerName: 'Dean Ferraro',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-05-09T00:00:00.000Z',
+    tags: ['Cladding'],
+  },
+  {
+    id: 'sample-4',
+    rating: 5,
+    comment: 'Framing and gyprock for our home extension — professional crew, cleaned up every day before leaving site.',
+    reviewerName: 'Aisha Bello',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-04-30T00:00:00.000Z',
+    tags: ['Framing', 'Gyprock'],
+  },
+  {
+    id: 'sample-5',
+    rating: 2,
+    comment: 'The final result was fine but the project ran nearly a month over the original timeline with little warning.',
+    reviewerName: 'Chris Holloway',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-04-18T00:00:00.000Z',
+    tags: [],
+  },
+  {
+    id: 'sample-6',
+    rating: 5,
+    comment: 'Quoted fast, started on time, finished on budget. Rare combination in this industry and worth the five stars alone.',
+    reviewerName: 'Tom Reilly',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-04-02T00:00:00.000Z',
+    tags: ['Renovation'],
+  },
+  {
+    id: 'sample-7',
+    rating: 3,
+    comment: 'Decent carpentry work, but had to follow up twice to get a reply about scheduling the final inspection.',
+    reviewerName: 'Karen Sudworth',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-03-21T00:00:00.000Z',
+    tags: ['Staircases'],
+  },
+  {
+    id: 'sample-8',
+    rating: 1,
+    comment: 'Very disappointed with the communication on this job. Would not use again.',
+    reviewerName: 'Bradley Kim',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-03-05T00:00:00.000Z',
+    tags: [],
+  },
+  {
+    id: 'sample-9',
+    rating: 5,
+    comment: 'Beautiful pergola build. The team even helped us choose the timber stain to match the house.',
+    reviewerName: 'Nadia Farhat',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-02-27T00:00:00.000Z',
+    tags: ['Pergola'],
+  },
+  {
+    id: 'sample-10',
+    rating: 4,
+    comment: 'Good value for the fencing and eaves work. Minor touch-ups needed after handover but they came back promptly.',
+    reviewerName: 'Liam O’Connor',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-02-11T00:00:00.000Z',
+    tags: ['Eaves'],
+  },
+  {
+    id: 'sample-11',
+    rating: 5,
+    comment: 'Our verandah looks incredible. Contigo delivered exactly what was in the 3D render, down to the last detail.',
+    reviewerName: 'Grace Papadopoulos',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-01-30T00:00:00.000Z',
+    tags: ['Verandahs'],
+  },
+  {
+    id: 'sample-12',
+    rating: 2,
+    comment: 'Carpentry quality was fine but there was a billing mix-up that took two weeks to sort out.',
+    reviewerName: 'Ryan Duggan',
+    reviewerAvatarUrl: null,
+    reviewCreatedAt: '2026-01-14T00:00:00.000Z',
+    tags: [],
+  },
+]
