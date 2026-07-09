@@ -1,5 +1,5 @@
 import { SimpleHeader } from '@/presentation/components/SimpleHeader'
-import Footer from '@/presentation/sections/Footer'
+import Footer from '@/presentation/sections/FooterServer'
 
 export default function QuoteStatusLayout({
   children,

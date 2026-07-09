@@ -1,9 +1,12 @@
 'use client'
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Instagram, Facebook, Linkedin } from 'lucide-react';
 import { IconLogo } from '@/presentation/components/IconLogo';
+
+type LegalLink = { slug: string; title: string; domain: 'website' | 'service' | 'general' };
 
 type BrandIconProps = { className?: string; strokeWidth?: number };
 
@@ -31,8 +34,10 @@ const SOCIAL_LINKS = [
   { Icon: TikTokIcon, label: 'TikTok', href: 'https://www.tiktok.com/@contigoconstructions' },
 ];
 
-export default function Footer() {
+export default function Footer({ legalLinks = [] }: { legalLinks?: LegalLink[] }) {
   const footerRef = useRef<HTMLElement>(null);
+  const websiteLinks = legalLinks.filter((l) => l.domain === 'website' || l.domain === 'general');
+  const serviceLinks = legalLinks.filter((l) => l.domain === 'service');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -134,6 +139,72 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Legal links — desktop: grouped by domain. Mobile: single micro-line. */}
+        {legalLinks.length > 0 && (
+          <div className="mt-8 pt-6" style={{ borderTop: '1px solid var(--neutral-700)' }}>
+            {/* Desktop */}
+            <div className="hidden md:flex justify-center gap-x-10 gap-y-2 flex-wrap">
+              {websiteLinks.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>
+                    Website
+                  </span>
+                  <div className="flex gap-4 flex-wrap">
+                    {websiteLinks.map((link) => (
+                      <Link
+                        key={link.slug}
+                        href={`/legal/${link.slug}`}
+                        className="text-fluid-xs hover:underline"
+                        style={{ color: 'var(--neutral-50)' }}
+                      >
+                        {link.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {serviceLinks.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-fluid-xs" style={{ color: 'var(--neutral-600)' }}>
+                    Services
+                  </span>
+                  <div className="flex gap-4 flex-wrap">
+                    {serviceLinks.map((link) => (
+                      <Link
+                        key={link.slug}
+                        href={`/legal/${link.slug}`}
+                        className="text-fluid-xs hover:underline"
+                        style={{ color: 'var(--neutral-50)' }}
+                      >
+                        {link.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile: single micro-line, middot separators, no accordions/columns */}
+            <div
+              className="flex md:hidden flex-wrap items-center justify-center"
+              style={{ columnGap: '0.5rem', rowGap: '0.5rem' }}
+            >
+              {legalLinks.map((link, i) => (
+                <span key={link.slug} className="flex items-center" style={{ columnGap: '0.5rem' }}>
+                  {i > 0 && <span style={{ color: 'var(--contigo-primary)' }}>&middot;</span>}
+                  <Link
+                    href={`/legal/${link.slug}`}
+                    className="text-fluid-xs py-3 hover:underline"
+                    style={{ color: 'var(--neutral-50)' }}
+                  >
+                    {link.title}
+                  </Link>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Bottom bar */}
         <div
           className="mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4"
@@ -174,6 +245,12 @@ export default function Footer() {
               >
                 BLD Licence No. 357596
               </a>
+            </p>
+            <p
+              className="text-fluid-xs"
+              style={{ color: 'var(--neutral-600)' }}
+            >
+              Member, Master Builders SA
             </p>
           </div>
         </div>

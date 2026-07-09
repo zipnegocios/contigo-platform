@@ -7,10 +7,11 @@ export interface ILegalDocumentRepository {
   // Version that was in effect at a given point in time (temporal lookup —
   // e.g. "what did the Privacy Policy say on the date this quote was sent").
   getVersionEffectiveAt(slug: string, date: Date): Promise<LegalDocument | null>
-  // Latest version per slug regardless of status — feeds the admin list and
-  // the /legal index (via the footer, which only shows slugs with a
-  // published version).
+  // Latest version per slug regardless of status — feeds the admin list.
   listCurrent(): Promise<LegalDocument[]>
+  // Only slugs with a live published version — feeds the /legal index and
+  // the footer, so a document that never got past draft never shows a link.
+  listPublished(): Promise<LegalDocument[]>
   listVersions(slug: string): Promise<LegalDocument[]>
   // Highest version number recorded for a slug, or 0 if none exists yet.
   getMaxVersion(slug: string): Promise<number>

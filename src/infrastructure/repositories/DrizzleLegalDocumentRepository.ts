@@ -1,4 +1,4 @@
-import { eq, and, or, isNull, lte, desc, max, ne } from 'drizzle-orm'
+import { eq, and, or, lte, desc, max, ne } from 'drizzle-orm'
 import { db } from '../db/client'
 import { legalDocuments } from '../db/schema'
 import { LegalDocument, LegalDocumentNotEditableError } from '@/core/entities/LegalDocument'
@@ -68,6 +68,15 @@ export class DrizzleLegalDocumentRepository implements ILegalDocumentRepository 
       if (!bySlug.has(row.slug)) bySlug.set(row.slug, row)
     }
     return Array.from(bySlug.values()).map(mapToEntity)
+  }
+
+  async listPublished(): Promise<LegalDocument[]> {
+    const rows = await db
+      .select()
+      .from(legalDocuments)
+      .where(eq(legalDocuments.status, 'published'))
+      .orderBy(legalDocuments.slug)
+    return rows.map(mapToEntity)
   }
 
   async listVersions(slug: string): Promise<LegalDocument[]> {

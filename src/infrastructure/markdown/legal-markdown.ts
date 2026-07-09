@@ -6,14 +6,15 @@ import rehypeSlug from 'rehype-slug'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import { visit } from 'unist-util-visit'
 import type { Element, Root } from 'hast'
+import type { PluggableList } from 'unified'
 
 // Shared remark/rehype plugin chain — used identically by the public
 // /legal/[slug] page and the admin editor preview, so what an editor sees
 // while drafting is exactly what ships. rehype-sanitize strips any HTML
 // that slipped in (react-markdown skips raw HTML by default already, this
 // is defense in depth) — no raw HTML is ever rendered in legal content.
-export const legalMarkdownRemarkPlugins = [remarkGfm]
-export const legalMarkdownRehypePlugins = [rehypeSlug, [rehypeSanitize, defaultSchema]] as const
+export const legalMarkdownRemarkPlugins: PluggableList = [remarkGfm]
+export const legalMarkdownRehypePlugins: PluggableList = [rehypeSlug, [rehypeSanitize, defaultSchema]]
 
 // Extracts the slugified ids rehype-slug would assign to every H2/H3 in the
 // given markdown. Must use the exact same plugin chain as the render path

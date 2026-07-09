@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
+import { DrizzleLegalDocumentRepository } from '@/infrastructure/repositories/DrizzleLegalDocumentRepository'
+import { ListLegalDocumentsUseCase } from '@/application/use-cases/legal/ListLegalDocumentsUseCase'
 import { SERVICE_ROOT_SLUGS } from '@/presentation/data/serviceCategoryMeta'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -27,6 +29,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
   ]
+
+  // Add legal documents (only slugs with a live published version)
+  try {
+    if (process.env.DATABASE_URL) {
+      const documents = await new ListLegalDocumentsUseCase(new DrizzleLegalDocumentRepository()).published()
+      routes.push({
+        url: `${baseUrl}/legal`,
+        lastModified: now,
+        changeFrequency: 'yearly',
+        priority: 0.3,
+      })
+      for (const doc of documents) {
+        routes.push({
+          url: `${baseUrl}/legal/${doc.slug}`,
+          lastModified: doc.effectiveDate ?? doc.updatedAt,
+          changeFrequency: 'yearly',
+          priority: 0.3,
+        })
+      }
+    }
+  } catch (error) {
+    console.error('sitemap legal documents error:', error)
+  }
 
   // Add service categories and items dynamically
   try {
