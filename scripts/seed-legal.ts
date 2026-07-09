@@ -9,8 +9,11 @@
  * "Third-Party Content and Services" -> #third-party-content-and-services
  * ("and" spelled out, not "&", since "&" is stripped by the slugger).
  *
- * Registered address is a placeholder pending client confirmation
- * (changelog #8) — must be resolved before Fase 5 sends this to legal review.
+ * Registered address (changelog #8, resolved 2026-07-09 per Gustavo): the
+ * confirmed place of business, 76 Coorara Ave, Payneham South SA 5070. This
+ * differs from the address currently on file with CBS (25 Green Ave, Seaton
+ * SA 5023) — updating the CBS registration itself is a client action, out of
+ * scope for this codebase (see the traceability matrix in docs/09).
  *
  * Usage: npx tsx scripts/seed-legal.ts
  */
@@ -23,7 +26,7 @@ import * as schema from '../src/infrastructure/db/schema'
 const client = postgres(process.env.DATABASE_URL!, { max: 1 })
 const db = drizzle(client, { schema })
 
-const ADDRESS_PLACEHOLDER = '[REGISTERED ADDRESS — TO CONFIRM]'
+const REGISTERED_ADDRESS = '76 Coorara Ave, Payneham South SA 5070'
 const ENTITY = 'Contigo Constructions Pty Ltd (ABN 25 698 028 394), trading as Contigo Constructions'
 const LICENCE = 'Building Work Contractor Licence BLD 357596 (Carpentry and Joinery)'
 
@@ -41,7 +44,7 @@ const documents: Array<{
 
 ## About These Terms
 
-This website is operated by ${ENTITY}, registered office at ${ADDRESS_PLACEHOLDER}. By using this website you agree to these terms.
+This website is operated by ${ENTITY}, registered office at ${REGISTERED_ADDRESS}. By using this website you agree to these terms.
 
 ## Use of the Website
 
@@ -83,7 +86,7 @@ Questions about these terms can be sent through the contact form on this website
 
 ## Who We Are
 
-${ENTITY}, registered office at ${ADDRESS_PLACEHOLDER}, is the entity responsible for the personal information described in this policy.
+${ENTITY}, registered office at ${REGISTERED_ADDRESS}, is the entity responsible for the personal information described in this policy.
 
 ## What We Collect
 
