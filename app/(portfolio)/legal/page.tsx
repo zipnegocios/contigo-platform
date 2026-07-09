@@ -19,7 +19,14 @@ const DOMAIN_LABELS: Record<LegalDomain, string> = {
 }
 
 export default async function LegalIndexPage() {
-  const documents = await new ListLegalDocumentsUseCase(new DrizzleLegalDocumentRepository()).published()
+  let documents: Awaited<ReturnType<ListLegalDocumentsUseCase['published']>> = []
+  try {
+    if (process.env.DATABASE_URL) {
+      documents = await new ListLegalDocumentsUseCase(new DrizzleLegalDocumentRepository()).published()
+    }
+  } catch (error) {
+    console.error('Error fetching published legal documents:', error)
+  }
 
   const grouped = documents.reduce<Record<LegalDomain, typeof documents>>(
     (acc, doc) => {

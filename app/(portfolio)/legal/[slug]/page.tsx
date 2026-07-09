@@ -16,8 +16,13 @@ const DOMAIN_SUBTITLE: Record<LegalDomain, string> = {
 }
 
 export async function generateStaticParams() {
-  const documents = await new ListLegalDocumentsUseCase(new DrizzleLegalDocumentRepository()).published()
-  return documents.map((doc) => ({ slug: doc.slug }))
+  try {
+    if (!process.env.DATABASE_URL) return []
+    const documents = await new ListLegalDocumentsUseCase(new DrizzleLegalDocumentRepository()).published()
+    return documents.map((doc) => ({ slug: doc.slug }))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
