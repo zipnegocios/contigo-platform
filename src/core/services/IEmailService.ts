@@ -15,4 +15,6 @@ export interface IEmailService {
   sendEventUpdatedNotificationToAdmin(lead: Lead, quote: Quote, event: LeadEvent): Promise<void>
   sendEventCancelledNotificationToClient(quote: Quote, event: LeadEvent): Promise<void>
   sendEventCancelledNotificationToAdmin(lead: Lead, quote: Quote, event: LeadEvent): Promise<void>
+  sendReviewRequestEmail(params: { to: string; subject: string; bodyHtml: string }): Promise<void>
+  sendReviewAutomationAlertToAdmin(params: { subject: string; bodyHtml: string }): Promise<void>
 }

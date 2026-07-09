@@ -232,6 +232,27 @@
       "when": 1783307019420,
       "tag": "20260706030339_elite_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1783543697014,
+      "tag": "20260708204817_add_google_reviews_module",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1783543810724,
+      "tag": "20260708205010_seed_reviews_permissions_and_default_template",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1783551862093,
+      "tag": "20260708230422_add_review_request_suppressions",
+      "breakpoints": true
     }
   ]
 }

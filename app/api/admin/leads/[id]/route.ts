@@ -10,7 +10,12 @@ import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/Driz
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
 import { ChangeLeadStageUseCase } from '@/application/use-cases/leads/ChangeLeadStageUseCase'
+import { ScheduleReviewRequestUseCase } from '@/application/use-cases/reviews/ScheduleReviewRequestUseCase'
 import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
+import { DrizzleReviewRequestRepository } from '@/infrastructure/repositories/DrizzleReviewRequestRepository'
+import { DrizzleReviewRequestTemplateRepository } from '@/infrastructure/repositories/DrizzleReviewRequestTemplateRepository'
+import { DrizzleReviewSettingsRepository } from '@/infrastructure/repositories/DrizzleReviewSettingsRepository'
+import { DrizzleReviewRequestSuppressionRepository } from '@/infrastructure/repositories/DrizzleReviewRequestSuppressionRepository'
 import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 import { toLeadDTO } from '@/presentation/types/LeadDTO'
 import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
@@ -99,6 +104,15 @@ export async function PATCH(
       new DrizzlePipelineStageRepository(),
       new DrizzleQuoteRepository(),
       new ResendEmailService(),
+      new ScheduleReviewRequestUseCase(
+        leadRepo,
+        new DrizzleLeadContactRepository(),
+        new DrizzleQuoteRepository(),
+        new DrizzleReviewRequestRepository(),
+        new DrizzleReviewRequestTemplateRepository(),
+        new DrizzleReviewSettingsRepository(),
+        new DrizzleReviewRequestSuppressionRepository(),
+      ),
     )
 
     const updatedLead = await changeLeadStageUseCase.execute(

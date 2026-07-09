@@ -8,6 +8,7 @@ import { DrizzleLeadContactRepository } from '@/infrastructure/repositories/Driz
 import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/DrizzlePipelineStageRepository'
 import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
 import { LeadDetailTabs } from '@/presentation/components/admin/LeadDetailTabs'
+import { RequestReviewButton } from '@/presentation/components/admin/reviews/RequestReviewButton'
 import { toQuoteDTO } from '@/presentation/types/QuoteDTO'
 import { toLeadDTO } from '@/presentation/types/LeadDTO'
 import { toLeadEventDTO } from '@/presentation/types/LeadEventDTO'
@@ -38,12 +39,17 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   if (!quote) notFound()
 
   const quoteDto = toQuoteDTO(quote)
+  const currentStage = pipelineStages.find((s) => s.id === lead.stageId)
+  const isWon = currentStage?.terminalKind === 'won'
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{quote.name}</h1>
-        <p className="text-muted-foreground">{quote.service}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{quote.name}</h1>
+          <p className="text-muted-foreground">{quote.service}</p>
+        </div>
+        {isWon && <RequestReviewButton leadId={lead.id} />}
       </div>
 
       <LeadDetailTabs

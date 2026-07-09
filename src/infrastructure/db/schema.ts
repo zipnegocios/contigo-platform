@@ -5,6 +5,7 @@ import {
   timestamp,
   uuid,
   integer,
+  numeric,
   boolean,
   jsonb,
   pgEnum,
@@ -97,6 +98,22 @@ export const leadActivityTypeEnum = pgEnum('lead_activity_type', [
 export const taskStatusEnum = pgEnum('task_status', ['open', 'in_progress', 'done'])
 
 export const categoryStatusEnum = pgEnum('category_status', ['draft', 'active', 'inactive'])
+
+export const reviewSentimentEnum = pgEnum('review_sentiment', ['positive', 'neutral', 'negative'])
+
+export const reviewRequestStatusEnum = pgEnum('review_request_status', [
+  'scheduled',
+  'sent',
+  'opened',
+  'clicked',
+  'reviewed_inferred',
+  'expired',
+  'cancelled',
+])
+
+export const reviewSyncTriggerEnum = pgEnum('review_sync_trigger', ['manual', 'scheduled'])
+
+export const reviewSyncStatusEnum = pgEnum('review_sync_status', ['success', 'partial', 'failed'])
 
 // ============ LEAD CONTACT ROLES TABLE ============
 // Replaces leadContactRoleEnum: a real table lets admins add new roles from
@@ -595,4 +612,152 @@ export const heroConfig = pgTable('hero_config', {
   autoplayInterval: integer('autoplay_interval').notNull().default(5000),
   overlayOpacity: integer('overlay_opacity').notNull().default(50),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ============ GOOGLE_REVIEWS TABLE ============
+// Local cache of Google Business Profile reviews. The public website never
+// queries Google directly — it reads only from this table. Moderation
+// fields (isVisible/isFeatured/isPinned/tags/notes/AI fields) are owned by
+// admins and must never be overwritten by the sync use case.
+export const googleReviews = pgTable(
+  'google_reviews',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    googleReviewId: varchar('google_review_id', { length: 255 }).notNull().unique(), // v4 review resource name
+    locationId: varchar('location_id', { length: 100 }).notNull(),
+    reviewerName: varchar('reviewer_name', { length: 255 }).notNull(),
+    reviewerAvatarUrl: text('reviewer_avatar_url'),
+    reviewerProfileUrl: text('reviewer_profile_url'),
+    rating: integer('rating').notNull(),
+    comment: text('comment'), // nullable: star-only reviews exist
+    reviewCreatedAt: timestamp('review_created_at', { withTimezone: true }).notNull(),
+    reviewUpdatedAt: timestamp('review_updated_at', { withTimezone: true }).notNull(),
+    language: varchar('language', { length: 10 }),
+    ownerReply: text('owner_reply'),
+    ownerReplyAt: timestamp('owner_reply_at', { withTimezone: true }),
+    isVisible: boolean('is_visible').notNull().default(false), // opt-in publishing
+    isFeatured: boolean('is_featured').notNull().default(false),
+    isPinned: boolean('is_pinned').notNull().default(false),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+    internalNotes: text('internal_notes'),
+    aiSummary: text('ai_summary'),
+    aiSentiment: reviewSentimentEnum('ai_sentiment'),
+    aiCategories: jsonb('ai_categories').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    spamScore: numeric('spam_score', { precision: 4, scale: 3 }),
+    deletedOnGoogleAt: timestamp('deleted_on_google_at', { withTimezone: true }), // soft flag — Google deletions never hard-delete locally
+    syncedAt: timestamp('synced_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_google_reviews_rating').on(table.rating),
+    index('idx_google_reviews_is_visible').on(table.isVisible),
+    index('idx_google_reviews_review_created_at').on(table.reviewCreatedAt),
+  ],
+)
+
+// ============ REVIEW_TAGS TABLE ============
+export const reviewTags = pgTable('review_tags', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 100 }).notNull().unique(),
+  color: varchar('color', { length: 7 }).notNull().default('#E2C063'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ============ GOOGLE_REVIEW_TAGS TABLE (join) ============
+export const googleReviewTags = pgTable(
+  'google_review_tags',
+  {
+    reviewId: uuid('review_id')
+      .notNull()
+      .references(() => googleReviews.id, { onDelete: 'cascade' }),
+    tagId: uuid('tag_id')
+      .notNull()
+      .references(() => reviewTags.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.reviewId, table.tagId] })],
+)
+
+// ============ REVIEW_REQUEST_TEMPLATES TABLE ============
+// Must be declared before review_requests due to the FK reference.
+export const reviewRequestTemplates = pgTable('review_request_templates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 150 }).notNull(),
+  subject: varchar('subject', { length: 255 }).notNull(),
+  bodyHtml: text('body_html').notNull(), // rendered via renderEmailShell
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ============ REVIEW_REQUESTS TABLE ============
+export const reviewRequests = pgTable(
+  'review_requests',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    leadId: uuid('lead_id')
+      .notNull()
+      .references(() => leads.id, { onDelete: 'cascade' }),
+    contactEmail: varchar('contact_email', { length: 255 }).notNull(),
+    contactName: varchar('contact_name', { length: 255 }).notNull(),
+    status: reviewRequestStatusEnum('status').notNull().default('scheduled'),
+    templateId: uuid('template_id')
+      .notNull()
+      .references(() => reviewRequestTemplates.id),
+    scheduledFor: timestamp('scheduled_for', { withTimezone: true }).notNull(),
+    sentAt: timestamp('sent_at', { withTimezone: true }),
+    openedAt: timestamp('opened_at', { withTimezone: true }),
+    clickedAt: timestamp('clicked_at', { withTimezone: true }),
+    reminderCount: integer('reminder_count').notNull().default(0),
+    nextReminderAt: timestamp('next_reminder_at', { withTimezone: true }),
+    // Best-effort fuzzy match to a synced review — never authoritative (see plan §3.5).
+    matchedReviewId: uuid('matched_review_id').references(() => googleReviews.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_review_requests_lead_id').on(table.leadId),
+    index('idx_review_requests_status').on(table.status),
+    index('idx_review_requests_next_reminder_at').on(table.nextReminderAt),
+  ],
+)
+
+// ============ REVIEW_SYNC_LOGS TABLE ============
+export const reviewSyncLogs = pgTable('review_sync_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  trigger: reviewSyncTriggerEnum('trigger').notNull(),
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  finishedAt: timestamp('finished_at', { withTimezone: true }),
+  status: reviewSyncStatusEnum('status'),
+  newCount: integer('new_count').notNull().default(0),
+  updatedCount: integer('updated_count').notNull().default(0),
+  deletedCount: integer('deleted_count').notNull().default(0),
+  errorMessage: text('error_message'),
+})
+
+// ============ REVIEW_SETTINGS TABLE ============
+// Singleton row (one record) controls sync cadence, request timing and
+// public website visibility for the Google Business reputation module.
+export const reviewSettings = pgTable('review_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  syncFrequencyMinutes: integer('sync_frequency_minutes').notNull().default(15),
+  requestDelayDays: integer('request_delay_days').notNull().default(3),
+  maxRemindersPerRequest: integer('max_reminders_per_request').notNull().default(2),
+  reminderIntervalDays: integer('reminder_interval_days').notNull().default(7),
+  minStarsPublic: integer('min_stars_public').notNull().default(4),
+  defaultDisplayMode: varchar('default_display_mode', { length: 20 }).notNull().default('carousel'),
+  websiteVisibilityFlags: jsonb('website_visibility_flags')
+    .$type<Record<string, boolean>>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
+  automationRules: jsonb('automation_rules').$type<Record<string, unknown>[]>().notNull().default(sql`'[]'::jsonb`),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+// ============ REVIEW_REQUEST_SUPPRESSIONS TABLE ============
+// Spam Act 2003 compliance: emails that unsubscribed from review requests.
+// Checked by the dispatcher before every send/reminder (plan Phase 5).
+export const reviewRequestSuppressions = pgTable('review_request_suppressions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  suppressedAt: timestamp('suppressed_at', { withTimezone: true }).notNull().defaultNow(),
 })

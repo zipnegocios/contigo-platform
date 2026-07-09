@@ -55,7 +55,7 @@ export class ResendEmailService implements IEmailService {
   // Purpose-specific sender display name so recipients see e.g. "Contigo
   // Constructions | Quotes" instead of a bare address (which mail clients
   // were rendering as just "Contact" with no display name set at all).
-  private getFromAddress(purpose: 'Quotes' | 'New Quotes' | 'Messages' | 'Updates' | 'Scheduling'): string {
+  private getFromAddress(purpose: 'Quotes' | 'New Quotes' | 'Messages' | 'Updates' | 'Scheduling' | 'Reviews'): string {
     return `Contigo Constructions | ${purpose} <${this.getFromEmail()}>`
   }
 
@@ -444,6 +444,34 @@ export class ResendEmailService implements IEmailService {
       to: adminEmail,
       subject: `[${typeLabel} Cancelled] ${quote.service} — ${quote.name}`,
       html: this.renderEmailShell(`${typeLabel} Cancelled`, bodyHtml),
+    })
+  }
+
+  // bodyHtml/subject arrive pre-rendered (merge fields already substituted
+  // by DispatchReviewRequestsUseCase from the admin-editable template) —
+  // this method only wraps them in the shared shell and sends.
+  //
+  // ⚠️ Compliance gap (plan §Phase 5, Spam Act 2003): renderEmailShell's
+  // footer does not currently include an ABN. Flag to Gustavo — needs the
+  // real business number before this goes to production sends.
+  async sendReviewRequestEmail(params: { to: string; subject: string; bodyHtml: string }): Promise<void> {
+    const resend = getResend()
+    await resend.emails.send({
+      from: this.getFromAddress('Reviews'),
+      to: params.to,
+      subject: params.subject,
+      html: this.renderEmailShell(params.subject, params.bodyHtml),
+    })
+  }
+
+  async sendReviewAutomationAlertToAdmin(params: { subject: string; bodyHtml: string }): Promise<void> {
+    const resend = getResend()
+    const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
+    await resend.emails.send({
+      from: this.getFromAddress('Reviews'),
+      to: adminEmail,
+      subject: params.subject,
+      html: this.renderEmailShell(params.subject, params.bodyHtml),
     })
   }
 

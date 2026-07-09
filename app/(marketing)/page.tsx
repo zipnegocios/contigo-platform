@@ -7,12 +7,17 @@ import ServicesSection from '@/presentation/sections/ServicesSection'
 import BrandPromiseSection from '@/presentation/sections/BrandPromiseSection'
 import ProjectsSection from '@/presentation/sections/ProjectsSection'
 import MasterBuildersSection from '@/presentation/sections/MasterBuildersSection'
+import ReviewsSection from '@/presentation/sections/ReviewsSection'
 import AboutAuthoritySection from '@/presentation/sections/AboutAuthoritySection'
 import Footer from '@/presentation/sections/Footer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { DrizzleHeroConfigRepository } from '@/infrastructure/repositories/DrizzleHeroConfigRepository'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
+import { DrizzleGoogleReviewRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewRepository'
+import { DrizzleReviewSettingsRepository } from '@/infrastructure/repositories/DrizzleReviewSettingsRepository'
+import { DrizzleReviewTagRepository } from '@/infrastructure/repositories/DrizzleReviewTagRepository'
+import { GetPublicReviewsUseCase, type PublicReviewsResult } from '@/application/use-cases/reviews/GetPublicReviewsUseCase'
 import { SERVICE_ROOT_SLUGS, SERVICE_ROOT_NAMES, SERVICE_FALLBACK_CATALOGUE } from '@/presentation/data/serviceCategoryMeta'
 import { SERVICE_FALLBACK_IMAGES } from '@/presentation/data/serviceFallbackImages'
 import type { ServiceCardData } from '@/presentation/sections/ServicesSection'
@@ -158,6 +163,20 @@ export default async function HomePage() {
     console.error('HomePage: failed to fetch services', err)
   }
 
+  let publicReviews: PublicReviewsResult = { reviews: [], averageRating: 0, count: 0, displayMode: 'carousel' }
+  try {
+    if (process.env.DATABASE_URL) {
+      const useCase = new GetPublicReviewsUseCase(
+        new DrizzleGoogleReviewRepository(),
+        new DrizzleReviewSettingsRepository(),
+        new DrizzleReviewTagRepository(),
+      )
+      publicReviews = await useCase.execute()
+    }
+  } catch (err) {
+    console.error('HomePage: failed to fetch public reviews', err)
+  }
+
   return (
     <MarketingPageClient>
       <SimpleHeader />
@@ -169,6 +188,12 @@ export default async function HomePage() {
         <BrandPromiseSection />
         <ProjectsSection projects={projects} />
         <MasterBuildersSection />
+        <ReviewsSection
+          reviews={publicReviews.reviews}
+          averageRating={publicReviews.averageRating}
+          count={publicReviews.count}
+          displayMode={publicReviews.displayMode}
+        />
         <ContactSection />
       </main>
 

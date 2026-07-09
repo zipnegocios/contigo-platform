@@ -12,4 +12,9 @@ export const PERMISSION_OPTIONS: Array<{ key: string; label: string }> = [
   { key: 'users.manage', label: 'Manage Users' },
   { key: 'media.manage', label: 'Manage Media' },
   { key: 'settings.manage', label: 'Manage Settings' },
+  { key: 'reviews.view', label: 'View Reviews' },
+  { key: 'reviews.moderate', label: 'Moderate Reviews' },
+  { key: 'reviews.reply', label: 'Reply to Reviews' },
+  { key: 'reviews.requests', label: 'Manage Review Requests' },
+  { key: 'reviews.settings', label: 'Manage Review Settings' },
 ]
