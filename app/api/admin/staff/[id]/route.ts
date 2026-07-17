@@ -1,9 +1,18 @@
+import { z } from 'zod'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleAdminUserRepository } from '@/infrastructure/repositories/DrizzleAdminUserRepository'
 import { UpdateStaffUserUseCase } from '@/application/use-cases/staff/UpdateStaffUserUseCase'
 import { DeactivateStaffUserUseCase } from '@/application/use-cases/staff/DeactivateStaffUserUseCase'
+import { DrizzleSecurityEventLogger } from '@/infrastructure/services/DrizzleSecurityEventLogger'
 import { AdminUser } from '@/core/entities/AdminUser'
+
+const UpdateStaffSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  title: z.string().max(100).nullable().optional(),
+  phone: z.string().max(20).nullable().optional(),
+  isActive: z.boolean().optional(),
+})
 
 function serializeStaffUser(user: AdminUser) {
   return {
@@ -26,16 +35,20 @@ export async function PATCH(
 ) {
   try {
     const session = await auth()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const userId = (session.user as any)?.id
+    const userId = (session.user as { id?: string })?.id
     if (!userId || !(await hasPermission(userId, 'users.manage'))) {
       return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const { id } = await params
     const body = await request.json()
-    const { name, title, phone, isActive } = body
+    const parsed = UpdateStaffSchema.safeParse(body)
+    if (!parsed.success) {
+      return Response.json({ error: parsed.error.issues[0]?.message ?? 'Invalid request' }, { status: 400 })
+    }
+    const { name, title, phone, isActive } = parsed.data
 
     const hasProfileFields = name !== undefined || title !== undefined || phone !== undefined
 
@@ -55,7 +68,7 @@ export async function PATCH(
     }
 
     if (isActive !== undefined) {
-      const deactivateUseCase = new DeactivateStaffUserUseCase(repository)
+      const deactivateUseCase = new DeactivateStaffUserUseCase(repository, new DrizzleSecurityEventLogger(), userId)
       user = await deactivateUseCase.execute(id, isActive)
     }
 

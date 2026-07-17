@@ -10,11 +10,11 @@ import { DrizzlePipelineStageRepository } from '@/infrastructure/repositories/Dr
 import { CreateLeadForQuoteUseCase } from '@/application/use-cases/leads/CreateLeadForQuoteUseCase'
 
 const CreateQuoteSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
-  service: z.string().min(2, 'Please select a service'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(255),
+  email: z.string().email('Invalid email address').max(255),
+  phone: z.string().max(50).optional(),
+  service: z.string().min(2, 'Please select a service').max(255),
+  message: z.string().min(10, 'Message must be at least 10 characters').max(5000),
   attachmentUrls: z.array(z.string()).max(3).optional().default([]),
 })
 

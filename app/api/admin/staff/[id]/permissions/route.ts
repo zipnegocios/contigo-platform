@@ -1,6 +1,7 @@
 import { auth } from '@/infrastructure/auth/auth.config'
 import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzlePermissionRepository } from '@/infrastructure/repositories/DrizzlePermissionRepository'
+import { DrizzleSecurityEventLogger } from '@/infrastructure/services/DrizzleSecurityEventLogger'
 import { SetStaffPermissionsUseCase } from '@/application/use-cases/staff/SetStaffPermissionsUseCase'
 
 export async function PUT(
@@ -9,9 +10,9 @@ export async function PUT(
 ) {
   try {
     const session = await auth()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const userId = (session.user as any)?.id
+    const userId = (session.user as { id?: string })?.id
     if (!userId || !(await hasPermission(userId, 'users.manage'))) {
       return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
@@ -24,7 +25,7 @@ export async function PUT(
       return Response.json({ error: 'permissionKeys must be an array of strings' }, { status: 400 })
     }
 
-    const useCase = new SetStaffPermissionsUseCase(new DrizzlePermissionRepository())
+    const useCase = new SetStaffPermissionsUseCase(new DrizzlePermissionRepository(), new DrizzleSecurityEventLogger(), userId)
     await useCase.execute(id, permissionKeys)
 
     return Response.json({ success: true, permissionKeys })

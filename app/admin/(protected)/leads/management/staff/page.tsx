@@ -16,6 +16,7 @@ export default async function StaffManagementPage() {
       title: user.title,
       phone: user.phone,
       isActive: user.isActive,
+      lastLogin: user.lastLogin,
       permissionKeys: await permissionRepository.findAllForUser(user.id),
     })),
   )

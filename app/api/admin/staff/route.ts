@@ -1,8 +1,21 @@
+import { z } from 'zod'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { hasPermission } from '@/infrastructure/auth/hasPermission'
 import { DrizzleAdminUserRepository } from '@/infrastructure/repositories/DrizzleAdminUserRepository'
+import { DrizzleAuthTokenRepository } from '@/infrastructure/repositories/DrizzleAuthTokenRepository'
+import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
+import { AuthTokenService } from '@/infrastructure/services/AuthTokenService'
+import { DrizzleSecurityEventLogger } from '@/infrastructure/services/DrizzleSecurityEventLogger'
 import { CreateStaffUserUseCase } from '@/application/use-cases/staff/CreateStaffUserUseCase'
 import { AdminUser } from '@/core/entities/AdminUser'
+
+const CreateStaffSchema = z.object({
+  name: z.string().min(1).max(255),
+  email: z.string().email().max(255),
+  password: z.string().max(255).optional(),
+  title: z.string().max(100).nullable().optional(),
+  phone: z.string().max(20).nullable().optional(),
+})
 
 function serializeStaffUser(user: AdminUser) {
   return {
@@ -23,7 +36,12 @@ function serializeStaffUser(user: AdminUser) {
 export async function GET() {
   try {
     const session = await auth()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const userId = (session.user as { id?: string })?.id
+    if (!userId || !(await hasPermission(userId, 'users.manage'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const staff = await new DrizzleAdminUserRepository().findAll()
 
@@ -40,18 +58,25 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await auth()
-    if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const userId = (session.user as any)?.id
+    const userId = (session.user as { id?: string })?.id
     if (!userId || !(await hasPermission(userId, 'users.manage'))) {
       return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const body = await request.json()
-    const { name, email, password, title, phone } = body
+    const parsed = CreateStaffSchema.safeParse(body)
+    if (!parsed.success) {
+      return Response.json({ error: parsed.error.issues[0]?.message ?? 'Invalid request' }, { status: 400 })
+    }
+    const { name, email, password, title, phone } = parsed.data
 
-    if (!name || !email || !password) {
-      return Response.json({ error: 'name, email and password are required' }, { status: 400 })
+    if (password) {
+      return Response.json(
+        { error: 'Staff users are provisioned by invitation — do not send a password.' },
+        { status: 400 },
+      )
     }
 
     const repository = new DrizzleAdminUserRepository()
@@ -61,8 +86,17 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Email already in use' }, { status: 409 })
     }
 
-    const useCase = new CreateStaffUserUseCase(repository)
-    const user = await useCase.execute({ name, email, password, title, phone })
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const useCase = new CreateStaffUserUseCase(
+      repository,
+      new DrizzleAuthTokenRepository(),
+      new ResendEmailService(),
+      new AuthTokenService(),
+      `${siteUrl}/admin/accept-invitation`,
+      new DrizzleSecurityEventLogger(),
+      userId,
+    )
+    const user = await useCase.execute({ name, email, title, phone })
 
     return Response.json({ success: true, staff: serializeStaffUser(user) }, { status: 201 })
   } catch (error) {

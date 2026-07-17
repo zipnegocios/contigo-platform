@@ -16,9 +16,18 @@ const envConfig = config({
 expand(envConfig)
 
 const DATABASE_URL = process.env.DATABASE_URL
+const SEED_ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL
+const SEED_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD
+const SEED_ADMIN_NAME = process.env.SEED_ADMIN_NAME
+const BCRYPT_COST = 12
 
 if (!DATABASE_URL) {
   console.error('❌ DATABASE_URL not found in .env.local')
+  process.exit(1)
+}
+
+if (!SEED_ADMIN_EMAIL || !SEED_ADMIN_PASSWORD) {
+  console.error('❌ SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD must both be set in .env.local. Aborting - no default credentials will be used.')
   process.exit(1)
 }
 
@@ -30,14 +39,13 @@ async function seedAdmin() {
     console.log('🌱 Seeding admin user...\n')
 
     // Hash password
-    const password = 'admin123'
-    const passwordHash = await bcryptjs.hash(password, 10)
+    const passwordHash = await bcryptjs.hash(SEED_ADMIN_PASSWORD, BCRYPT_COST)
 
     // Insert admin user
     const adminUser = {
-      email: 'admin@contigoconstructions.com.au',
+      email: SEED_ADMIN_EMAIL,
       passwordHash,
-      name: 'Admin Contigo',
+      name: SEED_ADMIN_NAME || SEED_ADMIN_EMAIL.split('@')[0],
       role: 'owner',
       isActive: true,
     }
@@ -46,8 +54,7 @@ async function seedAdmin() {
 
     console.log('✅ Admin user created successfully!\n')
     console.log('📋 Login Credentials:')
-    console.log(`   Email: ${adminUser.email}`)
-    console.log(`   Password: ${password}\n`)
+    console.log(`   Email: ${adminUser.email}\n`)
     console.log('🔐 Access admin portal:')
     console.log('   Local: http://localhost:3000/admin/login')
     console.log('   Production: https://contigoconstructions.com.au/admin/login\n')

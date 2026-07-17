@@ -15,6 +15,7 @@ export interface StaffRow {
   title: string | null
   phone: string | null
   isActive: boolean
+  lastLogin: Date | null
   permissionKeys: string[]
 }
 
@@ -22,6 +23,22 @@ export function StaffTable({ staff }: { staff: StaffRow[] }) {
   const router = useRouter()
   const [pendingPermission, setPendingPermission] = useState<string | null>(null)
   const [pendingStatus, setPendingStatus] = useState<string | null>(null)
+  const [pendingResend, setPendingResend] = useState<string | null>(null)
+
+  async function resendInvitation(row: StaffRow) {
+    setPendingResend(row.id)
+    try {
+      const res = await fetch(`/api/admin/staff/${row.id}/resend-invitation`, { method: 'POST' })
+      if (!res.ok) {
+        const data = await res.json()
+        alert(data.error || 'Failed to resend invitation')
+        return
+      }
+      alert('Invitation resent.')
+    } finally {
+      setPendingResend(null)
+    }
+  }
 
   async function togglePermission(row: StaffRow, key: string, checked: boolean) {
     const nextKeys = checked
@@ -75,6 +92,7 @@ export function StaffTable({ staff }: { staff: StaffRow[] }) {
             <th className="text-left px-5 py-3 font-semibold whitespace-nowrap" style={{ color: 'var(--neutral-600)' }}>Title</th>
             <th className="text-left px-5 py-3 font-semibold whitespace-nowrap" style={{ color: 'var(--neutral-600)' }}>Role</th>
             <th className="text-left px-5 py-3 font-semibold whitespace-nowrap" style={{ color: 'var(--neutral-600)' }}>Status</th>
+            <th className="text-left px-5 py-3 font-semibold whitespace-nowrap" style={{ color: 'var(--neutral-600)' }}>Invitation</th>
             {PERMISSION_OPTIONS.map((perm) => (
               <th
                 key={perm.key}
@@ -124,6 +142,24 @@ export function StaffTable({ staff }: { staff: StaffRow[] }) {
                     </Badge>
                   </div>
                 </td>
+                <td className="px-5 py-3 whitespace-nowrap">
+                  {row.lastLogin === null ? (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">Invitation pending</Badge>
+                      <button
+                        type="button"
+                        disabled={pendingResend === row.id}
+                        onClick={() => resendInvitation(row)}
+                        className="text-fluid-xs font-semibold underline disabled:opacity-50"
+                        style={{ color: 'var(--neutral-600)' }}
+                      >
+                        Resend
+                      </button>
+                    </div>
+                  ) : (
+                    <span style={{ color: 'var(--neutral-600)' }}>—</span>
+                  )}
+                </td>
                 {PERMISSION_OPTIONS.map((perm) => (
                   <td key={perm.key} className="px-3 py-3 text-center">
                     <Checkbox
@@ -138,7 +174,7 @@ export function StaffTable({ staff }: { staff: StaffRow[] }) {
           })}
           {staff.length === 0 && (
             <tr>
-              <td colSpan={5 + PERMISSION_OPTIONS.length} className="px-5 py-8 text-center text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
+              <td colSpan={6 + PERMISSION_OPTIONS.length} className="px-5 py-8 text-center text-fluid-sm" style={{ color: 'var(--neutral-600)' }}>
                 No staff users found.
               </td>
             </tr>

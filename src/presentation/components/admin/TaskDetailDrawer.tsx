@@ -115,7 +115,7 @@ export function TaskDetailDrawer({ leadId, task: initialTask, onClose, onMutated
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    Promise.all([loadSubResources(), fetch('/api/admin/staff').then((r) => r.json())])
+    Promise.all([loadSubResources(), fetch('/api/admin/staff/options').then((r) => r.json())])
       .then(([, staffJson]) => {
         if (!cancelled) setStaff(staffJson.staff ?? [])
       })

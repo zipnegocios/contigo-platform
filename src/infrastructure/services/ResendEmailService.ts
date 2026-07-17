@@ -55,7 +55,7 @@ export class ResendEmailService implements IEmailService {
   // Purpose-specific sender display name so recipients see e.g. "Contigo
   // Constructions | Quotes" instead of a bare address (which mail clients
   // were rendering as just "Contact" with no display name set at all).
-  private getFromAddress(purpose: 'Quotes' | 'New Quotes' | 'Messages' | 'Updates' | 'Scheduling' | 'Reviews'): string {
+  private getFromAddress(purpose: 'Quotes' | 'New Quotes' | 'Messages' | 'Updates' | 'Scheduling' | 'Reviews' | 'Account'): string {
     return `Contigo Constructions | ${purpose} <${this.getFromEmail()}>`
   }
 
@@ -472,6 +472,38 @@ export class ResendEmailService implements IEmailService {
       to: adminEmail,
       subject: params.subject,
       html: this.renderEmailShell(params.subject, params.bodyHtml),
+    })
+  }
+
+  async sendPasswordResetEmail(params: { to: string; name: string; resetUrl: string }): Promise<void> {
+    const resend = getResend()
+    const bodyHtml = `
+      <p>Hi ${params.name},</p>
+      <p>We received a request to reset your admin password. Click the button below to choose a new one — this link expires in 30 minutes.</p>
+      <p><a href="${params.resetUrl}" class="button">Reset Password</a></p>
+      <p>If you didn't request this, you can safely ignore this email — your password will not be changed.</p>
+    `
+    await resend.emails.send({
+      from: this.getFromAddress('Account'),
+      to: params.to,
+      subject: 'Reset your Contigo admin password',
+      html: this.renderEmailShell('Password Reset Request', bodyHtml),
+    })
+  }
+
+  async sendStaffInvitationEmail(params: { to: string; name: string; inviteUrl: string }): Promise<void> {
+    const resend = getResend()
+    const bodyHtml = `
+      <p>Hi ${params.name},</p>
+      <p>You've been invited to the Contigo Constructions admin panel. Click the button below to set your password and activate your account — this link expires in 72 hours.</p>
+      <p><a href="${params.inviteUrl}" class="button">Accept Invitation</a></p>
+      <p>If you weren't expecting this invitation, you can safely ignore this email.</p>
+    `
+    await resend.emails.send({
+      from: this.getFromAddress('Account'),
+      to: params.to,
+      subject: "You're invited to the Contigo admin panel",
+      html: this.renderEmailShell('Staff Invitation', bodyHtml),
     })
   }
 

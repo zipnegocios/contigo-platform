@@ -579,9 +579,38 @@ export const adminUsers = pgTable('admin_users', {
   phone: varchar('phone', { length: 20 }),
   isActive: boolean('is_active').notNull().default(true),
   lastLogin: timestamp('last_login', { withTimezone: true }),
+  // Bumped on password change/deactivation to invalidate outstanding JWTs immediately.
+  sessionVersion: integer('session_version').notNull().default(1),
+  // Account-lockout counters (Fase 4 — anti-brute-force).
+  failedLoginCount: integer('failed_login_count').notNull().default(0),
+  lockedUntil: timestamp('locked_until', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ============ AUTH_TOKENS TABLE ============
+// Single-use tokens for password reset and staff invitation flows. Only the
+// sha256 hash is stored — the plaintext token travels solely in the email link.
+export const authTokenTypeEnum = pgEnum('auth_token_type', ['password_reset', 'invitation'])
+
+export const authTokens = pgTable(
+  'auth_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => adminUsers.id, { onDelete: 'cascade' }),
+    type: authTokenTypeEnum('type').notNull(),
+    tokenHash: varchar('token_hash', { length: 64 }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_auth_tokens_user_type').on(table.userId, table.type),
+    index('idx_auth_tokens_hash').on(table.tokenHash),
+  ],
+)
 
 // ============ PERMISSIONS TABLE ============
 // Granular permission catalog for staff users (Fase 4.1). Owners get every

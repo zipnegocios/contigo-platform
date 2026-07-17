@@ -267,6 +267,13 @@
       "when": 1783573850151,
       "tag": "20260709051050_seed_legal_permission",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1784263010935,
+      "tag": "20260717043650_melted_genesis",
+      "breakpoints": true
     }
   ]
 }

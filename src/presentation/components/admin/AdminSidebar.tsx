@@ -19,6 +19,7 @@ import {
   LayoutPanelTop,
   Star,
   Scale,
+  ShieldAlert,
 } from 'lucide-react'
 import { Button } from '@/presentation/design-system/components/atoms'
 import { AdminMessagesBell } from './AdminMessagesBell'
@@ -38,8 +39,11 @@ const navItems = [
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ canViewSecurity = false }: { canViewSecurity?: boolean }) {
   const pathname = usePathname() || ''
+  const items = canViewSecurity
+    ? [...navItems, { label: 'Security', href: '/admin/security', icon: ShieldAlert }]
+    : navItems
 
   return (
     <aside className="w-64 flex flex-col h-screen" style={{ backgroundColor: 'var(--petrol-800)' }}>
@@ -77,7 +81,7 @@ export default function AdminSidebar() {
 
       {/* Nav Items */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const Icon = item.icon
           const isActive =
             pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href + '/'))

@@ -157,6 +157,13 @@ function LoginForm() {
         </button>
       </div>
 
+      {/* Forgot password */}
+      <div style={{ textAlign: 'center', marginTop: '1rem', animation: 'fadeUp 0.45s ease 0.55s both' }}>
+        <Link href="/admin/forgot-password" className="credit-link" style={{ fontSize: '0.75rem' }}>
+          Forgot your password?
+        </Link>
+      </div>
+
     </form>
   )
 }

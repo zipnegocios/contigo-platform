@@ -16,6 +16,9 @@ export class DrizzleAdminUserRepository implements IAdminUserRepository {
       phone: user.phone,
       isActive: user.isActive,
       lastLogin: user.lastLogin,
+      sessionVersion: user.sessionVersion,
+      failedLoginCount: user.failedLoginCount,
+      lockedUntil: user.lockedUntil,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })
@@ -51,6 +54,9 @@ export class DrizzleAdminUserRepository implements IAdminUserRepository {
         phone: user.phone,
         isActive: user.isActive,
         lastLogin: user.lastLogin,
+        sessionVersion: user.sessionVersion,
+        failedLoginCount: user.failedLoginCount,
+        lockedUntil: user.lockedUntil,
         updatedAt: user.updatedAt,
       })
       .where(eq(adminUsers.id, user.id))
@@ -67,6 +73,9 @@ export class DrizzleAdminUserRepository implements IAdminUserRepository {
       phone: row.phone,
       isActive: row.isActive,
       lastLogin: row.lastLogin,
+      sessionVersion: row.sessionVersion,
+      failedLoginCount: row.failedLoginCount,
+      lockedUntil: row.lockedUntil,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     })

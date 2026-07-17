@@ -13,7 +13,6 @@ export function StaffFormModal({ onClose, onCreated }: StaffFormModalProps) {
   const [email, setEmail] = useState('')
   const [title, setTitle] = useState('')
   const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,7 +24,7 @@ export function StaffFormModal({ onClose, onCreated }: StaffFormModalProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim() || !email.trim() || !password) return
+    if (!name.trim() || !email.trim()) return
     setSaving(true)
     setError(null)
 
@@ -36,7 +35,6 @@ export function StaffFormModal({ onClose, onCreated }: StaffFormModalProps) {
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim(),
-          password,
           title: title.trim() || null,
           phone: phone.trim() || null,
         }),
@@ -125,19 +123,9 @@ export function StaffFormModal({ onClose, onCreated }: StaffFormModalProps) {
             />
           </div>
 
-          <div>
-            <label className="block text-fluid-xs font-medium mb-1" style={{ color: '#6B6560' }}>Initial password *</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-3 py-2 rounded-lg text-fluid-sm outline-none"
-              style={{ backgroundColor: '#F0EBE3', color: 'var(--neutral-800)', border: '1px solid #E5DDD0' }}
-              placeholder="Set an initial password"
-            />
-          </div>
+          <p className="text-fluid-xs px-3 py-2 rounded-lg" style={{ backgroundColor: '#F0EBE3', color: '#6B6560' }}>
+            An invitation email will be sent to this address so they can set their own password.
+          </p>
 
           {error && (
             <p className="text-fluid-xs px-3 py-2 rounded-lg" style={{ backgroundColor: 'rgba(232,112,112,0.1)', color: '#e87070' }}>
@@ -156,7 +144,7 @@ export function StaffFormModal({ onClose, onCreated }: StaffFormModalProps) {
             </button>
             <button
               type="submit"
-              disabled={saving || !name.trim() || !email.trim() || !password}
+              disabled={saving || !name.trim() || !email.trim()}
               className="flex items-center gap-2 px-5 py-2 text-fluid-sm font-semibold rounded-lg disabled:opacity-50 min-h-[44px]"
               style={{ backgroundColor: 'var(--contigo-primary)', color: 'var(--petrol-800)' }}
             >
