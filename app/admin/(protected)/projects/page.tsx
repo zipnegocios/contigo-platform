@@ -5,6 +5,7 @@ import type { ProjectGroup } from '@/presentation/components/admin/ProjectGroupe
 import { ProjectsTrashView } from '@/presentation/components/admin/ProjectsTrashView'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
+import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 
 export default async function ProjectsPage({
   searchParams,
@@ -25,6 +26,9 @@ export default async function ProjectsPage({
   ])
 
   const catMap = new Map(flatCats.map((c) => [c.id, c.name]))
+  const categorySlugById = new Map(flatCats.map((c) => [c.id, c.slug]))
+  const resolveCategorySlug = (p: { categoryId: string | null; category: string }) =>
+    (p.categoryId && categorySlugById.get(p.categoryId)) || generateSlug(p.category)
 
   if (isTrash) {
     return (
@@ -73,6 +77,7 @@ export default async function ProjectsPage({
           featured: p.featured,
           coverImageUrl: p.coverImageUrl,
           categoryId: p.categoryId,
+          categorySlug: resolveCategorySlug(p),
         })),
     }))
 
@@ -92,6 +97,7 @@ export default async function ProjectsPage({
           featured: p.featured,
           coverImageUrl: p.coverImageUrl,
           categoryId: p.categoryId,
+          categorySlug: resolveCategorySlug(p),
         })),
     })
   }

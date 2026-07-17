@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { Trash2, GripVertical, Pencil } from 'lucide-react'
+import { Trash2, GripVertical, Pencil, ExternalLink } from 'lucide-react'
 import { Button } from '@/presentation/components/ui/button'
 import { StatusMenu } from './StatusMenu'
 import type { ContentStatus } from '@/types/status'
@@ -18,6 +18,7 @@ export interface ProjectGroupItem {
   featured: boolean
   coverImageUrl: string
   categoryId: string | null
+  categorySlug: string
 }
 
 export interface ProjectGroup {
@@ -191,6 +192,30 @@ function CategorySection({ group }: { group: ProjectGroup }) {
                 <StatusMenu status={proj.status} onChange={(status) => handleStatusChange(proj.id, status)} />
 
                 <div className="flex gap-1 flex-shrink-0">
+                  {proj.status === 'active' ? (
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="outline"
+                      className="min-h-[36px] min-w-[36px] p-0 transition-all duration-150"
+                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                    >
+                      <a href={`/projects/${proj.categorySlug}/${proj.slug}`} target="_blank" rel="noopener noreferrer" title="View live page">
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled
+                      className="min-h-[36px] min-w-[36px] p-0 opacity-40 cursor-not-allowed"
+                      style={{ borderColor: '#E5DDD0', color: '#6B6560' }}
+                      title="Only Active projects have a public page"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
                   <Button
                     asChild
                     size="sm"
