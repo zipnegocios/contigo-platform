@@ -32,7 +32,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     completedDate: Date
   }[] = []
 
-  let allCategories: { name: string; slug: string }[] = []
+  let allCategories: { id: string; name: string; slug: string }[] = []
 
   try {
     if (process.env.DATABASE_URL) {
@@ -59,19 +59,19 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
       allCategories = flatCats
         .filter((c) => c.status === 'active' && c.parentId === null)
-        .map((c) => ({ name: c.name, slug: c.slug }))
+        .map((c) => ({ id: c.id, name: c.name, slug: c.slug }))
     }
   } catch (error) {
     console.warn('ProjectsPage: Could not fetch projects:', error)
   }
 
-  // Filter by category slug if provided
+  // Filter by category via the real FK (categoryId), never the legacy
+  // denormalized `category` text — that field only re-syncs when a project's
+  // categoryId changes, so it silently drifts whenever a category is renamed.
   let filtered = allProjects
   if (categorySlug) {
-    filtered = allProjects.filter((p) =>
-      p.category.toLowerCase().replace(/\s+/g, '-') === categorySlug ||
-      allCategories.find((c) => c.slug === categorySlug)?.name.toLowerCase() === p.category.toLowerCase()
-    )
+    const matchedCategory = allCategories.find((c) => c.slug === categorySlug)
+    filtered = matchedCategory ? allProjects.filter((p) => p.categoryId === matchedCategory.id) : []
   }
 
   return (

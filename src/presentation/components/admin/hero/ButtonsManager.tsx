@@ -19,7 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import type { HeroButton, ButtonLinkType, ButtonStyle } from '@/core/entities/HeroConfig'
 
-interface EntityOption { id: string; label: string; slug: string }
+interface EntityOption { id: string; label: string; slug: string; categorySlug?: string }
 interface FormOption { id: string; name: string; slug: string }
 
 interface Props {
@@ -188,7 +188,7 @@ function SortableButton({ button, expanded, onToggle, onDelete, onChange, servic
                 value={button.entityId ?? ''}
                 onChange={(e) => {
                   const opt = projectOptions.find((p) => p.id === e.target.value)
-                  if (opt) onChange({ entityId: opt.id, entityLabel: opt.label, href: `/projects/${opt.slug}` })
+                  if (opt) onChange({ entityId: opt.id, entityLabel: opt.label, href: `/projects/${opt.categorySlug ?? ''}/${opt.slug}` })
                 }}
               >
                 <option value="">Select a project…</option>

@@ -1,19 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import { Play } from 'lucide-react'
 import { Lightbox } from '@/presentation/components/Lightbox'
+import { isVideoUrl } from '@/presentation/lib/media-type'
 import type { GalleryItem } from '@/types/media'
-
-function isVideo(url: string) {
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
-}
 
 export function ProjectGallery({ items }: { items: GalleryItem[] }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   if (items.length === 0) return null
-
-  const imageItems = items.filter((it) => !isVideo(it.url))
 
   return (
     <>
@@ -33,44 +29,47 @@ export function ProjectGallery({ items }: { items: GalleryItem[] }) {
             lg      (1024px+): 3 columns
         */}
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-3">
-          {items.map((item, i) =>
-            isVideo(item.url) ? (
-              <div
-                key={i}
-                className="break-inside-avoid mb-3 overflow-hidden rounded-xl"
-                style={{ backgroundColor: '#1E1A16', aspectRatio: '16/9' }}
-              >
-                <video
-                  src={item.url}
-                  controls
-                  preload="metadata"
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
+          {items.map((item, i) => {
+            const video = isVideoUrl(item.url)
+            return (
               <button
                 key={i}
                 type="button"
-                onClick={() => setLightboxIndex(imageItems.indexOf(item))}
-                className="break-inside-avoid mb-3 block w-full overflow-hidden rounded-xl text-left group cursor-pointer"
+                onClick={() => setLightboxIndex(i)}
+                className="break-inside-avoid mb-3 block w-full overflow-hidden rounded-xl text-left group cursor-pointer relative"
+                style={video ? { backgroundColor: '#1E1A16', aspectRatio: '16/9' } : undefined}
               >
-                <img
-                  src={item.url}
-                  alt={item.title || `Gallery ${i + 1}`}
-                  className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
-                />
+                {video ? (
+                  <>
+                    <video
+                      src={item.url}
+                      muted
+                      preload="metadata"
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ backgroundColor: 'rgba(0,0,0,0.25)' }}>
+                      <Play className="w-8 h-8 fill-white text-white" />
+                    </div>
+                  </>
+                ) : (
+                  <img
+                    src={item.url}
+                    alt={item.title || `Gallery ${i + 1}`}
+                    className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
               </button>
-            ),
-          )}
+            )
+          })}
         </div>
       </div>
 
       {lightboxIndex !== null && (
         <Lightbox
-          items={imageItems}
+          items={items}
           startIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
         />

@@ -4,6 +4,8 @@ import type { ContentStatus } from '@/types/status'
 
 export interface CreateProjectInput {
   title: string
+  /** Optional manual override — caller is responsible for sanitizing/uniqueness (see admin create route). */
+  slug?: string
   category: string
   categoryId?: string | null
   description: string
@@ -73,7 +75,7 @@ export class Project {
 
   static create(input: CreateProjectInput): Project {
     const id = crypto.randomUUID()
-    const slug = generateSlug(input.title)
+    const slug = input.slug ? generateSlug(input.slug) : generateSlug(input.title)
     const now = new Date()
 
     return new Project({

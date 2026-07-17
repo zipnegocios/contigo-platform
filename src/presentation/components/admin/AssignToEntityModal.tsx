@@ -38,13 +38,13 @@ export function AssignToEntityModal({ item, onClose, onAssigned }: AssignToEntit
       const services = sRes.ok ? await sRes.json() : []
 
       const mapped: Entity[] = [
-        ...projects.map((p: { id: string; title: string; slug: string; coverImageUrl: string | null }) => ({
+        ...projects.map((p: { id: string; title: string; slug: string; categorySlug: string; coverImageUrl: string | null }) => ({
           id: p.id,
           name: p.title,
           type: 'project' as const,
           coverUrl: p.coverImageUrl,
           slug: p.slug,
-          previewPath: `/projects/${p.slug}`,
+          previewPath: `/projects/${p.categorySlug}/${p.slug}`,
         })),
         ...services.map((s: { id: string; name: string; slug: string; imageUrl: string | null; previewPath: string | null }) => ({
           id: s.id,

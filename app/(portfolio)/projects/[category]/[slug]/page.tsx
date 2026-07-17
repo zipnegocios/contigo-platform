@@ -1,19 +1,24 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
+import { resolveProjectCategorySlug } from '@/infrastructure/services/resolveProjectCategorySlug'
+import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 import { ProjectGallery } from '@/presentation/components/ProjectGallery'
-
-function isVideo(url: string) {
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
-}
+import { isVideoUrl } from '@/presentation/lib/media-type'
 
 export async function generateStaticParams() {
   try {
     if (!process.env.DATABASE_URL) return []
     const repo = new DrizzleProjectRepository()
-    const projects = await repo.findPublished(100)
-    return projects.map((p) => ({ slug: p.slug }))
+    const catRepo = new DrizzleCategoryRepository()
+    const [projectsList, cats] = await Promise.all([repo.findPublished(100), catRepo.findFlat('shared')])
+    const categoryById = new Map(cats.map((c) => [c.id, c.slug]))
+    return projectsList.map((p) => ({
+      category: (p.categoryId && categoryById.get(p.categoryId)) || generateSlug(p.category),
+      slug: p.slug,
+    }))
   } catch {
     return []
   }
@@ -22,7 +27,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ category: string; slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
   const repo = new DrizzleProjectRepository()
@@ -46,13 +51,21 @@ export const dynamic = 'force-dynamic'
 export default async function ProjectDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ category: string; slug: string }>
 }) {
-  const { slug } = await params
+  const { category: categorySlug, slug } = await params
   const repo = new DrizzleProjectRepository()
   const project = await repo.findBySlug(slug)
 
   if (!project || project.status !== 'active' || project.trashedAt) notFound()
+
+  // Keep the category segment honest — if a project was recategorized, an
+  // old bookmarked/indexed `/projects/[oldCategory]/[slug]` URL still
+  // resolves, just permanently redirected to the current canonical one.
+  const correctCategorySlug = await resolveProjectCategorySlug(project)
+  if (categorySlug !== correctCategorySlug) {
+    permanentRedirect(`/projects/${correctCategorySlug}/${project.slug}`)
+  }
 
   const completedLabel = new Date(project.completedDate).toLocaleDateString('en-AU', {
     year: 'numeric',
@@ -63,7 +76,7 @@ export default async function ProjectDetailPage({
     <div style={{ backgroundColor: '#FAF6F0', minHeight: '100vh' }}>
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <div className="relative" style={{ height: '90vh', maxHeight: 720, minHeight: 480 }}>
-        {isVideo(project.coverImageUrl) ? (
+        {isVideoUrl(project.coverImageUrl) ? (
           <video
             src={project.coverImageUrl}
             poster={project.coverPosterUrl ?? undefined}
@@ -121,12 +134,17 @@ export default async function ProjectDetailPage({
 
           {/* ── Left: Description + Gallery ─────────────────────────────────── */}
           <div className="flex-1 min-w-0">
-            <p
-              className="text-fluid-xl leading-relaxed mb-12"
-              style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)' }}
-            >
-              {project.description}
-            </p>
+            <div className="mb-12">
+              {project.description.split(/\n{2,}/).map((paragraph, i) => (
+                <p
+                  key={i}
+                  className="text-fluid-xl leading-relaxed mb-4 last:mb-0 whitespace-pre-line"
+                  style={{ color: '#3D3530', fontFamily: 'var(--font-cormorant)' }}
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
 
             <ProjectGallery items={project.galleryItems} />
           </div>

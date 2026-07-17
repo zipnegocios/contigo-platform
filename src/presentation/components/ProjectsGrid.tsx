@@ -2,16 +2,15 @@
 
 import Link from 'next/link'
 import { CategoryFilterPills } from './CategoryFilterPills'
-
-function isVideo(url: string) {
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
-}
+import { isVideoUrl } from '@/presentation/lib/media-type'
+import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 
 interface ProjectItem {
   id: string
   slug: string
   title: string
   category: string
+  categoryId: string | null
   location: string
   coverImageUrl: string
   coverPosterUrl?: string | null
@@ -20,6 +19,7 @@ interface ProjectItem {
 }
 
 interface FilterCategory {
+  id: string
   name: string
   slug: string
 }
@@ -53,9 +53,11 @@ export function ProjectsGrid({ projects, allCategories, activeSlug }: ProjectsGr
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => {
             const year = new Date(project.completedDate).getFullYear()
-            const video = isVideo(project.coverImageUrl)
+            const video = isVideoUrl(project.coverImageUrl)
+            const categorySlug =
+              allCategories.find((c) => c.id === project.categoryId)?.slug ?? generateSlug(project.category)
             return (
-              <Link key={project.id} href={`/projects/${project.slug}`} className="group block">
+              <Link key={project.id} href={`/projects/${categorySlug}/${project.slug}`} className="group block">
                 <div
                   className="relative overflow-hidden rounded-2xl"
                   style={{ aspectRatio: '4/3', backgroundColor: '#1E1A16' }}

@@ -1,12 +1,25 @@
+import { revalidatePath } from 'next/cache'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
+import { DrizzleProjectSlugHistoryRepository } from '@/infrastructure/repositories/DrizzleProjectSlugHistoryRepository'
 import { Project } from '@/core/entities/Project'
 import { renamePrefix } from '@/infrastructure/services/R2StorageService'
-import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
+import { generateSlug, ensureUniqueSlug } from '@/infrastructure/services/SlugGeneratorService'
+import { resolveProjectCategorySlug } from '@/infrastructure/services/resolveProjectCategorySlug'
 import type { GalleryItem } from '@/types/media'
 
 const BUCKET = process.env.R2_ASSETS_BUCKET || 'contigo-assets'
+
+// Defense-in-depth: `/`, `/projects` and `/projects/[category]/[slug]` are
+// currently fully dynamic (force-dynamic / reads searchParams), so this is a
+// no-op today — but it keeps admin mutations correct if those pages ever
+// gain ISR.
+function revalidateProjectPages(slug?: string, categorySlug?: string) {
+  revalidatePath('/')
+  revalidatePath('/projects')
+  if (slug && categorySlug) revalidatePath(`/projects/${categorySlug}/${slug}`)
+}
 
 export async function GET(
   request: Request,
@@ -65,9 +78,26 @@ export async function PATCH(
     let newCoverPosterUrl: string | null =
       body.coverPosterUrl !== undefined ? body.coverPosterUrl : project.coverPosterUrl
 
-    // Detect slug change → rename R2 prefixes
+    // Slug: a manual override (`body.slug`, from the admin's editable slug
+    // field) always wins; otherwise it auto-regenerates from the title when
+    // the title changes, same as before. Either way it's re-sanitized and
+    // checked for uniqueness against every other project.
     const newTitle: string = body.title || project.title
-    const newSlug = newTitle !== project.title ? generateSlug(newTitle) : project.slug
+    let candidateSlug: string
+    if (typeof body.slug === 'string' && body.slug.trim() && generateSlug(body.slug) !== project.slug) {
+      candidateSlug = generateSlug(body.slug)
+    } else if (newTitle !== project.title) {
+      candidateSlug = generateSlug(newTitle)
+    } else {
+      candidateSlug = project.slug
+    }
+
+    let newSlug = project.slug
+    if (candidateSlug !== project.slug) {
+      const allProjects = await projectRepo.findAll(1000)
+      const existingSlugs = allProjects.filter((p) => p.id !== project.id).map((p) => p.slug)
+      newSlug = ensureUniqueSlug(candidateSlug, existingSlugs)
+    }
 
     if (newSlug !== project.slug) {
       const oldCoverPrefix = `projects/cover/${project.slug}`
@@ -121,7 +151,17 @@ export async function PATCH(
 
     await projectRepo.update(updatedProject)
 
-    return Response.json({ success: true, slug: updatedProject.slug })
+    if (updatedProject.slug !== project.slug) {
+      await new DrizzleProjectSlugHistoryRepository().record(project.id, project.slug)
+    }
+
+    const newCategorySlug = await resolveProjectCategorySlug(updatedProject)
+    revalidateProjectPages(updatedProject.slug, newCategorySlug)
+    if (updatedProject.slug !== project.slug) {
+      revalidateProjectPages(project.slug, await resolveProjectCategorySlug(project))
+    }
+
+    return Response.json({ success: true, slug: updatedProject.slug, category: newCategorySlug })
   } catch (error) {
     console.error(error)
     return Response.json({ error: 'Internal server error' }, { status: 500 })
@@ -147,6 +187,7 @@ export async function DELETE(
     }
 
     await projectRepo.trash(id)
+    revalidateProjectPages(project.slug, await resolveProjectCategorySlug(project))
 
     return Response.json({ success: true })
   } catch (error) {

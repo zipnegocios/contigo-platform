@@ -1,7 +1,21 @@
+import { revalidatePath } from 'next/cache'
 import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { Project } from '@/core/entities/Project'
+import { generateSlug, ensureUniqueSlug } from '@/infrastructure/services/SlugGeneratorService'
+import { resolveProjectCategorySlug } from '@/infrastructure/services/resolveProjectCategorySlug'
 import type { GalleryItem } from '@/types/media'
+
+// Defense-in-depth: `/`, `/projects` and `/projects/[category]/[slug]` are
+// currently fully dynamic (force-dynamic / reads searchParams), so this is a
+// no-op today — but it keeps admin mutations correct if those pages ever
+// gain ISR.
+function revalidateProjectPages(slug?: string, categorySlug?: string) {
+  revalidatePath('/')
+  revalidatePath('/projects')
+  if (slug && categorySlug) revalidatePath(`/projects/${categorySlug}/${slug}`)
+}
 
 export async function GET() {
   try {
@@ -11,13 +25,18 @@ export async function GET() {
     }
 
     const projectRepo = new DrizzleProjectRepository()
-    const projects = await projectRepo.findAll(200)
+    const [projects, categories] = await Promise.all([
+      projectRepo.findAll(200),
+      new DrizzleCategoryRepository().findFlat('shared'),
+    ])
+    const categorySlugById = new Map(categories.map((c) => [c.id, c.slug]))
 
     const mapped = projects.map((p) => ({
       id: p.id,
       title: p.title,
       slug: p.slug,
       coverImageUrl: p.coverImageUrl,
+      categorySlug: (p.categoryId && categorySlugById.get(p.categoryId)) || generateSlug(p.category),
     }))
 
     return Response.json(mapped)
@@ -57,8 +76,13 @@ export async function POST(request: Request) {
     const body = await request.json()
     const projectRepo = new DrizzleProjectRepository()
 
+    const baseSlug = generateSlug(typeof body.slug === 'string' && body.slug.trim() ? body.slug : body.title)
+    const existingSlugs = (await projectRepo.findAll(1000)).map((p) => p.slug)
+    const uniqueSlug = ensureUniqueSlug(baseSlug, existingSlugs)
+
     const project = Project.create({
       title: body.title,
+      slug: uniqueSlug,
       category: body.category,
       categoryId: body.categoryId ?? null,
       description: body.description,
@@ -70,6 +94,7 @@ export async function POST(request: Request) {
     })
 
     await projectRepo.save(project)
+    revalidateProjectPages(project.slug, await resolveProjectCategorySlug(project))
 
     return Response.json({ id: project.id }, { status: 201 })
   } catch (error) {

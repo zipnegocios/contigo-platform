@@ -5,12 +5,14 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ArrowRight } from 'lucide-react'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
+import { isVideoUrl } from '@/presentation/lib/media-type'
 
 export interface ProjectItem {
   id: string
   slug: string
   title: string
   category: string
+  categorySlug: string
   location: string
   completedDate?: string | null
   coverImageUrl: string
@@ -21,7 +23,7 @@ interface Props {
   projects: ProjectItem[]
 }
 
-const isVideo = (url: string) => /\.(mp4|webm|ogg|mov)/i.test(url)
+const isVideo = isVideoUrl
 
 function getCardsPerPage(): number {
   if (typeof window === 'undefined') return 5
@@ -257,7 +259,7 @@ export default function ProjectsSection({ projects }: Props) {
                     />
                   )}
                   {/* Link overlay */}
-                  <a href={`/projects/${project.slug}`} className="accordion-link">
+                  <a href={`/projects/${project.categorySlug}/${project.slug}`} className="accordion-link">
                     <p className="accordion-title">{project.title}</p>
                     <p className="accordion-desc">{project.category}</p>
                   </a>

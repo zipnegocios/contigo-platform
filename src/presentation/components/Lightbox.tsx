@@ -2,16 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { isVideoUrl } from '@/presentation/lib/media-type'
+import { GalleryThumbnail } from '@/presentation/components/GalleryThumbnail'
 import type { GalleryItem } from '@/types/media'
 
 interface LightboxProps {
   items: GalleryItem[]
   startIndex: number
   onClose: () => void
-}
-
-function isVideo(url: string) {
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
 }
 
 export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
@@ -97,12 +95,13 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
         className="flex flex-col items-center justify-center max-w-[90vw] max-h-[85vh]"
         style={{ width: '100%' }}
       >
-        {isVideo(item.url) ? (
+        {isVideoUrl(item.url) ? (
           <video
             key={item.url}
             src={item.url}
             controls
             autoPlay
+            playsInline
             className="max-w-full max-h-[80vh] rounded-lg"
             style={{ objectFit: 'contain' }}
           />
@@ -176,7 +175,7 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
                 outline: i === current ? '2px solid #E2C063' : '2px solid transparent',
               }}
             >
-              <img src={thumb.url} alt="" className="w-full h-full object-cover" />
+              <GalleryThumbnail url={thumb.url} />
             </button>
           ))}
         </div>

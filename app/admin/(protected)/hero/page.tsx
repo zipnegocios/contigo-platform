@@ -1,21 +1,31 @@
 import { DrizzleHeroConfigRepository } from '@/infrastructure/repositories/DrizzleHeroConfigRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
+import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleFormRepository } from '@/infrastructure/repositories/DrizzleFormRepository'
+import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 import { HeroConfigEditor } from '@/presentation/components/admin/hero/HeroConfigEditor'
 
 export const metadata = { title: 'Hero Section — Contigo Admin' }
 
 export default async function HeroPage() {
-  const [config, services, projects, forms] = await Promise.all([
+  const [config, services, projects, forms, categories] = await Promise.all([
     new DrizzleHeroConfigRepository().get(),
     new DrizzleServiceRepository().findAll(),
     new DrizzleProjectRepository().findAll(),
     new DrizzleFormRepository().findAll(),
+    new DrizzleCategoryRepository().findFlat('shared'),
   ])
 
+  const categorySlugById = new Map(categories.map((c) => [c.id, c.slug]))
+
   const serviceOptions = services.map((s) => ({ id: s.id, label: s.name, slug: s.slug }))
-  const projectOptions = projects.map((p) => ({ id: p.id, label: p.title, slug: p.slug }))
+  const projectOptions = projects.map((p) => ({
+    id: p.id,
+    label: p.title,
+    slug: p.slug,
+    categorySlug: (p.categoryId && categorySlugById.get(p.categoryId)) || generateSlug(p.category),
+  }))
   const formOptions = forms.map((f) => ({ id: f.id, name: f.name, slug: f.slug }))
 
   return (

@@ -10,6 +10,8 @@ import { Checkbox } from '@/presentation/components/ui/checkbox'
 import { CoverMediaSelector } from '@/presentation/components/admin/CoverMediaSelector'
 import { GalleryManagerModal } from '@/presentation/components/admin/GalleryManagerModal'
 import { HierarchicalCategorySelect } from '@/presentation/components/admin/HierarchicalCategorySelect'
+import { GalleryThumbnail } from '@/presentation/components/GalleryThumbnail'
+import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 import type { GalleryItem } from '@/types/media'
 import type { ContentStatus } from '@/types/status'
 
@@ -39,8 +41,10 @@ export function ProjectForm({ project }: ProjectFormProps) {
   const [activeTab, setActiveTab] = useState<TabId>('info')
   const [galleryModalOpen, setGalleryModalOpen] = useState(false)
 
+  const [slugTouched, setSlugTouched] = useState(false)
   const [formData, setFormData] = useState({
     title: project?.title || '',
+    slug: project?.slug || '',
     category: project?.category || '',
     categoryId: project?.categoryId || null as string | null,
     description: project?.description || '',
@@ -71,6 +75,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: formData.title,
+          slug: formData.slug,
           category: formData.category,
           categoryId: formData.categoryId,
           description: formData.description,
@@ -155,12 +160,60 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Title</label>
                   <Input
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) => {
+                      const title = e.target.value
+                      setFormData((prev) => ({
+                        ...prev,
+                        title,
+                        // Keeps auto-following the title until the admin edits
+                        // the slug field directly (see slug input below).
+                        slug: slugTouched ? prev.slug : generateSlug(title),
+                      }))
+                    }}
                     placeholder="Project title"
                     className="mt-2"
                     style={{ borderColor: 'var(--neutral-200)' }}
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
+                    URL Slug
+                    <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-400)' }}>
+                      /projects/[category]/{formData.slug || '…'}
+                    </span>
+                  </label>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Input
+                      value={formData.slug}
+                      onChange={(e) => {
+                        setSlugTouched(true)
+                        setFormData({ ...formData, slug: e.target.value })
+                      }}
+                      onBlur={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
+                      placeholder="auto-generated-from-title"
+                      style={{ borderColor: 'var(--neutral-200)' }}
+                    />
+                    {slugTouched && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSlugTouched(false)
+                          setFormData({ ...formData, slug: generateSlug(formData.title) })
+                        }}
+                        className="px-3 py-2 text-fluid-xs font-medium rounded-lg whitespace-nowrap min-h-[44px]"
+                        style={{ border: '1px solid var(--neutral-200)', color: 'var(--neutral-600)' }}
+                      >
+                        Reset to auto
+                      </button>
+                    )}
+                  </div>
+                  {project && formData.slug !== project.slug && (
+                    <p className="text-fluid-xs mt-1.5" style={{ color: '#B45309' }}>
+                      Changing the slug moves the project&apos;s public URL. The old URL will redirect here automatically.
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-2">
@@ -208,15 +261,22 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   />
                 </div>
 
-                <label className="flex items-center gap-2">
-                  <Checkbox
-                    checked={formData.featured}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, featured: checked as boolean })
-                    }
-                  />
-                  <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Featured Project</span>
-                </label>
+                <div>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={formData.featured}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, featured: checked as boolean })
+                      }
+                    />
+                    <span className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Featured Project</span>
+                  </label>
+                  {formData.featured && formData.status !== 'active' && (
+                    <p className="text-fluid-xs mt-1.5" style={{ color: '#B45309' }}>
+                      Won&apos;t appear in Featured Projects on the home page until Status is set to Active.
+                    </p>
+                  )}
+                </div>
 
                 <div>
                   <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Status</label>
@@ -276,7 +336,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                           className="overflow-hidden rounded-lg flex-shrink-0"
                           style={{ width: 64, height: 48, backgroundColor: 'var(--neutral-100)' }}
                         >
-                          <img src={item.url} alt="" className="w-full h-full object-cover" />
+                          <GalleryThumbnail url={item.url} />
                         </div>
                       ))}
                       {formData.galleryItems.length > 8 && (

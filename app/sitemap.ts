@@ -1,8 +1,10 @@
 import { MetadataRoute } from 'next'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
+import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { DrizzleLegalDocumentRepository } from '@/infrastructure/repositories/DrizzleLegalDocumentRepository'
 import { ListLegalDocumentsUseCase } from '@/application/use-cases/legal/ListLegalDocumentsUseCase'
+import { resolveProjectCategorySlug } from '@/infrastructure/services/resolveProjectCategorySlug'
 import { SERVICE_ROOT_SLUGS } from '@/presentation/data/serviceCategoryMeta'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -94,6 +96,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     console.error('sitemap generation error:', error)
     // Return base routes on error, don't crash
+  }
+
+  // Add individual published projects
+  try {
+    if (process.env.DATABASE_URL) {
+      const projects = await new DrizzleProjectRepository().findPublished(200)
+      for (const project of projects) {
+        const categorySlug = await resolveProjectCategorySlug(project)
+        routes.push({
+          url: `${baseUrl}/projects/${categorySlug}/${project.slug}`,
+          lastModified: project.updatedAt || now,
+          changeFrequency: 'monthly',
+          priority: 0.7,
+        })
+      }
+    }
+  } catch (error) {
+    console.error('sitemap projects error:', error)
   }
 
   return routes

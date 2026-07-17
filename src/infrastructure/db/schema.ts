@@ -276,6 +276,26 @@ export const projects = pgTable(
   ],
 )
 
+// ============ PROJECT_SLUG_HISTORY TABLE ============
+// One row per previous slug a project has had — lets the public detail page
+// 301-redirect old/indexed URLs to the project's current canonical URL after
+// a rename, instead of 404ing.
+export const projectSlugHistory = pgTable(
+  'project_slug_history',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    oldSlug: varchar('old_slug', { length: 255 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('idx_project_slug_history_old_slug').on(table.oldSlug),
+    index('idx_project_slug_history_project_id').on(table.projectId),
+  ],
+)
+
 // ============ SERVICES TABLE ============
 export const services = pgTable(
   'services',

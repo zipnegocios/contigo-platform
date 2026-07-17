@@ -21,7 +21,7 @@ import type { HeroSlide } from '@/core/entities/HeroConfig'
 import { HeroImagePair } from './HeroImagePair'
 import { ButtonsManager } from './ButtonsManager'
 
-interface EntityOption { id: string; label: string; slug: string }
+interface EntityOption { id: string; label: string; slug: string; categorySlug?: string }
 interface FormOption { id: string; name: string; slug: string }
 
 interface Props {

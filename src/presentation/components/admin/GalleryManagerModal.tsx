@@ -18,9 +18,10 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { X, GripVertical, ChevronUp, ChevronDown, Trash2, Upload, Film, Plus } from 'lucide-react'
+import { X, GripVertical, ChevronUp, ChevronDown, Trash2, Upload, Plus } from 'lucide-react'
 import type { GalleryItem } from '@/types/media'
 import { MediaPickerModal } from '@/presentation/components/admin/MediaPickerModal'
+import { GalleryThumbnail } from '@/presentation/components/GalleryThumbnail'
 import { uploadFileToR2 } from '@/presentation/lib/uploadToR2'
 import type { EntityContext } from '@/presentation/components/admin/MediaLibraryContext'
 
@@ -30,10 +31,6 @@ interface GalleryManagerModalProps {
   onClose: () => void
   folder?: string
   entityContext?: EntityContext | null
-}
-
-function isVideo(url: string) {
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
 }
 
 function SortableItem({
@@ -86,13 +83,7 @@ function SortableItem({
         className="flex-shrink-0 overflow-hidden rounded-lg"
         style={{ width: 80, height: 60, backgroundColor: '#150F0A' }}
       >
-        {isVideo(item.url) ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <Film className="w-[clamp(1rem,2vw,1.25rem)] h-[clamp(1rem,2vw,1.25rem)]" style={{ color: 'var(--neutral-600)' }} />
-          </div>
-        ) : (
-          <img src={item.url} alt="" className="w-full h-full object-cover" />
-        )}
+        <GalleryThumbnail url={item.url} />
       </div>
 
       {/* Metadata inputs */}

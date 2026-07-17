@@ -13,6 +13,7 @@ import Footer from '@/presentation/sections/FooterServer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { DrizzleHeroConfigRepository } from '@/infrastructure/repositories/DrizzleHeroConfigRepository'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
+import { resolveProjectCategorySlug } from '@/infrastructure/services/resolveProjectCategorySlug'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { DrizzleGoogleReviewRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewRepository'
 import { DrizzleReviewSettingsRepository } from '@/infrastructure/repositories/DrizzleReviewSettingsRepository'
@@ -89,6 +90,7 @@ export default async function HomePage() {
     slug: string
     title: string
     category: string
+    categorySlug: string
     location: string
     completedDate: string | null
     coverImageUrl: string
@@ -108,16 +110,19 @@ export default async function HomePage() {
     if (process.env.DATABASE_URL) {
       const repo = new DrizzleProjectRepository()
       const raw = await repo.findFeatured()
-      projects = raw.map((p) => ({
-        id: p.id,
-        slug: p.slug,
-        title: p.title,
-        category: p.category,
-        location: p.location,
-        completedDate: p.completedDate ? p.completedDate.toISOString() : null,
-        coverImageUrl: p.coverImageUrl,
-        coverPosterUrl: p.coverPosterUrl ?? null,
-      }))
+      projects = await Promise.all(
+        raw.map(async (p) => ({
+          id: p.id,
+          slug: p.slug,
+          title: p.title,
+          category: p.category,
+          categorySlug: await resolveProjectCategorySlug(p),
+          location: p.location,
+          completedDate: p.completedDate ? p.completedDate.toISOString() : null,
+          coverImageUrl: p.coverImageUrl,
+          coverPosterUrl: p.coverPosterUrl ?? null,
+        })),
+      )
     }
   } catch (err) {
     console.error('HomePage: failed to fetch featured projects', err)
