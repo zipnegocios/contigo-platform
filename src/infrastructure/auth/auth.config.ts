@@ -100,11 +100,13 @@ export const authConfig: NextAuthConfig = {
     },
     async session({ session, token }) {
       if (token.invalid) {
-        // `Session.user` is optional — clearing it is how we signal "no
-        // longer authenticated" to callers (middleware/layout check
-        // `session?.user`, not just session truthiness).
-        session.user = undefined
-        return session
+        // Clearing `user` is how we signal "no longer authenticated" to
+        // callers (middleware/layout check `session?.user`, not just session
+        // truthiness). The cast is needed because next-auth's `session`
+        // callback param type is an intersection of the jwt- and
+        // database-strategy shapes, which makes `user` appear non-optional
+        // even though we only use the jwt strategy — at runtime it's fine.
+        return { ...session, user: undefined } as unknown as typeof session
       }
       if (session.user) {
         session.user.id = token.id as string

@@ -52,9 +52,9 @@ export class VerifyCredentialsUseCase {
       const updated = user.withFailedLoginAttempt(LOCKOUT_THRESHOLD, LOCKOUT_DURATION_MS)
       await this.adminUserRepository.update(updated)
       if (updated.isLocked()) {
-        await this.logEvent(SECURITY_EVENT_TYPES.ACCOUNT_LOCKED, user.id, context)
+        await this.logEvent(SECURITY_EVENT_TYPES.ACCOUNT_LOCKED, user.id, { ...context })
       } else {
-        await this.logEvent(SECURITY_EVENT_TYPES.LOGIN_FAILED, user.id, context)
+        await this.logEvent(SECURITY_EVENT_TYPES.LOGIN_FAILED, user.id, { ...context })
       }
       throw new Error(GENERIC_ERROR)
     }
@@ -71,7 +71,7 @@ export class VerifyCredentialsUseCase {
     }
 
     await this.adminUserRepository.update(verifiedUser)
-    await this.logEvent(SECURITY_EVENT_TYPES.LOGIN_SUCCESS, verifiedUser.id, context)
+    await this.logEvent(SECURITY_EVENT_TYPES.LOGIN_SUCCESS, verifiedUser.id, { ...context })
     return verifiedUser
   }
 

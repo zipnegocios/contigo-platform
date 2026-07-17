@@ -31,26 +31,49 @@ export default function SecurityEventsPage() {
   const [eventType, setEventType] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const load = useCallback(async (cursor?: string | null, filter?: string) => {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (cursor) params.set('cursor', cursor)
-      if (filter) params.set('eventType', filter)
-      const res = await fetch(`/api/admin/security-events?${params.toString()}`)
-      const data = await res.json()
-      if (!res.ok) return
-      setEvents((prev) => (cursor ? [...prev, ...data.events] : data.events))
-      setNextCursor(data.nextCursor)
-    } finally {
-      setLoading(false)
-    }
+  // Pure fetch — no state writes here, so effects can call it without
+  // tripping the "setState synchronously in effect" lint rule; the caller
+  // (effect or button handler) owns loading/result state around the call.
+  const fetchEvents = useCallback(async (cursor?: string | null, filter?: string) => {
+    const params = new URLSearchParams()
+    if (cursor) params.set('cursor', cursor)
+    if (filter) params.set('eventType', filter)
+    const res = await fetch(`/api/admin/security-events?${params.toString()}`)
+    if (!res.ok) return null
+    return res.json()
   }, [])
 
+  const load = useCallback(
+    async (cursor?: string | null, filter?: string) => {
+      setLoading(true)
+      try {
+        const data = await fetchEvents(cursor, filter)
+        if (!data) return
+        setEvents((prev) => (cursor ? [...prev, ...data.events] : data.events))
+        setNextCursor(data.nextCursor)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [fetchEvents],
+  )
+
   useEffect(() => {
-    load(null, eventType || undefined)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventType])
+    let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- kicks off the fetch for the new filter, resolved asynchronously below
+    setLoading(true)
+    fetchEvents(null, eventType || undefined).then((data) => {
+      if (cancelled) return
+      if (data) {
+        setEvents(data.events)
+        setNextCursor(data.nextCursor)
+      }
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [eventType, fetchEvents])
 
   return (
     <div className="space-y-6">
