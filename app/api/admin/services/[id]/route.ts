@@ -2,7 +2,7 @@ import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { Service } from '@/core/entities/Service'
 import { renamePrefix } from '@/infrastructure/services/R2StorageService'
-import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
+import { generateSlug, ensureUniqueSlug } from '@/infrastructure/services/SlugGeneratorService'
 import type { GalleryItem } from '@/types/media'
 import type { PageBlock } from '@/types/pageBlocks'
 
@@ -66,9 +66,26 @@ export async function PATCH(
     let newGalleryItems: GalleryItem[] =
       body.galleryItems !== undefined ? (body.galleryItems as GalleryItem[]) : service.galleryItems
 
-    // Detect slug change → rename R2 prefix
+    // Slug: a manual override (`body.slug`, from the admin's editable slug
+    // field) always wins; otherwise it auto-regenerates from the name when
+    // the name changes, same as before. Either way it's re-sanitized and
+    // checked for uniqueness against every other service.
     const newName: string = body.name ?? service.name
-    const newSlug = newName !== service.name ? generateSlug(newName) : service.slug
+    let candidateSlug: string
+    if (typeof body.slug === 'string' && body.slug.trim() && generateSlug(body.slug) !== service.slug) {
+      candidateSlug = generateSlug(body.slug)
+    } else if (newName !== service.name) {
+      candidateSlug = generateSlug(newName)
+    } else {
+      candidateSlug = service.slug
+    }
+
+    let newSlug = service.slug
+    if (candidateSlug !== service.slug) {
+      const allServices = await serviceRepo.findAll(1000)
+      const existingSlugs = allServices.filter((s) => s.id !== service.id).map((s) => s.slug)
+      newSlug = ensureUniqueSlug(candidateSlug, existingSlugs)
+    }
 
     if (newSlug !== service.slug) {
       const urlMap = await renamePrefix(BUCKET, `services/${service.slug}`, `services/${newSlug}`)

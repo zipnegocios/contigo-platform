@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
+import { resolveServicePreviewPath } from '@/infrastructure/services/resolveServiceRootSlug'
 import { ServiceGroupedView } from '@/presentation/components/admin/ServiceGroupedView'
 import type { ServiceGroup } from '@/presentation/components/admin/ServiceGroupedView'
 import { ServicesTrashView } from '@/presentation/components/admin/ServicesTrashView'
@@ -51,6 +52,8 @@ export default async function ServicesPage({
     )
   }
 
+  const catById = new Map(categories.map((c) => [c.id, c]))
+
   const groups: ServiceGroup[] = categories
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map((cat) => ({
@@ -70,6 +73,7 @@ export default async function ServicesPage({
           categoryId: s.categoryId,
           metaTitle: s.metaTitle,
           noIndex: s.noIndex,
+          previewPath: resolveServicePreviewPath(s, catById),
         })),
     }))
 
@@ -91,6 +95,7 @@ export default async function ServicesPage({
           categoryId: s.categoryId,
           metaTitle: s.metaTitle,
           noIndex: s.noIndex,
+          previewPath: null,
         })),
     })
   }

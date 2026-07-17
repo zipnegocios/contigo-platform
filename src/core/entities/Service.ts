@@ -5,6 +5,8 @@ import type { ContentStatus } from '@/types/status'
 
 export interface CreateServiceInput {
   name: string
+  /** Optional manual override — caller is responsible for sanitizing/uniqueness (see admin create route). */
+  slug?: string
   shortDescription: string
   fullDescription: string
   imageUrl: string
@@ -80,7 +82,7 @@ export class Service {
 
   static create(input: CreateServiceInput): Service {
     const id = crypto.randomUUID()
-    const slug = generateSlug(input.name)
+    const slug = input.slug ? generateSlug(input.slug) : generateSlug(input.name)
     const now = new Date()
 
     return new Service({

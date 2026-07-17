@@ -2,31 +2,10 @@ import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { Service } from '@/core/entities/Service'
-import { isServiceRootSlug } from '@/presentation/data/serviceCategoryMeta'
+import { generateSlug, ensureUniqueSlug } from '@/infrastructure/services/SlugGeneratorService'
+import { resolveServicePreviewPath } from '@/infrastructure/services/resolveServiceRootSlug'
 import type { GalleryItem } from '@/types/media'
 import type { FlatCategory } from '@/types/category'
-
-// Walks a category's parentId chain up to the root and returns the root's
-// slug. The live taxonomy is exactly 2 levels (4 fixed roots, flat leaf
-// service categories beneath them — see serviceCategoryMeta.ts), so walking
-// all the way to `parentId === null` is equivalent to "the direct parent"
-// today. If categories ever grow a 3rd level this would need the same
-// "must be a direct child of root" constraint the public service page
-// enforces (see app/(portfolio)/services/[category]/[item]/page.tsx).
-function resolveRootSlug(categoryId: string | null, catById: Map<string, FlatCategory>): string | null {
-  if (!categoryId) return null
-  let node = catById.get(categoryId)
-  if (!node) return null
-  const visited = new Set<string>()
-  while (node.parentId !== null) {
-    if (visited.has(node.id)) return null
-    visited.add(node.id)
-    const parent = catById.get(node.parentId)
-    if (!parent) return null
-    node = parent
-  }
-  return node.slug
-}
 
 export async function GET() {
   try {
@@ -45,17 +24,13 @@ export async function GET() {
 
     const catById = new Map<string, FlatCategory>(flatCats.map((c) => [c.id, c]))
 
-    const mapped = serviceList.map((s) => {
-      const rootSlug = resolveRootSlug(s.categoryId, catById)
-      const previewPath = rootSlug && isServiceRootSlug(rootSlug) ? `/services/${rootSlug}/${s.slug}` : null
-      return {
-        id: s.id,
-        name: s.name,
-        slug: s.slug,
-        imageUrl: s.imageUrl,
-        previewPath,
-      }
-    })
+    const mapped = serviceList.map((s) => ({
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      imageUrl: s.imageUrl,
+      previewPath: resolveServicePreviewPath(s, catById),
+    }))
 
     return Response.json(mapped)
   } catch (error) {
@@ -99,8 +74,13 @@ export async function POST(request: Request) {
 
     const serviceRepo = new DrizzleServiceRepository()
 
+    const baseSlug = generateSlug(typeof body.slug === 'string' && body.slug.trim() ? body.slug : body.name)
+    const existingSlugs = (await serviceRepo.findAll(1000)).map((s) => s.slug)
+    const uniqueSlug = ensureUniqueSlug(baseSlug, existingSlugs)
+
     const service = Service.create({
       name: body.name,
+      slug: uniqueSlug,
       shortDescription: body.shortDescription,
       fullDescription: body.fullDescription || '',
       imageUrl: body.imageUrl,

@@ -100,6 +100,7 @@ export class DrizzleProjectRepository {
     await db
       .update(projects)
       .set({
+        slug: project.slug,
         title: project.title,
         category: project.category,
         categoryId: project.categoryId,

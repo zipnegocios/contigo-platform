@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Input } from '@/presentation/components/ui/input'
@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/compone
 import { CoverMediaSelector } from '@/presentation/components/admin/CoverMediaSelector'
 import { GalleryManagerModal } from '@/presentation/components/admin/GalleryManagerModal'
 import { HierarchicalCategorySelect } from '@/presentation/components/admin/HierarchicalCategorySelect'
+import { GalleryThumbnail } from '@/presentation/components/GalleryThumbnail'
+import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
 import type { GalleryItem } from '@/types/media'
 import type { ContentStatus } from '@/types/status'
 
@@ -27,16 +29,6 @@ interface ServiceFormProps {
   }
 }
 
-function generateSlugClient(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
 type TabId = 'info' | 'media'
 
 export function ServiceForm({ service }: ServiceFormProps) {
@@ -44,6 +36,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<TabId>('info')
   const [galleryModalOpen, setGalleryModalOpen] = useState(false)
+  const [slugTouched, setSlugTouched] = useState(false)
   const [formData, setFormData] = useState({
     name: service?.name || '',
     slug: service?.slug || '',
@@ -55,13 +48,6 @@ export function ServiceForm({ service }: ServiceFormProps) {
     categoryId: service?.categoryId || null as string | null,
     status: service?.status ?? 'active' as ContentStatus,
   })
-
-  // Auto-generate slug when name changes (create mode only)
-  useEffect(() => {
-    if (!service) {
-      setFormData((prev) => ({ ...prev, slug: generateSlugClient(prev.name) }))
-    }
-  }, [formData.name, service])
 
   const mediaLocked = !formData.name.trim()
   const entityCtx = service
@@ -87,6 +73,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
+          slug: formData.slug,
           shortDescription: formData.shortDescription,
           fullDescription: formData.fullDescription,
           imageUrl: formData.imageUrl,
@@ -168,7 +155,16 @@ export function ServiceForm({ service }: ServiceFormProps) {
                   <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>Name</label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      const name = e.target.value
+                      setFormData((prev) => ({
+                        ...prev,
+                        name,
+                        // Keeps auto-following the name until the admin edits
+                        // the slug field directly (see slug input below).
+                        slug: slugTouched ? prev.slug : generateSlug(name),
+                      }))
+                    }}
                     placeholder="Service name"
                     className="mt-2"
                     style={{ borderColor: 'var(--neutral-200)' }}
@@ -178,17 +174,42 @@ export function ServiceForm({ service }: ServiceFormProps) {
 
                 <div>
                   <label className="text-fluid-sm font-medium" style={{ color: 'var(--neutral-800)' }}>
-                    Slug
-                    <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-600)' }}>
-                      (auto-generated)
+                    URL Slug
+                    <span className="ml-2 text-fluid-xs font-normal" style={{ color: 'var(--neutral-400)' }}>
+                      /services/[category]/{formData.slug || '…'}
                     </span>
                   </label>
-                  <Input
-                    value={formData.slug}
-                    readOnly
-                    className="mt-2 font-mono text-fluid-sm"
-                    style={{ borderColor: 'var(--neutral-200)', backgroundColor: 'var(--neutral-50)', color: '#6B6560' }}
-                  />
+                  <div className="flex items-center gap-2 mt-2">
+                    <Input
+                      value={formData.slug}
+                      onChange={(e) => {
+                        setSlugTouched(true)
+                        setFormData({ ...formData, slug: e.target.value })
+                      }}
+                      onBlur={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
+                      placeholder="auto-generated-from-name"
+                      className="font-mono text-fluid-sm"
+                      style={{ borderColor: 'var(--neutral-200)' }}
+                    />
+                    {slugTouched && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSlugTouched(false)
+                          setFormData({ ...formData, slug: generateSlug(formData.name) })
+                        }}
+                        className="px-3 py-2 text-fluid-xs font-medium rounded-lg whitespace-nowrap min-h-[44px]"
+                        style={{ border: '1px solid var(--neutral-200)', color: 'var(--neutral-600)' }}
+                      >
+                        Reset to auto
+                      </button>
+                    )}
+                  </div>
+                  {service && formData.slug !== service.slug && (
+                    <p className="text-fluid-xs mt-1.5" style={{ color: '#B45309' }}>
+                      Changing the slug moves the service&apos;s public URL. Old links will no longer resolve.
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -279,7 +300,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
                           className="overflow-hidden rounded-lg flex-shrink-0"
                           style={{ width: 64, height: 48, backgroundColor: '#F5EFE8' }}
                         >
-                          <img src={item.url} alt="" className="w-full h-full object-cover" />
+                          <GalleryThumbnail url={item.url} />
                         </div>
                       ))}
                       {formData.galleryItems.length > 8 && (

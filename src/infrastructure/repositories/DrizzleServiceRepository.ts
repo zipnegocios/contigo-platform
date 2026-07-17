@@ -87,6 +87,7 @@ export class DrizzleServiceRepository {
     await db
       .update(services)
       .set({
+        slug: service.slug,
         name: service.name,
         shortDescription: service.shortDescription,
         fullDescription: service.fullDescription,
