@@ -61,7 +61,10 @@ export default async function ProjectsPage({
   }
 
   const groups: ProjectGroup[] = flatCats
-    .filter((c) => byCategory.has(c.id))
+    // Active categories always get a section, even with zero projects yet
+    // (matches /admin/services) — inactive ones only show if they still
+    // hold projects, so nothing existing silently disappears.
+    .filter((c) => c.status === 'active' || byCategory.has(c.id))
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map((cat) => ({
       categoryId: cat.id,
