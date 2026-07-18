@@ -9,6 +9,7 @@ import { DrizzleTaskRepository } from '@/infrastructure/repositories/DrizzleTask
 import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
 import { SyncGoogleReviewsUseCase } from '@/application/use-cases/reviews/SyncGoogleReviewsUseCase'
 import { RunReviewAutomationRulesUseCase } from '@/application/use-cases/reviews/RunReviewAutomationRulesUseCase'
+import { GetGbpConnectionStatusUseCase } from '@/application/use-cases/reviews/GetGbpConnectionStatusUseCase'
 
 export async function POST() {
   try {
@@ -18,6 +19,18 @@ export async function POST() {
     const userId = (session.user as any)?.id
     if (!userId || !(await hasPermission(userId, 'reviews.view'))) {
       return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Guard: check cached connection status before ever calling Google —
+    // avoids burning the sync attempt (and logging noise) on a known-bad state.
+    const connection = await new GetGbpConnectionStatusUseCase(new GoogleBusinessProfileService()).execute()
+    if (connection.status === 'pending_api_approval' || connection.status === 'disconnected') {
+      console.info(`GBP sync skipped: ${connection.status}`)
+      return Response.json({ success: true, skipped: true, reason: connection.status })
+    }
+    if (connection.status === 'auth_error') {
+      console.warn('GBP sync skipped: auth_error — reconnect required')
+      return Response.json({ error: 'Google Business Profile connection needs to be reconnected' }, { status: 502 })
     }
 
     const useCase = new SyncGoogleReviewsUseCase(

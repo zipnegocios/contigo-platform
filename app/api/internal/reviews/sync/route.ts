@@ -7,6 +7,7 @@ import { DrizzleTaskRepository } from '@/infrastructure/repositories/DrizzleTask
 import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
 import { SyncGoogleReviewsUseCase } from '@/application/use-cases/reviews/SyncGoogleReviewsUseCase'
 import { RunReviewAutomationRulesUseCase } from '@/application/use-cases/reviews/RunReviewAutomationRulesUseCase'
+import { GetGbpConnectionStatusUseCase } from '@/application/use-cases/reviews/GetGbpConnectionStatusUseCase'
 import { verifyCronSecret } from '@/infrastructure/auth/verifyCronSecret'
 
 const DEFAULT_SYNC_FREQUENCY_MINUTES = 15
@@ -28,6 +29,18 @@ export async function POST(request: Request) {
       if (minutesSinceLastSync < syncFrequencyMinutes) {
         return Response.json({ success: true, skipped: true, reason: 'sync frequency not yet elapsed' })
       }
+    }
+
+    // Guard: check cached connection status before ever calling Google —
+    // avoids burning the sync attempt (and logging noise) on a known-bad state.
+    const connection = await new GetGbpConnectionStatusUseCase(new GoogleBusinessProfileService()).execute()
+    if (connection.status === 'pending_api_approval' || connection.status === 'disconnected') {
+      console.info(`GBP sync skipped: ${connection.status}`)
+      return Response.json({ success: true, skipped: true, reason: connection.status })
+    }
+    if (connection.status === 'auth_error') {
+      console.warn('GBP sync skipped: auth_error — reconnect required')
+      return Response.json({ success: true, skipped: true, reason: 'auth_error' })
     }
 
     const useCase = new SyncGoogleReviewsUseCase(

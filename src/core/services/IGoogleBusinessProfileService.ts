@@ -13,6 +13,8 @@ export interface GoogleReviewApiItem {
 }
 
 export interface IGoogleBusinessProfileService {
+  /** Cheapest possible live call — for connection health checks, fetches nothing beyond token + account resolution. */
+  checkConnection(): Promise<void>
   /** Full-pull of every review for the configured location (handles v4 pagination internally). */
   listReviews(): Promise<GoogleReviewApiItem[]>
   updateReply(googleReviewId: string, comment: string): Promise<void>

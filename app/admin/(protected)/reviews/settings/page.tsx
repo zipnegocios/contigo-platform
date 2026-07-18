@@ -1,10 +1,17 @@
 import Link from 'next/link'
+import { auth } from '@/infrastructure/auth/auth.config'
 import { DrizzleReviewSettingsRepository } from '@/infrastructure/repositories/DrizzleReviewSettingsRepository'
 import { DrizzleReviewSyncLogRepository } from '@/infrastructure/repositories/DrizzleReviewSyncLogRepository'
 import { ReviewsSettingsForm } from '@/presentation/components/admin/reviews/ReviewsSettingsForm'
+import { GbpConnectionStatusCard } from '@/presentation/components/admin/reviews/GbpConnectionStatusCard'
 import { DEFAULT_AUTOMATION_RULES } from '@/application/use-cases/reviews/RunReviewAutomationRulesUseCase'
 
 export default async function ReviewsSettingsPage() {
+  const session = await auth()
+  // Owner-only (plan §8 Q3 default) — the live status card surfaces
+  // Google error detail strings, treated like other sensitive settings.
+  const isOwner = (session?.user as { role?: string } | undefined)?.role === 'owner'
+
   const [settings, lastSync] = await Promise.all([
     new DrizzleReviewSettingsRepository().get(),
     new DrizzleReviewSyncLogRepository().findLatest(),
@@ -33,6 +40,8 @@ export default async function ReviewsSettingsPage() {
           </Link>
         </p>
       </div>
+
+      {isOwner && <GbpConnectionStatusCard />}
 
       <ReviewsSettingsForm
         initialSettings={{
