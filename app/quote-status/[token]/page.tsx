@@ -8,6 +8,8 @@ import { DrizzleLeadDocumentRepository } from '@/infrastructure/repositories/Dri
 import { DrizzleLeadEventRepository } from '@/infrastructure/repositories/DrizzleLeadEventRepository'
 import { DrizzleLeadMessageRepository } from '@/infrastructure/repositories/DrizzleLeadMessageRepository'
 import { toPipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
+import { extractAddressFromFormData } from '@/presentation/lib/addressExtractor'
+import { AddressMapViewer } from '@/presentation/components/maps/AddressMapViewer'
 import { TrackingStatusCard } from '@/presentation/components/portal/TrackingStatusCard'
 import { TrackingDocumentsList } from '@/presentation/components/portal/TrackingDocumentsList'
 import { TrackingScheduleList } from '@/presentation/components/portal/TrackingScheduleList'
@@ -49,6 +51,7 @@ export default async function QuoteStatusPage({
   const stages = (await new DrizzlePipelineStageRepository().findAll()).map(toPipelineStageDTO)
 
   const { quote, clientStage, documents, events, messages } = panelData
+  const address = extractAddressFromFormData(quote.formData)
 
   return (
     <div style={{ backgroundColor: 'var(--petrol-50)', minHeight: '100vh' }}>
@@ -114,6 +117,15 @@ export default async function QuoteStatusPage({
                       {quote.message}
                     </p>
                   </div>
+
+                  {address && (
+                    <div>
+                      <label className="block text-fluid-sm font-medium mb-2" style={{ color: 'var(--petrol-600)' }}>
+                        Project Location
+                      </label>
+                      <AddressMapViewer address={address} />
+                    </div>
+                  )}
 
                   <div className="pt-4 border-t" style={{ borderColor: 'var(--petrol-100)' }}>
                     <p className="text-fluid-sm" style={{ color: 'var(--petrol-600)', opacity: 0.7 }}>

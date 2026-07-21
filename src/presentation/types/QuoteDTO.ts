@@ -11,6 +11,7 @@ export interface QuoteDTO {
   trackingToken: string
   status: QuoteStatus
   attachmentUrls: string[]
+  formData?: Record<string, unknown>
   createdAt: Date
   updatedAt: Date
 }
@@ -26,6 +27,7 @@ export function toQuoteDTO(quote: Quote): QuoteDTO {
     trackingToken: quote.trackingToken,
     status: quote.status,
     attachmentUrls: quote.attachmentUrls,
+    formData: quote.formData,
     createdAt: quote.createdAt,
     updatedAt: quote.updatedAt,
   }

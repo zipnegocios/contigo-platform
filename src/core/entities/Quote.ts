@@ -10,6 +10,7 @@ export interface CreateQuoteInput {
   service: string
   message: string
   attachmentUrls?: string[]
+  formData?: Record<string, unknown>
 }
 
 export class Quote {
@@ -22,6 +23,7 @@ export class Quote {
   readonly trackingToken: string
   readonly status: QuoteStatus
   readonly attachmentUrls: string[]
+  readonly formData: Record<string, unknown>
   readonly createdAt: Date
   readonly updatedAt: Date
 
@@ -35,6 +37,7 @@ export class Quote {
     trackingToken: string
     status: QuoteStatus
     attachmentUrls: string[]
+    formData?: Record<string, unknown>
     createdAt: Date
     updatedAt: Date
   }) {
@@ -47,6 +50,7 @@ export class Quote {
     this.trackingToken = props.trackingToken
     this.status = props.status
     this.attachmentUrls = props.attachmentUrls
+    this.formData = props.formData ?? {}
     this.createdAt = props.createdAt
     this.updatedAt = props.updatedAt
   }
@@ -69,6 +73,7 @@ export class Quote {
       trackingToken,
       status: 'new',
       attachmentUrls: input.attachmentUrls ?? [],
+      formData: input.formData ?? {},
       createdAt: now,
       updatedAt: now,
     })
@@ -85,6 +90,7 @@ export class Quote {
       trackingToken: this.trackingToken,
       status,
       attachmentUrls: this.attachmentUrls,
+      formData: this.formData,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     })
@@ -101,6 +107,7 @@ export class Quote {
       trackingToken: this.trackingToken,
       status: this.status,
       attachmentUrls: this.attachmentUrls,
+      formData: this.formData,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     })
@@ -116,6 +123,7 @@ export class Quote {
     trackingToken: string
     status: QuoteStatus
     attachmentUrls: string[]
+    formData?: Record<string, unknown>
     createdAt: Date
     updatedAt: Date
   }): Quote {

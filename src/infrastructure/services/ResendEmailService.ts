@@ -21,6 +21,7 @@ import { Quote } from '@/core/entities/Quote'
 import { Lead } from '@/core/entities/Lead'
 import { LeadEvent, LeadEventType } from '@/core/entities/LeadEvent'
 import { IEmailService } from '@/core/services/IEmailService'
+import { extractAddressFromFormData } from '@/presentation/lib/addressExtractor'
 
 const EVENT_TYPE_LABELS: Record<LeadEventType, string> = {
   call: 'Call',
@@ -110,6 +111,8 @@ export class ResendEmailService implements IEmailService {
   async sendQuoteConfirmation(quote: Quote): Promise<void> {
     const resend = getResend()
     const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+    const address = extractAddressFromFormData(quote.formData)
+    const mapsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : ''
 
     const bodyHtml = `
       <p>Dear ${quote.name},</p>
@@ -120,6 +123,7 @@ export class ResendEmailService implements IEmailService {
         <li><strong>Service:</strong> ${quote.service}</li>
         <li><strong>Email:</strong> ${quote.email.toString()}</li>
         ${quote.phone ? `<li><strong>Phone:</strong> ${quote.phone.toString()}</li>` : ''}
+        ${address ? `<li><strong>Address:</strong> ${address} (<a href="${mapsUrl}" target="_blank" style="color: #D4AF37; text-decoration: underline;">View on Google Maps</a>)</li>` : ''}
       </ul>
 
       <p><strong>Tracking Your Quote:</strong></p>
@@ -141,6 +145,8 @@ export class ResendEmailService implements IEmailService {
   async sendAdminNotification(quote: Quote): Promise<void> {
     const resend = getResend()
     const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
+    const address = extractAddressFromFormData(quote.formData)
+    const mapsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : ''
 
     const bodyHtml = `
       <p><strong>A new quote request has been submitted:</strong></p>
@@ -155,6 +161,11 @@ export class ResendEmailService implements IEmailService {
       <div class="detail">
         <p><strong>Service:</strong> ${quote.service}</p>
       </div>
+      ${address ? `
+      <div class="detail">
+        <p><strong>Address:</strong> ${address}</p>
+        <p><a href="${mapsUrl}" target="_blank" class="button" style="padding: 6px 12px; font-size: 13px;">View on Google Maps</a></p>
+      </div>` : ''}
       <div class="detail">
         <p><strong>Message:</strong><br>${quote.message.replace(/\n/g, '<br>')}</p>
       </div>

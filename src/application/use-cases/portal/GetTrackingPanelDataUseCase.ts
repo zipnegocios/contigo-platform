@@ -15,6 +15,7 @@ export interface TrackingPanelDTO {
     message: string
     createdAt: Date
     attachmentUrls: string[]
+    formData?: Record<string, unknown>
   }
   clientStage: {
     key: string
@@ -131,6 +132,7 @@ export class GetTrackingPanelDataUseCase {
         message: quote.message,
         createdAt: quote.createdAt,
         attachmentUrls: quote.attachmentUrls,
+        formData: quote.formData,
       },
       clientStage,
       documents,

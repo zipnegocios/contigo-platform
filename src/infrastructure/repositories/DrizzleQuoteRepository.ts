@@ -19,6 +19,7 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
       trackingToken: quote.trackingToken,
       status: quote.status,
       attachmentUrls: quote.attachmentUrls,
+      formData: quote.formData,
       createdAt: quote.createdAt,
       updatedAt: new Date(),
     })
@@ -132,6 +133,7 @@ export class DrizzleQuoteRepository implements IQuoteRepository {
       trackingToken: row.trackingToken,
       status: row.status,
       attachmentUrls: (row.attachmentUrls as string[]) || [],
+      formData: (row.formData as Record<string, unknown>) || {},
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     })

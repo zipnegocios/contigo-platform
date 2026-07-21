@@ -24,6 +24,8 @@ import { Phone } from '@/core/value-objects/Phone'
 import type { LeadNoteDTO } from '@/presentation/types/LeadNoteDTO'
 import type { LeadContactDTO } from '@/presentation/types/LeadContactDTO'
 import type { PipelineStageDTO } from '@/presentation/types/PipelineStageDTO'
+import { extractAddressFromFormData } from '@/presentation/lib/addressExtractor'
+import { AddressMapViewer } from '@/presentation/components/maps/AddressMapViewer'
 import { LeadNotesPanel } from './LeadNotesPanel'
 import { LeadContactsPanel } from './LeadContactsPanel'
 import { QuoteAttachmentsGrid } from './QuoteAttachmentsGrid'
@@ -172,9 +174,15 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
     }
   }
 
-  const defaultOpen = quote.attachmentUrls.length > 0
-    ? ['contact', 'quote-details', 'attachments', 'manage']
-    : ['contact', 'quote-details', 'manage']
+  const address = extractAddressFromFormData(quote.formData)
+
+  const defaultOpen = [
+    'contact',
+    'quote-details',
+    ...(address ? ['location'] : []),
+    ...(quote.attachmentUrls.length > 0 ? ['attachments'] : []),
+    'manage',
+  ]
 
   return (
     <Accordion type="multiple" defaultValue={defaultOpen} className="space-y-6">
@@ -293,6 +301,29 @@ export function QuoteDetailPanel({ leadId, quote, initialStage, notes, contacts,
           />
         </AccordionContent>
       </AccordionItem>
+
+      {address && (
+        <AccordionItem
+          value="location"
+          className="bg-white rounded-lg overflow-hidden border-b-0"
+          style={{ border: '1px solid #E5DDD0', boxShadow: '0 2px 8px rgba(45,41,36,0.06)' }}
+        >
+          <AccordionTrigger
+            className="px-6 py-4 hover:no-underline rounded-none"
+            style={{ borderBottom: '1px solid #F0E8DC', backgroundColor: 'var(--neutral-50)' }}
+          >
+            <h3
+              className="text-fluid-lg font-semibold"
+              style={{ fontFamily: 'var(--font-cormorant)', color: 'var(--neutral-800)' }}
+            >
+              Location & Map
+            </h3>
+          </AccordionTrigger>
+          <AccordionContent className="px-6 py-5">
+            <AddressMapViewer address={address} />
+          </AccordionContent>
+        </AccordionItem>
+      )}
 
       {quote.attachmentUrls.length > 0 && (
         <AccordionItem
