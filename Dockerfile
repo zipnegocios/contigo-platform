@@ -18,6 +18,11 @@ COPY src ./src
 COPY app ./app
 COPY public ./public
 
+# 🚨 ESTA ES LA MAGIA: Declarar la variable para la fase de build
+
+
+
+
 # Build Next.js app
 RUN npm run build
 

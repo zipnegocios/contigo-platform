@@ -8,12 +8,11 @@ const LIBRARIES: any = ['places']
 
 /**
  * LocationRenderer component that implements the `address_autocomplete` field type
- * using Google Places Autocomplete. Fallback remains for unsupported location types
- * (`map_picker` and `geolocation`).
+ * using Google's new PlaceAutocompleteElement Web Component. Fallback remains for
+ * unsupported location types (`map_picker` and `geolocation`).
  */
 export function LocationRenderer({ field, register, error, setValue }: FieldComponentProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const autocompleteInstanceRef = useRef<any>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
@@ -21,51 +20,79 @@ export function LocationRenderer({ field, register, error, setValue }: FieldComp
   })
 
   useEffect(() => {
-    if (!isLoaded || loadError || !inputRef.current) return
+    if (!isLoaded || loadError || !containerRef.current) return
 
     const google = (window as any).google
-    if (!google || !google.maps || !google.maps.places) return
+    if (!google || !google.maps || !google.maps.places || !google.maps.places.PlaceAutocompleteElement) {
+      console.warn('PlaceAutocompleteElement is not available on google.maps.places')
+      return
+    }
 
-    const autocomplete = new google.maps.places.Autocomplete(inputRef.current)
-    autocompleteInstanceRef.current = autocomplete
+    // Clear any existing children to prevent duplicates on re-render
+    containerRef.current.innerHTML = ''
 
-    const listener = autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace()
-      if (place && place.formatted_address && setValue) {
-        setValue(field.id, place.formatted_address, { shouldValidate: true })
+    const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement()
+    // Make sure the element expands to full width of the parent container
+    placeAutocomplete.style.width = '100%'
+
+    const handlePlaceSelect = async (event: any) => {
+      const place = event.place
+      if (place) {
+        if (place.formattedAddress) {
+          setValue?.(field.id, place.formattedAddress, { shouldValidate: true })
+        } else {
+          try {
+            await place.fetchFields({ fields: ['formattedAddress'] })
+            if (place.formattedAddress) {
+              setValue?.(field.id, place.formattedAddress, { shouldValidate: true })
+            }
+          } catch (e) {
+            console.error('Error fetching formattedAddress:', e)
+          }
+        }
       }
-    })
+    }
+
+    placeAutocomplete.addEventListener('gmp-placeselect', handlePlaceSelect)
+    containerRef.current.appendChild(placeAutocomplete)
 
     return () => {
-      if (listener && google.maps.event) {
-        google.maps.event.removeListener(listener)
+      if (placeAutocomplete) {
+        placeAutocomplete.removeEventListener('gmp-placeselect', handlePlaceSelect)
+      }
+      if (containerRef.current) {
+        containerRef.current.innerHTML = ''
       }
     }
   }, [isLoaded, loadError, field.id, setValue])
 
   if (field.type === 'address_autocomplete') {
-    const { ref, ...rest } = register(field.id)
-
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full">
         {field.label && (
           <label htmlFor={field.id} className="text-sm font-medium text-gray-700">
             {field.label}
           </label>
         )}
-        <input
-          id={field.id}
-          type="text"
-          placeholder={field.placeholder || 'Enter your address'}
-          aria-invalid={!!error}
-          disabled={!isLoaded || !!loadError}
-          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
-          {...rest}
-          ref={(el) => {
-            ref(el)
-            inputRef.current = el
-          }}
-        />
+        
+        <div className="w-full flex" style={{ minHeight: '38px' }}>
+          {(!isLoaded || loadError) && (
+            <input
+              type="text"
+              placeholder={loadError ? 'Error loading address search' : 'Loading address search...'}
+              disabled
+              className={`block w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 cursor-not-allowed ${
+                loadError ? 'bg-red-50 text-red-400' : 'bg-gray-100 text-gray-400'
+              }`}
+            />
+          )}
+          <div
+            ref={containerRef}
+            className={`w-full ${(!isLoaded || loadError) ? 'hidden' : 'block'}`}
+          />
+        </div>
+
+        <input type="hidden" {...register(field.id)} />
         {field.helpText && <p className="text-xs text-gray-500">{field.helpText}</p>}
         {error && <p role="alert" className="text-xs text-red-600 mt-1">{error.message}</p>}
       </div>
