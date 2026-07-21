@@ -20,7 +20,8 @@ COPY public ./public
 
 # 🚨 ESTA ES LA MAGIA: Declarar la variable para la fase de build
 
-
+ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
 
 # Build Next.js app
