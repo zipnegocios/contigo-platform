@@ -213,10 +213,9 @@ function ContextMenu({
   onClose: () => void
   onAssign: (item: MediaObject) => void
 }) {
-  const { folders, tags, moveToFolder, openDetail, deleteItem, updateMetadata, optimizeMedia } = useMediaLibrary()
+  const { folders, tags, moveToFolder, openDetail, deleteItem, updateMetadata } = useMediaLibrary()
   const [openFlyout, setOpenFlyout] = useState<FlyoutKind>(null)
   const [flyoutPos, setFlyoutPos] = useState<{ top: number; left: number } | null>(null)
-  const [optimizing, setOptimizing] = useState(false)
 
   const folderBtnRef = useRef<HTMLButtonElement>(null)
   const tagBtnRef = useRef<HTMLButtonElement>(null)
@@ -234,16 +233,6 @@ function ContextMenu({
   }
 
   const itemTags = state.item.metadata?.tags ?? []
-
-  const handleOptimize = async () => {
-    setOptimizing(true)
-    try {
-      await optimizeMedia(state.item.key)
-    } finally {
-      setOptimizing(false)
-      onClose()
-    }
-  }
 
   return (
     <>
@@ -284,12 +273,6 @@ function ContextMenu({
         </button>
 
         <MenuItem onClick={() => { onAssign(state.item); onClose() }}>Assign Media</MenuItem>
-
-        {state.item.mediaType === 'image' && (
-          <MenuItem onClick={handleOptimize} dimmed={optimizing}>
-            {optimizing ? 'Optimizing…' : 'Optimize'}
-          </MenuItem>
-        )}
 
         <div style={{ borderTop: '1px solid rgba(226,192,99,0.08)' }} className="my-1" />
 

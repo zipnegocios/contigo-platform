@@ -5,6 +5,7 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { isVideoUrl } from '@/presentation/lib/media-type'
 import { GalleryThumbnail } from '@/presentation/components/GalleryThumbnail'
 import type { GalleryItem } from '@/types/media'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 interface LightboxProps {
   items: GalleryItem[]
@@ -108,7 +109,7 @@ export function Lightbox({ items, startIndex, onClose }: LightboxProps) {
         ) : (
           <img
             key={item.url}
-            src={item.url}
+            src={cfImage(item.url, { width: 2000, quality: 80 })}
             alt={item.title || ''}
             className="max-w-full max-h-[80vh] rounded-lg"
             style={{ objectFit: 'contain' }}

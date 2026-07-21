@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { CategoryFilterPills } from './CategoryFilterPills'
 import { isVideoUrl } from '@/presentation/lib/media-type'
 import { generateSlug } from '@/infrastructure/services/SlugGeneratorService'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 interface ProjectItem {
   id: string
@@ -65,7 +66,7 @@ export function ProjectsGrid({ projects, allCategories, activeSlug }: ProjectsGr
                   {video ? (
                     <video
                       src={project.coverImageUrl}
-                      poster={project.coverPosterUrl ?? undefined}
+                      poster={project.coverPosterUrl ? cfImage(project.coverPosterUrl, { width: 900 }) : undefined}
                       autoPlay
                       muted
                       loop
@@ -75,7 +76,7 @@ export function ProjectsGrid({ projects, allCategories, activeSlug }: ProjectsGr
                     />
                   ) : (
                     <img
-                      src={project.coverImageUrl}
+                      src={cfImage(project.coverImageUrl, { width: 900 })}
                       alt={project.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />

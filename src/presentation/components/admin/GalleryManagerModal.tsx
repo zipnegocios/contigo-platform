@@ -31,6 +31,7 @@ interface GalleryManagerModalProps {
   onClose: () => void
   folder?: string
   entityContext?: EntityContext | null
+  entityType?: 'project' | 'service'
 }
 
 function SortableItem({
@@ -144,7 +145,7 @@ function SortableItem({
 
 type GalleryItemWithId = GalleryItem & { _id: string }
 
-export function GalleryManagerModal({ items: initialItems, onSave, onClose, folder, entityContext }: GalleryManagerModalProps) {
+export function GalleryManagerModal({ items: initialItems, onSave, onClose, folder, entityContext, entityType }: GalleryManagerModalProps) {
   const [localItems, setLocalItems] = useState<GalleryItemWithId[]>(() =>
     initialItems.map((item, i) => ({ ...item, order: i, _id: `item-${i}-${item.url}` }))
   )
@@ -197,9 +198,12 @@ export function GalleryManagerModal({ items: initialItems, onSave, onClose, fold
     if (!files.length) return
     setUploading(true)
     try {
+      const finalEntityType = entityType || entityContext?.type || 'project'
+      const entityDir = finalEntityType === 'service' ? 'services' : 'projects'
+
       const results = await Promise.all(
         files.map((file) => {
-          const prefix = file.type.startsWith('video/') ? 'projects/video' : 'projects/gallery'
+          const prefix = file.type.startsWith('video/') ? `${entityDir}/videos` : `${entityDir}/gallery`
           return uploadFileToR2(file, prefix, undefined, folder)
         })
       )

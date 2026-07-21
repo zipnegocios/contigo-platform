@@ -7,6 +7,7 @@ import gsap from 'gsap'
 import { ServiceIcon } from '@/presentation/components/ServiceIcons'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 import { SERVICE_ROOT_SLUGS, SERVICE_ROOT_NAMES } from '@/presentation/data/serviceCategoryMeta'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 export interface ServiceCategoryCarouselItem {
   slug: string
@@ -534,7 +535,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
             className="absolute overflow-hidden"
             style={{
               backgroundColor: '#1E1A16',
-              backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : undefined,
+              backgroundImage: item.imageUrl ? `url(${cfImage(item.imageUrl, { width: 1600 })})` : undefined,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               cursor: 'pointer',
@@ -670,7 +671,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
                 scrollSnapAlign: 'start',
                 flex: '0 0 100%',
                 backgroundColor: '#1E1A16',
-                backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : undefined,
+                backgroundImage: item.imageUrl ? `url(${cfImage(item.imageUrl, { width: 1600 })})` : undefined,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}

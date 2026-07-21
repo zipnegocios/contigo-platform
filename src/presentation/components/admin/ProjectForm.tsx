@@ -304,6 +304,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
                   }
                   folder={project?.slug || undefined}
                   entityContext={entityCtx}
+                  entityType="project"
                 />
 
                 <div
@@ -384,6 +385,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
           items={formData.galleryItems}
           folder={project?.slug || undefined}
           entityContext={entityCtx}
+          entityType="project"
           onSave={(items) => {
             setFormData({ ...formData, galleryItems: items })
             setGalleryModalOpen(false)

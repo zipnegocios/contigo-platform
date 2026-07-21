@@ -5,6 +5,7 @@ import { Play } from 'lucide-react'
 import { Lightbox } from '@/presentation/components/Lightbox'
 import { isVideoUrl } from '@/presentation/lib/media-type'
 import type { GalleryItem } from '@/types/media'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 export function ProjectGallery({ items }: { items: GalleryItem[] }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -54,7 +55,7 @@ export function ProjectGallery({ items }: { items: GalleryItem[] }) {
                   </>
                 ) : (
                   <img
-                    src={item.url}
+                    src={cfImage(item.url, { width: 800 })}
                     alt={item.title || `Gallery ${i + 1}`}
                     className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"

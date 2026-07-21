@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Play, Film } from 'lucide-react'
 import { isVideoUrl } from '@/presentation/lib/media-type'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 /**
  * Shared thumbnail renderer for gallery items (images and videos) — used by
@@ -15,7 +16,7 @@ export function GalleryThumbnail({ url, className }: { url: string; className?: 
   const boxClassName = className ?? 'w-full h-full object-cover'
 
   if (!isVideoUrl(url)) {
-    return <img src={url} alt="" className={boxClassName} />
+    return <img src={cfImage(url, { width: 300 })} alt="" className={boxClassName} />
   }
 
   if (videoError) {

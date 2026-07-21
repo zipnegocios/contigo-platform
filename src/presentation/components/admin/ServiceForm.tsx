@@ -269,6 +269,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
                   }
                   folder={service?.slug || formData.slug || undefined}
                   entityContext={entityCtx}
+                  entityType="service"
                 />
 
                 <div
@@ -352,6 +353,7 @@ export function ServiceForm({ service }: ServiceFormProps) {
           items={formData.galleryItems}
           folder={service?.slug || formData.slug || undefined}
           entityContext={entityCtx}
+          entityType="service"
           onSave={(items) => {
             setFormData({ ...formData, galleryItems: items })
             setGalleryModalOpen(false)

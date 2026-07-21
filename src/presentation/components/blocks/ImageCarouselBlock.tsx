@@ -2,6 +2,7 @@
 import { useRef } from 'react'
 import type { ImageCarouselBlockData } from '@/types/pageBlocks'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 interface ImageCarouselBlockProps { data: ImageCarouselBlockData }
 
@@ -35,7 +36,7 @@ export function ImageCarouselBlock({ data }: ImageCarouselBlockProps) {
           {data.images.map((img, idx) => (
             <div key={idx} className="flex-shrink-0 w-72">
               <img
-                src={img.url}
+                src={cfImage(img.url, { width: 1200 })}
                 alt={img.caption || ''}
                 className="w-full h-48 object-cover rounded-lg"
                 style={{ border: '1px solid #E5DDD0' }}

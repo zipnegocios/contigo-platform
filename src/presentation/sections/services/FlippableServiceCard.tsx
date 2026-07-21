@@ -4,6 +4,7 @@ import { type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 interface FlippableServiceCardProps {
   slug: string
@@ -76,6 +77,7 @@ export default function FlippableServiceCard({
             alt={name}
             fill
             draggable={false}
+            loader={({ src, width, quality }) => cfImage(src, { width, quality })}
             sizes="(max-width: 1024px) 82vw, 420px"
             style={{ objectFit: 'cover' }}
           />
@@ -97,7 +99,7 @@ export default function FlippableServiceCard({
         <div
           className="service-flip-face service-flip-face--back flex flex-col justify-center gap-1.5 px-5 py-4"
           style={{
-            background: `linear-gradient(rgba(5,30,39,0.86), rgba(9,43,56,0.86)), url(${imageUrl}) center/cover`,
+            background: `linear-gradient(rgba(5,30,39,0.86), rgba(9,43,56,0.86)), url(${cfImage(imageUrl, { width: 800 })}) center/cover`,
           }}
         >
           <span

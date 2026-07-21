@@ -83,7 +83,6 @@ interface MediaLibraryContextValue {
   deleteTag: (id: string) => Promise<void>
   renameTag: (id: string, name: string) => Promise<void>
   renameMedia: (key: string, newName: string) => Promise<void>
-  optimizeMedia: (key: string) => Promise<void>
   // Bulk selection
   selectedKeys: string[]
   toggleSelectKey: (key: string) => void
@@ -321,15 +320,6 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
     await refreshItems()
   }, [refreshItems])
 
-  const optimizeMedia = useCallback(async (key: string) => {
-    await fetch('/api/admin/media/optimize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key }),
-    })
-    await refreshItems()
-  }, [refreshItems])
-
   const createFolder = useCallback(async (name: string, parentId?: string): Promise<MediaFolder> => {
     const res = await fetch('/api/admin/media/folders', {
       method: 'POST',
@@ -514,7 +504,7 @@ export function MediaLibraryProvider({ children, entityContext = null }: Provide
         entityContext,
         moveToFolder, updateMetadata, deleteItem, refreshItems,
         createFolder, deleteFolder, renameFolder, createTag, deleteTag, renameTag,
-        renameMedia, optimizeMedia,
+        renameMedia,
         selectedKeys, toggleSelectKey, clearSelection, selectAllFiltered,
         bulkMoveToFolder, bulkDelete, bulkAddTag, bulkRemoveTag,
       }}

@@ -12,13 +12,14 @@ interface CoverMediaSelectorProps {
   onChange: (coverUrl: string | null, posterUrl: string | null) => void
   folder?: string
   entityContext?: EntityContext | null
+  entityType?: 'project' | 'service'
 }
 
 function isVideo(url: string) {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)
 }
 
-export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, entityContext }: CoverMediaSelectorProps) {
+export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, entityContext, entityType }: CoverMediaSelectorProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [posterPickerOpen, setPosterPickerOpen] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
@@ -28,12 +29,15 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
 
   const coverIsVideo = coverUrl ? isVideo(coverUrl) : false
 
+  const finalEntityType = entityType || entityContext?.type || 'project'
+  const entityDir = finalEntityType === 'service' ? 'services' : 'projects'
+
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setUploadingCover(true)
     try {
-      const prefix = file.type.startsWith('video/') ? 'projects/video' : 'projects/cover'
+      const prefix = file.type.startsWith('video/') ? `${entityDir}/videos` : `${entityDir}/covers`
       const result = await uploadFileToR2(file, prefix, undefined, folder)
       onChange(result.publicUrl, file.type.startsWith('video/') ? posterUrl : null)
     } catch (err) {
@@ -50,7 +54,7 @@ export function CoverMediaSelector({ coverUrl, posterUrl, onChange, folder, enti
     if (!file) return
     setUploadingPoster(true)
     try {
-      const result = await uploadFileToR2(file, 'projects/cover', undefined, folder)
+      const result = await uploadFileToR2(file, `${entityDir}/covers`, undefined, folder)
       onChange(coverUrl, result.publicUrl)
     } catch (err) {
       console.error(err)

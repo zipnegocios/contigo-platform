@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { HeroConfig, HeroButton } from '@/core/entities/HeroConfig'
 import { DynamicFormModal } from '@/presentation/components/DynamicFormModal'
 import { QuoteFormModal } from '@/presentation/components/QuoteFormModal'
-
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 // The "Request a Quote" form gets the bespoke modal used everywhere else in
 // the site (Navigation's "Request a Quote" button) instead of the generic
 // form-builder-driven DynamicFormModal, so a Hero CTA wired to this specific
@@ -163,10 +163,10 @@ export default function HeroSection({ config }: Props) {
         >
           <picture>
             {cfg.mobileImageUrl && (
-              <source media="(max-width: 640px)" srcSet={cfg.mobileImageUrl} />
+              <source media="(max-width: 640px)" srcSet={cfImage(cfg.mobileImageUrl, { width: 750 })} />
             )}
             <img
-              src={cfg.desktopImageUrl ?? '/assets/hero-test1.png'}
+              src={cfg.desktopImageUrl ? cfImage(cfg.desktopImageUrl, { width: 1920 }) : '/assets/hero-test1.png'}
               alt="Contigo construction project"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
             />
@@ -188,10 +188,10 @@ export default function HeroSection({ config }: Props) {
           >
             <picture>
               {slide.mobileImageUrl && (
-                <source media="(max-width: 640px)" srcSet={slide.mobileImageUrl} />
+                <source media="(max-width: 640px)" srcSet={cfImage(slide.mobileImageUrl, { width: 750 })} />
               )}
               <img
-                src={slide.desktopImageUrl || '/assets/hero-test1.png'}
+                src={slide.desktopImageUrl ? cfImage(slide.desktopImageUrl, { width: 1920 }) : '/assets/hero-test1.png'}
                 alt=""
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />

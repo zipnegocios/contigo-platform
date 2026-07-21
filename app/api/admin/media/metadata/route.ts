@@ -3,6 +3,7 @@ import { db } from '@/infrastructure/db/client'
 import { mediaMetadata } from '@/infrastructure/db/schema'
 import { eq, inArray } from 'drizzle-orm'
 import { sql } from 'drizzle-orm'
+import { inferMediaType } from '@/core/lib/inferMediaType'
 
 export async function GET(request: Request) {
   const session = await auth()
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
 
   if (!key) return Response.json({ error: 'key is required' }, { status: 400 })
 
+  const isImage = inferMediaType(key) === 'image'
   const [row] = await db
     .insert(mediaMetadata)
     .values({
@@ -43,6 +45,7 @@ export async function POST(request: Request) {
       height: height ?? null,
       duration: duration ?? null,
       format: format ?? null,
+      optimized: isImage,
     })
     .onConflictDoUpdate({
       target: mediaMetadata.key,
@@ -54,6 +57,7 @@ export async function POST(request: Request) {
         height: sql`excluded.height`,
         duration: sql`excluded.duration`,
         format: sql`excluded.format`,
+        optimized: isImage,
         updatedAt: sql`now()`,
       },
     })
@@ -77,6 +81,11 @@ export async function PATCH(request: Request) {
     if (field in updates) patch[field] = updates[field]
   }
 
+  const isImage = inferMediaType(key) === 'image'
+  if (isImage) {
+    patch.optimized = true
+  }
+
   // Upsert - create if not exists
   const [existing] = await db
     .select({ id: mediaMetadata.id })
@@ -93,7 +102,7 @@ export async function PATCH(request: Request) {
   } else {
     ;[row] = await db
       .insert(mediaMetadata)
-      .values({ key, folderId: null, tags: [], ...patch })
+      .values({ key, folderId: null, tags: [], optimized: isImage, ...patch })
       .returning()
   }
 

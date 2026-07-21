@@ -1,11 +1,12 @@
 import type { TwoColumnBlockData } from '@/types/pageBlocks'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 interface TwoColumnBlockProps { data: TwoColumnBlockData }
 
 export function TwoColumnBlock({ data }: TwoColumnBlockProps) {
   const imgEl = data.imageUrl ? (
     <div className="flex-1 min-h-[300px]">
-      <img src={data.imageUrl} alt="" className="w-full h-full object-cover rounded-lg" />
+      <img src={cfImage(data.imageUrl, { width: 1200 })} alt="" className="w-full h-full object-cover rounded-lg" />
     </div>
   ) : null
 

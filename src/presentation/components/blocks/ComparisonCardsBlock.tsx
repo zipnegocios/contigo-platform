@@ -1,5 +1,6 @@
 import type { ComparisonCardsBlockData } from '@/types/pageBlocks'
 import { Check } from 'lucide-react'
+import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 interface ComparisonCardsBlockProps { data: ComparisonCardsBlockData }
 
@@ -14,7 +15,7 @@ export function ComparisonCardsBlock({ data }: ComparisonCardsBlockProps) {
             style={{ border: '1px solid #E5DDD0', backgroundColor: '#FAFAF8' }}
           >
             {card.imageUrl && (
-              <img src={card.imageUrl} alt={card.title} className="w-full h-44 object-cover" />
+              <img src={cfImage(card.imageUrl, { width: 1200 })} alt={card.title} className="w-full h-44 object-cover" />
             )}
             <div className="p-5">
               <h3 className="text-fluid-base font-semibold mb-3" style={{ fontFamily: 'var(--font-cormorant)', color: '#2D2924' }}>
