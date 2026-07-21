@@ -16,6 +16,7 @@ const CreateQuoteSchema = z.object({
   service: z.string().min(2, 'Please select a service').max(255),
   message: z.string().min(10, 'Message must be at least 10 characters').max(5000),
   attachmentUrls: z.array(z.string()).max(3).optional().default([]),
+  formData: z.record(z.string(), z.unknown()).optional().default({}),
 })
 
 export const dynamic = 'force-dynamic'

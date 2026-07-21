@@ -109,78 +109,86 @@ export class ResendEmailService implements IEmailService {
   }
 
   async sendQuoteConfirmation(quote: Quote): Promise<void> {
-    const resend = getResend()
-    const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
-    const address = extractAddressFromFormData(quote.formData)
-    const mapsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : ''
+    try {
+      const resend = getResend()
+      const trackingUrl = `${this.siteUrl}/quote-status/${quote.trackingToken}`
+      const address = extractAddressFromFormData(quote?.formData)
+      const mapsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : ''
 
-    const bodyHtml = `
-      <p>Dear ${quote.name},</p>
-      <p>We've received your quote request for <strong>${quote.service}</strong>. Our team will review your project details and get back to you shortly.</p>
+      const bodyHtml = `
+        <p>Dear ${quote.name},</p>
+        <p>We've received your quote request for <strong>${quote.service}</strong>. Our team will review your project details and get back to you shortly.</p>
 
-      <h3>Your Details:</h3>
-      <ul>
-        <li><strong>Service:</strong> ${quote.service}</li>
-        <li><strong>Email:</strong> ${quote.email.toString()}</li>
-        ${quote.phone ? `<li><strong>Phone:</strong> ${quote.phone.toString()}</li>` : ''}
-        ${address ? `<li><strong>Address:</strong> ${address} (<a href="${mapsUrl}" target="_blank" style="color: #D4AF37; text-decoration: underline;">View on Google Maps</a>)</li>` : ''}
-      </ul>
+        <h3>Your Details:</h3>
+        <ul>
+          <li><strong>Service:</strong> ${quote.service}</li>
+          <li><strong>Email:</strong> ${quote.email.toString()}</li>
+          ${quote.phone ? `<li><strong>Phone:</strong> ${quote.phone.toString()}</li>` : ''}
+          ${address ? `<li><strong>Address:</strong> ${address} (<a href="${mapsUrl}" target="_blank" style="color: #D4AF37; text-decoration: underline;">View on Google Maps</a>)</li>` : ''}
+        </ul>
 
-      <p><strong>Tracking Your Quote:</strong></p>
-      <p>You can check the status of your quote at any time using the link below:</p>
-      <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
+        <p><strong>Tracking Your Quote:</strong></p>
+        <p>You can check the status of your quote at any time using the link below:</p>
+        <p><a href="${trackingUrl}" class="button">View Quote Status</a></p>
 
-      <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
-      <p>Best regards,<br><strong>Contigo Constructions</strong></p>
-    `
+        <p>If you have any questions in the meantime, please don't hesitate to reach out.</p>
+        <p>Best regards,<br><strong>Contigo Constructions</strong></p>
+      `
 
-    await resend.emails.send({
-      from: this.getFromAddress('Quotes'),
-      to: quote.email.toString(),
-      subject: 'Your Quote Request - Contigo Constructions',
-      html: this.renderEmailShell('Thank You for Your Inquiry', bodyHtml),
-    })
+      await resend.emails.send({
+        from: this.getFromAddress('Quotes'),
+        to: quote.email.toString(),
+        subject: 'Your Quote Request - Contigo Constructions',
+        html: this.renderEmailShell('Thank You for Your Inquiry', bodyHtml),
+      })
+    } catch (error) {
+      console.error('Error sending quote confirmation email:', error)
+    }
   }
 
   async sendAdminNotification(quote: Quote): Promise<void> {
-    const resend = getResend()
-    const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
-    const address = extractAddressFromFormData(quote.formData)
-    const mapsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : ''
+    try {
+      const resend = getResend()
+      const adminEmail = process.env.ADMIN_EMAIL || 'contact@contigoconstructions.com.au'
+      const address = extractAddressFromFormData(quote?.formData)
+      const mapsUrl = address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : ''
 
-    const bodyHtml = `
-      <p><strong>A new quote request has been submitted:</strong></p>
+      const bodyHtml = `
+        <p><strong>A new quote request has been submitted:</strong></p>
 
-      <div class="detail">
-        <p><strong>Name:</strong> ${quote.name}</p>
-      </div>
-      <div class="detail">
-        <p><strong>Email:</strong> ${quote.email.toString()}</p>
-      </div>
-      ${quote.phone ? `<div class="detail"><p><strong>Phone:</strong> ${quote.phone.toString()}</p></div>` : ''}
-      <div class="detail">
-        <p><strong>Service:</strong> ${quote.service}</p>
-      </div>
-      ${address ? `
-      <div class="detail">
-        <p><strong>Address:</strong> ${address}</p>
-        <p><a href="${mapsUrl}" target="_blank" class="button" style="padding: 6px 12px; font-size: 13px;">View on Google Maps</a></p>
-      </div>` : ''}
-      <div class="detail">
-        <p><strong>Message:</strong><br>${quote.message.replace(/\n/g, '<br>')}</p>
-      </div>
+        <div class="detail">
+          <p><strong>Name:</strong> ${quote.name}</p>
+        </div>
+        <div class="detail">
+          <p><strong>Email:</strong> ${quote.email.toString()}</p>
+        </div>
+        ${quote.phone ? `<div class="detail"><p><strong>Phone:</strong> ${quote.phone.toString()}</p></div>` : ''}
+        <div class="detail">
+          <p><strong>Service:</strong> ${quote.service}</p>
+        </div>
+        ${address ? `
+        <div class="detail">
+          <p><strong>Address:</strong> ${address}</p>
+          <p><a href="${mapsUrl}" target="_blank" class="button" style="padding: 6px 12px; font-size: 13px;">View on Google Maps</a></p>
+        </div>` : ''}
+        <div class="detail">
+          <p><strong>Message:</strong><br>${(quote.message || '').replace(/\n/g, '<br>')}</p>
+        </div>
 
-      <p><strong>Tracking Token:</strong> ${quote.trackingToken}</p>
-      <p><strong>Quote ID:</strong> ${quote.id}</p>
-      <p><strong>Submitted:</strong> ${quote.createdAt.toLocaleString()}</p>
-    `
+        <p><strong>Tracking Token:</strong> ${quote.trackingToken}</p>
+        <p><strong>Quote ID:</strong> ${quote.id}</p>
+        <p><strong>Submitted:</strong> ${quote.createdAt.toLocaleString()}</p>
+      `
 
-    await resend.emails.send({
-      from: this.getFromAddress('New Quotes'),
-      to: adminEmail,
-      subject: `[New Quote] ${quote.service} - ${quote.name}`,
-      html: this.renderEmailShell('New Quote Request', bodyHtml),
-    })
+      await resend.emails.send({
+        from: this.getFromAddress('New Quotes'),
+        to: adminEmail,
+        subject: `[New Quote] ${quote.service} - ${quote.name}`,
+        html: this.renderEmailShell('New Quote Request', bodyHtml),
+      })
+    } catch (error) {
+      console.error('Error sending admin notification email:', error)
+    }
   }
 
   async sendNewMessageNotificationToAdmin(lead: Lead, quote: Quote): Promise<void> {

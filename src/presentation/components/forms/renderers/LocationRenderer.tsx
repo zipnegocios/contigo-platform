@@ -37,18 +37,32 @@ export function LocationRenderer({ field, register, error, setValue }: FieldComp
 
     const handlePlaceSelect = async (event: any) => {
       const place = event.place
-      if (place) {
-        if (place.formattedAddress) {
-          setValue?.(field.id, place.formattedAddress, { shouldValidate: true })
-        } else {
-          try {
-            await place.fetchFields({ fields: ['formattedAddress'] })
-            if (place.formattedAddress) {
-              setValue?.(field.id, place.formattedAddress, { shouldValidate: true })
-            }
-          } catch (e) {
-            console.error('Error fetching formattedAddress:', e)
-          }
+      if (!place) return
+
+      let addressString = place.formattedAddress
+      if (!addressString) {
+        try {
+          await place.fetchFields({ fields: ['formattedAddress'] })
+          addressString = place.formattedAddress
+        } catch (e) {
+          console.error('Error fetching formattedAddress:', e)
+        }
+      }
+
+      if (addressString) {
+        // Update primary field.id
+        setValue?.(field.id, addressString, {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true,
+        })
+        // Also update mapsToSystemField if defined (e.g. 'address')
+        if (field.mapsToSystemField && field.mapsToSystemField !== field.id) {
+          setValue?.(field.mapsToSystemField, addressString, {
+            shouldValidate: true,
+            shouldDirty: true,
+            shouldTouch: true,
+          })
         }
       }
     }

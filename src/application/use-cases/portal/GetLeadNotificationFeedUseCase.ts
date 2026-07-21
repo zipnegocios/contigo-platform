@@ -58,44 +58,55 @@ export class GetLeadNotificationFeedUseCase {
   ) {}
 
   async execute(leadId: string): Promise<LeadNotificationFeedDTO> {
-    const [lead, activities] = await Promise.all([
-      this.leadRepository.findById(leadId),
-      this.leadActivityRepository.findByLeadId(leadId),
-    ])
+    try {
+      const [lead, activities] = await Promise.all([
+        this.leadRepository.findById(leadId),
+        this.leadActivityRepository.findByLeadId(leadId),
+      ])
 
-    const allowedActivities = activities.filter((activity) => ALLOWED_TYPES.has(activity.type))
+      const allowedActivities = (activities || []).filter(
+        (activity) => activity && ALLOWED_TYPES.has(activity.type),
+      )
 
-    // Newest-first, matching ILeadActivityRepository.findByLeadId's existing
-    // desc(createdAt) ordering — no re-sort needed for a notification feed.
-    const items: LeadNotificationItem[] = []
-    for (const activity of allowedActivities) {
-      items.push({
-        id: activity.id,
-        type: activity.type,
-        label: await this.buildLabel(activity),
-        createdAt: activity.createdAt,
-      })
+      const items: LeadNotificationItem[] = []
+      for (const activity of allowedActivities) {
+        items.push({
+          id: activity.id,
+          type: activity.type,
+          label: await this.buildLabel(activity),
+          createdAt: activity.createdAt,
+        })
+      }
+
+      const viewedAt = lead?.notificationsViewedAt ?? null
+      const unreadCount =
+        viewedAt === null
+          ? items.length
+          : items.filter((item) => item.createdAt && viewedAt && item.createdAt > viewedAt).length
+
+      return { items, unreadCount }
+    } catch (error) {
+      console.error('Error fetching notification feed:', error)
+      return { items: [], unreadCount: 0 }
     }
-
-    const viewedAt = lead?.notificationsViewedAt ?? null
-    const unreadCount =
-      viewedAt === null ? items.length : items.filter((item) => item.createdAt > viewedAt).length
-
-    return { items, unreadCount }
   }
 
   private async buildLabel(activity: LeadActivity): Promise<string> {
-    if (activity.type === 'stage_change') {
-      const toStageId = activity.payload.to as string | undefined
-      const stage = toStageId ? await this.pipelineStageRepository.findById(toStageId) : null
-      const stageMeta = getClientStageLabel(stage?.key ?? '')
-      return `Status: ${stageMeta.label}`
-    }
+    try {
+      if (activity.type === 'stage_change') {
+        const toStageId = activity.payload?.to as string | undefined
+        const stage = toStageId ? await this.pipelineStageRepository.findById(toStageId) : null
+        const stageMeta = getClientStageLabel(stage?.key ?? '')
+        return `Status: ${stageMeta.label}`
+      }
 
-    if (activity.type === 'message_sent') {
-      return 'New message from our team'
-    }
+      if (activity.type === 'message_sent') {
+        return 'New message from our team'
+      }
 
-    return SCHEDULED_LABELS[activity.type] ?? activity.type
+      return SCHEDULED_LABELS[activity.type] ?? activity.type
+    } catch {
+      return activity.type
+    }
   }
 }
