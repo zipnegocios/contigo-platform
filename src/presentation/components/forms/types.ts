@@ -1,4 +1,4 @@
-import type { FieldError, UseFormRegister, FieldValues } from 'react-hook-form'
+import type { FieldError, UseFormRegister, FieldValues, UseFormSetValue } from 'react-hook-form'
 import type { FormField } from '@/core/form-schema/FormSchema'
 
 /**
@@ -18,6 +18,7 @@ export interface FieldComponentProps {
   field: FormField
   register: UseFormRegister<FieldValues>
   error?: FieldError
+  setValue?: UseFormSetValue<FieldValues>
 }
 
 /**

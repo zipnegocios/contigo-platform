@@ -94,6 +94,7 @@ export function FormRenderer({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(validator),
@@ -129,7 +130,7 @@ export function FormRenderer({
         const error = errors[field.id] as FieldError | undefined
 
         return (
-          <Component key={field.id} field={field} register={register} error={error} />
+          <Component key={field.id} field={field} register={register} error={error} setValue={setValue} />
         )
       })}
       {typeof children === 'function' ? children({ isSubmitting }) : children}
