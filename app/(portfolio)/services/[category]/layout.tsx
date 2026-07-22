@@ -16,5 +16,5 @@ export default function ServiceCategoryLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return <div style={{ backgroundColor: 'var(--petrol-800, #0D3C4C)' }}>{children}</div>
 }
