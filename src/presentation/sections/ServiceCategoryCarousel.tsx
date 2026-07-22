@@ -33,12 +33,12 @@ interface Props {
 
 // Reference: docs/temporal-service-cards/src/script.js (Timed Cards Opening)
 // Queue thumbnail sizing is proportional to the viewport (half of the original
-// fixed-px values: 200/300/40 → 100/150/20px at a 1920×1080 reference screen)
-// so relative card size stays consistent across screen sizes instead of being
-// pinned to an absolute pixel count.
-const CARD_W_VW = 5.2   // 100px @ 1920px wide
-const CARD_H_VH = 13.9  // 150px @ 1080px tall
-const GAP_VW = 1.04     // 20px @ 1920px wide
+// fixed-px values, then bumped 20% back up: 200/300/40 → 100/150/20 → 120/180/24px
+// at a 1920×1080 reference screen) so relative card size stays consistent
+// across screen sizes instead of being pinned to an absolute pixel count.
+const CARD_W_VW = 6.25  // 120px @ 1920px wide
+const CARD_H_VH = 16.7  // 180px @ 1080px tall
+const GAP_VW = 1.25     // 24px @ 1920px wide
 const RIGHT_MARGIN_VW = 2.6 // gap between queue row and the container's right edge (~50px @ 1920)
 const PROGRESS_W = 260
 const EASE = 'sine.inOut'
@@ -70,7 +70,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
   const manualPauseRef = useRef(false)
 
   // Layout (computed on mount from actual DOM measurements)
-  const layoutRef = useRef({ w: 0, h: 0, offsetTop: 0, cardW: 0, cardH: 0, gap: 0, rightMargin: 0 })
+  const layoutRef = useRef({ w: 0, h: 0, offsetTop: 0, cardW: 0, cardH: 0, gap: 0, rightMargin: 0, tabsTop: 0, controlsTop: 0 })
 
   // DOM refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -101,15 +101,20 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     const cardH = cardHPx()
     const gap = gapPx()
     const rightMargin = rightMarginPx()
-    const offsetTop = Math.max(0, h - (cardH + 130))
-    layoutRef.current = { w, h, offsetTop, cardW, cardH, gap, rightMargin }
+    // Reserve enough room below the queue row for the pagination controls
+    // (~1/3 of the card height) plus a fixed breathing margin.
+    const controlsClearance = cardH * 0.33 + 60
+    const offsetTop = Math.max(0, h - (cardH + controlsClearance))
+    const tabsTop = offsetTop - cardH * 0.35 - 12 // tabs sit just above the queue row, scaled with card height
+    const controlsTop = offsetTop + cardH + 30    // controls sit just below the queue row
+    layoutRef.current = { w, h, offsetTop, cardW, cardH, gap, rightMargin, tabsTop, controlsTop }
 
     // Position desktop tabs just above the queue cards row, anchored to the
     // same right edge as the queue row itself.
     if (desktopTabsRef.current) {
       desktopTabsRef.current.style.right = `${rightMargin}px`
       desktopTabsRef.current.style.left = 'auto'
-      desktopTabsRef.current.style.top = `${offsetTop - 52}px`
+      desktopTabsRef.current.style.top = `${tabsTop}px`
     }
   }
 
@@ -204,12 +209,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
         onComplete: () => {
           // Reposition old hero to its queue slot
           const endX = queueX(prvQueueIdx, rest.length)
+          const labelY = offsetTop + cardH - cardH * 0.33
           gsap.set(cardRefs.current[prv], {
             x: endX, y: offsetTop, width: cardW, height: cardH,
             zIndex: 30, borderRadius: 10, scale: 1,
           })
           gsap.set(cardQueueContentRefs.current[prv], {
-            x: endX, y: offsetTop + cardH - 100, opacity: 1, zIndex: 40,
+            x: endX, y: labelY, opacity: 1, zIndex: 40,
           })
 
           // Reset now-inactive details panel for next use
@@ -228,7 +234,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
                 ease: EASE, delay: 0.1 * (i + 1),
               })
               gsap.to(cardQueueContentRefs.current[idx], {
-                x: xNew, y: offsetTop + cardH - 100,
+                x: xNew, y: labelY,
                 opacity: 1, zIndex: 40, ease: EASE, delay: 0.1 * (i + 1),
               })
             }
@@ -298,9 +304,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     if (!containerRef.current) return
 
     computeLayout()
-    const { w, h, offsetTop, cardW, cardH, rightMargin } = layoutRef.current
+    const { w, h, offsetTop, cardW, cardH, rightMargin, controlsTop } = layoutRef.current
     const [active, ...rest] = orderRef.current
     const rm = prefersReducedMotion()
+    const labelY = offsetTop + cardH - cardH * 0.33 // queue-card text label, ~bottom third of the thumbnail
 
     // Cover is visible (white overlay hides everything during setup)
     gsap.set(coverRef.current, { x: 0 })
@@ -317,7 +324,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       })
       gsap.set(cardQueueContentRefs.current[i], {
         x: w + 400 + index * (cardW + layoutRef.current.gap),
-        y: offsetTop + cardH - 100, zIndex: 40, opacity: 1,
+        y: labelY, zIndex: 40, opacity: 1,
       })
     })
 
@@ -338,7 +345,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     // Pagination: off-screen below (will slide up), anchored to the same
     // right edge as the queue row and category tabs.
     gsap.set(paginationRef.current, {
-      top: offsetTop + 330, right: rightMargin, left: 'auto',
+      top: controlsTop, right: rightMargin, left: 'auto',
       y: 200, opacity: 0, zIndex: 60,
     })
 
@@ -447,7 +454,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       <div
         ref={ref}
         className="absolute pointer-events-none select-none"
-        style={{ left: '3.1vw', top: '20.4vh', maxWidth: '27.1vw', color: '#FAF6F0' }}
+        style={{ left: '3.1vw', top: '20.4vh', maxWidth: '32.5vw', color: '#FAF6F0' }}
         aria-live={ariaLive}
       >
         {/* Place label */}
@@ -494,8 +501,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
             fontFamily: 'var(--font-cormorant)',
             fontSize: '1.15rem',
             lineHeight: 1.6,
-            maxWidth: '21.9vw',
-            marginTop: '1.48vh',
+            maxWidth: '26.3vw',
+            marginTop: '0.6vh',
             textShadow: '0 1px 8px rgba(0,0,0,0.5)',
           }}
         >
@@ -566,8 +573,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
         {/* ── Category tabs — positioned above queue cards by computeLayout() ── */}
         <nav
           ref={desktopTabsRef as React.RefObject<HTMLDivElement>}
-          className="absolute z-[55] flex flex-wrap justify-end gap-2"
-          style={{ top: '0px', right: '0px' }}
+          className="absolute z-[55] flex flex-wrap justify-end"
+          style={{ top: '0px', right: '0px', gap: '5.6px' }}
           aria-label="Service categories"
         >
           {navCategories.map(({ slug, name }) => {
@@ -577,16 +584,18 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
                 key={slug}
                 href={`/services/${slug}`}
                 aria-current={isActive ? 'page' : undefined}
-                className="text-xs uppercase tracking-widest px-4 py-2 rounded-full transition-all duration-200 backdrop-blur-sm"
-                style={
-                  isActive
+                className="uppercase tracking-widest rounded-full transition-all duration-200 backdrop-blur-sm"
+                style={{
+                  fontSize: '8.4px',
+                  padding: '5.6px 11px',
+                  ...(isActive
                     ? { backgroundColor: '#E2C063', color: '#1E1A16', fontWeight: 700 }
                     : {
                         border: '1px solid rgba(255,255,255,0.35)',
                         color: 'rgba(255,255,255,0.8)',
                         backgroundColor: 'rgba(0,0,0,0.25)',
-                      }
-                }
+                      }),
+                }}
               >
                 {rootCategoryNames?.[slug] ?? name}
               </Link>
