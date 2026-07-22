@@ -42,6 +42,9 @@ const GAP_VW = 1.25     // 24px @ 1920px wide
 const RIGHT_MARGIN_VW = 2.6 // gap between queue row and the container's right edge (~50px @ 1920)
 const PROGRESS_W = 260
 const EASE = 'sine.inOut'
+// Max thumbnails shown in the queue row at once. Slots beyond this stay
+// parked off-screen (same as cards waiting to enter) until they rotate in.
+const MAX_QUEUE_VISIBLE = 6
 
 function cardWPx() { return window.innerWidth * (CARD_W_VW / 100) }
 function cardHPx() { return window.innerHeight * (CARD_H_VH / 100) }
@@ -107,6 +110,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     const offsetTop = Math.max(0, h - (cardH + controlsClearance))
     const tabsTop = offsetTop - cardH * 0.35 - 12 // tabs sit just above the queue row, scaled with card height
     const controlsTop = offsetTop + cardH + 30    // controls sit just below the queue row
+    // Height of the pagination control row itself (buttons ~25px tall) —
+    // used so the details panel's CTA row lines up on the same baseline.
+    const controlsRowH = 25
+    const detailsBottom = Math.max(0, h - controlsTop - controlsRowH / 2 - 10)
     layoutRef.current = { w, h, offsetTop, cardW, cardH, gap, rightMargin, tabsTop, controlsTop }
 
     // Position desktop tabs just above the queue cards row, anchored to the
@@ -116,17 +123,33 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       desktopTabsRef.current.style.left = 'auto'
       desktopTabsRef.current.style.top = `${tabsTop}px`
     }
+
+    // Anchor the details panels' CTA row to the same height as the
+    // pagination controls (progress bar / arrows) in the queue footer.
+    ;[detailsEvenRef.current, detailsOddRef.current].forEach((elx) => {
+      if (elx) elx.style.bottom = `${detailsBottom}px`
+    })
   }
 
   /**
    * X position (px, left-edge of the card) for queue slot `i` of `restCount`
-   * total queue slots. Slot 0 is the leftmost of the row, slot `restCount-1`
-   * sits flush against the container's right edge — same left-to-right
-   * ordering as before, just measured from the right instead of the left.
+   * total queue slots. Only the last `MAX_QUEUE_VISIBLE` slots are laid out
+   * in the visible row (slot `restCount-1` flush against the container's
+   * right edge, working backwards); anything earlier than that stays parked
+   * off-screen to the right, waiting to rotate in — same as cards that
+   * haven't entered yet.
    */
   function queueX(i: number, restCount: number): number {
     const { w, cardW, gap, rightMargin } = layoutRef.current
-    return w - rightMargin - (restCount - i) * (cardW + gap) + gap
+    const visibleCount = Math.min(restCount, MAX_QUEUE_VISIBLE)
+    const firstVisibleIdx = restCount - visibleCount
+    if (i < firstVisibleIdx) {
+      // Parked off-screen, stacked beyond the row so it can stagger in later.
+      const parkSlot = firstVisibleIdx - i
+      return w + 400 + parkSlot * (cardW + gap)
+    }
+    const rowPos = i - firstVisibleIdx
+    return w - rightMargin - (visibleCount - rowPos) * (cardW + gap) + gap
   }
 
   function animPromise(target: gsap.TweenTarget, duration: number, props: gsap.TweenVars): Promise<void> {
@@ -453,66 +476,17 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     return (
       <div
         ref={ref}
-        className="absolute pointer-events-none select-none"
-        style={{ left: '3.1vw', top: '20.4vh', maxWidth: '32.5vw', color: '#FAF6F0' }}
+        className="absolute pointer-events-none select-none flex flex-col-reverse"
+        style={{ left: '3.1vw', maxWidth: '32.5vw', color: '#FAF6F0' }}
         aria-live={ariaLive}
       >
-        {/* Place label */}
-        <div style={{ height: '4.3vh', overflow: 'hidden' }}>
-          <div
-            className="svc-place"
-            style={{ paddingTop: '1.3vh', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '0.52vw', textTransform: 'uppercase', letterSpacing: '0.12em' }}
-          >
-            <span style={{ display: 'inline-block', width: '1.25vw', height: '2px', borderRadius: '99px', backgroundColor: '#E2C063', flexShrink: 0 }} />
-            {categoryName}
-          </div>
-        </div>
-
-        {/* Service name */}
-        <div style={{ overflow: 'hidden', marginTop: '0.56vh' }}>
-          <h2
-            className="svc-title"
-            style={{
-              fontFamily: 'var(--font-cormorant)',
-              fontSize: 'clamp(1.75rem, 3.5vw, 3.5rem)',
-              fontWeight: 600,
-              lineHeight: 1.08,
-              color: '#FFFFFF',
-              margin: 0,
-              textShadow: '0 2px 20px rgba(0,0,0,0.4)',
-            }}
-          >
-            {content.name}
-          </h2>
-        </div>
-
-        {/* Icon */}
-        <div style={{ height: '4.8vh', overflow: 'hidden', marginTop: '0.93vh' }}>
-          <div className="svc-title" style={{ color: '#E2C063' }}>
-            <ServiceIcon name={content.iconKey} className="w-10 h-10" />
-          </div>
-        </div>
-
-        {/* Description */}
-        <p
-          className="svc-desc"
-          style={{
-            color: 'rgba(255,255,255,0.82)',
-            fontFamily: 'var(--font-cormorant)',
-            fontSize: '1.15rem',
-            lineHeight: 1.6,
-            maxWidth: '26.3vw',
-            marginTop: '0.6vh',
-            textShadow: '0 1px 8px rgba(0,0,0,0.5)',
-          }}
-        >
-          {content.shortDescription}
-        </p>
-
-        {/* CTA buttons */}
+        {/* CTA buttons — anchored to the panel's bottom edge, level with the
+            carousel's footer controls (progress bar / arrows). Everything
+            else stacks upward from here (flex-col-reverse keeps this first
+            in visual order while staying last in the DOM for reading order). */}
         <div
           className="svc-cta pointer-events-auto"
-          style={{ marginTop: '2.6vh', display: 'flex', gap: '0.52vw', flexWrap: 'wrap' }}
+          style={{ display: 'flex', gap: '0.52vw', flexWrap: 'wrap' }}
         >
           {/* Primary: Request a Quote — always visible, solid gold */}
           <Link
@@ -530,6 +504,58 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           >
             View Detail →
           </Link>
+        </div>
+
+        {/* Description */}
+        <p
+          className="svc-desc"
+          style={{
+            color: 'rgba(255,255,255,0.82)',
+            fontFamily: 'var(--font-cormorant)',
+            fontSize: '1.15rem',
+            lineHeight: 1.6,
+            maxWidth: '26.3vw',
+            marginBottom: '2.6vh',
+            textShadow: '0 1px 8px rgba(0,0,0,0.5)',
+          }}
+        >
+          {content.shortDescription}
+        </p>
+
+        {/* Icon */}
+        <div style={{ height: '4.8vh', overflow: 'hidden', marginBottom: '0.6vh' }}>
+          <div className="svc-title" style={{ color: '#E2C063' }}>
+            <ServiceIcon name={content.iconKey} className="w-10 h-10" />
+          </div>
+        </div>
+
+        {/* Service name */}
+        <div style={{ overflow: 'hidden', marginBottom: '0.93vh' }}>
+          <h2
+            className="svc-title"
+            style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontSize: 'clamp(1.75rem, 3.5vw, 3.5rem)',
+              fontWeight: 600,
+              lineHeight: 1.08,
+              color: '#FFFFFF',
+              margin: 0,
+              textShadow: '0 2px 20px rgba(0,0,0,0.4)',
+            }}
+          >
+            {content.name}
+          </h2>
+        </div>
+
+        {/* Place label */}
+        <div style={{ height: '4.3vh', overflow: 'hidden' }}>
+          <div
+            className="svc-place"
+            style={{ paddingTop: '1.3vh', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '0.52vw', textTransform: 'uppercase', letterSpacing: '0.12em' }}
+          >
+            <span style={{ display: 'inline-block', width: '1.25vw', height: '2px', borderRadius: '99px', backgroundColor: '#E2C063', flexShrink: 0 }} />
+            {categoryName}
+          </div>
         </div>
       </div>
     )
