@@ -571,10 +571,6 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       role="region"
       aria-roledescription="carousel"
       aria-label={`${categoryName} services`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onFocus={handleFocus as React.FocusEventHandler<HTMLElement>}
-      onBlur={handleBlur as React.FocusEventHandler<HTMLElement>}
     >
       {/* ── White cover overlay — reveals on load via GSAP slide-out ─────── */}
       <div ref={coverRef} className="absolute inset-0 z-[100]" style={{ backgroundColor: '#FAF6F0' }} />
@@ -596,6 +592,20 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           style={{ height: '200px', background: 'linear-gradient(to top, rgba(8,6,4,0.65) 0%, transparent 100%)' }}
         />
 
+        {/* ── Pause-on-hover scope: category tabs, queue cards, details panels,
+            pagination controls. The bare hero background (gradients above) and
+            the underlying full-bleed card image are intentionally OUTSIDE this
+            wrapper only where they render no foreground content — per product
+            decision, hovering any card (including while it's the full-screen
+            hero) still pauses, since cards are a single shared DOM node whether
+            they're the hero or a queue thumbnail. ── */}
+        <div
+          className="absolute inset-0"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onFocus={handleFocus as React.FocusEventHandler<HTMLDivElement>}
+          onBlur={handleBlur as React.FocusEventHandler<HTMLDivElement>}
+        >
         {/* ── Category tabs — positioned above queue cards by computeLayout() ── */}
         <nav
           ref={desktopTabsRef as React.RefObject<HTMLDivElement>}
@@ -737,6 +747,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
               </svg>
             </button>
           </div>
+        </div>
         </div>
       </div>
 
