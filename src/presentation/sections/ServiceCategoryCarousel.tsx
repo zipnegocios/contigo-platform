@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import gsap from 'gsap'
 import { ServiceIcon } from '@/presentation/components/ServiceIcons'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
@@ -57,10 +57,12 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
   const navCategories: VisibleServiceCategory[] =
     visibleCategories ?? SERVICE_ROOT_SLUGS.map((slug) => ({ slug, name: SERVICE_ROOT_NAMES[slug] }))
   const pathname = usePathname()
+  const router = useRouter()
 
   // Mutable rotation refs — no re-render during animation
   const orderRef = useRef<number[]>(items.map((_, i) => i))
   const animatingRef = useRef(false)
+  const categoryTransitionRef = useRef(false) // guards against double-clicking a category tab mid-fade-out
   const isPausedRef = useRef(false)
   const mountedRef = useRef(false)
   const loopRunningRef = useRef(false)
@@ -320,6 +322,27 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       gsap.killTweensOf(indicatorRef.current)
       gsap.set(indicatorRef.current, { width: '0%' })
     }
+  }
+
+  function handleCategoryNavigate(slug: string) {
+    if (slug === categorySlug) return
+    if (categoryTransitionRef.current) return
+    categoryTransitionRef.current = true
+
+    stopLoop()
+
+    if (prefersReducedMotion() || !containerRef.current) {
+      router.push(`/services/${slug}`, { scroll: false })
+      return
+    }
+
+    gsap.to(containerRef.current, {
+      opacity: 0,
+      y: 15,
+      duration: 0.35,
+      ease: 'power2.inOut',
+      onComplete: () => router.push(`/services/${slug}`, { scroll: false }),
+    })
   }
 
   // ── Init on mount ─────────────────────────────────────────────────────────
@@ -622,6 +645,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
               <Link
                 key={slug}
                 href={`/services/${slug}`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleCategoryNavigate(slug)
+                }}
                 aria-current={isActive ? 'page' : undefined}
                 className="uppercase tracking-widest rounded-full transition-all duration-200 backdrop-blur-sm"
                 style={{
@@ -773,6 +800,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
               <Link
                 key={slug}
                 href={`/services/${slug}`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleCategoryNavigate(slug)
+                }}
                 aria-current={isActive ? 'page' : undefined}
                 className="text-[9px] uppercase tracking-widest px-3 py-1.5 rounded-full transition-all backdrop-blur-sm whitespace-nowrap"
                 style={isActive
