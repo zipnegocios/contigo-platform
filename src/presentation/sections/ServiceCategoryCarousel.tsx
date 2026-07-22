@@ -21,6 +21,7 @@ interface Props {
   items: ServiceCategoryCarouselItem[]
   categorySlug: string
   categoryName: string
+  rootCategoryNames?: Record<string, string>
   tagline: string
 }
 
@@ -31,7 +32,7 @@ const GAP = 40
 const PROGRESS_W = 260
 const EASE = 'sine.inOut'
 
-export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tagline }: Props) {
+export function ServiceCategoryCarousel({ items, categorySlug, categoryName, rootCategoryNames, tagline }: Props) {
   const n = items.length
   const pathname = usePathname()
 
@@ -47,6 +48,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
   const [evenContent, setEvenContent] = useState<ServiceCategoryCarouselItem>(items[0])
   const [oddContent, setOddContent] = useState<ServiceCategoryCarouselItem>(items[Math.min(1, n - 1)])
   const [mobileIdx, setMobileIdx] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const manualPauseRef = useRef(false)
 
   // Layout (computed on mount from actual DOM measurements)
   const layoutRef = useRef({ w: 0, h: 0, offsetLeft: 0, offsetTop: 0 })
@@ -206,15 +209,35 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
 
   // ── loop() — indicator bar is the visual timer ────────────────────────────
 
+  const CYCLE_DURATION = 10 // seconds — full left-to-right sweep per card
+
+  async function waitWhilePaused() {
+    while (isPausedRef.current && loopRunningRef.current && mountedRef.current) {
+      await new Promise(resolve => setTimeout(resolve, 150))
+    }
+  }
+
   async function runLoop() {
     while (loopRunningRef.current && mountedRef.current) {
       if (prefersReducedMotion()) break
-      const { w } = layoutRef.current
-      await animPromise(indicatorRef.current!, 2, { x: 0 })
+
+      gsap.set(indicatorRef.current!, { width: '0%' })
+      const tween = gsap.to(indicatorRef.current!, { width: '100%', duration: CYCLE_DURATION, ease: 'none' })
+
+      let elapsed = 0
+      while (elapsed < CYCLE_DURATION * 1000 && loopRunningRef.current && mountedRef.current) {
+        if (isPausedRef.current) {
+          tween.pause()
+          await waitWhilePaused()
+          if (!loopRunningRef.current || !mountedRef.current) break
+          tween.play()
+        }
+        await new Promise(resolve => setTimeout(resolve, 150))
+        elapsed += 150
+      }
+
+      tween.kill()
       if (!loopRunningRef.current || !mountedRef.current) break
-      await animPromise(indicatorRef.current!, 0.8, { x: w, delay: 0.3 })
-      if (!loopRunningRef.current || !mountedRef.current) break
-      gsap.set(indicatorRef.current!, { x: -w })
       if (!isPausedRef.current) await stepImpl('next')
       if (!loopRunningRef.current || !mountedRef.current) break
     }
@@ -230,7 +253,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
     loopRunningRef.current = false
     if (indicatorRef.current) {
       gsap.killTweensOf(indicatorRef.current)
-      gsap.set(indicatorRef.current, { x: -(layoutRef.current.w || 2000) })
+      gsap.set(indicatorRef.current, { width: '0%' })
     }
   }
 
@@ -284,8 +307,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
       y: 200, opacity: 0, zIndex: 60,
     })
 
-    // Indicator: off-screen left
-    gsap.set(indicatorRef.current, { x: -w })
+    // Indicator: reset to empty
+    gsap.set(indicatorRef.current, { width: '0%' })
 
     if (rm) {
       // Reduced motion: instant layout, no animations, no auto-advance
@@ -346,7 +369,9 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
   // ── Pause / resume handlers ───────────────────────────────────────────────
 
   const handleMouseEnter = useCallback(() => { isPausedRef.current = true }, [])
-  const handleMouseLeave = useCallback(() => { isPausedRef.current = false }, [])
+  const handleMouseLeave = useCallback(() => {
+    if (!manualPauseRef.current) isPausedRef.current = false
+  }, [])
 
   const handleFocus = useCallback((e: React.FocusEvent<HTMLElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
@@ -355,13 +380,19 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
   }, [])
 
   const handleBlur = useCallback((e: React.FocusEvent<HTMLElement>) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null) && !manualPauseRef.current) {
       isPausedRef.current = false
     }
   }, [])
 
   const handlePrev = useCallback(() => { stepImpl('prev') }, [stepImpl])
   const handleNext = useCallback(() => { stepImpl('next') }, [stepImpl])
+  const handleTogglePause = useCallback(() => {
+    const next = !manualPauseRef.current
+    manualPauseRef.current = next
+    isPausedRef.current = next
+    setIsPaused(next)
+  }, [])
 
   // ── Early return for empty / single-item ─────────────────────────────────
 
@@ -480,7 +511,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
       <div ref={coverRef} className="absolute inset-0 z-[100]" style={{ backgroundColor: '#FAF6F0' }} />
 
       {/* ── Golden timer indicator bar ───────────────────────────────────── */}
-      <div ref={indicatorRef} className="absolute top-0 left-0 right-0 z-[60]" style={{ height: '5px', backgroundColor: '#E2C063' }} />
+      <div ref={indicatorRef} className="absolute top-0 left-0 z-[60]" style={{ height: '5px', width: '0%', backgroundColor: '#E2C063' }} />
 
       {/* ═══ Desktop carousel (≥1024px) — GSAP controlled ════════════════ */}
       <div className="hidden lg:block absolute inset-0">
@@ -521,7 +552,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
                       }
                 }
               >
-                {SERVICE_ROOT_NAMES[slug]}
+                {rootCategoryNames?.[slug] ?? SERVICE_ROOT_NAMES[slug]}
               </Link>
             )
           })}
@@ -595,6 +626,24 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
             </svg>
           </button>
           <button
+            onClick={handleTogglePause}
+            aria-label={isPaused ? 'Resume carousel' : 'Pause carousel'}
+            className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
+            style={{ width: '40px', height: '40px', borderRadius: '999px', border: '2px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
+          >
+            {isPaused ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="6 4 20 12 6 20" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            )}
+          </button>
+
+          <button
             onClick={handleNext}
             aria-label="Next service"
             className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
@@ -644,7 +693,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, tag
                   : { border: '1px solid rgba(255,255,255,0.38)', color: 'rgba(255,255,255,0.88)', backgroundColor: 'rgba(0,0,0,0.38)' }
                 }
               >
-                {SERVICE_ROOT_NAMES[slug]}
+                {rootCategoryNames?.[slug] ?? SERVICE_ROOT_NAMES[slug]}
               </Link>
             )
           })}

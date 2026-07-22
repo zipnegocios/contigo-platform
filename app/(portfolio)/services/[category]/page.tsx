@@ -87,6 +87,7 @@ export default async function ServiceCategoryPage({
   }))
   let usedFallback = true
   let rootInactiveOrMissing = false
+  const rootCategoryNames: Record<string, string> = { ...SERVICE_ROOT_NAMES }
 
   try {
     if (process.env.DATABASE_URL) {
@@ -97,13 +98,20 @@ export default async function ServiceCategoryPage({
       // categoryId pointing directly to the root category.
       const root = await categoryRepo.findBySlug(category, 'shared')
 
+      const allRoots = await Promise.all(
+        SERVICE_ROOT_SLUGS.map((slug) => categoryRepo.findBySlug(slug, 'shared'))
+      )
+      allRoots.forEach((cat, i) => {
+        if (cat) rootCategoryNames[SERVICE_ROOT_SLUGS[i]] = cat.name
+      })
+
       if (!root || root.status !== 'active' || root.trashedAt) {
         rootInactiveOrMissing = true
       } else {
         categoryName = root.name
         categorySupport = root.description
 
-        const allServices = await serviceRepo.findAll(100)
+        const allServices = await serviceRepo.findPublished()
         const matched = allServices
           .filter((s) => s.categoryId === root.id)
           .sort((a, b) => a.orderIndex - b.orderIndex)
@@ -144,6 +152,7 @@ export default async function ServiceCategoryPage({
       key={category}
       categorySlug={category}
       categoryName={categoryName}
+      rootCategoryNames={rootCategoryNames}
       tagline={tagline}
       items={items}
     />
