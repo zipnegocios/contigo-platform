@@ -32,11 +32,21 @@ interface Props {
 }
 
 // Reference: docs/temporal-service-cards/src/script.js (Timed Cards Opening)
-const CARD_W = 200
-const CARD_H = 300
-const GAP = 40
+// Queue thumbnail sizing is proportional to the viewport (half of the original
+// fixed-px values: 200/300/40 → 100/150/20px at a 1920×1080 reference screen)
+// so relative card size stays consistent across screen sizes instead of being
+// pinned to an absolute pixel count.
+const CARD_W_VW = 5.2   // 100px @ 1920px wide
+const CARD_H_VH = 13.9  // 150px @ 1080px tall
+const GAP_VW = 1.04     // 20px @ 1920px wide
+const RIGHT_MARGIN_VW = 2.6 // gap between queue row and the container's right edge (~50px @ 1920)
 const PROGRESS_W = 260
 const EASE = 'sine.inOut'
+
+function cardWPx() { return window.innerWidth * (CARD_W_VW / 100) }
+function cardHPx() { return window.innerHeight * (CARD_H_VH / 100) }
+function gapPx() { return window.innerWidth * (GAP_VW / 100) }
+function rightMarginPx() { return window.innerWidth * (RIGHT_MARGIN_VW / 100) }
 
 export function ServiceCategoryCarousel({ items, categorySlug, categoryName, rootCategoryNames, visibleCategories, tagline }: Props) {
   const n = items.length
@@ -60,7 +70,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
   const manualPauseRef = useRef(false)
 
   // Layout (computed on mount from actual DOM measurements)
-  const layoutRef = useRef({ w: 0, h: 0, offsetLeft: 0, offsetTop: 0 })
+  const layoutRef = useRef({ w: 0, h: 0, offsetTop: 0, cardW: 0, cardH: 0, gap: 0, rightMargin: 0 })
 
   // DOM refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -87,15 +97,31 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     el.style.height = `${h}px`
 
     const w = el.offsetWidth
-    const offsetLeft = Math.max(0, w - 830)
-    const offsetTop = Math.max(0, h - 430)
-    layoutRef.current = { w, h, offsetLeft, offsetTop }
+    const cardW = cardWPx()
+    const cardH = cardHPx()
+    const gap = gapPx()
+    const rightMargin = rightMarginPx()
+    const offsetTop = Math.max(0, h - (cardH + 130))
+    layoutRef.current = { w, h, offsetTop, cardW, cardH, gap, rightMargin }
 
-    // Position desktop tabs just above the queue cards row
+    // Position desktop tabs just above the queue cards row, anchored to the
+    // same right edge as the queue row itself.
     if (desktopTabsRef.current) {
-      desktopTabsRef.current.style.left = `${offsetLeft}px`
+      desktopTabsRef.current.style.right = `${rightMargin}px`
+      desktopTabsRef.current.style.left = 'auto'
       desktopTabsRef.current.style.top = `${offsetTop - 52}px`
     }
+  }
+
+  /**
+   * X position (px, left-edge of the card) for queue slot `i` of `restCount`
+   * total queue slots. Slot 0 is the leftmost of the row, slot `restCount-1`
+   * sits flush against the container's right edge — same left-to-right
+   * ordering as before, just measured from the right instead of the left.
+   */
+  function queueX(i: number, restCount: number): number {
+    const { w, cardW, gap, rightMargin } = layoutRef.current
+    return w - rightMargin - (restCount - i) * (cardW + gap) + gap
   }
 
   function animPromise(target: gsap.TweenTarget, duration: number, props: gsap.TweenVars): Promise<void> {
@@ -113,7 +139,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       if (animatingRef.current) { resolve(); return }
       animatingRef.current = true
 
-      const { w, h, offsetLeft, offsetTop } = layoutRef.current
+      const { w, h, offsetTop, cardW, cardH } = layoutRef.current
       const order = orderRef.current
 
       // Rotate order array
@@ -177,13 +203,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
         ease: EASE,
         onComplete: () => {
           // Reposition old hero to its queue slot
-          const endX = offsetLeft + prvQueueIdx * (CARD_W + GAP)
+          const endX = queueX(prvQueueIdx, rest.length)
           gsap.set(cardRefs.current[prv], {
-            x: endX, y: offsetTop, width: CARD_W, height: CARD_H,
+            x: endX, y: offsetTop, width: cardW, height: cardH,
             zIndex: 30, borderRadius: 10, scale: 1,
           })
           gsap.set(cardQueueContentRefs.current[prv], {
-            x: endX, y: offsetTop + CARD_H - 100, opacity: 1, zIndex: 40,
+            x: endX, y: offsetTop + cardH - 100, opacity: 1, zIndex: 40,
           })
 
           // Reset now-inactive details panel for next use
@@ -196,13 +222,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           // Shift remaining queue cards to new positions
           rest.forEach((idx, i) => {
             if (idx !== prv) {
-              const xNew = offsetLeft + i * (CARD_W + GAP)
+              const xNew = queueX(i, rest.length)
               gsap.to(cardRefs.current[idx], {
-                x: xNew, y: offsetTop, width: CARD_W, height: CARD_H,
+                x: xNew, y: offsetTop, width: cardW, height: cardH,
                 ease: EASE, delay: 0.1 * (i + 1),
               })
               gsap.to(cardQueueContentRefs.current[idx], {
-                x: xNew, y: offsetTop + CARD_H - 100,
+                x: xNew, y: offsetTop + cardH - 100,
                 opacity: 1, zIndex: 40, ease: EASE, delay: 0.1 * (i + 1),
               })
             }
@@ -272,7 +298,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     if (!containerRef.current) return
 
     computeLayout()
-    const { w, h, offsetLeft, offsetTop } = layoutRef.current
+    const { w, h, offsetTop, cardW, cardH, rightMargin } = layoutRef.current
     const [active, ...rest] = orderRef.current
     const rm = prefersReducedMotion()
 
@@ -283,15 +309,15 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     gsap.set(cardRefs.current[active], { x: 0, y: 0, width: w, height: h, zIndex: 20, borderRadius: 0 })
     gsap.set(cardQueueContentRefs.current[active], { x: 0, y: 0, opacity: 0 })
 
-    // Queue cards: staggered off-screen right (400px beyond offsetLeft)
+    // Queue cards: staggered off-screen right (400px beyond the container's right edge)
     rest.forEach((i, index) => {
       gsap.set(cardRefs.current[i], {
-        x: offsetLeft + 400 + index * (CARD_W + GAP),
-        y: offsetTop, width: CARD_W, height: CARD_H, zIndex: 30, borderRadius: 10,
+        x: w + 400 + index * (cardW + layoutRef.current.gap),
+        y: offsetTop, width: cardW, height: cardH, zIndex: 30, borderRadius: 10,
       })
       gsap.set(cardQueueContentRefs.current[i], {
-        x: offsetLeft + 400 + index * (CARD_W + GAP),
-        y: offsetTop + CARD_H - 100, zIndex: 40, opacity: 1,
+        x: w + 400 + index * (cardW + layoutRef.current.gap),
+        y: offsetTop + cardH - 100, zIndex: 40, opacity: 1,
       })
     })
 
@@ -309,9 +335,10 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
     // Progress bar initial position (1/n filled)
     gsap.set(progressFgRef.current, { width: PROGRESS_W / n })
 
-    // Pagination: off-screen below (will slide up)
+    // Pagination: off-screen below (will slide up), anchored to the same
+    // right edge as the queue row and category tabs.
     gsap.set(paginationRef.current, {
-      top: offsetTop + 330, left: offsetLeft,
+      top: offsetTop + 330, right: rightMargin, left: 'auto',
       y: 200, opacity: 0, zIndex: 60,
     })
 
@@ -322,8 +349,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       // Reduced motion: instant layout, no animations, no auto-advance
       gsap.set(coverRef.current, { x: w + 400 })
       rest.forEach((i, index) => {
-        gsap.set(cardRefs.current[i], { x: offsetLeft + index * (CARD_W + GAP) })
-        gsap.set(cardQueueContentRefs.current[i], { x: offsetLeft + index * (CARD_W + GAP) })
+        gsap.set(cardRefs.current[i], { x: queueX(index, rest.length) })
+        gsap.set(cardQueueContentRefs.current[i], { x: queueX(index, rest.length) })
       })
       gsap.set(paginationRef.current, { y: 0, opacity: 1 })
       gsap.set(detailsEvenRef.current, { opacity: 1, x: 0 })
@@ -338,14 +365,15 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       onComplete: () => { if (mountedRef.current) startLoop() },
     })
 
-    // Stagger queue cards into view from right
+    // Stagger queue cards into view from the right
     rest.forEach((i, index) => {
+      const xFinal = queueX(index, rest.length)
       gsap.to(cardRefs.current[i], {
-        x: offsetLeft + index * (CARD_W + GAP), zIndex: 30,
+        x: xFinal, zIndex: 30,
         delay: startDelay + 0.05 * index, ease: EASE,
       })
       gsap.to(cardQueueContentRefs.current[i], {
-        x: offsetLeft + index * (CARD_W + GAP), zIndex: 40,
+        x: xFinal, zIndex: 40,
         delay: startDelay + 0.05 * index, ease: EASE,
       })
     })
@@ -419,22 +447,22 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       <div
         ref={ref}
         className="absolute pointer-events-none select-none"
-        style={{ left: '60px', top: '220px', maxWidth: '520px', color: '#FAF6F0' }}
+        style={{ left: '3.1vw', top: '20.4vh', maxWidth: '27.1vw', color: '#FAF6F0' }}
         aria-live={ariaLive}
       >
         {/* Place label */}
-        <div style={{ height: '46px', overflow: 'hidden' }}>
+        <div style={{ height: '4.3vh', overflow: 'hidden' }}>
           <div
             className="svc-place"
-            style={{ paddingTop: '14px', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.12em' }}
+            style={{ paddingTop: '1.3vh', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '0.52vw', textTransform: 'uppercase', letterSpacing: '0.12em' }}
           >
-            <span style={{ display: 'inline-block', width: '24px', height: '2px', borderRadius: '99px', backgroundColor: '#E2C063', flexShrink: 0 }} />
+            <span style={{ display: 'inline-block', width: '1.25vw', height: '2px', borderRadius: '99px', backgroundColor: '#E2C063', flexShrink: 0 }} />
             {categoryName}
           </div>
         </div>
 
         {/* Service name */}
-        <div style={{ overflow: 'hidden', marginTop: '6px' }}>
+        <div style={{ overflow: 'hidden', marginTop: '0.56vh' }}>
           <h2
             className="svc-title"
             style={{
@@ -452,7 +480,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
         </div>
 
         {/* Icon */}
-        <div style={{ height: '52px', overflow: 'hidden', marginTop: '10px' }}>
+        <div style={{ height: '4.8vh', overflow: 'hidden', marginTop: '0.93vh' }}>
           <div className="svc-title" style={{ color: '#E2C063' }}>
             <ServiceIcon name={content.iconKey} className="w-10 h-10" />
           </div>
@@ -466,8 +494,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
             fontFamily: 'var(--font-cormorant)',
             fontSize: '1.15rem',
             lineHeight: 1.6,
-            maxWidth: '420px',
-            marginTop: '16px',
+            maxWidth: '21.9vw',
+            marginTop: '1.48vh',
             textShadow: '0 1px 8px rgba(0,0,0,0.5)',
           }}
         >
@@ -477,13 +505,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
         {/* CTA buttons */}
         <div
           className="svc-cta pointer-events-auto"
-          style={{ marginTop: '28px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}
+          style={{ marginTop: '2.6vh', display: 'flex', gap: '0.52vw', flexWrap: 'wrap' }}
         >
           {/* Primary: Request a Quote — always visible, solid gold */}
           <Link
             href="/#contact"
             className="inline-flex items-center gap-2 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
-            style={{ padding: '11px 24px', backgroundColor: '#E2C063', color: '#1E1A16', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
+            style={{ padding: '1.02vh 1.25vw', backgroundColor: '#E2C063', color: '#1E1A16', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
           >
             Request a Quote
           </Link>
@@ -491,7 +519,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           <Link
             href={`/services/${categorySlug}/${content.slug}`}
             className="inline-flex items-center gap-2 text-sm transition-all hover:bg-white/10 active:scale-95"
-            style={{ padding: '11px 24px', border: '1.5px solid rgba(255,255,255,0.55)', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
+            style={{ padding: '1.02vh 1.25vw', border: '1.5px solid rgba(255,255,255,0.55)', color: '#FFFFFF', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
           >
             View Detail →
           </Link>
@@ -538,8 +566,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
         {/* ── Category tabs — positioned above queue cards by computeLayout() ── */}
         <nav
           ref={desktopTabsRef as React.RefObject<HTMLDivElement>}
-          className="absolute z-[55] flex flex-wrap gap-2"
-          style={{ top: '0px', left: '0px' }}
+          className="absolute z-[55] flex flex-wrap justify-end gap-2"
+          style={{ top: '0px', right: '0px' }}
           aria-label="Service categories"
         >
           {navCategories.map(({ slug, name }) => {
@@ -618,52 +646,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
         {/* ── Details panel ODD ─────────────────────────────────────────── */}
         {renderDetailsPanel(detailsOddRef, oddContent)}
 
-        {/* ── Pagination: arrows + progress bar + slide counter ─────────── */}
+        {/* ── Pagination: progress bar + slide counter + arrows/pause ────── */}
         <div
           ref={paginationRef}
           className="absolute flex items-center gap-3"
         >
-          <button
-            onClick={handlePrev}
-            aria-label="Previous service"
-            className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
-            style={{ width: '50px', height: '50px', borderRadius: '999px', border: '2px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <button
-            onClick={handleTogglePause}
-            aria-label={isPaused ? 'Resume carousel' : 'Pause carousel'}
-            className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
-            style={{ width: '40px', height: '40px', borderRadius: '999px', border: '2px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
-          >
-            {isPaused ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="6 4 20 12 6 20" />
-              </svg>
-            ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="6" y="4" width="4" height="16" />
-                <rect x="14" y="4" width="4" height="16" />
-              </svg>
-            )}
-          </button>
-
-          <button
-            onClick={handleNext}
-            aria-label="Next service"
-            className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
-            style={{ width: '50px', height: '50px', borderRadius: '999px', border: '2px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-
           {/* Progress bar */}
-          <div style={{ marginLeft: '24px', width: `${PROGRESS_W}px`, height: '3px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
+          <div style={{ width: `${PROGRESS_W}px`, height: '3px', backgroundColor: 'rgba(255,255,255,0.2)' }}>
             <div ref={progressFgRef} style={{ height: '100%', backgroundColor: '#E2C063' }} />
           </div>
 
@@ -671,6 +660,47 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
             <span ref={slideCounterRef} style={{ color: 'white', fontSize: '28px', fontWeight: 700, lineHeight: 1 }}>1</span>
             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>/ {n}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5" style={{ marginLeft: '12px' }}>
+            <button
+              onClick={handlePrev}
+              aria-label="Previous service"
+              className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
+              style={{ width: '25px', height: '25px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
+            >
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <button
+              onClick={handleTogglePause}
+              aria-label={isPaused ? 'Resume carousel' : 'Pause carousel'}
+              className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
+              style={{ width: '20px', height: '20px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
+            >
+              {isPaused ? (
+                <svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="6 4 20 12 6 20" />
+                </svg>
+              ) : (
+                <svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16" />
+                  <rect x="14" y="4" width="4" height="16" />
+                </svg>
+              )}
+            </button>
+
+            <button
+              onClick={handleNext}
+              aria-label="Next service"
+              className="flex items-center justify-center shrink-0 transition-colors hover:border-white"
+              style={{ width: '25px', height: '25px', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.4)', color: 'rgba(255,255,255,0.75)' }}
+            >
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
