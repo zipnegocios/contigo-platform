@@ -13,6 +13,7 @@ export interface VisibleServiceCategory {
   name: string
 }
 import { cfImage } from '@/presentation/lib/cloudflareImage'
+import { QuoteFormModal } from '@/presentation/components/QuoteFormModal'
 
 export interface ServiceCategoryCarouselItem {
   slug: string
@@ -70,6 +71,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
   const [oddContent, setOddContent] = useState<ServiceCategoryCarouselItem>(items[Math.min(1, n - 1)])
   const [mobileIdx, setMobileIdx] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false)
   const manualPauseRef = useRef(false)
 
   // Layout (computed on mount from actual DOM measurements)
@@ -488,14 +490,15 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           className="svc-cta pointer-events-auto"
           style={{ display: 'flex', gap: '0.52vw', flexWrap: 'wrap' }}
         >
-          {/* Primary: Request a Quote — always visible, solid gold */}
-          <Link
-            href="/#contact"
+          {/* Primary: Request a Quote — opens the quote modal in place, no page navigation */}
+          <button
+            type="button"
+            onClick={() => setQuoteModalOpen(true)}
             className="inline-flex items-center gap-2 text-sm font-semibold transition-all hover:brightness-110 active:scale-95"
-            style={{ padding: '1.02vh 1.25vw', backgroundColor: '#E2C063', color: '#1E1A16', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem' }}
+            style={{ padding: '1.02vh 1.25vw', backgroundColor: '#E2C063', color: '#1E1A16', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.78rem', border: 'none', cursor: 'pointer' }}
           >
             Request a Quote
-          </Link>
+          </button>
           {/* Secondary: View Detail — always visible */}
           <Link
             href={`/services/${categorySlug}/${content.slug}`}
@@ -827,12 +830,13 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
                 </p>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {/* Primary CTA: solid gold, always visible */}
-                  <Link
-                    href="/#contact"
-                    style={{ backgroundColor: '#E2C063', color: '#1E1A16', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 18px' }}
+                  <button
+                    type="button"
+                    onClick={() => setQuoteModalOpen(true)}
+                    style={{ backgroundColor: '#E2C063', color: '#1E1A16', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', padding: '10px 18px', border: 'none', cursor: 'pointer' }}
                   >
                     Request a Quote
-                  </Link>
+                  </button>
                   {/* Secondary CTA: always visible */}
                   <Link
                     href={`/services/${categorySlug}/${item.slug}`}
@@ -920,6 +924,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           </div>{/* end arrows row */}
         </div>{/* end nav bar */}
       </div>{/* end mobile wrapper */}
+
+      <QuoteFormModal open={quoteModalOpen} onOpenChange={setQuoteModalOpen} />
     </section>
   )
 }
