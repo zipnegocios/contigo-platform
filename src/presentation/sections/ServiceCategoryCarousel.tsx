@@ -416,7 +416,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
 
     // Slide cover out to reveal
     gsap.to(coverRef.current, {
-      x: w + 400, delay: 0.5, ease: EASE,
+      x: w + 400, delay: 0, ease: EASE,
       onComplete: () => { if (mountedRef.current) startLoop() },
     })
 
@@ -598,8 +598,8 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
       aria-roledescription="carousel"
       aria-label={`${categoryName} services`}
     >
-      {/* ── White cover overlay — reveals on load via GSAP slide-out ─────── */}
-      <div ref={coverRef} className="absolute inset-0 z-[100]" style={{ backgroundColor: '#FAF6F0' }} />
+      {/* ── Petrol Blue cover overlay — reveals on load via GSAP slide-out ── */}
+      <div ref={coverRef} className="absolute inset-0 z-[100]" style={{ backgroundColor: 'var(--petrol-800, #0D3C4C)' }} />
 
       {/* ── Golden timer indicator bar ───────────────────────────────────── */}
       <div ref={indicatorRef} className="absolute top-0 left-0 z-[60]" style={{ height: '5px', width: '0%', backgroundColor: '#E2C063' }} />
