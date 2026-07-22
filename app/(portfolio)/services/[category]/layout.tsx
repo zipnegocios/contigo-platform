@@ -1,7 +1,14 @@
 import { SERVICE_ROOT_SLUGS } from '@/presentation/data/serviceCategoryMeta'
+import { getPublicServiceCategories } from '@/infrastructure/services/getPublicServiceCategories'
 
 export async function generateStaticParams() {
-  return SERVICE_ROOT_SLUGS.map((category) => ({ category }))
+  try {
+    if (!process.env.DATABASE_URL) return SERVICE_ROOT_SLUGS.map((category) => ({ category }))
+    const visible = await getPublicServiceCategories()
+    return visible.map((cat) => ({ category: cat.slug }))
+  } catch {
+    return []
+  }
 }
 
 export default function ServiceCategoryLayout({

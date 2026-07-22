@@ -5,11 +5,7 @@ import Script from 'next/script'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { ProjectGallery } from '@/presentation/components/ProjectGallery'
-import {
-  SERVICE_ROOT_SLUGS,
-  SERVICE_ROOT_NAMES,
-  isServiceRootSlug,
-} from '@/presentation/data/serviceCategoryMeta'
+import { getPublicServiceCategories } from '@/infrastructure/services/getPublicServiceCategories'
 import { PageBlockRenderer } from '@/presentation/components/PageBlockRenderer'
 import type { Service } from '@/core/entities/Service'
 
@@ -19,23 +15,22 @@ function isVideo(url: string) {
 
 /**
  * Resolves the service for `item` and validates it belongs to an active
- * child category of the `category` root. Returns `null` if anything in the
- * chain is missing/inactive/unpublished/mismatched — callers should treat
- * `null` as a 404.
+ * category of the `category` root that is currently publicly visible
+ * (active category with at least one active service). Returns `null` if
+ * anything in the chain is missing/inactive/unpublished/mismatched —
+ * callers should treat `null` as a 404.
  */
 async function resolveServiceForCategory(category: string, item: string) {
-  if (!isServiceRootSlug(category)) return null
-
   const categoryRepo = new DrizzleCategoryRepository()
   const serviceRepo = new DrizzleServiceRepository()
 
-  // After migration, categories are flat — services have categoryId pointing
-  // directly to the root category (no leaf indirection).
-  const [root, service] = await Promise.all([
+  const [visible, root, service] = await Promise.all([
+    getPublicServiceCategories(),
     categoryRepo.findBySlug(category, 'shared'),
     serviceRepo.findBySlug(item),
   ])
 
+  if (!visible.some((c) => c.slug === category)) return null
   if (!root || root.status !== 'active' || root.trashedAt) return null
   if (!service || service.status !== 'active' || service.trashedAt) return null
   if (!service.categoryId) return null
@@ -49,22 +44,17 @@ export async function generateStaticParams() {
   try {
     if (!process.env.DATABASE_URL) return []
 
-    const categoryRepo = new DrizzleCategoryRepository()
     const serviceRepo = new DrizzleServiceRepository()
 
-    // After migration, services.categoryId points directly to root categories.
-    const flatCats = await categoryRepo.findFlat('shared')
+    const visible = await getPublicServiceCategories()
     const services = await serviceRepo.findPublished()
 
     const params: { category: string; item: string }[] = []
 
-    for (const category of SERVICE_ROOT_SLUGS) {
-      const root = flatCats.find((c) => c.parentId === null && c.slug === category)
-      if (!root || root.status !== 'active') continue
-
+    for (const root of visible) {
       for (const service of services) {
         if (service.categoryId === root.id) {
-          params.push({ category, item: service.slug })
+          params.push({ category: root.slug, item: service.slug })
         }
       }
     }
@@ -140,8 +130,8 @@ export default async function ServiceItemPage({
 
   if (!resolved) notFound()
 
-  const { service } = resolved
-  const categoryName = SERVICE_ROOT_NAMES[category as keyof typeof SERVICE_ROOT_NAMES]
+  const { root, service } = resolved
+  const categoryName = root.name
 
   if (service.pageBlocks && service.pageBlocks.length > 0) {
     return (

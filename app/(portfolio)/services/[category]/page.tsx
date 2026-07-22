@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
+import { getPublicServiceCategories } from '@/infrastructure/services/getPublicServiceCategories'
 import {
   ServiceCategoryCarousel,
   type ServiceCategoryCarouselItem,
@@ -18,7 +19,13 @@ export const dynamicParams = true
 export const dynamic = 'force-dynamic'
 
 export async function generateStaticParams() {
-  return SERVICE_ROOT_SLUGS.map((category) => ({ category }))
+  try {
+    if (!process.env.DATABASE_URL) return SERVICE_ROOT_SLUGS.map((category) => ({ category }))
+    const visible = await getPublicServiceCategories()
+    return visible.map((cat) => ({ category: cat.slug }))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({
@@ -27,22 +34,22 @@ export async function generateMetadata({
   params: Promise<{ category: string }>
 }): Promise<Metadata> {
   const { category } = await params
-  if (!isServiceRootSlug(category)) return { title: 'Services not found' }
 
   try {
-    const categoryRepo = new DrizzleCategoryRepository()
-    const cat = await categoryRepo.findBySlug(category, 'shared')
-
-    if (!cat || cat.status !== 'active' || cat.trashedAt) {
-      return { title: 'Services not found' }
+    if (!process.env.DATABASE_URL) {
+      if (!isServiceRootSlug(category)) return { title: 'Services not found' }
+      return { title: `${SERVICE_ROOT_NAMES[category]} | Contigo Constructions` }
     }
 
+    const visible = await getPublicServiceCategories()
+    const cat = visible.find((c) => c.slug === category)
+    if (!cat) return { title: 'Services not found' }
+
     // Use metaTitle from DB, fallback to name
-    const title = cat.metaTitle || `${cat.name} | Contigo Constructions`
-    // Use metaDescription from DB, fallback to tagline
-    const description = cat.metaDescription || SERVICE_ROOT_TAGLINES[category]
-    // Use metaKeywords from DB, fallback to empty array
-    const keywords = cat.metaKeywords || []
+    const title = `${cat.name} | Contigo Constructions`
+    // Use metaDescription from DB, fallback to tagline (if one exists for this slug)
+    const description = cat.description || (isServiceRootSlug(category) ? SERVICE_ROOT_TAGLINES[category] : undefined)
+    const keywords: string[] = []
 
     return {
       title,
@@ -71,22 +78,24 @@ export default async function ServiceCategoryPage({
 }) {
   const { category } = await params
 
-  if (!isServiceRootSlug(category)) notFound()
-
-  const tagline = SERVICE_ROOT_TAGLINES[category]
-  const fallbackName = SERVICE_ROOT_NAMES[category]
+  const fallbackName = isServiceRootSlug(category) ? SERVICE_ROOT_NAMES[category] : category
+  const tagline = isServiceRootSlug(category) ? SERVICE_ROOT_TAGLINES[category] : ''
 
   let categoryName: string = fallbackName
-  let categorySupport: string | null = null
-  let items: ServiceCategoryCarouselItem[] = SERVICE_FALLBACK_CATALOGUE[category].map((f) => ({
-    slug: f.slug,
-    name: f.name,
-    shortDescription: f.shortDescription,
-    iconKey: f.iconKey,
-    imageUrl: null,
-  }))
-  let usedFallback = true
+  let items: ServiceCategoryCarouselItem[] = isServiceRootSlug(category)
+    ? SERVICE_FALLBACK_CATALOGUE[category].map((f) => ({
+        slug: f.slug,
+        name: f.name,
+        shortDescription: f.shortDescription,
+        iconKey: f.iconKey,
+        imageUrl: null,
+      }))
+    : []
   let rootInactiveOrMissing = false
+  let visibleCategories: { slug: string; name: string }[] = SERVICE_ROOT_SLUGS.map((slug) => ({
+    slug,
+    name: SERVICE_ROOT_NAMES[slug],
+  }))
   const rootCategoryNames: Record<string, string> = { ...SERVICE_ROOT_NAMES }
 
   try {
@@ -94,29 +103,23 @@ export default async function ServiceCategoryPage({
       const categoryRepo = new DrizzleCategoryRepository()
       const serviceRepo = new DrizzleServiceRepository()
 
-      // After migration, categories are flat (no leaf nodes). Services have
-      // categoryId pointing directly to the root category.
-      const root = await categoryRepo.findBySlug(category, 'shared')
+      const visible = await getPublicServiceCategories()
+      visibleCategories = visible.map((cat) => ({ slug: cat.slug, name: cat.name }))
+      visible.forEach((cat) => { rootCategoryNames[cat.slug] = cat.name })
 
-      const allRoots = await Promise.all(
-        SERVICE_ROOT_SLUGS.map((slug) => categoryRepo.findBySlug(slug, 'shared'))
-      )
-      allRoots.forEach((cat, i) => {
-        if (cat) rootCategoryNames[SERVICE_ROOT_SLUGS[i]] = cat.name
-      })
+      const root = visible.find((cat) => cat.slug === category)
 
-      if (!root || root.status !== 'active' || root.trashedAt) {
+      if (!root) {
         rootInactiveOrMissing = true
       } else {
         categoryName = root.name
-        categorySupport = root.description
 
         const allServices = await serviceRepo.findPublished()
         const matched = allServices
           .filter((s) => s.categoryId === root.id)
           .sort((a, b) => a.orderIndex - b.orderIndex)
 
-        const fallback = SERVICE_FALLBACK_CATALOGUE[category] ?? []
+        const fallback = isServiceRootSlug(category) ? SERVICE_FALLBACK_CATALOGUE[category] : []
 
         items = matched.map((s) => ({
           slug: s.slug,
@@ -126,13 +129,11 @@ export default async function ServiceCategoryPage({
             fallback.find((f) => f.slug === s.slug)?.iconKey ?? 'new-home',
           imageUrl: s.imageUrl,
         }))
-        usedFallback = false
       }
     }
   } catch (error) {
     console.warn('ServiceCategoryPage: Could not fetch services for category', category, error)
-    usedFallback = true
-    rootInactiveOrMissing = false
+    if (!isServiceRootSlug(category)) rootInactiveOrMissing = true
   }
 
   if (rootInactiveOrMissing) notFound()
@@ -153,6 +154,7 @@ export default async function ServiceCategoryPage({
       categorySlug={category}
       categoryName={categoryName}
       rootCategoryNames={rootCategoryNames}
+      visibleCategories={visibleCategories}
       tagline={tagline}
       items={items}
     />

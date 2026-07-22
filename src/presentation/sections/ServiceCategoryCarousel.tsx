@@ -7,6 +7,11 @@ import gsap from 'gsap'
 import { ServiceIcon } from '@/presentation/components/ServiceIcons'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
 import { SERVICE_ROOT_SLUGS, SERVICE_ROOT_NAMES } from '@/presentation/data/serviceCategoryMeta'
+
+export interface VisibleServiceCategory {
+  slug: string
+  name: string
+}
 import { cfImage } from '@/presentation/lib/cloudflareImage'
 
 export interface ServiceCategoryCarouselItem {
@@ -22,6 +27,7 @@ interface Props {
   categorySlug: string
   categoryName: string
   rootCategoryNames?: Record<string, string>
+  visibleCategories?: VisibleServiceCategory[]
   tagline: string
 }
 
@@ -32,8 +38,10 @@ const GAP = 40
 const PROGRESS_W = 260
 const EASE = 'sine.inOut'
 
-export function ServiceCategoryCarousel({ items, categorySlug, categoryName, rootCategoryNames, tagline }: Props) {
+export function ServiceCategoryCarousel({ items, categorySlug, categoryName, rootCategoryNames, visibleCategories, tagline }: Props) {
   const n = items.length
+  const navCategories: VisibleServiceCategory[] =
+    visibleCategories ?? SERVICE_ROOT_SLUGS.map((slug) => ({ slug, name: SERVICE_ROOT_NAMES[slug] }))
   const pathname = usePathname()
 
   // Mutable rotation refs — no re-render during animation
@@ -534,7 +542,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           style={{ top: '0px', left: '0px' }}
           aria-label="Service categories"
         >
-          {SERVICE_ROOT_SLUGS.map((slug) => {
+          {navCategories.map(({ slug, name }) => {
             const isActive = slug === categorySlug
             return (
               <Link
@@ -552,7 +560,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
                       }
                 }
               >
-                {rootCategoryNames?.[slug] ?? SERVICE_ROOT_NAMES[slug]}
+                {rootCategoryNames?.[slug] ?? name}
               </Link>
             )
           })}
@@ -680,7 +688,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
           style={{ bottom: '360px', left: '20px' }}
           aria-label="Service categories"
         >
-          {SERVICE_ROOT_SLUGS.map((slug) => {
+          {navCategories.map(({ slug, name }) => {
             const isActive = slug === categorySlug
             return (
               <Link
@@ -693,7 +701,7 @@ export function ServiceCategoryCarousel({ items, categorySlug, categoryName, roo
                   : { border: '1px solid rgba(255,255,255,0.38)', color: 'rgba(255,255,255,0.88)', backgroundColor: 'rgba(0,0,0,0.38)' }
                 }
               >
-                {rootCategoryNames?.[slug] ?? SERVICE_ROOT_NAMES[slug]}
+                {rootCategoryNames?.[slug] ?? name}
               </Link>
             )
           })}

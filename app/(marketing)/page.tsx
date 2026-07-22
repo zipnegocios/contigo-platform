@@ -12,14 +12,14 @@ import AboutAuthoritySection from '@/presentation/sections/AboutAuthoritySection
 import Footer from '@/presentation/sections/FooterServer'
 import { DrizzleProjectRepository } from '@/infrastructure/repositories/DrizzleProjectRepository'
 import { DrizzleHeroConfigRepository } from '@/infrastructure/repositories/DrizzleHeroConfigRepository'
-import { DrizzleCategoryRepository } from '@/infrastructure/repositories/DrizzleCategoryRepository'
 import { resolveProjectCategorySlug } from '@/infrastructure/services/resolveProjectCategorySlug'
+import { getPublicServiceCategories } from '@/infrastructure/services/getPublicServiceCategories'
 import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleServiceRepository'
 import { DrizzleGoogleReviewRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewRepository'
 import { DrizzleReviewSettingsRepository } from '@/infrastructure/repositories/DrizzleReviewSettingsRepository'
 import { DrizzleReviewTagRepository } from '@/infrastructure/repositories/DrizzleReviewTagRepository'
 import { GetPublicReviewsUseCase, type PublicReviewsResult } from '@/application/use-cases/reviews/GetPublicReviewsUseCase'
-import { SERVICE_ROOT_SLUGS, SERVICE_ROOT_NAMES, SERVICE_FALLBACK_CATALOGUE } from '@/presentation/data/serviceCategoryMeta'
+import { SERVICE_ROOT_SLUGS, SERVICE_ROOT_NAMES, SERVICE_FALLBACK_CATALOGUE, isServiceRootSlug } from '@/presentation/data/serviceCategoryMeta'
 import { SERVICE_FALLBACK_IMAGES } from '@/presentation/data/serviceFallbackImages'
 import type { ServiceCardData } from '@/presentation/sections/ServicesSection'
 import { MarketingPageClient } from './MarketingPageClient'
@@ -128,33 +128,27 @@ export default async function HomePage() {
     console.error('HomePage: failed to fetch featured projects', err)
   }
 
-  // All published services, each tagged with its (active) root category, then
+  // All published services, each tagged with its (visible) category, then
   // shuffled into one flat pool. ServicesSection deals them across 3 rows.
   let serviceCards: ServiceCardData[] = buildFallbackServices()
   try {
     if (process.env.DATABASE_URL) {
-      const categoryRepo = new DrizzleCategoryRepository()
       const serviceRepo = new DrizzleServiceRepository()
 
-      // Map each active root category id → its slug + display name.
-      const roots = await Promise.all(
-        SERVICE_ROOT_SLUGS.map((slug) => categoryRepo.findBySlug(slug, 'shared')),
-      )
-      const rootById = new Map<string, { slug: (typeof SERVICE_ROOT_SLUGS)[number]; name: string }>()
-      roots.forEach((root, i) => {
-        if (root && root.status === 'active') {
-          rootById.set(root.id, { slug: SERVICE_ROOT_SLUGS[i], name: root.name })
-        }
-      })
+      const visibleCategories = await getPublicServiceCategories()
+      const rootById = new Map(visibleCategories.map((cat) => [cat.id, cat]))
 
       const allPublished = await serviceRepo.findPublished()
       const cards = allPublished.flatMap((s): ServiceCardData[] => {
         const root = s.categoryId ? rootById.get(s.categoryId) : undefined
-        if (!root) return [] // skip services whose category is inactive/unknown
+        if (!root) return [] // skip services whose category isn't publicly visible
+        const fallbackImage = isServiceRootSlug(root.slug)
+          ? SERVICE_FALLBACK_IMAGES[root.slug]
+          : '/assets/service-carpentry.jpg'
         return [{
           slug: s.slug,
           name: s.name,
-          imageUrl: s.imageUrl || SERVICE_FALLBACK_IMAGES[root.slug],
+          imageUrl: s.imageUrl || fallbackImage,
           categorySlug: root.slug,
           categoryName: root.name,
         }]
