@@ -62,7 +62,7 @@ export default function FlippableServiceCard({
 
   return (
     <div
-      className={`service-flip-perspective ${isFlipped ? 'is-flip-open' : ''} ${className ?? ''}`}
+      className={`service-flip-perspective ${className ?? ''}`}
       data-loop-key={loopKey}
       style={style}
     >

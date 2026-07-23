@@ -276,14 +276,30 @@ export default function MarqueeServiceRow({
       // ── Center the just-opened card in the viewport ──────────────────
       // One-off tween, separate from the autoplay tween (which is already
       // killed via pauseAutoplay by the time this runs, driven by isPaused).
-      // Wraps the target into the same [min, max] window as autoplay so the
-      // loop stays seamless once resumeAutoplay() picks up from here.
+      //
+      // Uses getBoundingClientRect() rather than offsetLeft: neither `track`
+      // nor `.service-marquee-viewport` set `position`, so a card's
+      // offsetParent is whatever positioned ancestor happens to sit further
+      // up the tree (unrelated to track's coordinate space) — offsetLeft was
+      // effectively meaningless here, which is why centering never landed
+      // consistently. getBoundingClientRect() gives real viewport-relative
+      // coordinates for both elements regardless of position/offsetParent,
+      // so the delta between them is always correct.
+      //
+      // The final rendered x is wrapped into [min, max] — same as every
+      // other place that sets x directly (drag, arrow-nav) — so the next
+      // resumeAutoplay()'s createTween() starts from an in-range currentX
+      // instead of jumping when its own modifier re-wraps it. Since the
+      // track content repeats every oneSetWidth, wrap(min, max, x) renders
+      // identically to x, so this doesn't change where the card ends up.
       centerOnCardRef.current = (loopKey: string) => {
         const viewport = track.parentElement
         const card = track.querySelector<HTMLElement>(`[data-loop-key="${loopKey}"]`)
         if (!viewport || !card) return
-        const cardCenter = card.offsetLeft + card.offsetWidth / 2
-        const viewportCenter = viewport.clientWidth / 2
+        const cardRect = card.getBoundingClientRect()
+        const viewportRect = viewport.getBoundingClientRect()
+        const cardCenter = cardRect.left + cardRect.width / 2
+        const viewportCenter = viewportRect.left + viewportRect.width / 2
         const currentX = (gsap.getProperty(track, 'x') as number) || 0
         const targetX = gsap.utils.wrap(min, max, currentX + (viewportCenter - cardCenter))
         gsap.to(track, { x: targetX, duration: 0.6, ease: 'power2.out' })
