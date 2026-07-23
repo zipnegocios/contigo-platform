@@ -7,6 +7,7 @@ import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleS
 import { ProjectGallery } from '@/presentation/components/ProjectGallery'
 import { getPublicServiceCategories } from '@/infrastructure/services/getPublicServiceCategories'
 import { PageBlockRenderer } from '@/presentation/components/PageBlockRenderer'
+import { ServiceHeroPhotoButton } from '@/presentation/components/ServiceHeroPhotoButton'
 import type { Service } from '@/core/entities/Service'
 
 function isVideo(url: string) {
@@ -135,7 +136,7 @@ export default async function ServiceItemPage({
 
   if (service.pageBlocks && service.pageBlocks.length > 0) {
     return (
-      <main>
+      <main style={{ backgroundColor: '#FAF6F0' }}>
         {!service.noIndex && (
           <Script
             id={`service-schema-${service.id}`}
@@ -165,7 +166,7 @@ export default async function ServiceItemPage({
   }
 
   return (
-    <main>
+    <main style={{ backgroundColor: '#FAF6F0' }}>
       {!service.noIndex && (
         <Script
           id={`service-schema-${service.id}`}
@@ -238,6 +239,8 @@ export default async function ServiceItemPage({
             {service.shortDescription}
           </p>
         </div>
+
+        <ServiceHeroPhotoButton imageUrl={service.imageUrl} title={service.name} />
       </div>
 
       <LegacyServiceBody service={service} />
