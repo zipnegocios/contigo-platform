@@ -68,6 +68,8 @@ export default function MarqueeServiceRow({
   // Bridge from the `isPaused` prop (does THIS row own the open card?) into
   // the tween controls that live inside the mount-once effect closure.
   const setPausedByFlipRef = useRef<((paused: boolean) => void) | undefined>(undefined)
+  // Bridge from `openCardKey` into the centering tween, same reasoning as above.
+  const centerOnCardRef = useRef<((loopKey: string) => void) | undefined>(undefined)
 
   const isPointerDownRef = useRef(false)
   const isDraggingRef = useRef(false)
@@ -271,8 +273,25 @@ export default function MarqueeServiceRow({
       prevBtn?.addEventListener('click', handlePrevClick)
       nextBtn?.addEventListener('click', handleNextClick)
 
+      // ── Center the just-opened card in the viewport ──────────────────
+      // One-off tween, separate from the autoplay tween (which is already
+      // killed via pauseAutoplay by the time this runs, driven by isPaused).
+      // Wraps the target into the same [min, max] window as autoplay so the
+      // loop stays seamless once resumeAutoplay() picks up from here.
+      centerOnCardRef.current = (loopKey: string) => {
+        const viewport = track.parentElement
+        const card = track.querySelector<HTMLElement>(`[data-loop-key="${loopKey}"]`)
+        if (!viewport || !card) return
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2
+        const viewportCenter = viewport.clientWidth / 2
+        const currentX = (gsap.getProperty(track, 'x') as number) || 0
+        const targetX = gsap.utils.wrap(min, max, currentX + (viewportCenter - cardCenter))
+        gsap.to(track, { x: targetX, duration: 0.6, ease: 'power2.out' })
+      }
+
       innerCleanup = () => {
         setPausedByFlipRef.current = undefined
+        centerOnCardRef.current = undefined
         row?.removeEventListener('pointerenter', handlePointerEnter)
         row?.removeEventListener('pointerleave', handlePointerLeave)
         track.removeEventListener('pointerdown', handlePointerDown)
@@ -296,7 +315,13 @@ export default function MarqueeServiceRow({
   // effect above (which would rebuild listeners and reset track geometry).
   useEffect(() => {
     setPausedByFlipRef.current?.(isPaused)
-  }, [isPaused])
+    // Center only when THIS row now owns the open card — closing (isPaused
+    // false, openCardKey null) intentionally does NOT trigger any tween here;
+    // resumeAutoplay() above just continues from wherever centering left off.
+    if (isPaused && openCardKey) {
+      centerOnCardRef.current?.(openCardKey)
+    }
+  }, [isPaused, openCardKey])
 
   return (
     <div ref={rowRef} className="group relative flex items-center gap-3">
@@ -320,6 +345,7 @@ export default function MarqueeServiceRow({
               imageUrl={item.imageUrl}
               categorySlug={item.categorySlug}
               categoryName={item.categoryName}
+              loopKey={item.loopKey}
               className="service-card-desktop"
               isFlipped={openCardKey === item.loopKey}
               onToggle={() => onCardToggle(item.loopKey)}

@@ -18,17 +18,17 @@ interface ServicesSectionProps {
   services: ServiceCardData[];
 }
 
-const ROW_COUNT = 3;
+const ROW_COUNT = 2;
 
 export default function ServicesSection({ services }: ServicesSectionProps) {
   const headerRef = useScrollReveal<HTMLDivElement>({ y: 30, duration: 0.8, start: 'top 80%' });
 
-  // Distribute the shuffled services across exactly 3 rows. Round-robin keeps
+  // Distribute the shuffled services across exactly 2 rows. Round-robin keeps
   // the rows balanced regardless of the total service count, and each service
   // appears in exactly one row (carrying its own category for the flip + link).
   const rows = splitIntoRows(services, ROW_COUNT);
 
-  // Section-wide "which card is open" — only one card (across all 3 rows,
+  // Section-wide "which card is open" — only one card (across all rows,
   // desktop and mobile alike) may be flipped at a time, so opening a new one
   // implicitly closes whatever was open. Tracked as (rowIndex, loopKey) so
   // only the row that actually owns the open card pauses — the other two
@@ -54,7 +54,7 @@ export default function ServicesSection({ services }: ServicesSectionProps) {
         <h2 style={{ color: 'var(--neutral-800)' }}>Our Services</h2>
       </div>
 
-      {/* 3 service rows — same autonomous marquee behavior at every viewport size.
+      {/* 2 service rows — same autonomous marquee behavior at every viewport size.
           Rows with no items are skipped: an empty row has nothing to loop and
           would otherwise render a marquee with no content. */}
       <div className="flex flex-col gap-4 md:gap-6">

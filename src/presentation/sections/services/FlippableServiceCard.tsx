@@ -29,6 +29,7 @@ export default function FlippableServiceCard({
   imageUrl,
   categorySlug,
   categoryName,
+  loopKey,
   className,
   style,
   isFlipped,
@@ -60,7 +61,11 @@ export default function FlippableServiceCard({
   }
 
   return (
-    <div className={`service-flip-perspective ${className ?? ''}`} style={style}>
+    <div
+      className={`service-flip-perspective ${isFlipped ? 'is-flip-open' : ''} ${className ?? ''}`}
+      data-loop-key={loopKey}
+      style={style}
+    >
       <div
         className={`service-flip-inner ${isFlipped ? 'is-flipped' : ''}`}
         onClick={isFlipped ? handleBackClick : handleFrontClick}
