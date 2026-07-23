@@ -8,6 +8,7 @@ import { ProjectGallery } from '@/presentation/components/ProjectGallery'
 import { getPublicServiceCategories } from '@/infrastructure/services/getPublicServiceCategories'
 import { PageBlockRenderer } from '@/presentation/components/PageBlockRenderer'
 import { ServiceHeroPhotoButton } from '@/presentation/components/ServiceHeroPhotoButton'
+import { ServiceCtaSidebar } from '@/presentation/components/ServiceCtaSidebar'
 import type { Service } from '@/core/entities/Service'
 
 function isVideo(url: string) {
@@ -270,41 +271,7 @@ function LegacyServiceBody({ service }: { service: Service }) {
         </div>
 
         {/* ── Right: CTA sidebar ──────────────────────────────────────────── */}
-        <aside className="lg:w-72 xl:w-80 flex-shrink-0">
-          <div
-            className="rounded-2xl p-8 sticky top-8"
-            style={{
-              backgroundColor: '#1E1A16',
-              border: '1px solid rgba(226,192,99,0.18)',
-            }}
-          >
-            <h3
-              className="text-fluid-xs uppercase tracking-widest mb-4"
-              style={{ color: '#E2C063' }}
-            >
-              Interested?
-            </h3>
-            <p className="text-fluid-sm mb-6" style={{ color: '#A89E8C', lineHeight: 1.6 }}>
-              Our team specialises in {service.name.toLowerCase()}. Tell us about your project and we&apos;ll be in touch.
-            </p>
-
-            <Link
-              href="/#contact"
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-semibold transition-all duration-200 mb-3"
-              style={{ backgroundColor: '#E2C063', color: '#1E1A16' }}
-            >
-              Request a Quote
-            </Link>
-
-            <Link
-              href="/projects"
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-fluid-sm font-medium transition-all duration-200"
-              style={{ border: '1px solid rgba(226,192,99,0.3)', color: '#E2C063' }}
-            >
-              View Our Projects
-            </Link>
-          </div>
-        </aside>
+        <ServiceCtaSidebar serviceName={service.name} />
       </div>
     </div>
   )
