@@ -15,7 +15,7 @@ const FALLBACK_CONFIG: HeroConfig = {
   id: 'fallback',
   mode: 'single',
   headline: 'Building Dreams Together',
-  subtitle: "We don't build for you, we build with you. Premium construction services tailored to your vision.",
+  subtitle: "We build with you. Premium construction services tailored to your vision.",
   eyebrow: 'Adelaide, South Australia',
   desktopImageUrl: '/assets/hero-test1.png',
   mobileImageUrl: undefined,
@@ -74,12 +74,12 @@ export default function HeroSection({ config }: Props) {
   const [activeIdx, setActiveIdx] = useState(0)
   const [formModal, setFormModal] = useState<{ slug: string; name?: string } | null>(null)
 
-  const imgWrapRef  = useRef<HTMLDivElement>(null)
-  const overlayRef  = useRef<HTMLDivElement>(null)
+  const imgWrapRef = useRef<HTMLDivElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
   const overlineRef = useRef<HTMLSpanElement>(null)
   const headlineRef = useRef<HTMLHeadingElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
-  const ctaRef      = useRef<HTMLDivElement>(null)
+  const ctaRef = useRef<HTMLDivElement>(null)
 
   /* ── Ken Burns — slow zoom + pan, loops forever ──────────────────────── */
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function HeroSection({ config }: Props) {
       tl.to(overlineRef.current, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' })
         .to(headlineRef.current, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.3')
         .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.4')
-        .to(ctaRef.current,      { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.3')
+        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.3')
       return () => { tl.kill() }
     })
   }, [])
@@ -123,7 +123,7 @@ export default function HeroSection({ config }: Props) {
     const onScroll = () => {
       if (!overlayRef.current) return
       const progress = Math.min(window.scrollY / window.innerHeight, 1)
-      overlayRef.current.style.opacity   = String(1 - progress)
+      overlayRef.current.style.opacity = String(1 - progress)
       overlayRef.current.style.transform = `translateY(${-progress * 50}px)`
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -141,11 +141,11 @@ export default function HeroSection({ config }: Props) {
   }, [cfg.mode, cfg.slides.length, cfg.autoplayInterval])
 
   const activeSlide = cfg.mode === 'slider' && cfg.slides.length > 0 ? cfg.slides[activeIdx] : null
-  const displayEyebrow  = activeSlide?.eyebrow  ?? cfg.eyebrow
+  const displayEyebrow = activeSlide?.eyebrow ?? cfg.eyebrow
   const displayHeadline = activeSlide?.headline ?? cfg.headline
   const displaySubtitle = activeSlide?.subtitle ?? cfg.subtitle
-  const displayButtons  = activeSlide?.buttons.length ? activeSlide.buttons : cfg.buttons
-  const overlayOpacity  = cfg.overlayOpacity / 100
+  const displayButtons = activeSlide?.buttons.length ? activeSlide.buttons : cfg.buttons
+  const overlayOpacity = cfg.overlayOpacity / 100
 
   return (
     <section

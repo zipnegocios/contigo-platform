@@ -61,7 +61,7 @@ Admin components (~533 `style={{}}` instances) hardcode the palette per componen
 **Strengths:** clear single-page marketing narrative (Hero → Brand → Services → Heritage → Projects → Contact); strong conversion paths ("Get a Quote" in nav, hero, project/service detail sidebars); token-based public quote tracking (`/quote-status/[token]`) builds trust; voice search affordance is a differentiator.
 
 **Risks:**
-- The hero subtitle ("We don't build for you, we build with you") is the brand's closeness value — good — but the *petrol* trust dimension was absent everywhere, making the site read "boutique" more than "solid engineering."
+- The hero subtitle ("We build with you") is the brand's closeness value — good — but the *petrol* trust dimension was absent everywhere, making the site read "boutique" more than "solid engineering."
 - Custom cursor (`cursor: none` globally) is a luxury flourish but a usability gamble; correctly disabled on touch, still worth monitoring in analytics.
 - Featured Projects carousel auto-plays at 4s — near the lower comfort bound for reading title + location.
 

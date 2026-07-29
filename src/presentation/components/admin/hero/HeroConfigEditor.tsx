@@ -21,7 +21,7 @@ interface Props {
 const DEFAULT_CONFIG: HeroConfigInput = {
   mode: 'single',
   headline: 'Building Dreams Together',
-  subtitle: "We don't build for you, we build with you. Premium construction services tailored to your vision.",
+  subtitle: "We build with you. Premium construction services tailored to your vision.",
   eyebrow: 'Adelaide, South Australia',
   desktopImageUrl: '/assets/hero-test1.png',
   mobileImageUrl: undefined,
