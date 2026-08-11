@@ -51,9 +51,8 @@ export default function MissionVisionSection() {
               style={{ color: 'var(--contigo-foreground)', opacity: 0.82, lineHeight: 1.7 }}
             >
               To design and deliver high-quality construction solutions that align with our
-              clients&apos; needs and vision, through efficient processes, strong technical
-              standards, and a firm commitment to excellence. At Contigo Constructions, we
-              create value through trust, precision, and long-term relationships.
+              clients&apos; needs, through efficient processes, strong technical standards, and a
+              firm commitment to excellence.
             </p>
           </div>
 
@@ -67,8 +66,6 @@ export default function MissionVisionSection() {
             >
               To establish ourselves as a leading construction company in Australia, recognised
               for the quality of our projects, reliability in execution, and sustainable growth.
-              We aim to be a strategic partner for our clients, delivering integrated solutions
-              that add value at every stage of the project.
             </p>
           </div>
         </div>
