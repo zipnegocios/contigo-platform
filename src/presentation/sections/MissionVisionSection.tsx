@@ -23,26 +23,14 @@ export default function MissionVisionSection() {
       style={{ backgroundColor: 'var(--neutral-50)', fontFamily: 'var(--font-alegreya-sans)' }}
     >
       <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-        <div ref={imageRef} className="lg:col-span-5">
+        <div ref={imageRef} className="lg:col-span-5 lg:self-stretch">
           <div
-            className="relative overflow-hidden rounded-2xl flex items-center justify-center"
-            style={{
-              aspectRatio: '4 / 5',
-              backgroundColor: 'var(--petrol-800)',
-              boxShadow: '0 16px 48px rgba(45,41,36,0.18)',
-            }}
+            className="mba-card h-full flex items-center justify-center"
+            style={{ padding: 'clamp(1.75rem, 4vw, 3rem)' }}
           >
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  'radial-gradient(circle at 50% 45%, rgba(226,192,99,0.22) 0%, rgba(226,192,99,0.06) 45%, transparent 70%)',
-              }}
-            />
             <svg
               viewBox={BRAND_LOCKUP_VIEWBOX}
               aria-label="Contigo Constructions Pty"
-              className="relative"
               style={{ width: 'clamp(9rem, 22vw, 14rem)', height: 'auto' }}
             >
               {brandLetterGlyphs.map((glyph, i) =>
@@ -56,10 +44,6 @@ export default function MissionVisionSection() {
                 <rect key={i} fill="var(--gold-400)" x={r.x} y={r.y} width={r.width} height={r.height} />
               ))}
             </svg>
-            <div
-              className="absolute bottom-0 left-0 right-0 h-1"
-              style={{ backgroundColor: 'var(--gold-400)' }}
-            />
           </div>
         </div>
 
