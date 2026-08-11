@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useScrollReveal } from '@/presentation/hooks/useScrollReveal'
 
 export default function TeamSection() {
@@ -24,12 +23,10 @@ export default function TeamSection() {
             className="relative overflow-hidden rounded-2xl"
             style={{ aspectRatio: '16 / 9', boxShadow: '0 20px 56px rgba(0,0,0,0.35)' }}
           >
-            <Image
+            <img
               src="https://assets.contigoconstructions.com.au/about/team.png"
               alt="The Contigo Constructions team"
-              fill
-              sizes="(max-width: 1024px) 100vw, 80vw"
-              className="object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
             <div
               className="absolute bottom-0 left-0 right-0 h-1"

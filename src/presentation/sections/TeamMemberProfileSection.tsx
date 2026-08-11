@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useScrollReveal } from '@/presentation/hooks/useScrollReveal'
 
 type TeamMemberProfileSectionProps = {
@@ -55,12 +54,10 @@ export default function TeamMemberProfileSection({
             className="relative overflow-hidden rounded-2xl"
             style={{ aspectRatio: '4 / 5', boxShadow: '0 16px 48px rgba(45,41,36,0.18)' }}
           >
-            <Image
+            <img
               src={photoSrc}
               alt={photoAlt}
-              fill
-              sizes="(max-width: 1024px) 100vw, 42vw"
-              className="object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
             <div
               className="absolute inset-0"
