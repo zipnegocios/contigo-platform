@@ -1,6 +1,11 @@
 'use client'
 
 import { useScrollReveal } from '@/presentation/hooks/useScrollReveal'
+import {
+  BRAND_LOCKUP_VIEWBOX,
+  brandLetterGlyphs,
+  brandSeparatorRects,
+} from '@/presentation/components/brand-lockup-paths'
 
 export default function MissionVisionSection() {
   const imageRef = useScrollReveal<HTMLDivElement>({ y: 32, duration: 0.9 })
@@ -20,20 +25,37 @@ export default function MissionVisionSection() {
       <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         <div ref={imageRef} className="lg:col-span-5">
           <div
-            className="relative overflow-hidden rounded-2xl"
-            style={{ aspectRatio: '4 / 5', boxShadow: '0 16px 48px rgba(45,41,36,0.18)' }}
+            className="relative overflow-hidden rounded-2xl flex items-center justify-center"
+            style={{
+              aspectRatio: '4 / 5',
+              backgroundColor: 'var(--petrol-800)',
+              boxShadow: '0 16px 48px rgba(45,41,36,0.18)',
+            }}
           >
-            <img
-              src="/assets/project-prospect.jpg"
-              alt="A Contigo Constructions build in Prospect, Adelaide"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
             <div
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to top, rgba(13,60,76,0.35) 0%, transparent 50%)',
+                background:
+                  'radial-gradient(circle at 50% 45%, rgba(226,192,99,0.22) 0%, rgba(226,192,99,0.06) 45%, transparent 70%)',
               }}
             />
+            <svg
+              viewBox={BRAND_LOCKUP_VIEWBOX}
+              aria-label="Contigo Constructions Pty"
+              className="relative"
+              style={{ width: 'clamp(9rem, 22vw, 14rem)', height: 'auto' }}
+            >
+              {brandLetterGlyphs.map((glyph, i) =>
+                glyph.type === 'path' ? (
+                  <path key={i} fill="var(--gold-400)" d={glyph.d} />
+                ) : (
+                  <polygon key={i} fill="var(--gold-400)" points={glyph.points} />
+                )
+              )}
+              {brandSeparatorRects.map((r, i) => (
+                <rect key={i} fill="var(--gold-400)" x={r.x} y={r.y} width={r.width} height={r.height} />
+              ))}
+            </svg>
             <div
               className="absolute bottom-0 left-0 right-0 h-1"
               style={{ backgroundColor: 'var(--gold-400)' }}
