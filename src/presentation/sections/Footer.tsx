@@ -27,8 +27,8 @@ function TikTokIcon({ className }: BrandIconProps) {
 }
 
 const SOCIAL_LINKS = [
-  { Icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/contigoconstructions' },
-  { Icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/contigoconstructions' },
+  { Icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/contigoconstructionsptyltd' },
+  { Icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/ContigoConstructions' },
   { Icon: WhatsAppIcon, label: 'WhatsApp', href: 'https://api.whatsapp.com/send?phone=61406274096' },
   { Icon: Linkedin, label: 'LinkedIn', href: 'https://www.linkedin.com/company/contigo-constructions-pty-ltd/' },
   { Icon: TikTokIcon, label: 'TikTok', href: 'https://www.tiktok.com/@contigoconstructions' },
@@ -237,13 +237,13 @@ export default function Footer({ legalLinks = [] }: { legalLinks?: LegalLink[] }
               style={{ color: 'var(--neutral-600)' }}
             >
               <a
-                href="https://secure.cbs.sa.gov.au/OccLicPubReg/LicenceDetails.php?LicClassCode=BLD&LicNum=357596"
+                href="https://secure.cbs.sa.gov.au/OccLicPubReg/LicenceDetails.php?LicClassCode=BLD&LicNum=360639"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline"
                 style={{ color: 'inherit' }}
               >
-                BLD Licence No. 357596
+                BLD Licence No. 360639
               </a>
             </p>
             <p

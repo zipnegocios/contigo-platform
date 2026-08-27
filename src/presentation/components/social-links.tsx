@@ -19,8 +19,8 @@ export function TikTokIcon({ className }: BrandIconProps) {
 }
 
 export const SOCIAL_LINKS = [
-  { Icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/contigoconstructions' },
-  { Icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/contigoconstructions' },
+  { Icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/contigoconstructionsptyltd' },
+  { Icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/ContigoConstructions' },
   { Icon: WhatsAppIcon, label: 'WhatsApp', href: 'https://api.whatsapp.com/send?phone=61406274096' },
   { Icon: Linkedin, label: 'LinkedIn', href: 'https://www.linkedin.com/company/contigo-constructions-pty-ltd/' },
   { Icon: TikTokIcon, label: 'TikTok', href: 'https://www.tiktok.com/@contigoconstructions' },

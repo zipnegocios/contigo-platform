@@ -28,7 +28,7 @@ const db = drizzle(client, { schema })
 
 const REGISTERED_ADDRESS = '76 Coorara Ave, Payneham South SA 5070'
 const ENTITY = 'Contigo Constructions Pty Ltd (ABN 25 698 028 394), trading as Contigo Constructions'
-const LICENCE = 'Building Work Contractor Licence BLD 357596 (Carpentry and Joinery)'
+const LICENCE = 'Building Work Contractor Licence BLD 360639 (Carpentry and Joinery)'
 
 const documents: Array<{
   slug: string

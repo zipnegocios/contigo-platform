@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     'gyprock Adelaide',
     'licensed builder Adelaide',
     'licensed carpentry contractor Adelaide',
-    'BLD licence 357596',
+    'BLD licence 360639',
     'Contigo Constructions',
   ],
 
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     siteName: 'Contigo Constructions',
     title: 'Contigo Constructions | Carpentry & Renovations Adelaide',
     description:
-      'Licensed Carpentry & Joinery contractor in Adelaide. BLD Licence 357596. Master Builders member. Specialising in renovations, extensions, carpentry, cladding and gyprock.',
+      'Licensed Carpentry & Joinery contractor in Adelaide. BLD Licence 360639. Master Builders member. Specialising in renovations, extensions, carpentry, cladding and gyprock.',
     images: [
       {
         url: 'https://contigoconstructions.com.au/og-image.jpg',
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Contigo Constructions | Carpentry & Renovations Adelaide',
     description:
-      'Licensed Carpentry & Joinery contractor in Adelaide. BLD Licence 357596. Master Builders member.',
+      'Licensed Carpentry & Joinery contractor in Adelaide. BLD Licence 360639. Master Builders member.',
     images: ['https://contigoconstructions.com.au/og-image.jpg'],
   },
 
@@ -169,8 +169,8 @@ export default function RootLayout({
               },
               image: 'https://contigoconstructions.com.au/og-image.jpg',
               sameAs: [
-                'https://www.instagram.com/contigoconstructions',
-                'https://www.facebook.com/contigoconstructions',
+                'https://www.instagram.com/contigoconstructionsptyltd',
+                'https://www.facebook.com/ContigoConstructions',
                 'https://www.linkedin.com/company/contigo-constructions-pty-ltd',
                 'https://www.tiktok.com/@contigoconstructions',
               ],
@@ -195,7 +195,7 @@ export default function RootLayout({
               },
               certification: {
                 '@type': 'Certification',
-                certificationId: '357596',
+                certificationId: '360639',
                 name: 'Master Builders South Australia - BLD Licence',
               },
               openingHoursSpecification: {
