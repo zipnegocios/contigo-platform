@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Upload, X, ImageIcon, Video as VideoIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadFileToR2 } from '@/presentation/lib/uploadToR2'
@@ -67,13 +67,20 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
   const posterInput = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
-  const mode: 'image' | 'video' = media?.type ?? 'image'
+  // Local so the switch works on an empty slot; follows the media whenever one is present.
+  const [mode, setModeState] = useState<'image' | 'video'>(media?.type ?? 'image')
+  useEffect(() => {
+    if (media?.type) setModeState(media.type)
+  }, [media?.type])
 
   function setMode(next: 'image' | 'video') {
     if (next === mode) return
+    setModeState(next)
     // Switching kind discards the current file: an image URL isn't a video and vice versa.
-    onChange(undefined)
-    onDuration(undefined)
+    if (media) {
+      onChange(undefined)
+      onDuration(undefined)
+    }
   }
 
   async function upload(file: File, purpose: 'media' | 'poster') {
@@ -117,7 +124,8 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
     onChange({ ...media, video: { ...DEFAULT_HERO_VIDEO_SETTINGS, ...media.video, ...patch } })
   }
 
-  const video = media?.type === 'video' ? { ...DEFAULT_HERO_VIDEO_SETTINGS, ...media.video } : undefined
+  const hasVideo = media?.type === 'video'
+  const video = { ...DEFAULT_HERO_VIDEO_SETTINGS, ...(media?.type === 'video' ? media.video : undefined) }
   const start = video?.startTime
   const end = video?.endTime
   const rangeInvalid =
@@ -131,19 +139,33 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
         <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6B6560', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           {label}
         </p>
-        <div style={{ display: 'flex', border: '1px solid #E5DDD0', borderRadius: 6, overflow: 'hidden' }}>
+        <div
+          role="group"
+          aria-label={`${label} media type`}
+          style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr', padding: 3, borderRadius: 999, background: '#EFE8DA', width: 168 }}
+        >
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute', top: 3, bottom: 3, left: 3, width: 'calc(50% - 3px)', borderRadius: 999,
+              background: '#2D2924', transition: 'transform 0.2s ease',
+              transform: mode === 'video' ? 'translateX(100%)' : 'translateX(0)',
+            }}
+          />
           {(['image', 'video'] as const).map((m) => (
             <button
               key={m}
               type="button"
+              aria-pressed={mode === m}
               onClick={() => setMode(m)}
               style={{
-                fontSize: '0.7rem', padding: '3px 10px', border: 'none', cursor: 'pointer',
-                background: mode === m ? '#E2C063' : '#fff', color: '#2D2924', fontWeight: mode === m ? 700 : 500,
-                textTransform: 'capitalize',
+                position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                fontSize: '0.75rem', padding: '5px 0', border: 'none', background: 'transparent', cursor: 'pointer',
+                color: mode === m ? '#FAF6F0' : '#6B6560', fontWeight: 600, transition: 'color 0.2s ease',
               }}
             >
-              {m}
+              {m === 'image' ? <ImageIcon size={13} /> : <VideoIcon size={13} />}
+              {m === 'image' ? 'Image' : 'Video'}
             </button>
           ))}
         </div>
@@ -230,11 +252,20 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
         onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f, 'media'); e.target.value = '' }}
       />
 
-      {media?.type === 'video' && video && (
-        <div style={{ marginTop: 12, padding: 12, border: '1px solid #E5DDD0', borderRadius: 8, background: '#FAF6F0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {mode === 'video' && (
+        <fieldset
+          disabled={!hasVideo}
+          style={{
+            minWidth: 0, margin: '12px 0 0', padding: 12, border: '1px solid #E5DDD0', borderRadius: 8, background: '#FAF6F0',
+            display: 'flex', flexDirection: 'column', gap: 10, opacity: hasVideo ? 1 : 0.55,
+          }}
+        >
           <p style={{ fontSize: '0.7rem', fontWeight: 700, color: '#6B6560', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Video settings{duration !== undefined ? ` · ${formatDuration(duration)}` : ''}
           </p>
+          {!hasVideo && (
+            <p style={{ fontSize: '0.72rem', color: '#6B6560' }}>Upload or pick a video to edit these settings.</p>
+          )}
 
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <label style={{ fontSize: '0.8rem', display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -304,12 +335,12 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
           <div>
             <label style={labelStyle}>Fallback image (poster)</label>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              {media.posterUrl ? (
+              {media?.posterUrl ? (
                 <div style={{ position: 'relative', width: 64, height: 40, borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
                   <img src={media.posterUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <button
                     type="button"
-                    onClick={() => onChange({ ...media, posterUrl: undefined })}
+                    onClick={() => media && onChange({ ...media, posterUrl: undefined })}
                     style={{ position: 'absolute', top: 1, right: 1, background: 'rgba(18,14,10,0.7)', border: 'none', borderRadius: 3, color: '#fff', width: 14, height: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <X size={9} />
@@ -334,7 +365,7 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
               onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f, 'poster'); e.target.value = '' }}
             />
           </div>
-        </div>
+        </fieldset>
       )}
     </div>
   )

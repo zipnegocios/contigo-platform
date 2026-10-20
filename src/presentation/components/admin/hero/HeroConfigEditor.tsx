@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { LayoutPanelTop, GalleryHorizontal, Loader2 } from 'lucide-react'
+import { LayoutPanelTop, GalleryHorizontal, Loader2, History } from 'lucide-react'
 import { toast } from 'sonner'
 import { resolveHeroMedia, legacyImageUrl, type HeroConfig, type HeroConfigInput } from '@/core/entities/HeroConfig'
 import { HeroMediaPair } from './HeroMediaPair'
 import { ButtonsManager } from './ButtonsManager'
 import { SlidesList } from './SlidesList'
+import { HeroVersionHistory } from './HeroVersionHistory'
 
 interface EntityOption { id: string; label: string; slug: string; categorySlug?: string }
 interface FormOption { id: string; name: string; slug: string }
@@ -103,8 +104,18 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
         position: 'sticky', top: 0, zIndex: 10,
         background: '#fff', borderBottom: '1px solid #E5DDD0',
         padding: '12px 0 12px', marginBottom: '1.5rem',
-        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12,
       }}>
+        <button
+          onClick={() => document.getElementById('hero-version-history')?.scrollIntoView({ behavior: 'smooth' })}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8,
+            border: '1px solid #E5DDD0', background: '#fff', color: '#2D2924', fontWeight: 600,
+            fontSize: '0.875rem', cursor: 'pointer',
+          }}
+        >
+          <History size={14} /> History
+        </button>
         <button
           onClick={handleSave}
           disabled={saving}
@@ -262,6 +273,14 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
           </div>
         </>
       )}
+
+      <HeroVersionHistory
+        currentConfig={config}
+        onRestored={(restored) => {
+          const { id: _id, updatedAt: _updatedAt, ...rest } = restored
+          setConfig(rest)
+        }}
+      />
 
       <style>{`@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }`}</style>
     </div>

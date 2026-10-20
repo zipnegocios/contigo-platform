@@ -675,6 +675,21 @@ export const heroConfig = pgTable('hero_config', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// ============ HERO_CONFIG_VERSIONS TABLE ============
+// Manual snapshots of the hero config. Non-archived versions are capped to the
+// most recent 5 by the repository; archived ones are kept until deleted.
+export const heroConfigVersions = pgTable(
+  'hero_config_versions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    label: varchar('label', { length: 120 }).notNull().default(''),
+    snapshot: jsonb('snapshot').notNull(),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('hero_config_versions_created_at_idx').on(table.createdAt)],
+)
+
 // ============ GOOGLE_REVIEWS TABLE ============
 // Local cache of Google Business Profile reviews. The public website never
 // queries Google directly — it reads only from this table. Moderation

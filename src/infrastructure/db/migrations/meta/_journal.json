@@ -288,6 +288,13 @@
       "when": 1792477002612,
       "tag": "20261020061642_add_hero_media",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1792482191231,
+      "tag": "20261020074311_add_hero_config_versions",
+      "breakpoints": true
     }
   ]
 }
