@@ -1,4 +1,5 @@
 import type { GbpConnectionStatus } from '@/core/entities/GbpConnection'
+import { GbpAuthError } from '@/infrastructure/services/GoogleBusinessProfileService'
 
 /**
  * Documented test cases for `interpretGbpApiError` (plan §8 Q2 — no test
@@ -74,6 +75,11 @@ export const GBP_ERROR_INTERPRETER_FIXTURES: GbpErrorInterpreterFixture[] = [
   {
     description: '403 → auth_error',
     input: { error: { code: 403, status: 'PERMISSION_DENIED' } },
+    expected: 'auth_error',
+  },
+  {
+    description: 'GbpAuthError wrapping an OAuth invalid_grant body (revoked refresh token) → auth_error',
+    input: new GbpAuthError('OAuth failure (invalid_grant)', { error: 'invalid_grant' }),
     expected: 'auth_error',
   },
   {

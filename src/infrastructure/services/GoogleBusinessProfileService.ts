@@ -42,6 +42,7 @@ function extractQuotaLimitValue(body: unknown): string | undefined {
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const ACCOUNTS_URL = 'https://mybusinessaccountmanagement.googleapis.com/v1/accounts'
 const REVIEWS_BASE_URL = 'https://mybusiness.googleapis.com/v4'
+const OAUTH_AUTH_ERRORS = new Set(['invalid_grant', 'invalid_client', 'unauthorized_client'])
 const PAGE_SIZE = 50
 const MAX_RETRIES = 3
 
@@ -93,7 +94,26 @@ async function requestJson(url: string, init: RequestInit, attempt = 1): Promise
 
   if (res.status === 401 || res.status === 403) {
     const bodyText = await res.text()
+    // Drop cached state so a rotated token / changed account is picked up
+    // without waiting for a process restart.
+    cachedToken = null
+    cachedAccountName = null
     throw new GbpAuthError(`Auth failure (${res.status}): ${bodyText}`, tryParseJson(bodyText))
+  }
+
+  // The OAuth token endpoint reports a revoked/expired refresh token or bad
+  // client credentials as 400 with a string `error` (not 401/403 and not the
+  // nested Google API error shape).
+  if (res.status === 400) {
+    const bodyText = await res.text()
+    const body = tryParseJson(bodyText)
+    const oauthError = (body as { error?: unknown } | undefined)?.error
+    if (typeof oauthError === 'string' && OAUTH_AUTH_ERRORS.has(oauthError)) {
+      cachedToken = null
+      cachedAccountName = null
+      throw new GbpAuthError(`OAuth failure (${oauthError}): ${bodyText}`, body)
+    }
+    throw new Error(`GBP request failed (400): ${bodyText}`)
   }
 
   if (res.status >= 500 && res.status < 600) {
