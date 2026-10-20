@@ -666,6 +666,8 @@ export const heroConfig = pgTable('hero_config', {
   eyebrow: varchar('eyebrow', { length: 255 }),
   desktopImageUrl: text('desktop_image_url'),
   mobileImageUrl: text('mobile_image_url'),
+  desktopMedia: jsonb('desktop_media'),
+  mobileMedia: jsonb('mobile_media'),
   buttons: jsonb('buttons').notNull().default(sql`'[]'::jsonb`),
   slides: jsonb('slides').notNull().default(sql`'[]'::jsonb`),
   autoplayInterval: integer('autoplay_interval').notNull().default(5000),

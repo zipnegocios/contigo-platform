@@ -1,9 +1,9 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import type { HeroConfig, HeroButton } from '@/core/entities/HeroConfig'
+import { resolveHeroMedia, type HeroConfig, type HeroButton } from '@/core/entities/HeroConfig'
+import { HeroMediaLayer } from '@/presentation/components/hero/HeroMediaLayer'
 import { DynamicFormModal } from '@/presentation/components/DynamicFormModal'
 import { QuoteFormModal } from '@/presentation/components/QuoteFormModal'
-import { cfImage } from '@/presentation/lib/cloudflareImage'
 // The "Request a Quote" form gets the bespoke modal used everywhere else in
 // the site (Navigation's "Request a Quote" button) instead of the generic
 // form-builder-driven DynamicFormModal, so a Hero CTA wired to this specific
@@ -82,8 +82,14 @@ export default function HeroSection({ config }: Props) {
   const ctaRef = useRef<HTMLDivElement>(null)
 
   /* ── Ken Burns — slow zoom + pan, loops forever ──────────────────────── */
+  const activeMedia =
+    cfg.mode === 'slider' && cfg.slides.length > 0
+      ? [cfg.slides[activeIdx]?.desktopMedia, cfg.slides[activeIdx]?.mobileMedia]
+      : [cfg.desktopMedia, cfg.mobileMedia]
+  const activeHasVideo = activeMedia.some((m) => m?.type === 'video')
+
   useEffect(() => {
-    if (!imgWrapRef.current) return
+    if (!imgWrapRef.current || activeHasVideo) return
     // Dynamic import to avoid SSR issues
     import('gsap').then(({ gsap }) => {
       const tl = gsap.timeline({ repeat: -1, yoyo: true })
@@ -104,7 +110,7 @@ export default function HeroSection({ config }: Props) {
         document.removeEventListener('visibilitychange', onVisibilityChange)
       }
     })
-  }, [activeIdx])
+  }, [activeIdx, activeHasVideo])
 
   /* ── Text entrance ───────────────────────────────────────────────────── */
   useEffect(() => {
@@ -161,16 +167,10 @@ export default function HeroSection({ config }: Props) {
           className="absolute inset-0"
           style={{ willChange: 'transform', transformOrigin: 'center center' }}
         >
-          <picture>
-            {cfg.mobileImageUrl && (
-              <source media="(max-width: 640px)" srcSet={cfImage(cfg.mobileImageUrl, { width: 750 })} />
-            )}
-            <img
-              src={cfg.desktopImageUrl ? cfImage(cfg.desktopImageUrl, { width: 1920 }) : '/assets/hero-test1.png'}
-              alt="Contigo construction project"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </picture>
+          <HeroMediaLayer
+            desktop={resolveHeroMedia(cfg.desktopMedia, cfg.desktopImageUrl)}
+            mobile={resolveHeroMedia(cfg.mobileMedia, cfg.mobileImageUrl)}
+          />
         </div>
       ) : (
         cfg.slides.map((slide, i) => (
@@ -186,16 +186,12 @@ export default function HeroSection({ config }: Props) {
               pointerEvents: i === activeIdx ? 'auto' : 'none',
             }}
           >
-            <picture>
-              {slide.mobileImageUrl && (
-                <source media="(max-width: 640px)" srcSet={cfImage(slide.mobileImageUrl, { width: 750 })} />
-              )}
-              <img
-                src={slide.desktopImageUrl ? cfImage(slide.desktopImageUrl, { width: 1920 }) : '/assets/hero-test1.png'}
-                alt=""
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </picture>
+            <HeroMediaLayer
+              desktop={resolveHeroMedia(slide.desktopMedia, slide.desktopImageUrl)}
+              mobile={resolveHeroMedia(slide.mobileMedia, slide.mobileImageUrl)}
+              active={i === activeIdx}
+              alt=""
+            />
           </div>
         ))
       )}

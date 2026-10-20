@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { LayoutPanelTop, GalleryHorizontal, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { HeroConfig, HeroConfigInput } from '@/core/entities/HeroConfig'
-import { HeroImagePair } from './HeroImagePair'
+import { resolveHeroMedia, legacyImageUrl, type HeroConfig, type HeroConfigInput } from '@/core/entities/HeroConfig'
+import { HeroMediaPair } from './HeroMediaPair'
 import { ButtonsManager } from './ButtonsManager'
 import { SlidesList } from './SlidesList'
 
@@ -151,10 +151,17 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
           {/* Images */}
           <div style={sectionCard}>
             <p style={sectionHeading}>Images</p>
-            <HeroImagePair
-              desktopImageUrl={config.desktopImageUrl}
-              mobileImageUrl={config.mobileImageUrl}
-              onChange={(desktop, mobile) => patch({ desktopImageUrl: desktop, mobileImageUrl: mobile })}
+            <HeroMediaPair
+              desktopMedia={resolveHeroMedia(config.desktopMedia, config.desktopImageUrl)}
+              mobileMedia={resolveHeroMedia(config.mobileMedia, config.mobileImageUrl)}
+              onChange={(desktop, mobile) =>
+                patch({
+                  desktopMedia: desktop,
+                  mobileMedia: mobile,
+                  desktopImageUrl: legacyImageUrl(desktop),
+                  mobileImageUrl: legacyImageUrl(mobile),
+                })
+              }
             />
           </div>
 

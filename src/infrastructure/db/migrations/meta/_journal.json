@@ -281,6 +281,13 @@
       "when": 1784281198286,
       "tag": "20260717093958_lonely_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792477002612,
+      "tag": "20261020061642_add_hero_media",
+      "breakpoints": true
     }
   ]
 }

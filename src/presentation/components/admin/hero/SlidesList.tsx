@@ -18,7 +18,8 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { HeroSlide } from '@/core/entities/HeroConfig'
-import { HeroImagePair } from './HeroImagePair'
+import { HeroMediaPair } from './HeroMediaPair'
+import { resolveHeroMedia, legacyImageUrl } from '@/core/entities/HeroConfig'
 import { ButtonsManager } from './ButtonsManager'
 
 interface EntityOption { id: string; label: string; slug: string; categorySlug?: string }
@@ -68,8 +69,8 @@ function SortableThumb({ slide, index, isActive, onClick, onDelete }: {
       {...attributes}
       {...listeners}
     >
-      {slide.desktopImageUrl && (
-        <img src={slide.desktopImageUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      {(slide.desktopImageUrl || slide.desktopMedia?.posterUrl) && (
+        <img src={slide.desktopImageUrl || slide.desktopMedia?.posterUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       )}
       <span style={{
         position: 'absolute', bottom: 3, left: 4,
@@ -169,11 +170,19 @@ export function SlidesList({ slides, onChange, serviceOptions, projectOptions, f
       {selectedSlide && (
         <div style={{ marginTop: 20 }}>
           <div style={{ background: '#fff', border: '1px solid #E5DDD0', borderRadius: 10, padding: '1.25rem', marginBottom: 12 }}>
-            <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6B6560', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Images</p>
-            <HeroImagePair
-              desktopImageUrl={selectedSlide.desktopImageUrl || undefined}
-              mobileImageUrl={selectedSlide.mobileImageUrl}
-              onChange={(desktop, mobile) => patchSlide({ desktopImageUrl: desktop ?? '', mobileImageUrl: mobile })}
+            <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#6B6560', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Images &amp; videos</p>
+            <HeroMediaPair
+              key={selectedSlide.id}
+              desktopMedia={resolveHeroMedia(selectedSlide.desktopMedia, selectedSlide.desktopImageUrl || undefined)}
+              mobileMedia={resolveHeroMedia(selectedSlide.mobileMedia, selectedSlide.mobileImageUrl)}
+              onChange={(desktop, mobile) =>
+                patchSlide({
+                  desktopMedia: desktop,
+                  mobileMedia: mobile,
+                  desktopImageUrl: legacyImageUrl(desktop) ?? '',
+                  mobileImageUrl: legacyImageUrl(mobile),
+                })
+              }
             />
           </div>
 

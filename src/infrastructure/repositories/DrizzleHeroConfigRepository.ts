@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '../db/client'
 import { heroConfig } from '@/infrastructure/db/schema'
 import type { IHeroConfigRepository } from '@/core/repositories/IHeroConfigRepository'
-import type { HeroConfig, HeroButton, HeroSlide, HeroConfigInput } from '@/core/entities/HeroConfig'
+import type { HeroConfig, HeroButton, HeroSlide, HeroMedia, HeroConfigInput } from '@/core/entities/HeroConfig'
 
 function mapRow(row: typeof heroConfig.$inferSelect): HeroConfig {
   return {
@@ -13,6 +13,8 @@ function mapRow(row: typeof heroConfig.$inferSelect): HeroConfig {
     eyebrow: row.eyebrow ?? undefined,
     desktopImageUrl: row.desktopImageUrl ?? undefined,
     mobileImageUrl: row.mobileImageUrl ?? undefined,
+    desktopMedia: (row.desktopMedia as HeroMedia | null) ?? undefined,
+    mobileMedia: (row.mobileMedia as HeroMedia | null) ?? undefined,
     buttons: (row.buttons as HeroButton[]) ?? [],
     slides: (row.slides as HeroSlide[]) ?? [],
     autoplayInterval: row.autoplayInterval,
@@ -36,6 +38,8 @@ export class DrizzleHeroConfigRepository implements IHeroConfigRepository {
       eyebrow: input.eyebrow ?? null,
       desktopImageUrl: input.desktopImageUrl ?? null,
       mobileImageUrl: input.mobileImageUrl ?? null,
+      desktopMedia: input.desktopMedia ?? null,
+      mobileMedia: input.mobileMedia ?? null,
       buttons: input.buttons,
       slides: input.slides,
       autoplayInterval: input.autoplayInterval,
