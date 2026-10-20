@@ -86,6 +86,11 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ config }),
       })
+      if (res.status === 409) {
+        const json = await res.json()
+        toast.info(json.error ?? 'No changes to version')
+        return
+      }
       if (!res.ok) {
         toast.error('Could not save version')
         return

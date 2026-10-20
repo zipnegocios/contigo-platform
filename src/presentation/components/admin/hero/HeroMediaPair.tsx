@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Upload, X, ImageIcon, Video as VideoIcon } from 'lucide-react'
+import { Upload, X, ImageIcon, Video as VideoIcon, Camera } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadFileToR2 } from '@/presentation/lib/uploadToR2'
 import { extractMediaMetadata, formatDuration } from '@/presentation/lib/extractMediaMetadata'
@@ -45,6 +45,35 @@ const AUDIO_OPTIONS: { value: HeroVideoAudio; label: string }[] = [
   { value: 'on', label: 'Starts with sound (browser may block)' },
 ]
 
+/** Draws the frame at `time` to a JPEG. Throws on CORS-tainted canvas (R2 without CORS headers). */
+async function captureVideoFrame(src: string, time: number): Promise<File> {
+  const video = document.createElement('video')
+  video.crossOrigin = 'anonymous'
+  video.muted = true
+  video.playsInline = true
+  video.preload = 'auto'
+  video.src = src
+  await new Promise<void>((resolve, reject) => {
+    video.onloadeddata = () => resolve()
+    video.onerror = () => reject(new Error('Could not load the video'))
+  })
+  if (time > 0) {
+    await new Promise<void>((resolve, reject) => {
+      video.onseeked = () => resolve()
+      video.onerror = () => reject(new Error('Could not seek the video'))
+      video.currentTime = Math.min(time, Math.max(video.duration - 0.05, 0))
+    })
+  }
+  const scale = Math.min(1, 1920 / (video.videoWidth || 1920))
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(video.videoWidth * scale)
+  canvas.height = Math.round(video.videoHeight * scale)
+  canvas.getContext('2d')!.drawImage(video, 0, 0, canvas.width, canvas.height)
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+  if (!blob) throw new Error('Could not encode the frame')
+  return new File([blob], `hero-poster-${Date.now()}.jpg`, { type: 'image/jpeg' })
+}
+
 function numberOrUndefined(value: string): number | undefined {
   if (value.trim() === '') return undefined
   const n = Number(value)
@@ -65,6 +94,10 @@ interface ZoneProps {
 function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, duration, onDuration }: ZoneProps) {
   const mediaInput = useRef<HTMLInputElement>(null)
   const posterInput = useRef<HTMLInputElement>(null)
+  const previewRef = useRef<HTMLVideoElement>(null)
+  // Object URL of the video uploaded in this session: lets us grab frames without any CORS dependency.
+  const localVideoUrl = useRef<string | null>(null)
+  useEffect(() => () => { if (localVideoUrl.current) URL.revokeObjectURL(localVideoUrl.current) }, [])
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   // Local so the switch works on an empty slot; follows the media whenever one is present.
@@ -100,6 +133,8 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
       if (purpose === 'poster') {
         if (media) onChange({ ...media, posterUrl: result.publicUrl })
       } else if (mode === 'video') {
+        if (localVideoUrl.current) URL.revokeObjectURL(localVideoUrl.current)
+        localVideoUrl.current = URL.createObjectURL(file)
         const meta = await extractMediaMetadata(file)
         onDuration(meta.duration)
         onChange({
@@ -113,6 +148,29 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
       }
     } catch {
       toast.error('Upload failed')
+    } finally {
+      setUploading(false)
+      setProgress(0)
+    }
+  }
+
+  async function captureFrameAsPoster() {
+    if (!media || media.type !== 'video') return
+    const time = previewRef.current?.currentTime ?? 0
+    setUploading(true)
+    setProgress(0)
+    try {
+      const file = await captureVideoFrame(localVideoUrl.current ?? media.url, time)
+      const result = await uploadFileToR2(file, 'hero', setProgress)
+      onChange({ ...media, posterUrl: result.publicUrl })
+      toast.success(`Fallback image captured at ${time.toFixed(1)}s`)
+    } catch (err) {
+      const blocked = err instanceof DOMException && err.name === 'SecurityError'
+      toast.error(
+        blocked
+          ? 'The browser blocked reading this video (storage CORS). Re-upload the video in this session, or upload a custom fallback image.'
+          : 'Could not capture the frame. Upload a custom fallback image instead.',
+      )
     } finally {
       setUploading(false)
       setProgress(0)
@@ -193,6 +251,7 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
             {media.type === 'video' ? (
               <video
                 key={media.url}
+                ref={previewRef}
                 src={media.url}
                 poster={media.posterUrl}
                 muted
@@ -334,7 +393,7 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
 
           <div>
             <label style={labelStyle}>Fallback image (poster)</label>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               {media?.posterUrl ? (
                 <div style={{ position: 'relative', width: 64, height: 40, borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
                   <img src={media.posterUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -347,15 +406,18 @@ function MediaZone({ label, slot, media, aspectStyle, onChange, onBrowse, durati
                   </button>
                 </div>
               ) : null}
+              <button type="button" disabled={uploading || !hasVideo} onClick={captureFrameAsPoster} style={smallBtn(uploading || !hasVideo)}>
+                <Camera size={11} /> Use current frame
+              </button>
               <button type="button" disabled={uploading} onClick={() => posterInput.current?.click()} style={smallBtn(uploading)}>
-                <Upload size={11} /> Upload
+                <Upload size={11} /> Upload custom
               </button>
               <button type="button" disabled={uploading} onClick={() => onBrowse('poster')} style={smallBtn(uploading)}>
                 Browse library
               </button>
             </div>
             <p style={{ fontSize: '0.68rem', color: '#6B6560', marginTop: 4 }}>
-              Shown while the video loads, if it fails, with data saver, or for visitors who prefer reduced motion.
+              Pause the video above on the frame you want and press “Use current frame”, or upload your own designed image. Shown while the video loads, if it fails, with data saver, or for visitors who prefer reduced motion.
             </p>
             <input
               ref={posterInput}

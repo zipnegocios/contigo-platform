@@ -9,6 +9,7 @@ function mapRow(row: typeof heroConfigVersions.$inferSelect): HeroConfigVersion 
   return {
     id: row.id,
     label: row.label,
+    tag: row.tag ?? undefined,
     snapshot: row.snapshot as HeroConfigInput,
     archivedAt: row.archivedAt ?? undefined,
     createdAt: row.createdAt,
@@ -26,21 +27,24 @@ export class DrizzleHeroConfigVersionRepository implements IHeroConfigVersionRep
     return rows[0] ? mapRow(rows[0]) : null
   }
 
-  async create(label: string, snapshot: HeroConfigInput, protectId?: string): Promise<HeroConfigVersion> {
-    const rows = await db.insert(heroConfigVersions).values({ label, snapshot }).returning()
-    await this.pruneRecent(protectId)
+  async create(
+    label: string,
+    snapshot: HeroConfigInput,
+    opts: { tag?: string; protectId?: string } = {},
+  ): Promise<HeroConfigVersion> {
+    const rows = await db.insert(heroConfigVersions).values({ label, snapshot, tag: opts.tag || null }).returning()
+    await this.pruneRecent(opts.protectId)
     return mapRow(rows[0])
   }
 
-  async setArchived(id: string, archived: boolean): Promise<HeroConfigVersion | null> {
-    const rows = await db
-      .update(heroConfigVersions)
-      .set({ archivedAt: archived ? new Date() : null })
-      .where(eq(heroConfigVersions.id, id))
-      .returning()
+  async update(id: string, patch: { archived?: boolean; tag?: string | null }): Promise<HeroConfigVersion | null> {
+    const set: Partial<typeof heroConfigVersions.$inferInsert> = {}
+    if (patch.archived !== undefined) set.archivedAt = patch.archived ? new Date() : null
+    if (patch.tag !== undefined) set.tag = patch.tag || null
+    const rows = await db.update(heroConfigVersions).set(set).where(eq(heroConfigVersions.id, id)).returning()
     if (!rows[0]) return null
     // Un-archiving puts it back among the recent ones, which are capped.
-    if (!archived) await this.pruneRecent(id)
+    if (patch.archived === false) await this.pruneRecent(id)
     return mapRow(rows[0])
   }
 

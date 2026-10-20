@@ -14,6 +14,8 @@ interface Props {
   /** Slider: only the active slide plays and preloads its video. */
   active?: boolean
   alt?: string
+  /** Force a viewport instead of following the window (admin previews). */
+  viewport?: 'desktop' | 'mobile'
 }
 
 function videoMime(url: string): string | undefined {
@@ -198,19 +200,21 @@ function VideoLayer({ media, active }: { media: HeroMedia; active: boolean }) {
 }
 
 /** Renders one hero background slot pair (desktop + mobile), each an image or a video. */
-export function HeroMediaLayer({ desktop, mobile, active = true, alt = 'Contigo construction project' }: Props) {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null)
+export function HeroMediaLayer({ desktop, mobile, active = true, alt = 'Contigo construction project', viewport }: Props) {
+  const [windowIsMobile, setIsMobile] = useState<boolean | null>(null)
+  const isMobile = viewport ? viewport === 'mobile' : windowIsMobile
 
   useEffect(() => {
+    if (viewport) return
     const mq = window.matchMedia(MOBILE_QUERY)
     const update = () => setIsMobile(mq.matches)
     update()
     mq.addEventListener('change', update)
     return () => mq.removeEventListener('change', update)
-  }, [])
+  }, [viewport])
 
   const hasVideo = desktop?.type === 'video' || mobile?.type === 'video'
-  if (!hasVideo) return <ImageLayer desktop={desktop} mobile={mobile} alt={alt} />
+  if (!hasVideo && !viewport) return <ImageLayer desktop={desktop} mobile={mobile} alt={alt} />
 
   // Before hydration we don't know the viewport: render the poster/image via <picture>
   // so the first paint is correct and no video is downloaded for the wrong breakpoint.

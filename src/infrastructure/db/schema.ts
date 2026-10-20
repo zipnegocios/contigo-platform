@@ -683,6 +683,8 @@ export const heroConfigVersions = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     label: varchar('label', { length: 120 }).notNull().default(''),
+    // Free-form reminder chosen by the admin; `label` is the auto-generated date/time.
+    tag: varchar('tag', { length: 60 }),
     snapshot: jsonb('snapshot').notNull(),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

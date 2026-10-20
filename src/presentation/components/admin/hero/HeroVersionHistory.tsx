@@ -1,10 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Archive, ArchiveRestore, History, Loader2, RotateCcw, Save, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, Eye, History, Loader2, Pencil, RotateCcw, Save, Tag, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { legacyImageUrl, resolveHeroMedia, type HeroConfig, type HeroConfigInput } from '@/core/entities/HeroConfig'
 import { MAX_RECENT_HERO_VERSIONS, type HeroConfigVersion } from '@/core/entities/HeroConfigVersion'
+import { HeroVersionPreviewDialog } from './HeroVersionPreviewDialog'
 
 interface Props {
   currentConfig: HeroConfigInput
@@ -48,7 +49,8 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
   const [tab, setTab] = useState<'recent' | 'archived'>('recent')
-  const [label, setLabel] = useState('')
+  const [tag, setTag] = useState('')
+  const [preview, setPreview] = useState<VersionDTO | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -67,6 +69,10 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
     try {
       const res = await fetch(url, init)
       const json = await res.json()
+      if (res.status === 409) {
+        toast.info(json.error ?? 'No changes to version')
+        return
+      }
       if (!res.ok) {
         toast.error(json.error ?? 'Request failed')
         return
@@ -93,10 +99,11 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Version name (optional)"
-          maxLength={120}
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+          placeholder="Tag (optional) — a reminder, e.g. “Summer campaign”"
+          maxLength={60}
+          aria-label="Tag"
           style={{ flex: '1 1 220px', padding: '7px 10px', border: '1px solid #E5DDD0', borderRadius: 6, fontSize: '0.8rem' }}
         />
         <button
@@ -105,8 +112,8 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
             call('create', API, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ label: label || undefined, config: currentConfig }),
-            }, 'Version saved', () => setLabel(''))
+              body: JSON.stringify({ tag: tag.trim() || undefined, config: currentConfig }),
+            }, 'Version saved', () => setTag(''))
           }
           style={{ ...btn, background: '#E2C063', border: 'none', fontWeight: 600, padding: '7px 14px' }}
         >
@@ -115,7 +122,7 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
         </button>
       </div>
       <p style={{ fontSize: '0.72rem', color: '#6B6560', marginBottom: 12 }}>
-        Saves what is currently in the editor (including unsaved edits) without publishing it. The last {MAX_RECENT_HERO_VERSIONS} recent versions are kept; archive one to keep it permanently.
+        Saves what is currently in the editor (including unsaved edits) without publishing it. It is named after the date and time; the tag is an optional reminder. The last {MAX_RECENT_HERO_VERSIONS} recent versions are kept; archive one to keep it permanently.
       </p>
 
       <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
@@ -147,19 +154,45 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
                   {img && <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                 </div>
                 <div style={{ flex: '1 1 180px', minWidth: 0 }}>
-                  <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#2D2924', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.label}</p>
-                  <p style={{ fontSize: '0.72rem', color: '#6B6560' }}>
-                    {new Date(v.createdAt).toLocaleString('en-AU', { timeZone: 'Australia/Adelaide' })} · {describe(v.snapshot)}
+                  <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#2D2924', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {v.label}
+                    {v.tag && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px', borderRadius: 999, background: 'rgba(226,192,99,0.25)', color: '#7A5F12' }}>
+                        <Tag size={10} /> {v.tag}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      aria-label="Edit tag"
+                      title="Edit tag"
+                      onClick={() => {
+                        const next = window.prompt('Tag (leave empty to remove):', v.tag ?? '')
+                        if (next === null) return
+                        call(`tag:${v.id}`, `${API}/${v.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ tag: next.trim() || null }),
+                        }, 'Tag updated')
+                      }}
+                      style={{ display: 'flex', border: 'none', background: 'transparent', color: '#9B918A', cursor: 'pointer', padding: 2 }}
+                    >
+                      <Pencil size={12} />
+                    </button>
                   </p>
+                  <p style={{ fontSize: '0.72rem', color: '#6B6560' }}>{describe(v.snapshot)}</p>
                   <p style={{ fontSize: '0.72rem', color: '#6B6560', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {v.snapshot.headline.replace(/\s+/g, ' ')}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
+                  <button disabled={disabled} onClick={() => setPreview(v)} style={btn}>
+                    <Eye size={12} /> Preview
+                  </button>
                   <button
                     disabled={disabled}
                     onClick={() => {
-                      if (!window.confirm(`Publish "${v.label}"? The current hero is saved to the history first.`)) return
+                      if (!window.confirm(`Publish "${v.tag || v.label}"? The current hero is saved to the history first.`)) return
                       call(`restore:${v.id}`, `${API}/${v.id}/restore`, { method: 'POST' }, 'Version restored and published', (json) => onRestored(json.config))
                     }}
                     style={btn}
@@ -183,7 +216,7 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
                   <button
                     disabled={disabled}
                     onClick={() => {
-                      if (!window.confirm(`Delete "${v.label}" permanently?`)) return
+                      if (!window.confirm(`Delete "${v.tag || v.label}" permanently?`)) return
                       call(`delete:${v.id}`, `${API}/${v.id}`, { method: 'DELETE' }, 'Version deleted')
                     }}
                     style={{ ...btn, color: '#B42318' }}
@@ -196,6 +229,12 @@ export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Pr
           })}
         </ul>
       )}
+
+      <HeroVersionPreviewDialog
+        title={preview ? `${preview.label}${preview.tag ? ` · ${preview.tag}` : ''}` : ''}
+        snapshot={preview?.snapshot ?? null}
+        onClose={() => setPreview(null)}
+      />
     </div>
   )
 }

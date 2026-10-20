@@ -1,0 +1,1 @@
+ALTER TABLE "hero_config_versions" ADD COLUMN "tag" varchar(60);

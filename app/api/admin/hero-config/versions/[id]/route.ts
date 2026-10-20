@@ -4,15 +4,17 @@ import { DrizzleHeroConfigVersionRepository } from '@/infrastructure/repositorie
 
 const repo = new DrizzleHeroConfigVersionRepository()
 
-const PatchSchema = z.object({ archived: z.boolean() })
+const PatchSchema = z
+  .object({ archived: z.boolean().optional(), tag: z.string().trim().max(60).nullable().optional() })
+  .refine((v) => v.archived !== undefined || v.tag !== undefined, { message: 'Nothing to update' })
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const { id } = await params
-    const { archived } = PatchSchema.parse(await request.json())
-    const updated = await repo.setArchived(id, archived)
+    const patch = PatchSchema.parse(await request.json())
+    const updated = await repo.update(id, patch)
     if (!updated) return Response.json({ error: 'Version not found' }, { status: 404 })
     return Response.json({ versions: await repo.list() })
   } catch (error) {
