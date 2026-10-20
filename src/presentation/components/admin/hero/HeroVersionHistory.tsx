@@ -8,6 +8,8 @@ import { MAX_RECENT_HERO_VERSIONS, type HeroConfigVersion } from '@/core/entitie
 
 interface Props {
   currentConfig: HeroConfigInput
+  /** Bump to reload the list after a version is created elsewhere (e.g. the sticky bar). */
+  refreshKey?: number
   onRestored: (config: HeroConfig) => void
 }
 
@@ -41,7 +43,7 @@ function thumb(snapshot: HeroConfigInput): string | undefined {
   return snapshot.desktopImageUrl || legacyImageUrl(snapshot.desktopMedia)
 }
 
-export function HeroVersionHistory({ currentConfig, onRestored }: Props) {
+export function HeroVersionHistory({ currentConfig, refreshKey, onRestored }: Props) {
   const [versions, setVersions] = useState<VersionDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
@@ -58,7 +60,7 @@ export function HeroVersionHistory({ currentConfig, onRestored }: Props) {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load() }, [load, refreshKey])
 
   async function call(key: string, url: string, init: RequestInit, success: string, after?: (json: any) => void) {
     setBusy(key)

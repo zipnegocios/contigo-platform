@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { LayoutPanelTop, GalleryHorizontal, Loader2, History } from 'lucide-react'
+import { LayoutPanelTop, GalleryHorizontal, Loader2, History, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { resolveHeroMedia, legacyImageUrl, type HeroConfig, type HeroConfigInput } from '@/core/entities/HeroConfig'
 import { HeroMediaPair } from './HeroMediaPair'
@@ -71,9 +71,32 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
     return rest
   })
   const [saving, setSaving] = useState(false)
+  const [savingVersion, setSavingVersion] = useState(false)
+  const [historyKey, setHistoryKey] = useState(0)
 
   function patch(partial: Partial<HeroConfigInput>) {
     setConfig((prev) => ({ ...prev, ...partial }))
+  }
+
+  async function handleSaveVersion() {
+    setSavingVersion(true)
+    try {
+      const res = await fetch('/api/admin/hero-config/versions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config }),
+      })
+      if (!res.ok) {
+        toast.error('Could not save version')
+        return
+      }
+      setHistoryKey((k) => k + 1)
+      toast.success('Version saved to history')
+    } catch {
+      toast.error('Could not save version')
+    } finally {
+      setSavingVersion(false)
+    }
   }
 
   async function handleSave() {
@@ -115,6 +138,19 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
           }}
         >
           <History size={14} /> History
+        </button>
+        <button
+          onClick={handleSaveVersion}
+          disabled={savingVersion}
+          title="Snapshot the editor as a version without publishing"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8,
+            border: '1px solid #E5DDD0', background: '#fff', color: '#2D2924', fontWeight: 600,
+            fontSize: '0.875rem', cursor: savingVersion ? 'not-allowed' : 'pointer', opacity: savingVersion ? 0.6 : 1,
+          }}
+        >
+          {savingVersion ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Save size={14} />}
+          Save as version
         </button>
         <button
           onClick={handleSave}
@@ -275,6 +311,7 @@ export function HeroConfigEditor({ initialConfig, serviceOptions, projectOptions
       )}
 
       <HeroVersionHistory
+        refreshKey={historyKey}
         currentConfig={config}
         onRestored={(restored) => {
           const { id: _id, updatedAt: _updatedAt, ...rest } = restored
