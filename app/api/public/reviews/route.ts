@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { DrizzleGoogleReviewRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewRepository'
 import { DrizzleReviewSettingsRepository } from '@/infrastructure/repositories/DrizzleReviewSettingsRepository'
 import { DrizzleReviewTagRepository } from '@/infrastructure/repositories/DrizzleReviewTagRepository'
+import { DrizzleGoogleReviewPhotoRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewPhotoRepository'
 import { GetPublicReviewsUseCase } from '@/application/use-cases/reviews/GetPublicReviewsUseCase'
 
 // Static-cacheable: admin moderation changes don't need to appear instantly,
@@ -15,6 +16,7 @@ export async function GET() {
       new DrizzleGoogleReviewRepository(),
       new DrizzleReviewSettingsRepository(),
       new DrizzleReviewTagRepository(),
+      new DrizzleGoogleReviewPhotoRepository(),
     )
     const result = await useCase.execute()
 

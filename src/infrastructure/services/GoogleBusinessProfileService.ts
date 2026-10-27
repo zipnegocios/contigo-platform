@@ -1,4 +1,8 @@
-import { IGoogleBusinessProfileService, GoogleReviewApiItem } from '@/core/services/IGoogleBusinessProfileService'
+import {
+  IGoogleBusinessProfileService,
+  GoogleReviewApiItem,
+  GoogleCustomerMediaItem,
+} from '@/core/services/IGoogleBusinessProfileService'
 
 /** Best-effort parse of a Google API error response body — never throws. */
 function tryParseJson(text: string): unknown {
@@ -245,6 +249,42 @@ export class GoogleBusinessProfileService implements IGoogleBusinessProfileServi
       }
 
       pageToken = json.nextPageToken
+    } while (pageToken)
+
+    return items
+  }
+
+  async listCustomerPhotos(): Promise<GoogleCustomerMediaItem[]> {
+    const accessToken = await this.getAccessToken()
+    const accountName = await this.getAccountName()
+
+    const items: GoogleCustomerMediaItem[] = []
+    let pageToken: string | undefined
+
+    do {
+      const url = new URL(`${REVIEWS_BASE_URL}/${accountName}/locations/${this.locationId}/media/customers`)
+      url.searchParams.set('pageSize', '100')
+      if (pageToken) url.searchParams.set('pageToken', pageToken)
+
+      const json = await requestJson(url.toString(), {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+
+      for (const media of json?.mediaItems ?? []) {
+        if (media.mediaFormat !== 'PHOTO' || !media.googleUrl) continue
+        items.push({
+          googleMediaName: media.name,
+          googleUrl: media.googleUrl,
+          thumbnailUrl: media.thumbnailUrl ?? null,
+          width: media.dimensions?.widthPixels ?? null,
+          height: media.dimensions?.heightPixels ?? null,
+          createdAt: new Date(media.createTime),
+          attributionName: media.attribution?.profileName ?? null,
+          attributionProfileUrl: media.attribution?.profileUrl ?? null,
+        })
+      }
+
+      pageToken = json?.nextPageToken
     } while (pageToken)
 
     return items

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Star, MessageSquareOff, Clock } from 'lucide-react'
 import { DrizzleGoogleReviewRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewRepository'
+import { DrizzleGoogleReviewPhotoRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewPhotoRepository'
 import { DrizzleReviewTagRepository } from '@/infrastructure/repositories/DrizzleReviewTagRepository'
 import { DrizzleReviewSyncLogRepository } from '@/infrastructure/repositories/DrizzleReviewSyncLogRepository'
 import { KPICard } from '@/presentation/components/admin/KPICard'
@@ -13,14 +14,30 @@ export default async function ReviewsPage() {
   const tagRepository = new DrizzleReviewTagRepository()
   const syncLogRepository = new DrizzleReviewSyncLogRepository()
 
-  const [reviews, tags, lastSync] = await Promise.all([
+  const [reviews, tags, lastSync, photos] = await Promise.all([
     reviewRepository.findAll(),
     tagRepository.findAll(),
     syncLogRepository.findLatest(),
+    new DrizzleGoogleReviewPhotoRepository().findAll().catch(() => []), // table may not exist until migrated
   ])
 
   const dtos = await Promise.all(
-    reviews.map(async (review) => toGoogleReviewDTO(review, await tagRepository.findTagIdsForReview(review.id))),
+    reviews.map(async (review) =>
+      toGoogleReviewDTO(
+        review,
+        await tagRepository.findTagIdsForReview(review.id),
+        photos
+          .filter((p) => p.reviewId === review.id)
+          .map((p) => ({
+            id: p.id,
+            thumbnailUrl: p.thumbnailUrl ?? p.googleUrl,
+            googleUrl: p.googleUrl,
+            attributionName: p.attributionName,
+            isHidden: p.isHidden,
+            matchSource: p.matchSource,
+          })),
+      ),
+    ),
   )
 
   const activeReviews = reviews.filter((r) => !r.archivedAt && !r.deletedOnGoogleAt)

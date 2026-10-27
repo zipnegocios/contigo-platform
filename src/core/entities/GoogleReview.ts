@@ -11,6 +11,8 @@ export interface CreateGoogleReviewInput {
   reviewCreatedAt: Date
   reviewUpdatedAt: Date
   language?: string | null
+  ownerReply?: string | null
+  ownerReplyAt?: Date | null
 }
 
 export interface SyncedGoogleReviewContent {
@@ -130,8 +132,8 @@ export class GoogleReview {
       reviewCreatedAt: input.reviewCreatedAt,
       reviewUpdatedAt: input.reviewUpdatedAt,
       language: input.language ?? null,
-      ownerReply: null,
-      ownerReplyAt: null,
+      ownerReply: input.ownerReply ?? null,
+      ownerReplyAt: input.ownerReplyAt ?? null,
       isVisible: false, // opt-in publishing
       isFeatured: false,
       isPinned: false,

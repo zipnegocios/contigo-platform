@@ -27,6 +27,24 @@ const INACTIVE_ICON_COLOR = 'var(--neutral-600)'
 export function ReviewsManagerClient({ reviews, tags: initialTags, googleMapsReviewUrl }: ReviewsManagerClientProps) {
   const router = useRouter()
   const [items, setItems] = useState(reviews)
+
+  async function togglePhotoHidden(reviewId: string, photoId: string, isHidden: boolean) {
+    const res = await fetch(`/api/admin/reviews/photos/${photoId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isHidden }),
+    })
+    if (!res.ok) {
+      toast.error('Could not update the photo')
+      return
+    }
+    setItems((prev) =>
+      prev.map((r) =>
+        r.id === reviewId ? { ...r, photos: r.photos.map((p) => (p.id === photoId ? { ...p, isHidden } : p)) } : r,
+      ),
+    )
+    toast.success(isHidden ? 'Photo hidden on the website' : 'Photo shown on the website')
+  }
   const [tags, setTags] = useState(initialTags)
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [sortMode, setSortMode] = useState<SortMode>('recent')
@@ -224,6 +242,30 @@ export function ReviewsManagerClient({ reviews, tags: initialTags, googleMapsRev
                       <p className="text-fluid-xs mt-1 italic" style={{ color: 'var(--contigo-primary)' }}>
                         Replied
                       </p>
+                    )}
+                    {review.photos.length > 0 && (
+                      <div className="flex gap-1.5 mt-2 flex-wrap">
+                        {review.photos.map((photo) => (
+                          <button
+                            key={photo.id}
+                            type="button"
+                            onClick={() => togglePhotoHidden(review.id, photo.id, !photo.isHidden)}
+                            title={photo.isHidden ? 'Hidden on the website — click to show' : 'Shown on the website — click to hide'}
+                            className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0"
+                          >
+                            <img
+                              src={photo.thumbnailUrl}
+                              alt=""
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover"
+                              style={{ opacity: photo.isHidden ? 0.35 : 1 }}
+                            />
+                            {photo.isHidden && (
+                              <EyeOff className="absolute inset-0 m-auto w-4 h-4" style={{ color: 'var(--neutral-800)' }} />
+                            )}
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3">

@@ -7,6 +7,8 @@ import { DrizzleTaskRepository } from '@/infrastructure/repositories/DrizzleTask
 import { ResendEmailService } from '@/infrastructure/services/ResendEmailService'
 import { SyncGoogleReviewsUseCase } from '@/application/use-cases/reviews/SyncGoogleReviewsUseCase'
 import { RunReviewAutomationRulesUseCase } from '@/application/use-cases/reviews/RunReviewAutomationRulesUseCase'
+import { SyncGoogleReviewPhotosUseCase } from '@/application/use-cases/reviews/SyncGoogleReviewPhotosUseCase'
+import { DrizzleGoogleReviewPhotoRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewPhotoRepository'
 import { GetGbpConnectionStatusUseCase } from '@/application/use-cases/reviews/GetGbpConnectionStatusUseCase'
 import { verifyCronSecret } from '@/infrastructure/auth/verifyCronSecret'
 
@@ -52,7 +54,19 @@ export async function POST(request: Request) {
     )
     const result = await useCase.execute('scheduled')
 
-    return Response.json({ success: true, result })
+    // Photos are best-effort: a failure here must not turn a successful review sync into an error.
+    let photos = null
+    try {
+      photos = await new SyncGoogleReviewPhotosUseCase(
+        new GoogleBusinessProfileService(),
+        new DrizzleGoogleReviewRepository(),
+        new DrizzleGoogleReviewPhotoRepository(),
+      ).execute()
+    } catch (photoError) {
+      console.warn('GBP review photo sync failed:', photoError instanceof Error ? photoError.message : photoError)
+    }
+
+    return Response.json({ success: true, result, photos })
   } catch (error) {
     if (error instanceof GbpAuthError) {
       console.error('GBP reconnect required:', error.message)

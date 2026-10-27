@@ -734,6 +734,32 @@ export const googleReviews = pgTable(
   ],
 )
 
+// ============ GOOGLE_REVIEW_PHOTOS TABLE ============
+// Customer photos from GBP `media.customers`. Google does not link a photo to
+// a review, so `reviewId` is inferred at sync time (reviewer name + upload
+// time) unless an admin set it by hand (`matchSource = 'manual'`, kept by sync).
+// `googleUrl` is not stable on Google's side and is refreshed on every sync.
+export const googleReviewPhotos = pgTable(
+  'google_review_photos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    googleMediaName: varchar('google_media_name', { length: 255 }).notNull().unique(),
+    reviewId: uuid('review_id').references(() => googleReviews.id, { onDelete: 'set null' }),
+    matchSource: varchar('match_source', { length: 10 }).notNull().default('auto'), // auto | manual
+    googleUrl: text('google_url').notNull(),
+    thumbnailUrl: text('thumbnail_url'),
+    width: integer('width'),
+    height: integer('height'),
+    attributionName: varchar('attribution_name', { length: 255 }),
+    attributionProfileUrl: text('attribution_profile_url'),
+    mediaCreatedAt: timestamp('media_created_at', { withTimezone: true }).notNull(),
+    isHidden: boolean('is_hidden').notNull().default(false),
+    syncedAt: timestamp('synced_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('idx_google_review_photos_review_id').on(table.reviewId)],
+)
+
 // ============ REVIEW_TAGS TABLE ============
 export const reviewTags = pgTable('review_tags', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -1,5 +1,14 @@
 import { GoogleReview, ReviewSentiment } from '@/core/entities/GoogleReview'
 
+export interface GoogleReviewPhotoDTO {
+  id: string
+  thumbnailUrl: string
+  googleUrl: string
+  attributionName: string | null
+  isHidden: boolean
+  matchSource: 'auto' | 'manual'
+}
+
 export interface GoogleReviewDTO {
   id: string
   googleReviewId: string
@@ -18,9 +27,14 @@ export interface GoogleReviewDTO {
   aiSentiment: ReviewSentiment | null
   deletedOnGoogleAt: Date | null
   tagIds: string[]
+  photos: GoogleReviewPhotoDTO[]
 }
 
-export function toGoogleReviewDTO(review: GoogleReview, tagIds: string[] = []): GoogleReviewDTO {
+export function toGoogleReviewDTO(
+  review: GoogleReview,
+  tagIds: string[] = [],
+  photos: GoogleReviewPhotoDTO[] = [],
+): GoogleReviewDTO {
   return {
     id: review.id,
     googleReviewId: review.googleReviewId,
@@ -39,5 +53,6 @@ export function toGoogleReviewDTO(review: GoogleReview, tagIds: string[] = []): 
     aiSentiment: review.aiSentiment,
     deletedOnGoogleAt: review.deletedOnGoogleAt,
     tagIds,
+    photos,
   }
 }

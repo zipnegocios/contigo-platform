@@ -72,6 +72,8 @@ export class SyncGoogleReviewsUseCase {
             reviewCreatedAt: item.reviewCreatedAt,
             reviewUpdatedAt: item.reviewUpdatedAt,
             language: item.language,
+            ownerReply: item.ownerReply,
+            ownerReplyAt: item.ownerReplyAt,
           })
           await this.reviewRepository.save(review)
           newCount++

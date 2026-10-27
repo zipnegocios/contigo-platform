@@ -18,6 +18,7 @@ import { DrizzleServiceRepository } from '@/infrastructure/repositories/DrizzleS
 import { DrizzleGoogleReviewRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewRepository'
 import { DrizzleReviewSettingsRepository } from '@/infrastructure/repositories/DrizzleReviewSettingsRepository'
 import { DrizzleReviewTagRepository } from '@/infrastructure/repositories/DrizzleReviewTagRepository'
+import { DrizzleGoogleReviewPhotoRepository } from '@/infrastructure/repositories/DrizzleGoogleReviewPhotoRepository'
 import { GetPublicReviewsUseCase, type PublicReviewsResult } from '@/application/use-cases/reviews/GetPublicReviewsUseCase'
 import { SERVICE_ROOT_SLUGS, SERVICE_ROOT_NAMES, SERVICE_FALLBACK_CATALOGUE, isServiceRootSlug } from '@/presentation/data/serviceCategoryMeta'
 import { SERVICE_FALLBACK_IMAGES } from '@/presentation/data/serviceFallbackImages'
@@ -169,6 +170,7 @@ export default async function HomePage() {
         new DrizzleGoogleReviewRepository(),
         new DrizzleReviewSettingsRepository(),
         new DrizzleReviewTagRepository(),
+        new DrizzleGoogleReviewPhotoRepository(),
       )
       publicReviews = await useCase.execute()
     }

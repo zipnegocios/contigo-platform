@@ -1,6 +1,7 @@
 import { IGoogleReviewRepository } from '@/core/repositories/IGoogleReviewRepository'
 import { IReviewSettingsRepository } from '@/core/repositories/IReviewSettingsRepository'
 import { IReviewTagRepository } from '@/core/repositories/IReviewTagRepository'
+import { IGoogleReviewPhotoRepository } from '@/core/repositories/IGoogleReviewPhotoRepository'
 import type { ReviewWebsiteVisibilityFlags } from '@/core/entities/ReviewSettings'
 
 export interface PublicReviewDTO {
@@ -11,6 +12,15 @@ export interface PublicReviewDTO {
   reviewerAvatarUrl?: string | null
   reviewCreatedAt?: string
   tags?: string[]
+  photos?: PublicReviewPhotoDTO[]
+}
+
+export interface PublicReviewPhotoDTO {
+  url: string
+  thumbnailUrl: string
+  /** Google requires this attribution to be shown as provided. */
+  attributionName: string | null
+  attributionProfileUrl: string | null
 }
 
 export interface PublicReviewsResult {
@@ -40,6 +50,8 @@ export class GetPublicReviewsUseCase {
     private reviewRepository: IGoogleReviewRepository,
     private settingsRepository: IReviewSettingsRepository,
     private tagRepository: IReviewTagRepository,
+    // Optional: customer photos matched to reviews during sync.
+    private photoRepository?: IGoogleReviewPhotoRepository,
   ) {}
 
   async execute(): Promise<PublicReviewsResult> {
@@ -62,6 +74,20 @@ export class GetPublicReviewsUseCase {
     const allTags = flags.showTags ? await this.tagRepository.findAll() : []
     const tagNameById = new Map(allTags.map((t) => [t.id, t.name]))
 
+    const photos = this.photoRepository ? await this.photoRepository.findVisibleForReviews(ordered.map((r) => r.id)) : []
+    const photosByReview = new Map<string, PublicReviewPhotoDTO[]>()
+    for (const photo of photos) {
+      if (!photo.reviewId) continue
+      const list = photosByReview.get(photo.reviewId) ?? []
+      list.push({
+        url: photo.googleUrl,
+        thumbnailUrl: photo.thumbnailUrl ?? photo.googleUrl,
+        attributionName: photo.attributionName,
+        attributionProfileUrl: photo.attributionProfileUrl,
+      })
+      photosByReview.set(photo.reviewId, list)
+    }
+
     const dtos: PublicReviewDTO[] = await Promise.all(
       ordered.map(async (review) => {
         const dto: PublicReviewDTO = { id: review.id, rating: review.rating, comment: review.comment }
@@ -72,6 +98,8 @@ export class GetPublicReviewsUseCase {
           const tagIds = await this.tagRepository.findTagIdsForReview(review.id)
           dto.tags = tagIds.map((id) => tagNameById.get(id)).filter((name): name is string => !!name)
         }
+        const reviewPhotos = photosByReview.get(review.id)
+        if (reviewPhotos?.length) dto.photos = reviewPhotos
         return dto
       }),
     )

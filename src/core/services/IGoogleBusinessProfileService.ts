@@ -12,11 +12,24 @@ export interface GoogleReviewApiItem {
   ownerReplyAt: Date | null
 }
 
+export interface GoogleCustomerMediaItem {
+  googleMediaName: string // v4 resource name: accounts/{a}/locations/{l}/media/customers/{id}
+  googleUrl: string
+  thumbnailUrl: string | null
+  width: number | null
+  height: number | null
+  createdAt: Date
+  attributionName: string | null
+  attributionProfileUrl: string | null
+}
+
 export interface IGoogleBusinessProfileService {
   /** Cheapest possible live call — for connection health checks, fetches nothing beyond token + account resolution. */
   checkConnection(): Promise<void>
   /** Full-pull of every review for the configured location (handles v4 pagination internally). */
   listReviews(): Promise<GoogleReviewApiItem[]>
+  /** Customer-contributed photos for the location (videos skipped). Not linked to reviews by Google. */
+  listCustomerPhotos(): Promise<GoogleCustomerMediaItem[]>
   updateReply(googleReviewId: string, comment: string): Promise<void>
   deleteReply(googleReviewId: string): Promise<void>
 }

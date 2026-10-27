@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { prefersReducedMotion } from '@/presentation/animations/prefersReducedMotion'
-import type { PublicReviewDTO } from '@/application/use-cases/reviews/GetPublicReviewsUseCase'
+import type { PublicReviewDTO, PublicReviewPhotoDTO } from '@/application/use-cases/reviews/GetPublicReviewsUseCase'
+import { ReviewPhotoLightbox, ReviewPhotoThumbs } from './ReviewPhotos'
 
 interface ReviewsCarouselClientProps {
   reviews: PublicReviewDTO[]
@@ -46,7 +47,17 @@ function GoogleMark() {
   )
 }
 
-function ReviewCard({ review, carousel, googleReviewsUrl }: { review: PublicReviewDTO; carousel: boolean; googleReviewsUrl?: string }) {
+function ReviewCard({
+  review,
+  carousel,
+  googleReviewsUrl,
+  onOpenPhoto,
+}: {
+  review: PublicReviewDTO
+  carousel: boolean
+  googleReviewsUrl?: string
+  onOpenPhoto: (photos: PublicReviewPhotoDTO[], index: number) => void
+}) {
   return (
     <li
       className={carousel ? 'flex-shrink-0 w-[300px] sm:w-[340px]' : ''}
@@ -68,6 +79,9 @@ function ReviewCard({ review, carousel, googleReviewsUrl }: { review: PublicRevi
           <p className="text-fluid-sm" style={{ color: 'var(--neutral-700)', lineHeight: 1.6 }}>
             &ldquo;{review.comment}&rdquo;
           </p>
+        )}
+        {review.photos && review.photos.length > 0 && (
+          <ReviewPhotoThumbs photos={review.photos} onOpen={(i) => onOpenPhoto(review.photos!, i)} />
         )}
         <div className="mt-auto flex items-center gap-3 pt-2">
           {review.reviewerAvatarUrl && (
@@ -113,6 +127,12 @@ export function ReviewsCarouselClient({ reviews, enableCarousel, googleReviewsUr
   const [activeIndex, setActiveIndex] = useState(0)
   const [isCarousel, setIsCarousel] = useState(false)
   const pausedRef = useRef(false)
+  const [lightbox, setLightbox] = useState<{ photos: PublicReviewPhotoDTO[]; index: number } | null>(null)
+  const closeLightbox = useCallback(() => setLightbox(null), [])
+  const setLightboxIndex = useCallback(
+    (index: number) => setLightbox((lb) => (lb ? { ...lb, index } : lb)),
+    [],
+  )
 
   // Enhance into a carousel only after mount, and only when motion is allowed —
   // the server-rendered grid is the no-JS / reduced-motion fallback (plan Phase 4).
@@ -134,10 +154,10 @@ export function ReviewsCarouselClient({ reviews, enableCarousel, googleReviewsUr
   useEffect(() => {
     if (!isCarousel) return
     const interval = setInterval(() => {
-      if (!pausedRef.current) goTo(activeIndex + 1)
+      if (!pausedRef.current && !lightbox) goTo(activeIndex + 1)
     }, AUTOPLAY_INTERVAL_MS)
     return () => clearInterval(interval)
-  }, [isCarousel, activeIndex, goTo])
+  }, [isCarousel, activeIndex, goTo, lightbox])
 
   if (reviews.length === 0) return null
 
@@ -161,7 +181,13 @@ export function ReviewsCarouselClient({ reviews, enableCarousel, googleReviewsUr
         style={isCarousel ? { scrollSnapType: 'x mandatory', scrollBehavior: 'smooth' } : undefined}
       >
         {reviews.map((review) => (
-          <ReviewCard key={review.id} review={review} carousel={isCarousel} googleReviewsUrl={googleReviewsUrl} />
+          <ReviewCard
+            key={review.id}
+            review={review}
+            carousel={isCarousel}
+            googleReviewsUrl={googleReviewsUrl}
+            onOpenPhoto={(photos, index) => setLightbox({ photos, index })}
+          />
         ))}
       </ul>
 
@@ -171,6 +197,14 @@ export function ReviewsCarouselClient({ reviews, enableCarousel, googleReviewsUr
             Review {activeIndex + 1} of {reviews.length}
           </p>
         </>
+      )}
+      {lightbox && (
+        <ReviewPhotoLightbox
+          photos={lightbox.photos}
+          index={lightbox.index}
+          onIndexChange={setLightboxIndex}
+          onClose={closeLightbox}
+        />
       )}
     </div>
   )
