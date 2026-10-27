@@ -193,6 +193,30 @@ export function ReviewsCarouselClient({ reviews, enableCarousel, googleReviewsUr
 
       {isCarousel && (
         <>
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <button
+              type="button"
+              aria-label="Previous review"
+              onClick={() => goTo(activeIndex - 1)}
+              className="flex items-center justify-center rounded-full transition-colors"
+              style={{ width: 42, height: 42, border: '1.5px solid var(--gold-a30)', color: 'var(--petrol-800)' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label="Next review"
+              onClick={() => goTo(activeIndex + 1)}
+              className="flex items-center justify-center rounded-full transition-colors"
+              style={{ width: 42, height: 42, border: '1.5px solid var(--gold-a30)', color: 'var(--petrol-800)' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
           <p className="sr-only" role="status" aria-live="polite">
             Review {activeIndex + 1} of {reviews.length}
           </p>

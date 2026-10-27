@@ -49,11 +49,29 @@ export default function Footer({ legalLinks = [] }: { legalLinks?: LegalLink[] }
         scrollTrigger: {
           trigger: footerRef.current,
           start: 'top 90%',
+          once: true,
         },
       });
     }, footerRef);
 
-    return () => ctx.revert();
+    // The footer starts at opacity 0 until its trigger fires. If content above it
+    // changes height after mount (images, carousels, fonts), the trigger position
+    // goes stale and the footer can stay invisible — so re-measure on those changes.
+    let raf = 0;
+    const refresh = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+    };
+    const observer = new ResizeObserver(refresh);
+    observer.observe(document.body);
+    window.addEventListener('load', refresh);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+      window.removeEventListener('load', refresh);
+      ctx.revert();
+    };
   }, []);
 
   const scrollTo = (id: string) => {
