@@ -12,6 +12,12 @@ interface ReviewsSectionProps {
 export default function ReviewsSection({ reviews, averageRating, count, displayMode }: ReviewsSectionProps) {
   if (reviews.length === 0) return null
 
+  // The v4 API exposes no public per-review URL, so cards link to the business's Google reviews page.
+  const placeId = process.env.GOOGLE_PLACE_ID
+  const googleReviewsUrl = placeId
+    ? `https://search.google.com/local/reviews?placeid=${encodeURIComponent(placeId)}`
+    : undefined
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -40,8 +46,17 @@ export default function ReviewsSection({ reviews, averageRating, count, displayM
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="max-w-6xl mx-auto">
-        <ReviewsAggregateHeader averageRating={averageRating} count={count} headingId="reviews-heading" />
-        <ReviewsCarouselClient reviews={reviews} enableCarousel={displayMode === 'carousel'} />
+        <ReviewsAggregateHeader
+          averageRating={averageRating}
+          count={count}
+          headingId="reviews-heading"
+          googleReviewsUrl={googleReviewsUrl}
+        />
+        <ReviewsCarouselClient
+          reviews={reviews}
+          enableCarousel={displayMode === 'carousel'}
+          googleReviewsUrl={googleReviewsUrl}
+        />
       </div>
     </section>
   )
