@@ -42,7 +42,8 @@ function extractQuotaLimitValue(body: unknown): string | undefined {
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const ACCOUNTS_URL = 'https://mybusinessaccountmanagement.googleapis.com/v1/accounts'
 const REVIEWS_BASE_URL = 'https://mybusiness.googleapis.com/v4'
-const OAUTH_AUTH_ERRORS = new Set(['invalid_grant', 'invalid_client', 'unauthorized_client'])
+/** OAuth token-endpoint `error` codes that mean the credentials must be reconnected. */
+export const OAUTH_AUTH_ERRORS = new Set(['invalid_grant', 'invalid_client', 'unauthorized_client'])
 const PAGE_SIZE = 50
 const MAX_RETRIES = 3
 

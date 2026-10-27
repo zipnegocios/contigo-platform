@@ -1,5 +1,10 @@
 import type { GbpConnectionStatus } from '@/core/entities/GbpConnection'
-import { GbpAuthError, GbpQuotaError, GbpTransientError } from '@/infrastructure/services/GoogleBusinessProfileService'
+import {
+  GbpAuthError,
+  GbpQuotaError,
+  GbpTransientError,
+  OAUTH_AUTH_ERRORS,
+} from '@/infrastructure/services/GoogleBusinessProfileService'
 
 interface GoogleApiErrorDetail {
   '@type'?: string
@@ -37,6 +42,11 @@ function normalizeGoogleError(error: unknown): NormalizedGoogleError {
 export function interpretGbpApiError(error: unknown): GbpConnectionStatus {
   if (error instanceof GbpAuthError) return 'auth_error'
   if (error instanceof GbpTransientError) return 'error'
+
+  // OAuth token endpoint shape: 400 `{ error: "invalid_grant", error_description }` —
+  // a string `error`, not the nested Google API error object handled below.
+  const oauthError = (error as { error?: unknown } | null | undefined)?.error
+  if (typeof oauthError === 'string' && OAUTH_AUTH_ERRORS.has(oauthError)) return 'auth_error'
 
   const normalized = normalizeGoogleError(error)
   const code = normalized.code

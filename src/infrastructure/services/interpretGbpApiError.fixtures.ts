@@ -83,6 +83,16 @@ export const GBP_ERROR_INTERPRETER_FIXTURES: GbpErrorInterpreterFixture[] = [
     expected: 'auth_error',
   },
   {
+    description: 'raw OAuth 400 body { error: "invalid_grant" } (revoked/expired refresh token) → auth_error',
+    input: { error: 'invalid_grant', error_description: 'Token has been expired or revoked.' },
+    expected: 'auth_error',
+  },
+  {
+    description: 'raw OAuth 400 body with an unrelated string error → error (not auth)',
+    input: { error: 'invalid_request' },
+    expected: 'error',
+  },
+  {
     description: '500 → error',
     input: { error: { code: 500, status: 'INTERNAL' } },
     expected: 'error',
